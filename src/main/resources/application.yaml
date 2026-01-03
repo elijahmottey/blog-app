@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: blog-app
+
+  datasource:
+    password: ${DB_PASSWORD1}
+    url: ${}
+    username: ${}
+
+
+server:
+  port: 8088
