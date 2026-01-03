@@ -1,12 +1,27 @@
 spring:
   application:
     name: blog-app
+  security:
+    user:
+      name: elijah
+      password: love
 
   datasource:
     password: ${DB_PASSWORD1}
-    url: ${}
-    username: ${}
+    url: ${DB_URL1}
+    username: ${DB_USERNAME1}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+
 
 
 server:
-  port: 8088
+  port: ${PORT}
