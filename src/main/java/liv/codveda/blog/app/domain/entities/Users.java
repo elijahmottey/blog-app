@@ -86,6 +86,14 @@ public class Users implements UserDetails {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    @OneToMany(mappedBy = "users", cascade = CascadeType.ALL)
+    private List<Post> posts;
+
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
+    private List<Comment> comments;
+
+
+
     // ================= SPRING SECURITY METHODS =================
 
     /**
@@ -137,5 +145,18 @@ public class Users implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+
+    @Override
+    public String toString() {
+        return "Users{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", role=" + role +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
     }
 }
