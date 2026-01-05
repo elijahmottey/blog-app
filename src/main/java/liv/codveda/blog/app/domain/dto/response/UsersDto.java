@@ -7,7 +7,7 @@ import liv.codveda.blog.app.domain.enums.Roles;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record UsereDto(
+public record UsersDto(
         Long id,
         String name,
         String email,
