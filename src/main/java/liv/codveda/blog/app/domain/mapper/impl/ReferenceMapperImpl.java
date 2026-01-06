@@ -11,16 +11,33 @@ import liv.codveda.blog.app.domain.mapper.interfaces.ReferenceMapper;
 public class ReferenceMapperImpl implements ReferenceMapper {
     @Override
     public UsersReferenceDto toUsersReference(Users user) {
-        return null;
+
+        if (user == null) return null;
+
+        return new UsersReferenceDto(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getRole()
+        );
     }
 
     @Override
     public PostReferenceDto toPostReference(Post post) {
-        return null;
+        if (post == null) return null;
+        return new PostReferenceDto(
+                post.getId(),
+                post.getTitle(),
+                post.getContent()
+        );
     }
 
     @Override
     public CommentReferenceDto toCommentReference(Comment comment) {
-        return null;
+        if (comment == null) return null;
+        return new CommentReferenceDto(
+                comment.getId(),
+                comment.getContent()
+        );
     }
 }
