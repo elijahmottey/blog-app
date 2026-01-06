@@ -23,3 +23,7 @@ spring:
 
 server:
   port: ${PORT}
+
+jwt:
+  secret: ${JWT}
+  refresh-secret: ${REFRESH_TOKEN}
