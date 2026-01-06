@@ -7,7 +7,9 @@ import liv.codveda.blog.app.domain.entities.Comment;
 import liv.codveda.blog.app.domain.entities.Post;
 import liv.codveda.blog.app.domain.entities.Users;
 import liv.codveda.blog.app.domain.mapper.interfaces.ReferenceMapper;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ReferenceMapperImpl implements ReferenceMapper {
     @Override
     public UsersReferenceDto toUsersReference(Users user) {
