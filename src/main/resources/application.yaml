@@ -22,8 +22,11 @@ spring:
 
 
 server:
-  port: ${PORT}
+  port: 8088
 
 jwt:
   secret: ${JWT}
   refresh-secret: ${REFRESH_TOKEN}
+
+frontend:
+  url: ${FRONTEND}
