@@ -1,9 +1,11 @@
 package liv.codveda.blog.app.service.impl;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import liv.codveda.blog.app.domain.dto.request.Login;
 import liv.codveda.blog.app.domain.dto.request.Register;
 import liv.codveda.blog.app.domain.dto.response.BlogResponse;
+import liv.codveda.blog.app.domain.dto.response.Token;
 import liv.codveda.blog.app.domain.entities.Users;
 import liv.codveda.blog.app.domain.enums.Roles;
 import liv.codveda.blog.app.exception.ConflictException;
@@ -18,8 +20,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 
@@ -31,6 +35,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final JWTUtils jwtUtils;
     private final AuthenticationManager authenticationManager;
     private final UsersRepository usersRepository;
+
+
 
     @Autowired
     public AuthenticationServiceImpl(UsersRepository userRepository, PasswordEncoder passwordEncoder, JWTUtils jwtUtils, AuthenticationManager authenticationManager, UsersRepository usersRepository) {
@@ -139,8 +145,5 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         .build());
     }
 
-    @Override
-    public void logout(HttpServletRequest request) {
 
-    }
 }

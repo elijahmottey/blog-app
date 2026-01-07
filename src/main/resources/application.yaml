@@ -1,10 +1,15 @@
 spring:
+  mvc:
+    apiversion:
+      supported:
+        - "1.0"
+        - "2.0"
+      default: "1.0"
+      use:
+        path-segment: 1
   application:
     name: blog-app
-  security:
-    user:
-      name: elijah
-      password: love
+
 
   datasource:
     password: ${DB_PASSWORD1}
