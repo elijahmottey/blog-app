@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/v1/auth/**",
+                                "/api/{version}/auth/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
