@@ -45,5 +45,13 @@ public class Comment {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-
+    @Override
+    public String toString() {
+        return "Comment{" +
+                "id=" + id +
+                ", content='" + content + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
 }
