@@ -3,6 +3,7 @@ package liv.codveda.blog.app.security.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,8 +12,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
@@ -30,15 +29,11 @@ public class JWTUtils {
             @Value("${jwt.secret}") String secretString,
             @Value("${jwt.refresh-secret}") String refreshSecretString
     ) {
-        this.secretKey = new SecretKeySpec(
-                Base64.getDecoder().decode(secretString.getBytes(StandardCharsets.UTF_8)),
-                "HmacSHA256"
-        );
-        this.refreshSecretKey = new SecretKeySpec(
-                Base64.getDecoder().decode(refreshSecretString.getBytes(StandardCharsets.UTF_8)),
-                "HmacSHA256"
-        );
+        // Better way to handle keys in JJWT 0.12.x
+        this.secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secretString));
+        this.refreshSecretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(refreshSecretString));
     }
+
 
     public String generateAccessToken(UserDetails userDetails) {
         return generateToken(userDetails, secretKey, ACCESS_TOKEN_EXPIRATION);
