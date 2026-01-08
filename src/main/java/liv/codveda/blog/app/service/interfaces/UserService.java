@@ -13,7 +13,7 @@ public interface UserService {
 
     void deleteUserById(long id);
     Users updateUserById(long id, Users user);
-    Users getUserBookingsHistory(long id);
+    Users getUserBlogHistory(long id);
     Users getMyInfo(String email);
 
 }

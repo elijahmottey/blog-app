@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -31,27 +32,50 @@ public class UserServiceImpl implements UserService {
         if ( id <= 0) {
             throw new IllegalArgumentException("Invalid user ID: " + id);
         }
-        return this.usersRepository.findById(Math.toIntExact(id))
+        return this.usersRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("user not found with id: " + id));
     }
 
     @Override
     public void deleteUserById(long id) {
-
+        this.getUserById(id);
+        this.usersRepository.deleteById( id);
     }
 
     @Override
     public Users updateUserById(long id, Users user) {
-        return null;
+        if( !Objects.equals(user.getId(), id)) {
+            throw new IllegalArgumentException("User ID in the request does not match the provided ID");
+        }
+
+        Users existingUser = this.getUserById(id);
+        if (user.getEmail() != null) {
+            existingUser.setEmail(user.getEmail());
+        }
+
+        if (user.getName() != null) {
+            existingUser.setName(user.getName());
+        }
+
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            existingUser.setPassword(user.getPassword());
+        }
+        if (user.getRole() != null) {
+            existingUser.setRole(user.getRole());
+        }
+
+        return this.usersRepository.save(existingUser);
     }
 
     @Override
-    public Users getUserBookingsHistory(long id) {
-        return null;
+    public Users getUserBlogHistory(long id) {
+        return this.getUserById(id);
     }
 
     @Override
     public Users getMyInfo(String email) {
-        return null;
+        return this.usersRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new NotFoundException("user not found with email: " + email));
     }
 }
