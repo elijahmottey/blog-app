@@ -1,0 +1,81 @@
+package liv.codveda.blog.app.service.impl;
+
+import liv.codveda.blog.app.domain.entities.Users;
+import liv.codveda.blog.app.exception.NotFoundException;
+import liv.codveda.blog.app.repository.UsersRepository;
+import liv.codveda.blog.app.service.interfaces.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Objects;
+
+@Service
+public class UserServiceImpl implements UserService {
+    private final UsersRepository usersRepository;
+
+    @Autowired
+    public UserServiceImpl(UsersRepository usersRepository) {
+        this.usersRepository = usersRepository;
+    }
+
+    @Override
+    public List<Users> getAllUsers() {
+        return usersRepository.findAll(Sort.by(Sort.Direction.DESC,"userId"));
+    }
+
+
+
+    @Override
+    public Users getUserById(Long id) {
+        if ( id <= 0) {
+            throw new IllegalArgumentException("Invalid user ID: " + id);
+        }
+        return this.usersRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("user not found with id: " + id));
+    }
+
+    @Override
+    public void deleteUserById(long id) {
+        this.getUserById(id);
+        this.usersRepository.deleteById( id);
+    }
+
+    @Override
+    public Users updateUserById(long id, Users user) {
+        if( !Objects.equals(user.getId(), id)) {
+            throw new IllegalArgumentException("User ID in the request does not match the provided ID");
+        }
+
+        Users existingUser = this.getUserById(id);
+        if (user.getEmail() != null) {
+            existingUser.setEmail(user.getEmail());
+        }
+
+        if (user.getName() != null) {
+            existingUser.setName(user.getName());
+        }
+
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            existingUser.setPassword(user.getPassword());
+        }
+        if (user.getRole() != null) {
+            existingUser.setRole(user.getRole());
+        }
+
+        return this.usersRepository.save(existingUser);
+    }
+
+    @Override
+    public Users getUserBlogHistory(long id) {
+        return this.getUserById(id);
+    }
+
+    @Override
+    public Users getMyInfo(String email) {
+        return this.usersRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new NotFoundException("user not found with email: " + email));
+    }
+}
