@@ -1,4 +1,13 @@
 spring:
+  ai:
+    openai:
+      api-key: ${API_KEY}
+      chat:
+        model: gpt-4o-mini  # Or gpt-3.5-turbo for a cost-effective option
+        options:
+          temperature: 0.7  # Controls response creativity (0.0 = deterministic, 1.0 = very creative)
+          max-tokens: 500   # Maximum tokens in the response (adjust based on needs)
+
   application:
     name: blog-app
 
