@@ -46,9 +46,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Users updateUserById(long id, Users user) {
-        if( !Objects.equals(user.getId(), id)) {
-            throw new IllegalArgumentException("User ID in the request does not match the provided ID");
-        }
+
 
         Users existingUser = this.getUserById(id);
         if (user.getEmail() != null) {

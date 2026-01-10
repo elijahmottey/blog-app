@@ -35,7 +35,7 @@ public class UserController {
 
 
     @GetMapping("/list")
-    @PreAuthorize("hasAuthority('ADMIN') ")
+//    @PreAuthorize("hasAuthority('ADMIN') ")
     public ResponseEntity<ApiResponse<Paged<UsersDto>>> getAllUsers(Pageable pageable) {
         Page<Users> users = userService.getAllUsers(pageable);
         Paged<UsersDto> response = new Paged<>(
@@ -68,7 +68,7 @@ public class UserController {
                 "user profile retrieved successfully"));
     }
 
-    @GetMapping("/bookings-history/{id}")
+    @GetMapping("/posts-history/{id}")
     public ResponseEntity<ApiResponse<List<PostDto>>> getUserBookingHistory(@PathVariable Long id) {
 
         Users user = userService.getUserBlogHistory(id);
@@ -77,7 +77,7 @@ public class UserController {
                 .map(postMapper::postToPostDto)
                 .toList();
 
-        return ResponseEntity.ok(new ApiResponse<>(postDtos, "User booking history retrieved successfully"));
+        return ResponseEntity.ok(new ApiResponse<>(postDtos, "User posting history retrieved successfully"));
     }
 
     @DeleteMapping("/{userId}")

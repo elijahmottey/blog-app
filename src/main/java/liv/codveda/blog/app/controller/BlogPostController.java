@@ -68,7 +68,7 @@ public class BlogPostController  {
         return ResponseEntity.ok(new ApiResponse<>(responseDto, "Post updated successfully"));
     }
     @GetMapping("/list")
-    @PreAuthorize("hasAuthority('ADMIN') ")
+//    @PreAuthorize("hasAuthority('ADMIN') ")
     public ResponseEntity<ApiResponse<Paged<PostDto>>> getAllPostsByUser(Pageable pageable) {
         Page<Post> post = blogService.getAllPosts(pageable);
         Paged<PostDto> postResponse = new Paged<>(

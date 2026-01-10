@@ -59,7 +59,7 @@ public class PostBlogServiceImpl implements BlogService {
     public Post getPostById(Long id) {
         return this.postRepository.findById(id)
                 .orElseThrow(
-                        ()-> new EntityNotFoundException("Post with "+id +" not found"));
+                        ()-> new EntityNotFoundException("Post with "+ id +" not found"));
     }
 
     @Override

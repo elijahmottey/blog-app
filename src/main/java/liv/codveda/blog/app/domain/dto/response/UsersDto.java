@@ -15,5 +15,5 @@ public record UsersDto(
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         List<PostReferenceDto> posts,
-        List<CommentReferenceDto> comments) {
+        List<CommentReferenceDto> comments ) {
 }
