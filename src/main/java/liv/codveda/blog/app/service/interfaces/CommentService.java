@@ -11,6 +11,7 @@ public interface CommentService {
     Comment createComment(Long postId,Comment comment);
     void deleteComment(Long id);
     Page<Comment> getCommentsByPost(Pageable pageable);
+    Page<Comment> getCommentsByPostById(Long id,Pageable pageable);
     Comment getCommentById(long id);
     Comment updateComment(Comment comment);
 

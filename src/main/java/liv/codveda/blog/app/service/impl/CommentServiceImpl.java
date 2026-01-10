@@ -45,6 +45,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public void deleteComment(Long id) {
         commentRepository.deleteById(id);
     }
@@ -52,6 +53,11 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public Page<Comment> getCommentsByPost(Pageable pageable) {
         return this.commentRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<Comment> getCommentsByPostById(Long id, Pageable pageable) {
+        return this.commentRepository.findAllById(id, pageable);
     }
 
 

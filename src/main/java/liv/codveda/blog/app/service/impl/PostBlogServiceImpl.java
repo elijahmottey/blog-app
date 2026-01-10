@@ -43,6 +43,7 @@ public class PostBlogServiceImpl implements BlogService {
 
 
     @Override
+    @Transactional
     public void deletePost(Long id) {
         Post post = this.getPostById(id);
         this.postRepository.delete(post);
@@ -67,6 +68,7 @@ public class PostBlogServiceImpl implements BlogService {
     }
 
     @Override
+    @Transactional
     public Post updatePost(Long id, Post post) {
         Post existingPost = this.getPostById(id);
         if(post.getTitle() != null) existingPost.setTitle(post.getTitle());
