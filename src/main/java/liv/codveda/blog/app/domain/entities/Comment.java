@@ -8,9 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -18,19 +16,18 @@ import java.time.LocalDateTime;
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
     private Long id;
 
     @NotBlank(message = "Comment content is required")
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @ManyToOne
-    @JoinColumn(name = "author_id", nullable = false)
-    private Users author;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "author_id", nullable = false)
+//    private Users users;
 
-    @ManyToOne
-    @JoinColumn(name = "post_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "post_id")
     private Post post;
 
     /**
@@ -45,13 +42,5 @@ public class Comment {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @Override
-    public String toString() {
-        return "Comment{" +
-                "id=" + id +
-                ", content='" + content + '\'' +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
-    }
+
 }

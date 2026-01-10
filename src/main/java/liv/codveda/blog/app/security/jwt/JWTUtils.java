@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
@@ -30,8 +31,9 @@ public class JWTUtils {
             @Value("${jwt.refresh-secret}") String refreshSecretString
     ) {
         // Better way to handle keys in JJWT 0.12.x
-        this.secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secretString));
-        this.refreshSecretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(refreshSecretString));
+        this.secretKey = Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
+        this.refreshSecretKey = Keys.hmacShaKeyFor(refreshSecretString.getBytes(StandardCharsets.UTF_8));
+
     }
 
 

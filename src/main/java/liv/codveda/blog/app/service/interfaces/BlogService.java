@@ -1,6 +1,8 @@
 package liv.codveda.blog.app.service.interfaces;
 
 import liv.codveda.blog.app.domain.entities.Post;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -9,7 +11,7 @@ public interface BlogService {
     void deletePost(Long id);
     List<Post> getPosts();
     Post getPostById(Long id);
-    Post getPostByTitle(String title);
+    Page<Post> getPostByTitle(String title, Pageable pageable);
     Post updatePost(Long id,Post post);
 
 }

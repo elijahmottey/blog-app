@@ -14,8 +14,8 @@ public record UsersDto(
         Roles role,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        List<PostReferenceDto> posts,
-        List<CommentReferenceDto> comments
+        List<PostReferenceDto> posts
+        //List<CommentReferenceDto> comments
 
 ) {
 }
