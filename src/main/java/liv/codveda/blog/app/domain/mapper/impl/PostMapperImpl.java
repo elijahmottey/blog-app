@@ -22,6 +22,7 @@ public class PostMapperImpl implements PostMapper {
         Post post = new Post();
         post.setId(postDto.id());
         post.setTitle(postDto.title());
+        post.setContent(postDto.content());
         post.setCreatedAt(postDto.createdAt());
         post.setUpdatedAt(postDto.updatedAt());
         return post;

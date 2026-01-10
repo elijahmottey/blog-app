@@ -23,12 +23,12 @@ public class UserMapperImp implements UserMapper {
     public Users userDtoToUser(UsersDto usersDto) {
         if(usersDto == null) return null;
         Users users = new Users();
-        users.setId(users.getId());
-        users.setName(users.getName());
-        users.setEmail(users.getEmail());
-        users.setRole(users.getRole());
-        users.setCreatedAt(users.getCreatedAt());
-        users.setUpdatedAt(users.getUpdatedAt());
+        users.setId(usersDto.id());
+        users.setName(usersDto.name());
+        users.setEmail(usersDto.email());
+        users.setRole(usersDto.role());
+        users.setCreatedAt(usersDto.createdAt());
+        users.setUpdatedAt(usersDto.updatedAt());
         return users;
     }
 

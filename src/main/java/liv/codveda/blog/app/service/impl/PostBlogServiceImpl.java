@@ -21,16 +21,26 @@ import java.util.Objects;
 @Service
 public class PostBlogServiceImpl implements BlogService {
     private final PostRepository postRepository;
+    private final UsersRepository userRepository;
 
     @Autowired
-    public PostBlogServiceImpl(PostRepository postRepository) {
+    public PostBlogServiceImpl(PostRepository postRepository, UsersRepository userRepository) {
         this.postRepository = postRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
-
+    @Transactional
     public Post postBlog(Post post) {
+        // Get authenticated user
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
 
+        Users user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
+
+        // Associate post with user
+        post.setUsers(user);
         return postRepository.save(post);
     }
 
