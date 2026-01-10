@@ -45,11 +45,11 @@ public class UserMapperImp implements UserMapper {
                 Optional.ofNullable(users.getPosts())
                         .map(post->post.stream()
                                 .map(referenceMapper::toPostReference)
-                                .toList()).orElse(null)
-//                Optional.ofNullable(users.getComments())
-//                        .map(comments -> comments.stream()
-//                                .map(referenceMapper::toCommentReference)
-//                        .toList()).orElse(null)
+                                .toList()).orElse(null),
+                Optional.ofNullable(users.getComments())
+                        .map(comments -> comments.stream()
+                                .map(referenceMapper::toCommentReference)
+                        .toList()).orElse(null)
         );
     }
 }

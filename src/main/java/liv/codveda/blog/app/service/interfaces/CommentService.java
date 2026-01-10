@@ -2,13 +2,15 @@ package liv.codveda.blog.app.service.interfaces;
 
 import liv.codveda.blog.app.domain.entities.Comment;
 import liv.codveda.blog.app.domain.entities.Post;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface CommentService {
-    Comment createComment(Comment comment);
-    void deleteComment(Comment comment);
-    List<Comment> getCommentsByPost(Post post);
+    Comment createComment(Long postId,Comment comment);
+    void deleteComment(Long id);
+    Page<Comment> getCommentsByPost(Pageable pageable);
     Comment getCommentById(long id);
     Comment updateComment(Comment comment);
 

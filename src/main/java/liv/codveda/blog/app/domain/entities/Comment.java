@@ -22,9 +22,9 @@ public class Comment {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "author_id", nullable = false)
-//    private Users users;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users users;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "post_id")

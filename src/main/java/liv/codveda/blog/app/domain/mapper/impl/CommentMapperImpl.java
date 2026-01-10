@@ -32,7 +32,7 @@ public class CommentMapperImpl implements CommentMapper {
         return new CommentDto(
                 comment.getId(),
                 comment.getContent(),
-               // referenceMapper.toUsersReference(comment.getUsers()),
+                referenceMapper.toUsersReference(comment.getUsers()),
                 referenceMapper.toPostReference(comment.getPost()),
                 comment.getCreatedAt(),
                 comment.getUpdatedAt()

@@ -2,6 +2,7 @@ package liv.codveda.blog.app.controller;
 
 import jakarta.validation.Valid;
 import liv.codveda.blog.app.domain.dto.response.ApiResponse;
+import liv.codveda.blog.app.domain.dto.response.Paged;
 import liv.codveda.blog.app.domain.dto.response.PostDto;
 import liv.codveda.blog.app.domain.dto.response.UsersDto;
 import liv.codveda.blog.app.domain.entities.Users;
@@ -9,6 +10,8 @@ import liv.codveda.blog.app.domain.mapper.interfaces.PostMapper;
 import liv.codveda.blog.app.domain.mapper.interfaces.UserMapper;
 import liv.codveda.blog.app.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -33,13 +36,17 @@ public class UserController {
 
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('ADMIN') ")
-    public ResponseEntity<ApiResponse<List<UsersDto>>> getAllUsers() {
-
-        List<UsersDto> users =  userService.getAllUsers()
-                .stream()
-                .map(userMapper::userToUserDto)
-                .toList();
-        return ResponseEntity.ok(new ApiResponse<>(users, "user list retrieved successfully"));
+    public ResponseEntity<ApiResponse<Paged<UsersDto>>> getAllUsers(Pageable pageable) {
+        Page<Users> users = userService.getAllUsers(pageable);
+        Paged<UsersDto> response = new Paged<>(
+                users.getContent().stream().map(userMapper::userToUserDto).toList(),
+                users.getNumber(),
+                users.getSize(),
+                users.getTotalElements(),
+                users.getTotalPages(),
+                users.isLast()
+        );
+        return ResponseEntity.ok(new ApiResponse<>(response, "user list retrieved successfully"));
 
     }
 

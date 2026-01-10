@@ -5,6 +5,8 @@ import liv.codveda.blog.app.exception.NotFoundException;
 import liv.codveda.blog.app.repository.UsersRepository;
 import liv.codveda.blog.app.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +23,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<Users> getAllUsers() {
-        return usersRepository.findAll(Sort.by(Sort.Direction.DESC,"userId"));
+    public Page<Users> getAllUsers(Pageable pageable) {
+        return usersRepository.findAll(pageable);
     }
 
 

@@ -3,8 +3,11 @@ package liv.codveda.blog.app.controller;
 
 import jakarta.validation.Valid;
 import liv.codveda.blog.app.domain.dto.response.ApiResponse;
+import liv.codveda.blog.app.domain.dto.response.Paged;
 import liv.codveda.blog.app.domain.dto.response.PostDto;
+import liv.codveda.blog.app.domain.dto.response.UsersDto;
 import liv.codveda.blog.app.domain.entities.Post;
+import liv.codveda.blog.app.domain.entities.Users;
 import liv.codveda.blog.app.domain.mapper.interfaces.PostMapper;
 import liv.codveda.blog.app.service.interfaces.BlogService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -63,6 +67,22 @@ public class BlogPostController  {
         PostDto responseDto = postMapper.postToPostDto(updatedPost);
         return ResponseEntity.ok(new ApiResponse<>(responseDto, "Post updated successfully"));
     }
+    @GetMapping("/list")
+    @PreAuthorize("hasAuthority('ADMIN') ")
+    public ResponseEntity<ApiResponse<Paged<PostDto>>> getAllPostsByUser(Pageable pageable) {
+        Page<Post> post = blogService.getAllPosts(pageable);
+        Paged<PostDto> postResponse = new Paged<>(
+                post.getContent().stream().map(postMapper::postToPostDto).toList(),
+                post.getNumber(),
+                post.getSize(),
+                post.getTotalElements(),
+                post.getTotalPages(),
+                post.isLast()
+        );
+        return ResponseEntity.ok(new ApiResponse<>(postResponse, "post list retrieved successfully"));
+
+    }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<PostDto>> getPostById(@PathVariable Long id) {

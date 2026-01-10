@@ -50,8 +50,8 @@ public class PostBlogServiceImpl implements BlogService {
 
 
     @Override
-    public List<Post> getPosts() {
-        return this.postRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+    public Page<Post> getAllPosts(Pageable pageable) {
+        return this.postRepository.findAll(pageable);
     }
 
     @Override
