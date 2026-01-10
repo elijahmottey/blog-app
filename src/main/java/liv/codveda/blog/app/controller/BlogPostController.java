@@ -5,18 +5,16 @@ import jakarta.validation.Valid;
 import liv.codveda.blog.app.domain.dto.response.ApiResponse;
 import liv.codveda.blog.app.domain.dto.response.PostDto;
 import liv.codveda.blog.app.domain.entities.Post;
-import liv.codveda.blog.app.domain.entities.Users;
 import liv.codveda.blog.app.domain.mapper.interfaces.PostMapper;
-import liv.codveda.blog.app.repository.UsersRepository;
 import liv.codveda.blog.app.service.interfaces.BlogService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -77,7 +75,9 @@ public class BlogPostController  {
     @GetMapping("search-titles")
     public ResponseEntity<ApiResponse<Page<PostDto>>> searchPostByTitle(
             @RequestParam String title,
-            Pageable pageable) {
+            @PageableDefault(page = 0, size = 10) Pageable pageable
+
+    ) {
 
         Page<Post> postPage = blogService.getPostByTitle(title, pageable);
 
