@@ -17,6 +17,7 @@ java {
 
 repositories {
 	mavenCentral()
+	maven { url 'https://repo.spring.io/milestone' }  // Required for Spring AI milestones
 }
 
 dependencies {
@@ -26,18 +27,15 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
 
+	// Core Spring AI starter (use milestone version for latest features)
+	implementation 'org.springframework.ai:spring-ai-spring-boot-starter:1.0.0-M1'
 
-	// Core Spring AI starter
-	implementation 'org.springframework.ai:spring-ai-spring-boot-starter:1.0.0'
-
-// OpenAI-specific integration for chat models
-	implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter:1.0.0'
+	// OpenAI-specific integration for chat models
+	implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter:1.0.0-M1'
 
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
-
-
 
 	implementation 'com.github.ben-manes.caffeine:caffeine:3.2.2'
 	runtimeOnly 'org.postgresql:postgresql'
@@ -51,7 +49,16 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 }
 
-
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+// Enable preview features for Java 25 (correct syntax for all compile tasks including tests)
+tasks.withType(JavaCompile) {
+	options.compilerArgs += ['--enable-preview']
+}
+
+// Enable preview for execution tasks (bootRun, tests, etc.)
+tasks.withType(JavaExec) {
+	jvmArgs += ['--enable-preview']
 }
