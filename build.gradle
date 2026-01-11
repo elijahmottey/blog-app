@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '4.0.1'
+	id 'org.springframework.boot' version '3.5.3'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id 'org.graalvm.buildtools.native' version '0.11.3'
 }
@@ -17,7 +17,6 @@ java {
 
 repositories {
 	mavenCentral()
-	maven { url 'https://repo.spring.io/milestone' }  // Required for Spring AI milestones
 }
 
 dependencies {
@@ -26,12 +25,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
-
-	// Core Spring AI starter (use milestone version for latest features)
-	implementation 'org.springframework.ai:spring-ai-spring-boot-starter:1.0.0-M1'
-
-	// OpenAI-specific integration for chat models
-	implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter:1.0.0-M1'
 
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
@@ -43,22 +36,20 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
+   // Spring AI BOM
+	implementation platform('org.springframework.ai:spring-ai-bom:1.0.0')
+
+	// Spring AI OpenAI (correct starter)
+	implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4'
+
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 }
 
+
 tasks.named('test') {
 	useJUnitPlatform()
-}
-
-// Enable preview features for Java 25 (correct syntax for all compile tasks including tests)
-tasks.withType(JavaCompile) {
-	options.compilerArgs += ['--enable-preview']
-}
-
-// Enable preview for execution tasks (bootRun, tests, etc.)
-tasks.withType(JavaExec) {
-	jvmArgs += ['--enable-preview']
 }

@@ -2,6 +2,7 @@ package liv.codveda.blog.app.exception;
 
 import org.apache.coyote.BadRequestException;
 import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.ai.retry.NonTransientAiException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -154,10 +155,20 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler (NonTransientAiException.class)
+    public ResponseEntity<ErrorResponse> handleAiException(NonTransientAiException ex, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(), // or 400/500 depending on the cause
+                "AI Service Error: " + ex.getMessage(),
+                request.getDescription(false)
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);}
 
 
 
 
 
 
-}
+
+
+    }
