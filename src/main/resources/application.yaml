@@ -2,12 +2,7 @@ spring:
   ai:
     openai:
       api-key: ${OPENROUTER_API_KEY}
-#      base-url: https://api.openai.com/v1
-#      chat:
-#        options:
-#          model: gpt-4o-mini
-#          temperature: 0.7
-#          max-tokens: 500
+
 
 
   application:
@@ -52,6 +47,3 @@ logging:
     org.springframework.ai.openai.api: DEBUG
 
 
-#openrouter:
-#  referer: https://openrouter.ai/settings/keys?utm_source=signup-success
-#  title: blog-post
