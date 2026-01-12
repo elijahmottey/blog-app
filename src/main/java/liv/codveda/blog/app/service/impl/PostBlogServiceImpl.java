@@ -6,6 +6,7 @@ import liv.codveda.blog.app.domain.entities.Post;
 import liv.codveda.blog.app.domain.entities.Users;
 import liv.codveda.blog.app.repository.PostRepository;
 import liv.codveda.blog.app.repository.UsersRepository;
+import liv.codveda.blog.app.service.AiChatService;
 import liv.codveda.blog.app.service.interfaces.BlogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -38,6 +39,7 @@ public class PostBlogServiceImpl implements BlogService {
         Users user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
         post.setUsers(user);
+
         return postRepository.save(post);
     }
 
