@@ -22,7 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/v1/posts")
+@RequestMapping("api/v1/post")
 public class BlogPostController  {
     private final PostMapper postMapper;
     private final BlogService blogService;
