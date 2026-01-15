@@ -131,6 +131,11 @@ export default function Navbar() {
                         {/* Auth Buttons */}
                         {isAuthenticated? (
                             <div className="flex items-center space-x-3">
+                                <Link to="/dashboard">
+                                    <Button variant="outlined" startIcon={<User />}>
+                                        Dashboard
+                                    </Button>
+                                </Link>
                                 <Link to="/create">
                                     <Button startIcon={<PenSquare />}>
                                         Write Post
@@ -142,12 +147,12 @@ export default function Navbar() {
                             </div>
                         ) : (
                             <div className="flex items-center space-x-3">
-                                <Link to="/login">
+                                <Link to="/auth/login">
                                     <Button variant="contained" startIcon={<LogIn className="h-4 w-4" />}>
                                         Sign In
                                     </Button>
                                 </Link>
-                                <Link to="/register">
+                                <Link to="/auth/signup">
                                     <Button>Get Started</Button>
                                 </Link>
                             </div>

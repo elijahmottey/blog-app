@@ -7,6 +7,8 @@ import Footer from "./components/footer.tsx";
 import Home from "./components/home.tsx";
 import {Login} from "./components/authentication/login.tsx";
 import {Signup} from "./components/authentication/signup.tsx";
+import { DashboardLayout } from "./components/dashboard/DashboardLayout";
+import { DashboardRouter } from "./components/dashboard/DashboardRouter";
 
 
 export const PagesRoute = () => {
@@ -36,6 +38,21 @@ export const PagesRoute = () => {
                         <Route path="auth/signup" element={<><Signup /> <Footer/></>} />
                         {/*<Route path="/terms" element={<Terms />} />*/}
                         {/*<Route path="/privacy" element={<PrivacyPolicy />} />*/}
+
+                        {/* Dashboard routes */}
+                        <Route path="/dashboard" element={<DashboardLayout />}>
+                            <Route index element={<DashboardRouter />} />
+                            {/* User routes */}
+                            <Route path="posts" element={<div>Posts Management</div>} />
+                            <Route path="posts/create" element={<div>Create Post</div>} />
+                            <Route path="comments" element={<div>Comments Management</div>} />
+                            <Route path="profile" element={<div>Profile Management</div>} />
+                            {/* Admin routes */}
+                            <Route path="admin/users" element={<div>User Management</div>} />
+                            <Route path="admin/content" element={<div>Content Moderation</div>} />
+                            <Route path="admin/analytics" element={<div>Analytics</div>} />
+                            <Route path="admin/settings" element={<div>System Settings</div>} />
+                        </Route>
 
                         {/*/!* Protected (User) routes *!/*/}
                         {/*<Route*/}

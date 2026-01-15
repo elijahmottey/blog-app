@@ -28,7 +28,7 @@ export const Login: React.FC = () => {
 
     const navigate = useNavigate();
     const location = useLocation();
-    const from = (location.state as any)?.from?.pathname || "/home";
+    const from = (location.state as any)?.from?.pathname || "/dashboard";
 
     const inputRefs = [
         useRef<HTMLInputElement>(null),

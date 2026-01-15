@@ -29,7 +29,7 @@ export interface  UserDto{
     id?: number;
     name: string;
     email: string;
-    roles: Roles;
+    roles: Roles[];
     createdAt:string;
     updatedAt:string;
     post?: string[];

@@ -5,7 +5,17 @@ import {PagesRoute} from "./page.tsx";
 import {toast, Toaster} from "sonner";
 import {useEffect} from "react";
 import BackendApi from "./service/BackendApi.ts";
-;
+import { AuthProvider } from './context/AuthContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 3,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 function App() {
   useEffect(() => {
@@ -37,7 +47,8 @@ function App() {
   }, []);
 
   return (
-      <>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
         <PagesRoute/>
         <Toaster
             richColors
@@ -47,7 +58,8 @@ function App() {
             expand={true}
             visibleToasts={3}
         />
-      </>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 
