@@ -15,6 +15,11 @@ spring:
     username: ${DB_USERNAME1}
     driver-class-name: org.postgresql.Driver
 
+  cache:
+    type: caffeine          # Enable Caffeine as the cache provider
+    cache-names: # Define cache names
+      - posts
+      - post
   jpa:
     hibernate:
       ddl-auto: update
