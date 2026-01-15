@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom"
 //import { ProtectedRoute, AdminRoute } from "./service/guard.tsx";
 import Navbar from "./components/navigation.tsx";
 import Footer from "./components/footer.tsx";
+import Home from "./components/home.tsx";
 
 
 export const PagesRoute = () => {
@@ -19,7 +20,7 @@ export const PagesRoute = () => {
                         {/* Guest routes */}
                         <Route path="/home" element={<>
                             <Navbar />
-                            {/*<HomePage />*/}
+                            <Home />
                             <Footer/>
                         </>} />
                         {/*<Route path="/forget-password" element={<ForgetPassword/>}/>*/}
