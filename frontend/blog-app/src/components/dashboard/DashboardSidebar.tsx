@@ -25,9 +25,10 @@ interface SidebarItem {
 interface DashboardSidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  isMobile: boolean;
 }
 
-export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onClose }) => {
+export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onClose, isMobile }) => {
   const { isAdmin } = useAuth();
   const location = useLocation();
   const [expandedItems, setExpandedItems] = React.useState<Set<string>>(new Set());
@@ -104,7 +105,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
 
   const menuItems = isAdmin ? [...userMenuItems, ...adminMenuItems] : userMenuItems;
 
-  const renderMenuItem = (item: SidebarItem, level = 0) => {
+  const renderMenuItem = (item: SidebarItem, level = 0, onClose?: () => void) => {
     const isActive = location.pathname === item.href;
     const hasChildren = item.children && item.children.length > 0;
     const isExpanded = expandedItems.has(item.name);
@@ -149,7 +150,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
 
         {hasChildren && isExpanded && (
           <div className="mt-1 space-y-1">
-            {item.children!.map((child) => renderMenuItem(child, level + 1))}
+            {item.children!.map((child) => renderMenuItem(child, level + 1, onClose))}
           </div>
         )}
       </div>
@@ -158,20 +159,25 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
 
   return (
     <>
-      {/* Mobile overlay */}
-      {isOpen && (
+      {/* Mobile overlay - only show when sidebar is open on mobile */}
+      {isMobile && isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-gray-600 bg-opacity-75 md:hidden"
+          className="fixed inset-0 z-40 bg-gray-600 bg-opacity-75 lg:hidden"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
       <div
-        className={cn(
-          'fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:inset-0',
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        )}
+        className={`${
+          isMobile
+            ? 'fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out'
+            : 'w-64 bg-white shadow-lg flex-shrink-0'
+        } ${
+          isMobile
+            ? (isOpen ? 'translate-x-0' : '-translate-x-full')
+            : ''
+        }`}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
@@ -183,7 +189,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
 
           {/* Navigation */}
           <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-            {menuItems.map((item) => renderMenuItem(item))}
+            {menuItems.map((item) => renderMenuItem(item, 0, onClose))}
           </nav>
 
           {/* Footer */}

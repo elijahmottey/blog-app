@@ -173,7 +173,7 @@ export const UserDashboard: React.FC = () => {
                   <div>
                     <p className="font-medium text-gray-900">{post.title}</p>
                     <p className="text-sm text-gray-500">
-                      Last modified: {new Date(post.updatedAt).toLocaleDateString()}
+                      Last modified: {post.updatedAt ? new Date(post.updatedAt).toLocaleDateString() : 'Unknown'}
                     </p>
                   </div>
                 </div>

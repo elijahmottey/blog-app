@@ -7,9 +7,10 @@ import { toast } from 'sonner';
 interface DashboardNavbarProps {
   onMenuClick: () => void;
   isSidebarOpen: boolean;
+  isMobile: boolean;
 }
 
-export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, isSidebarOpen }) => {
+export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, isSidebarOpen, isMobile }) => {
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -26,13 +27,15 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
         <div className="flex justify-between h-16">
           {/* Left side - Menu button and logo */}
           <div className="flex items-center">
-            <button
-              onClick={onMenuClick}
-              className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 md:hidden"
-            >
-              {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-            <div className="flex-shrink-0 flex items-center ml-4 md:ml-0">
+            {isMobile && (
+              <button
+                onClick={onMenuClick}
+                className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 lg:hidden"
+              >
+                {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            )}
+            <div className="flex-shrink-0 flex items-center ml-4 lg:ml-0">
               <Link to="/dashboard" className="text-xl font-bold text-gray-900">
                 BlogApp
               </Link>

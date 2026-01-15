@@ -28,7 +28,11 @@ export default function Home() {
 
     const posts = data?.data?.content || [];
     const latestPosts = [...posts]
-        .sort((a, b) => (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()))
+        .sort((a, b) => {
+            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return dateB - dateA;
+        })
         .slice(0, 6);
 
     const featuredPost = latestPosts[0];

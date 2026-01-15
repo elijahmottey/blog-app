@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Edit, Trash2, Eye, Plus, Search, Filter } from 'lucide-react';
-import BackendApi from '../../service/BackendApi';
+import BackendApi, { type PostDto } from '../../service/BackendApi';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
+import useLocalStorage from '../../hooks/useLocalStorage';
 
 export const PostsManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -50,14 +50,16 @@ export const PostsManagement: React.FC = () => {
     onSuccess: () => {
       toast.success('Post deleted successfully');
       queryClient.invalidateQueries({ queryKey: ['user-posts-management'] });
-      queryClient.invalidateQueries({ queryKey: ['user-posts'] });
+      // Clear cache when post is deleted
+      setCachedPosts(null);
+      setLastFetchTime(0);
     },
     onError: () => {
       toast.error('Failed to delete post');
     },
   });
 
-  const posts = postsData?.data?.content || [];
+  const posts: PostDto[] = postsData?.data?.content || [];
   const totalPages = postsData?.data?.totalPages || 0;
 
   // Filter posts based on search term
@@ -156,11 +158,13 @@ export const PostsManagement: React.FC = () => {
             <div key={post.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{post.title}</h3>
+                  <Link to={`/dashboard/posts/${post.id}`}>
+                    <h3 className="text-xl font-semibold text-blue-600 hover:text-blue-800 mb-2 cursor-pointer">{post.title}</h3>
+                  </Link>
                   <p className="text-gray-600 mb-4">{truncateContent(post.content)}</p>
                   <div className="flex items-center text-sm text-gray-500 space-x-4">
-                    <span>Created: {format(new Date(post.createdAt), 'MMM dd, yyyy')}</span>
-                    <span>Updated: {format(new Date(post.updatedAt), 'MMM dd, yyyy')}</span>
+                    <span>Created: {post.createdAt ? format(new Date(post.createdAt), 'MMM dd, yyyy') : 'Unknown'}</span>
+                    <span>Updated: {post.updatedAt ? format(new Date(post.updatedAt), 'MMM dd, yyyy') : 'Unknown'}</span>
                     {post.comments && (
                       <span>{post.comments.length} comments</span>
                     )}

@@ -11,6 +11,9 @@ import { DashboardLayout } from "./components/dashboard/DashboardLayout";
 import { DashboardRouter } from "./components/dashboard/DashboardRouter";
 import { CreatePost } from "./components/dashboard/CreatePost";
 import { PostsManagement } from "./components/dashboard/PostsManagement";
+import { PostDetail } from "./components/dashboard/PostDetail";
+import { EditPost } from "./components/dashboard/EditPost";
+import { ProfileManagement } from "./components/dashboard/ProfileManagement";
 
 
 export const PagesRoute = () => {
@@ -47,8 +50,10 @@ export const PagesRoute = () => {
                             {/* User routes */}
                             <Route path="posts" element={<PostsManagement />} />
                             <Route path="posts/create" element={<CreatePost />} />
+                            <Route path="posts/:id" element={<PostDetail />} />
+                            <Route path="posts/:id/edit" element={<EditPost />} />
                             <Route path="comments" element={<div>Comments Management</div>} />
-                            <Route path="profile" element={<div>Profile Management</div>} />
+                            <Route path="profile" element={<ProfileManagement />} />
                             {/* Admin routes */}
                             <Route path="admin/users" element={<div>User Management</div>} />
                             <Route path="admin/content" element={<div>Content Moderation</div>} />
