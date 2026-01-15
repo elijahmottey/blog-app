@@ -4,37 +4,8 @@ import { useApi } from "../hooks/useApi";
 import { CalendarDays, User, ArrowRight, Sparkles, TrendingUp, Clock, ChevronRight, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
 import {Button} from "@mui/material";
+import {excerpt, formatDate, getAuthorName} from "../lib/utils.ts";
 
-function formatDate(iso?: string) {
-    if (!iso) return "";
-    try {
-        const d = new Date(iso);
-        return d.toLocaleDateString(undefined, {
-            year: "numeric",
-            month: "short",
-            day: "numeric"
-        });
-    } catch {
-        return iso;
-    }
-}
-
-function excerpt(text?: string, length = 160) {
-    if (!text) return "";
-    const stripped = text.replace(/<[^>]+>/g, "");
-    return stripped.length > length ? stripped.slice(0, length).trim() + "..." : stripped;
-}
-
-function getAuthorName(user?: { name?: string; email?: string }) {
-    if (!user) return "Anonymous";
-    if (user.name && user.name !== "Anonymous" && user.name.length > 0) {
-        return user.name;
-    }
-    if (user.email) {
-        return user.email.split('@')[0];
-    }
-    return "Anonymous";
-}
 
 export default function Home() {
     const { data, loading, error } = useApi<ApiResponse<PagedResponse<PostDto>>>(
@@ -168,6 +139,7 @@ export default function Home() {
                                                 <User className="w-4 h-4 text-white" />
                                             </div>
                                             <div>
+                                                {/*@ts-ignore*/}
                                                 <div className="font-semibold">{getAuthorName(featuredPost.user)}</div>
                                                 <div className="text-xs text-gray-500">Author</div>
                                             </div>
@@ -298,6 +270,7 @@ export default function Home() {
                                                     </div>
                                                     <div>
                                                         <div className="font-semibold text-gray-800 text-sm">
+                                                            {/*@ts-ignore*/}
                                                             {getAuthorName(post?.user)}
                                                         </div>
                                                         <div className="text-xs text-gray-500">Author</div>
