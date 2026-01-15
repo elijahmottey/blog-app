@@ -5,6 +5,8 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom"
 import Navbar from "./components/navigation.tsx";
 import Footer from "./components/footer.tsx";
 import Home from "./components/home.tsx";
+import {Login} from "./components/authentication/login.tsx";
+import {Signup} from "./components/authentication/signup.tsx";
 
 
 export const PagesRoute = () => {
@@ -30,8 +32,8 @@ export const PagesRoute = () => {
                         {/*    <Footer/></>} />*/}
                         {/*<Route path="/rooms" element={<><Navbar /><AllRooms /> <Footer/> </>} />*/}
                         {/*<Route path="/find-bookings" element={<><Navbar /><FindBookingPage /> <Footer/> </>} />*/}
-                        {/*<Route path="/login" element={<><Login /> <Footer/></>} />*/}
-                        {/*<Route path="/signup" element={<><Signup /> <Footer/></>} />*/}
+                        <Route path="auth/login" element={<><Login /> <Footer/></>} />
+                        <Route path="auth/signup" element={<><Signup /> <Footer/></>} />
                         {/*<Route path="/terms" element={<Terms />} />*/}
                         {/*<Route path="/privacy" element={<PrivacyPolicy />} />*/}
 
