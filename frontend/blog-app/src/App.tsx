@@ -1,16 +1,18 @@
 
 import './App.css'
-import {Page} from "./page.tsx";
+import Footer from "./components/footer.tsx";
+
+
 
 function App() {
 
   return (
     <>
-      <div>
+      <p>aithhs</p>
+        <Footer/>
 
-        <Page/>
 
-      </div>
+
 
     </>
   )
