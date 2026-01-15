@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FileText, MessageSquare, Heart, TrendingUp, Plus, Clock } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import BackendApi from '../../service/BackendApi';
+import { AIChatWidget } from './AIChatWidget';
+import { AIChat } from './AIChat';
 
 export const UserDashboard: React.FC = () => {
   const { user } = useAuth();
+  const [isChatExpanded, setIsChatExpanded] = useState(false);
 
   // Fetch user's posts
   const { data: postsData } = useQuery({
@@ -184,6 +187,19 @@ export const UserDashboard: React.FC = () => {
             ))}
           </div>
         </div>
+      )}
+
+      {/* AI Chat Widget */}
+      {!isChatExpanded && (
+        <AIChatWidget
+          title="AI Writing Assistant"
+          description="Get AI-powered suggestions for your blog posts, brainstorm ideas, and improve your writing"
+        />
+      )}
+
+      {/* Expanded AI Chat */}
+      {isChatExpanded && (
+        <AIChat isExpanded={true} onToggleExpand={setIsChatExpanded} />
       )}
     </div>
   );

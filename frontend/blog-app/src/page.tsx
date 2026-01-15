@@ -9,6 +9,8 @@ import {Login} from "./components/authentication/login.tsx";
 import {Signup} from "./components/authentication/signup.tsx";
 import { DashboardLayout } from "./components/dashboard/DashboardLayout";
 import { DashboardRouter } from "./components/dashboard/DashboardRouter";
+import { CreatePost } from "./components/dashboard/CreatePost";
+import { PostsManagement } from "./components/dashboard/PostsManagement";
 
 
 export const PagesRoute = () => {
@@ -43,8 +45,8 @@ export const PagesRoute = () => {
                         <Route path="/dashboard" element={<DashboardLayout />}>
                             <Route index element={<DashboardRouter />} />
                             {/* User routes */}
-                            <Route path="posts" element={<div>Posts Management</div>} />
-                            <Route path="posts/create" element={<div>Create Post</div>} />
+                            <Route path="posts" element={<PostsManagement />} />
+                            <Route path="posts/create" element={<CreatePost />} />
                             <Route path="comments" element={<div>Comments Management</div>} />
                             <Route path="profile" element={<div>Profile Management</div>} />
                             {/* Admin routes */}

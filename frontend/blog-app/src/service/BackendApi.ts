@@ -41,8 +41,8 @@ export interface PostDto{
     title: string;
     content: string;
     users?: string;
-    createdAt:string;
-    updatedAt:string;
+    createdAt?:string;
+    updatedAt?:string;
     comments?:string[];
 }
 
