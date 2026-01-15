@@ -5,6 +5,7 @@ import * as yup from 'yup';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Save, ArrowLeft, Eye, EyeOff, Loader } from 'lucide-react';
+import { Button, IconButton, Typography, Box, Paper, TextField } from '@mui/material';
 import BackendApi from '../../service/BackendApi';
 import { toast } from 'sonner';
 
@@ -38,6 +39,7 @@ export const CreatePost: React.FC = () => {
       toast.success('Post created successfully!');
       queryClient.invalidateQueries({ queryKey: ['user-posts'] });
       queryClient.invalidateQueries({ queryKey: ['admin-posts'] });
+      queryClient.invalidateQueries({ queryKey: ['user-posts-management'] });
       navigate('/dashboard/posts');
     },
     onError: (error) => {
@@ -59,20 +61,20 @@ export const CreatePost: React.FC = () => {
       .map((line) => {
         // Handle headers
         if (line.startsWith('# ')) {
-          return `<h1 class="text-2xl font-bold mb-4 mt-6">${line.substring(2)}</h1>`;
+          return `<h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; margin-top: 1.5rem; color: #1a1a1a;">${line.substring(2)}</h1>`;
         }
         if (line.startsWith('## ')) {
-          return `<h2 class="text-xl font-semibold mb-3 mt-5">${line.substring(3)}</h2>`;
+          return `<h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; margin-top: 1.25rem; color: #1a1a1a;">${line.substring(3)}</h2>`;
         }
         if (line.startsWith('### ')) {
-          return `<h3 class="text-lg font-medium mb-2 mt-4">${line.substring(4)}</h3>`;
+          return `<h3 style="font-size: 1.125rem; font-weight: 500; margin-bottom: 0.5rem; margin-top: 1rem; color: #1a1a1a;">${line.substring(4)}</h3>`;
         }
 
         // Handle bold text
-        line = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        line = line.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 600; color: #1a1a1a;">$1</strong>');
 
         // Handle italic text
-        line = line.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        line = line.replace(/\*(.*?)\*/g, '<em style="font-style: italic; color: #666666;">$1</em>');
 
         // Handle empty lines
         if (line.trim() === '') {
@@ -80,88 +82,89 @@ export const CreatePost: React.FC = () => {
         }
 
         // Regular paragraphs
-        return `<p class="mb-2">${line}</p>`;
+        return `<p style="margin-bottom: 0.5rem; color: #1a1a1a; line-height: 1.6;">${line}</p>`;
       })
       .join('');
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <button
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 4 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <IconButton
             onClick={() => navigate('/dashboard')}
-            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            sx={{ color: 'text.secondary', '&:hover': { bgcolor: 'action.hover' } }}
           >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Create New Post</h1>
-            <p className="text-gray-600">Share your thoughts with the world</p>
-          </div>
-        </div>
-        <div className="flex items-center space-x-3">
-          <button
-            type="button"
-            onClick={() => setIsPreview(!isPreview)}
-            className="flex items-center px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            {isPreview ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
-            {isPreview ? 'Edit' : 'Preview'}
-          </button>
-        </div>
-      </div>
+            <ArrowLeft />
+          </IconButton>
+          <Box>
+            <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
+              Create New Post
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              Share your thoughts with the world
+            </Typography>
+          </Box>
+        </Box>
+        <Button
+          variant="outlined"
+          startIcon={isPreview ? <EyeOff /> : <Eye />}
+          onClick={() => setIsPreview(!isPreview)}
+        >
+          {isPreview ? 'Edit' : 'Preview'}
+        </Button>
+      </Box>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         {/* Title Input */}
-        <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-            Post Title
-          </label>
-          <input
-            {...register('title')}
-            type="text"
-            id="title"
-            placeholder="Enter an engaging title..."
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg font-medium"
-          />
-          {errors.title && (
-            <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
-          )}
-        </div>
+        <TextField
+          {...register('title')}
+          label="Post Title"
+          placeholder="Enter an engaging title..."
+          variant="outlined"
+          fullWidth
+          error={!!errors.title}
+          helperText={errors.title?.message}
+          sx={{
+            '& .MuiInputBase-input': {
+              fontSize: '1.125rem',
+              fontWeight: 500,
+            }
+          }}
+        />
 
         {/* Content Input/Preview */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label htmlFor="content" className="block text-sm font-medium text-gray-700">
+        <Box>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+            <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.primary' }}>
               Content
-            </label>
-            <div className="text-xs text-gray-500">
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
               Use **bold** and *italic* formatting
-            </div>
-          </div>
+            </Typography>
+          </Box>
 
           {isPreview ? (
-            <div className="min-h-96 p-6 border border-gray-300 rounded-lg bg-gray-50">
-              <div className="prose prose-lg max-w-none">
+            <Paper sx={{ minHeight: 400, p: 3, bgcolor: 'grey.50' }}>
+              <Box sx={{ '& h1': { typography: 'h3', mb: 3, pb: 2, borderBottom: 1, borderColor: 'divider' } }}>
                 {watchedTitle && (
-                  <h1 className="text-3xl font-bold mb-6 text-gray-900 border-b border-gray-200 pb-4">
+                  <Typography variant="h3" sx={{ mb: 3, pb: 2, borderBottom: 1, borderColor: 'divider', fontWeight: 'bold' }}>
                     {watchedTitle}
-                  </h1>
+                  </Typography>
                 )}
-                <div
+                <Box
                   dangerouslySetInnerHTML={{ __html: formatContent(watchedContent) }}
-                  className="text-gray-800 leading-relaxed"
+                  sx={{ color: 'text.primary', lineHeight: 1.6 }}
                 />
-              </div>
-            </div>
+              </Box>
+            </Paper>
           ) : (
-            <textarea
+            <TextField
               {...register('content')}
-              id="content"
+              multiline
               rows={20}
-              placeholder="Write your post content here...
+              placeholder={`Write your post content here...
 
 Use markdown-style formatting:
 # Heading 1
@@ -169,84 +172,83 @@ Use markdown-style formatting:
 **bold text**
 *italic text*
 
-Separate paragraphs with empty lines."
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+Separate paragraphs with empty lines.`}
+              variant="outlined"
+              fullWidth
+              error={!!errors.content}
+              helperText={errors.content?.message}
+              sx={{
+                '& .MuiInputBase-input': {
+                  fontFamily: 'monospace',
+                  fontSize: '0.875rem',
+                }
+              }}
             />
           )}
-
-          {errors.content && (
-            <p className="mt-1 text-sm text-red-600">{errors.content.message}</p>
-          )}
-        </div>
+        </Box>
 
         {/* Character Count */}
-        <div className="flex items-center justify-between text-sm text-gray-500">
-          <span>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', typography: 'body2', color: 'text.secondary' }}>
+          <Box>
             {watchedContent.length} characters
             {watchedContent.length < 10 && (
-              <span className="text-red-500 ml-1">(minimum 10 required)</span>
+              <Box component="span" sx={{ color: 'error.main', ml: 1 }}>
+                (minimum 10 required)
+              </Box>
             )}
-          </span>
-          <span>
+          </Box>
+          <Box>
             {watchedContent.split('\n').filter(line => line.trim()).length} paragraphs
-          </span>
-        </div>
+          </Box>
+        </Box>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-          <button
-            type="button"
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, pt: 3, borderTop: 1, borderColor: 'divider' }}>
+          <Button
+            variant="outlined"
             onClick={() => navigate('/dashboard')}
-            className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
+            variant="contained"
             disabled={isSubmitting || createPostMutation.isPending}
-            className="flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            startIcon={createPostMutation.isPending ? <Loader /> : <Save />}
           >
-            {createPostMutation.isPending ? (
-              <>
-                <Loader className="h-4 w-4 mr-2 animate-spin" />
-                Creating Post...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Publish Post
-              </>
-            )}
-          </button>
-        </div>
-      </form>
+            {createPostMutation.isPending ? 'Creating Post...' : 'Publish Post'}
+          </Button>
+        </Box>
+      </Box>
 
       {/* Tips Section */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-blue-900 mb-3">Writing Tips</h3>
-        <ul className="space-y-2 text-blue-800">
-          <li className="flex items-start">
-            <span className="text-blue-600 mr-2">•</span>
+      <Paper sx={{ p: 3, bgcolor: 'info.light', border: 1, borderColor: 'info.main' }}>
+        <Typography variant="h6" sx={{ mb: 2, color: 'info.dark', fontWeight: 'bold' }}>
+          Writing Tips
+        </Typography>
+        <Box component="ul" sx={{ m: 0, p: 0, listStyle: 'none', '& li': { mb: 1, display: 'flex', alignItems: 'flex-start' } }}>
+          <Box component="li" sx={{ color: 'info.dark' }}>
+            <Box component="span" sx={{ color: 'info.main', mr: 1 }}>•</Box>
             Start with a compelling title that captures attention
-          </li>
-          <li className="flex items-start">
-            <span className="text-blue-600 mr-2">•</span>
+          </Box>
+          <Box component="li" sx={{ color: 'info.dark' }}>
+            <Box component="span" sx={{ color: 'info.main', mr: 1 }}>•</Box>
             Use headings (# ## ###) to organize your content
-          </li>
-          <li className="flex items-start">
-            <span className="text-blue-600 mr-2">•</span>
+          </Box>
+          <Box component="li" sx={{ color: 'info.dark' }}>
+            <Box component="span" sx={{ color: 'info.main', mr: 1 }}>•</Box>
             **Bold** important points and *emphasize* key ideas
-          </li>
-          <li className="flex items-start">
-            <span className="text-blue-600 mr-2">•</span>
+          </Box>
+          <Box component="li" sx={{ color: 'info.dark' }}>
+            <Box component="span" sx={{ color: 'info.main', mr: 1 }}>•</Box>
             Keep paragraphs short and focused
-          </li>
-          <li className="flex items-start">
-            <span className="text-blue-600 mr-2">•</span>
+          </Box>
+          <Box component="li" sx={{ color: 'info.dark' }}>
+            <Box component="span" sx={{ color: 'info.main', mr: 1 }}>•</Box>
             Preview your post before publishing to see the final result
-          </li>
-        </ul>
-      </div>
-    </div>
+          </Box>
+        </Box>
+      </Paper>
+    </Box>
   );
 };

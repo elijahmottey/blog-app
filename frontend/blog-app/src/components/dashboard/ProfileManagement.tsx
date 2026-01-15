@@ -68,8 +68,8 @@ export const ProfileManagement: React.FC = () => {
     queryKey: ['user-stats'],
     queryFn: async () => {
       const [posts, comments] = await Promise.all([
-        BackendApi.getAllPost(0, 1000), // Get all posts to count user's posts
-        BackendApi.getAllPostComment(0, 1000), // Get all comments to count user's comments
+        BackendApi.getAllPost(),
+        BackendApi.getAllPostComment(),
       ]);
 
       const userPosts = posts.data?.content?.filter((post: any) =>

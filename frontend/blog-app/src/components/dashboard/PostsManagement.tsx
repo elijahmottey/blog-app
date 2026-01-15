@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Edit, Trash2, Eye, Plus, Search, Filter } from 'lucide-react';
+import { Button, TextField, InputAdornment, Box, Typography, Paper, IconButton, Chip } from '@mui/material';
 import BackendApi, { type PostDto } from '../../service/BackendApi';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -119,143 +120,163 @@ export const PostsManagement: React.FC = () => {
       </div>
 
       {/* Search and Filter */}
-      <div className="flex items-center space-x-4">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search posts..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-        <button className="flex items-center px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-          <Filter className="h-4 w-4 mr-2" />
+      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+        <TextField
+          placeholder="Search posts..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          variant="outlined"
+          fullWidth
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            ),
+          }}
+        />
+        <Button
+          variant="outlined"
+          startIcon={<Filter />}
+        >
           Filter
-        </button>
-      </div>
+        </Button>
+      </Box>
 
       {/* Posts List */}
-      <div className="space-y-4">
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {filteredPosts.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
+          <Box sx={{ textAlign: 'center', py: 6 }}>
+            <Typography variant="body1" sx={{ color: 'text.secondary', mb: 2 }}>
               {searchTerm ? 'No posts found matching your search.' : 'No posts yet.'}
-            </div>
+            </Typography>
             {!searchTerm && (
-              <Link
+              <Button
+                component={Link}
                 to="/dashboard/posts/create"
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                variant="contained"
+                startIcon={<Plus />}
               >
-                <Plus className="h-4 w-4 mr-2" />
                 Create Your First Post
-              </Link>
+              </Button>
             )}
-          </div>
+          </Box>
         ) : (
           filteredPosts.map((post) => (
-            <div key={post.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <Link to={`/dashboard/posts/${post.id}`}>
-                    <h3 className="text-xl font-semibold text-blue-600 hover:text-blue-800 mb-2 cursor-pointer">{post.title}</h3>
+            <Paper key={post.id} sx={{ p: 3, '&:hover': { boxShadow: 2 }, transition: 'box-shadow 0.2s' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <Box sx={{ flex: 1 }}>
+                  <Link to={`/dashboard/posts/${post.id}`} style={{ textDecoration: 'none' }}>
+                    <Typography variant="h6" sx={{ color: 'primary.main', '&:hover': { color: 'primary.dark' }, mb: 1, cursor: 'pointer' }}>
+                      {post.title}
+                    </Typography>
                   </Link>
-                  <p className="text-gray-600 mb-4">{truncateContent(post.content)}</p>
-                  <div className="flex items-center text-sm text-gray-500 space-x-4">
-                    <span>Created: {post.createdAt ? format(new Date(post.createdAt), 'MMM dd, yyyy') : 'Unknown'}</span>
-                    <span>Updated: {post.updatedAt ? format(new Date(post.updatedAt), 'MMM dd, yyyy') : 'Unknown'}</span>
+                  <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                    {truncateContent(post.content)}
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', typography: 'caption', color: 'text.secondary' }}>
+                    <Box>Created: {post.createdAt ? format(new Date(post.createdAt), 'MMM dd, yyyy') : 'Unknown'}</Box>
+                    <Box>Updated: {post.updatedAt ? format(new Date(post.updatedAt), 'MMM dd, yyyy') : 'Unknown'}</Box>
                     {post.comments && (
-                      <span>{post.comments.length} comments</span>
+                      <Chip label={`${post.comments.length} comments`} size="small" variant="outlined" />
                     )}
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2 ml-4">
-                  <button
-                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  </Box>
+                </Box>
+                <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
+                  <IconButton
+                    component={Link}
+                    to={`/dashboard/posts/${post.id}`}
+                    sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main', bgcolor: 'primary.light' } }}
                     title="View Post"
                   >
-                    <Eye className="h-4 w-4" />
-                  </button>
-                  <Link
+                    <Eye />
+                  </IconButton>
+                  <IconButton
+                    component={Link}
                     to={`/dashboard/posts/${post.id}/edit`}
-                    className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                    sx={{ color: 'text.secondary', '&:hover': { color: 'success.main', bgcolor: 'success.light' } }}
                     title="Edit Post"
                   >
-                    <Edit className="h-4 w-4" />
-                  </Link>
-                  <button
+                    <Edit />
+                  </IconButton>
+                  <IconButton
                     onClick={() => handleDelete(post.id!)}
                     disabled={deleteMutation.isPending}
-                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                    sx={{ color: 'text.secondary', '&:hover': { color: 'error.main', bgcolor: 'error.light' }, '&:disabled': { opacity: 0.5 } }}
                     title="Delete Post"
                   >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
+                    <Trash2 />
+                  </IconButton>
+                </Box>
+              </Box>
+            </Paper>
           ))
         )}
-      </div>
+      </Box>
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center space-x-2">
-          <button
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, alignItems: 'center' }}>
+          <Button
             onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
             disabled={currentPage === 0}
-            className="px-3 py-2 text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            variant="outlined"
           >
             Previous
-          </button>
+          </Button>
 
           {Array.from({ length: totalPages }, (_, i) => (
-            <button
+            <Button
               key={i}
               onClick={() => setCurrentPage(i)}
-              className={`px-3 py-2 border rounded-lg ${
-                currentPage === i
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'text-gray-500 bg-white border-gray-300 hover:bg-gray-50'
-              }`}
+              variant={currentPage === i ? 'contained' : 'outlined'}
             >
               {i + 1}
-            </button>
+            </Button>
           ))}
 
-          <button
+          <Button
             onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
             disabled={currentPage === totalPages - 1}
-            className="px-3 py-2 text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            variant="outlined"
           >
             Next
-          </button>
-        </div>
+          </Button>
+        </Box>
       )}
 
       {/* Stats */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Posts Statistics</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">{postsData?.data?.totalElements || 0}</div>
-            <div className="text-sm text-gray-600">Total Posts</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">
+      <Paper sx={{ p: 3 }}>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+          Posts Statistics
+        </Typography>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 2 }}>
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
+              {postsData?.data?.totalElements || 0}
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              Total Posts
+            </Typography>
+          </Box>
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="h4" sx={{ color: 'success.main', fontWeight: 'bold' }}>
               {posts.filter(post => post.content && post.content.length > 100).length}
-            </div>
-            <div className="text-sm text-gray-600">Published Posts</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-orange-600">
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              Published Posts
+            </Typography>
+          </Box>
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="h4" sx={{ color: 'warning.main', fontWeight: 'bold' }}>
               {posts.filter(post => !post.content || post.content.length <= 100).length}
-            </div>
-            <div className="text-sm text-gray-600">Draft Posts</div>
-          </div>
-        </div>
-      </div>
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              Draft Posts
+            </Typography>
+          </Box>
+        </Box>
+      </Paper>
     </div>
   );
 };

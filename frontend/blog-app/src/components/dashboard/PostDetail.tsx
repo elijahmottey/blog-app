@@ -12,6 +12,7 @@ import {
   ThumbsUp,
   User
 } from 'lucide-react';
+import { Button, IconButton, Typography, Box, Paper, TextField, Avatar } from '@mui/material';
 import BackendApi, { type CommentDto } from '../../service/BackendApi';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
@@ -37,7 +38,7 @@ export const PostDetail: React.FC = () => {
   // Fetch comments for this post
   const { data: commentsData, isLoading: commentsLoading } = useQuery({
     queryKey: ['post-comments', postId],
-    queryFn: () => BackendApi.getAllPostComment(0, 50), // Get all comments, we'll filter client-side
+    queryFn: () => BackendApi.getAllPostComment(0, 1000), // Get all comments (increased limit)
     enabled: !!postId,
   });
 
@@ -126,27 +127,27 @@ export const PostDetail: React.FC = () => {
       .map((line) => {
         // Handle headers
         if (line.startsWith('# ')) {
-          return `<h1 class="text-3xl font-bold mb-4 mt-8">${line.substring(2)}</h1>`;
+          return `<h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 1rem; margin-top: 2rem; color: #1a1a1a;">${line.substring(2)}</h1>`;
         }
         if (line.startsWith('## ')) {
-          return `<h2 class="text-2xl font-semibold mb-3 mt-6">${line.substring(3)}</h2>`;
+          return `<h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.75rem; margin-top: 1.5rem; color: #1a1a1a;">${line.substring(3)}</h2>`;
         }
         if (line.startsWith('### ')) {
-          return `<h3 class="text-xl font-medium mb-2 mt-4">${line.substring(4)}</h3>`;
+          return `<h3 style="font-size: 1.25rem; font-weight: 500; margin-bottom: 0.5rem; margin-top: 1rem; color: #1a1a1a;">${line.substring(4)}</h3>`;
         }
 
         // Handle bold text
-        line = line.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>');
+        line = line.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 600; color: #1a1a1a;">$1</strong>');
 
         // Handle italic text
-        line = line.replace(/\*(.*?)\*/g, '<em class="italic">$1</em>');
+        line = line.replace(/\*(.*?)\*/g, '<em style="font-style: italic; color: #666666;">$1</em>');
 
         // Handle empty lines as paragraphs
         if (line.trim() === '') {
           return '<br>';
         }
 
-        return `<p class="mb-3 leading-relaxed">${line}</p>`;
+        return `<p style="margin-bottom: 0.75rem; line-height: 1.6; color: #1a1a1a;">${line}</p>`;
       })
       .join('');
   };
@@ -177,185 +178,202 @@ export const PostDetail: React.FC = () => {
   const postData = post.data;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <Link
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Button
+          component={Link}
           to="/dashboard/posts"
-          className="inline-flex items-center px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+          variant="outlined"
+          startIcon={<ArrowLeft />}
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Posts
-        </Link>
+        </Button>
 
         {user && (
-          <div className="flex items-center space-x-2">
-            <Link
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <IconButton
+              component={Link}
               to={`/dashboard/posts/${postId}/edit`}
-              className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main', bgcolor: 'primary.light' } }}
               title="Edit Post"
             >
-              <Edit className="h-4 w-4" />
-            </Link>
-            <button
+              <Edit />
+            </IconButton>
+            <IconButton
               onClick={handleDelete}
               disabled={deleteMutation.isPending}
-              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+              sx={{ color: 'text.secondary', '&:hover': { color: 'error.main', bgcolor: 'error.light' }, '&:disabled': { opacity: 0.5 } }}
               title="Delete Post"
             >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </div>
+              <Trash2 />
+            </IconButton>
+          </Box>
         )}
-      </div>
+      </Box>
 
       {/* Post Content */}
-      <article className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <Paper sx={{ overflow: 'hidden' }}>
         {/* Post Header */}
-        <div className="p-6 border-b border-gray-200">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">{postData.title}</h1>
-          <div className="flex items-center justify-between text-sm text-gray-500">
-            <div className="flex items-center space-x-4">
-              <span>By {postData.users || 'Anonymous'}</span>
-              <span>Created: {postData.createdAt ? format(new Date(postData.createdAt), 'MMM dd, yyyy') : 'Unknown'}</span>
+        <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider' }}>
+          <Typography variant="h4" sx={{ mb: 2, fontWeight: 'bold' }}>
+            {postData.title}
+          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', typography: 'body2', color: 'text.secondary' }}>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Box>By {postData.users || 'Anonymous'}</Box>
+              <Box>Created: {postData.createdAt ? format(new Date(postData.createdAt), 'MMM dd, yyyy') : 'Unknown'}</Box>
               {postData.updatedAt && postData.updatedAt !== postData.createdAt && (
-                <span>Updated: {format(new Date(postData.updatedAt), 'MMM dd, yyyy')}</span>
+                <Box>Updated: {format(new Date(postData.updatedAt), 'MMM dd, yyyy')}</Box>
               )}
-            </div>
-          </div>
-        </div>
+            </Box>
+          </Box>
+        </Box>
 
         {/* Post Body */}
-        <div
-          className="p-6 prose prose-lg max-w-none"
+        <Box
+          sx={{ p: 3, typography: 'body1', lineHeight: 1.6 }}
           dangerouslySetInnerHTML={{ __html: formatContent(postData.content) }}
         />
 
         {/* Post Actions */}
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button
+        <Box sx={{ px: 3, py: 2, borderTop: 1, borderColor: 'divider', bgcolor: 'grey.50' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button
                 onClick={handleLike}
                 disabled={likeMutation.isPending}
-                className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                startIcon={<Heart />}
+                sx={{ color: 'text.secondary', '&:hover': { color: 'error.main', bgcolor: 'error.light' } }}
               >
-                <Heart className={`h-5 w-5 ${likeMutation.isPending ? 'fill-current' : ''}`} />
-                <span>Like</span>
-              </button>
+                Like
+              </Button>
 
-              <button
+              <Button
                 onClick={() => setShowComments(!showComments)}
-                className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                startIcon={<MessageCircle />}
+                sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main', bgcolor: 'primary.light' } }}
               >
-                <MessageCircle className="h-5 w-5" />
-                <span>{postComments.length} Comments</span>
-              </button>
+                {postComments.length} Comments
+              </Button>
 
-              <button className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
-                <Share2 className="h-5 w-5" />
-                <span>Share</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </article>
+              <Button
+                startIcon={<Share2 />}
+                sx={{ color: 'text.secondary', '&:hover': { color: 'success.main', bgcolor: 'success.light' } }}
+              >
+                Share
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      </Paper>
 
       {/* Comments Section */}
       {showComments && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Comments ({postComments.length})</h3>
+        <Paper sx={{ p: 3 }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+            Comments ({postComments.length})
+          </Typography>
 
-            {/* Add Comment Form */}
-            {user ? (
-              <form onSubmit={handleComment} className="mb-6">
-                <div className="flex space-x-3">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                      <User className="h-4 w-4 text-white" />
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <textarea
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      placeholder="Write a comment..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                      rows={3}
-                    />
-                    <div className="flex justify-end mt-2">
-                      <button
-                        type="submit"
-                        disabled={commentMutation.isPending || !commentText.trim()}
-                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <Send className="h-4 w-4 mr-2" />
-                        {commentMutation.isPending ? 'Posting...' : 'Post Comment'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </form>
-            ) : (
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg text-center">
-                <p className="text-gray-600 mb-2">Please login to comment on this post</p>
-                <Link
-                  to="/auth/login"
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Login
-                </Link>
-              </div>
-            )}
+          {/* Add Comment Form */}
+          {user ? (
+            <Box component="form" onSubmit={handleComment} sx={{ mb: 3 }}>
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <Avatar sx={{ bgcolor: 'primary.main' }}>
+                  <User />
+                </Avatar>
+                <Box sx={{ flex: 1 }}>
+                  <TextField
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    placeholder="Write a comment..."
+                    multiline
+                    rows={3}
+                    fullWidth
+                    variant="outlined"
+                  />
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      disabled={commentMutation.isPending || !commentText.trim()}
+                      startIcon={<Send />}
+                    >
+                      {commentMutation.isPending ? 'Posting...' : 'Post Comment'}
+                    </Button>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          ) : (
+            <Box sx={{ mb: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1, textAlign: 'center' }}>
+              <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
+                Please login to comment on this post
+              </Typography>
+              <Button
+                component={Link}
+                to="/auth/login"
+                variant="contained"
+              >
+                Login
+              </Button>
+            </Box>
+          )}
 
-            {/* Comments List */}
-            <div className="space-y-4">
-              {commentsLoading ? (
-                <div className="text-center py-4">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
-                </div>
-              ) : postComments.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+          {/* Comments List */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {commentsLoading ? (
+              <Box sx={{ textAlign: 'center', py: 2 }}>
+                <Box sx={{ width: 24, height: 24, border: 2, borderColor: 'primary.main', borderTopColor: 'transparent', borderRadius: '50%', mx: 'auto', animation: 'spin 1s linear infinite' }} />
+              </Box>
+            ) : postComments.length === 0 ? (
+              <Box sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
+                <Typography variant="body2">
                   No comments yet. Be the first to comment!
-                </div>
-              ) : (
-                postComments.map((comment: CommentDto) => (
-                  <div key={comment.id} className="flex space-x-3">
-                    <div className="flex-shrink-0">
-                      <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
-                        <User className="h-4 w-4 text-white" />
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-gray-900">
-                            {comment.users || 'Anonymous'}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {comment.createdAt ? format(new Date(comment.createdAt), 'MMM dd, yyyy') : 'Unknown'}
-                          </span>
-                        </div>
-                        <p className="text-gray-700">{comment.content}</p>
-                      </div>
-                      <div className="flex items-center mt-2 space-x-4">
-                        <button className="flex items-center space-x-1 text-xs text-gray-500 hover:text-blue-600">
-                          <ThumbsUp className="h-3 w-3" />
-                          <span>Like</span>
-                        </button>
-                        <button className="text-xs text-gray-500 hover:text-blue-600">
-                          Reply
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
+                </Typography>
+              </Box>
+            ) : (
+              postComments.map((comment: CommentDto) => (
+                <Box key={comment.id} sx={{ display: 'flex', gap: 2 }}>
+                  <Avatar sx={{ bgcolor: 'grey.400' }}>
+                    <User />
+                  </Avatar>
+                  <Box sx={{ flex: 1 }}>
+                    <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                          {comment.users || 'Anonymous'}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          {comment.createdAt ? format(new Date(comment.createdAt), 'MMM dd, yyyy') : 'Unknown'}
+                        </Typography>
+                      </Box>
+                      <Typography variant="body2" sx={{ color: 'text.primary' }}>
+                        {comment.content}
+                      </Typography>
+                    </Paper>
+                    <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
+                      <Button
+                        size="small"
+                        startIcon={<ThumbsUp />}
+                        sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' }, typography: 'caption' }}
+                      >
+                        Like
+                      </Button>
+                      <Button
+                        size="small"
+                        sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' }, typography: 'caption' }}
+                      >
+                        Reply
+                      </Button>
+                    </Box>
+                  </Box>
+                </Box>
+              ))
+            )}
+          </Box>
+        </Paper>
       )}
-    </div>
+    </Box>
   );
 };

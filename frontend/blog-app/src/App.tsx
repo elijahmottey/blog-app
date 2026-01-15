@@ -7,6 +7,9 @@ import {useEffect} from "react";
 import BackendApi from "./service/BackendApi.ts";
 import { AuthProvider } from './context/AuthContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { theme } from './theme';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,17 +51,20 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <PagesRoute/>
-        <Toaster
-            richColors
-            closeButton
-            position="top-right"
-            duration={4000}
-            expand={true}
-            visibleToasts={3}
-        />
-      </AuthProvider>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <AuthProvider>
+          <PagesRoute/>
+          <Toaster
+              richColors
+              closeButton
+              position="top-right"
+              duration={4000}
+              expand={true}
+              visibleToasts={3}
+          />
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
