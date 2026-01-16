@@ -36,6 +36,29 @@ export interface  UserDto{
     comments?:string[]
 }
 
+// Profile shapes returned by /user/get-user-profile
+export interface UserProfilePost {
+    id: number;
+    title: string;
+    content: string;
+}
+
+export interface UserProfileComment {
+    id: number;
+    content: string;
+}
+
+export interface UserProfile {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+    createdAt: string;
+    updatedAt: string;
+    posts: UserProfilePost[];
+    comments: UserProfileComment[];
+}
+
 export interface PostDto{
     id?: number;
     title: string;
@@ -314,7 +337,7 @@ export default class BackendApi {
     }
 
     static async getUserProfile() {
-        return this.get<UserRegistration>("/user/get-user-profile");
+        return this.get<ApiResponse<UserProfile>>("/user/get-user-profile");
     }
 
     static async getUserBookingHistoryByUserId(userId: number) {

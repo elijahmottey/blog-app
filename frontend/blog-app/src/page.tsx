@@ -14,6 +14,7 @@ import { PostsManagement } from "./components/dashboard/PostsManagement";
 import { PostDetail } from "./components/dashboard/PostDetail";
 import { EditPost } from "./components/dashboard/EditPost";
 import { ProfileManagement } from "./components/dashboard/ProfileManagement";
+import { CommentsManagement } from "./components/dashboard/CommentsManagement";
 import About from "./components/About";
 import Blog from "./components/Blog";
 import PrivacyPolicy from "./components/PrivacyPolicy";
@@ -55,7 +56,7 @@ export const PagesRoute = () => {
                             <Route path="posts/create" element={<CreatePost />} />
                             <Route path="posts/:id" element={<PostDetail />} />
                             <Route path="posts/:id/edit" element={<EditPost />} />
-                            <Route path="comments" element={<div>Comments Management</div>} />
+                            <Route path="comments" element={<CommentsManagement/>} />
                             <Route path="profile" element={<ProfileManagement />} />
                             {/* Admin routes */}
                             <Route path="admin/users" element={<div>User Management</div>} />

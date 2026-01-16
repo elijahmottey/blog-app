@@ -8,23 +8,20 @@ import { AIChatWidget } from './AIChatWidget';
 import { AIChat } from './AIChat';
 
 export const UserDashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const [isChatExpanded, setIsChatExpanded] = useState(false);
 
-  // Fetch user's posts
+  // Fetch all posts (for broader stats); your own posts are also in userProfile.posts
   const { data: postsData } = useQuery({
-    queryKey: ['user-posts'],
+    queryKey: ['all-posts'],
     queryFn: () => BackendApi.getAllPost(),
   });
 
-  // Fetch user's comments
-  const { data: commentsData } = useQuery({
-    queryKey: ['user-comments'],
-    queryFn: () => BackendApi.getAllPostComment(),
-  });
+  // Prefer comments from the logged-in user's profile
+  const userComments = userProfile?.comments ?? [];
 
   const posts = postsData?.data?.content || [];
-  const comments = commentsData?.data?.content || [];
+  const comments = userComments;
 
   // Calculate stats
   const totalPosts = posts.length;

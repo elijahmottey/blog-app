@@ -147,7 +147,7 @@ export default function Home() {
                                             </div>
                                         </div>
                                         <Link
-                                            to={`/post/${featuredPost.id}`}
+                                            to={`/dashboard/posts/:id`}
                                             className="group inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
                                         >
                                             Read Full Article
@@ -279,7 +279,7 @@ export default function Home() {
                                                     </div>
                                                 </div>
                                                 <Link
-                                                    to={`/post/${post.id}`}
+                                                    to={`/dashboard/posts/:id`}
                                                     className="inline-flex items-center gap-1 text-amber-600 hover:text-amber-700 font-semibold group/read text-sm sm:text-base"
                                                 >
                                                     Read
