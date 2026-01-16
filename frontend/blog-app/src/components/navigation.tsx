@@ -47,8 +47,8 @@ export default function Navbar() {
     const navigation = [
         { name: "Home", href: "/", icon: Home },
         { name: "Blog", href: "/blog", icon: BookOpen },
-        { name: "Categories", href: "/categories", icon: Tag },
-        { name: "Authors", href: "/authors", icon: Users },
+       // // { name: "Categories", href: "/categories", icon: Tag },
+       //  { name: "Authors", href: "/authors", icon: Users },
         { name: "About", href: "/about", icon: Users },
     ];
 

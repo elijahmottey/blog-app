@@ -340,7 +340,7 @@ export default class BackendApi {
         return this.get<ApiResponse<UserProfile>>("/user/get-user-profile");
     }
 
-    static async getUserBookingHistoryByUserId(userId: number) {
+    static async getUserPostHistoryByUserId(userId: number) {
         return this.get<any[]>(`/user/posts-history/${userId}`);
     }
 
