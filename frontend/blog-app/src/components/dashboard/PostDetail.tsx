@@ -18,7 +18,7 @@ import BackendApi, { type CommentDto } from '../../service/BackendApi';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { downloadPost } from '../../lib/download';
+import { downloadPost, downloadPostPdf } from '../../lib/download';
 
 export const PostDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -40,14 +40,12 @@ export const PostDetail: React.FC = () => {
   // Fetch comments for this post
   const { data: commentsData, isLoading: commentsLoading } = useQuery({
     queryKey: ['post-comments', postId],
-    queryFn: () => BackendApi.getAllPostComment(0, 1000), // Get all comments (increased limit)
+    queryFn: () => BackendApi.getCommentsByPostId(postId, 0, 1000), // Fetch comments for this specific post
     enabled: !!postId,
   });
 
-  // Filter comments for this post
-  const postComments = commentsData?.data?.content?.filter(
-    (comment: CommentDto) => comment.posts === post?.data?.id?.toString()
-  ) || [];
+  // Comments for this post
+  const postComments = (commentsData?.data as any)?.content || [];
 
   // Like mutation
   const likeMutation = useMutation({
@@ -259,13 +257,21 @@ export const PostDetail: React.FC = () => {
                 {postComments.length} Comments
               </Button>
 
-              <Button
-                onClick={() => downloadPost(postData)}
-                startIcon={<Download />}
-                sx={{ color: 'text.secondary', '&:hover': { color: 'success.main', bgcolor: 'success.light' } }}
-              >
-                Download
-              </Button>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  onClick={() => downloadPost(postData)}
+                  startIcon={<Download />}
+                  sx={{ color: 'text.secondary', '&:hover': { color: 'success.main', bgcolor: 'success.light' } }}
+                >
+                  TXT
+                </Button>
+                <Button
+                  onClick={() => downloadPostPdf(postData)}
+                  sx={{ color: 'text.secondary', '&:hover': { color: 'success.main', bgcolor: 'success.light' } }}
+                >
+                  PDF
+                </Button>
+              </Box>
             </Box>
           </Box>
         </Box>

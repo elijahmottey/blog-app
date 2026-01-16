@@ -4,7 +4,7 @@ import { Box, Typography, Container, Grid, Card, CardContent, CardMedia, Chip, B
 import { CalendarDays, User, Search, Filter, Download } from 'lucide-react';
 import BackendApi, { type PostDto } from '../service/BackendApi';
 import { excerpt, formatDate, getAuthorName } from '../lib/utils';
-import { downloadPost } from '../lib/download';
+import { downloadPost, downloadPostPdf } from '../lib/download';
 
 const Blog: React.FC = () => {
   const [posts, setPosts] = useState<PostDto[]>([]);
@@ -209,9 +209,14 @@ const Blog: React.FC = () => {
                               {formatDate(post.createdAt)}
                             </Typography>
                           </Box>
-                          <Button size="small" startIcon={<Download />} onClick={() => downloadPost(post)}>
-                            Download
-                          </Button>
+                          <Box sx={{ display: 'flex', gap: 1 }}>
+                            <Button size="small" startIcon={<Download />} onClick={() => downloadPost(post)}>
+                              TXT
+                            </Button>
+                            <Button size="small" onClick={() => downloadPostPdf(post)}>
+                              PDF
+                            </Button>
+                          </Box>
                         </Box>
                       </Box>
                     </CardContent>

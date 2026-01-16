@@ -39,7 +39,7 @@ function App() {
     const handleTokenExpiration = () => {
       toast.error('Your session has expired. Please login again.');
       BackendApi.clearTokens();
-      window.location.href = '/login';
+      window.location.href = '/auth/login';
     };
 
     const timer = checkTokenExpiration();
