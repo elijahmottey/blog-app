@@ -5,7 +5,6 @@ import {
   ArrowLeft,
   Heart,
   MessageCircle,
-  Share2,
   Edit,
   Trash2,
   Send,

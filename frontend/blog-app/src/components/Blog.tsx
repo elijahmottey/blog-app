@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Typography, Container, Grid, Card, CardContent, CardMedia, Chip, Button, TextField, InputAdornment, Pagination, Stack } from '@mui/material';
+import { Box, Typography, Container, Grid, Card, CardContent, CardMedia, Chip, Button, TextField, InputAdornment, Pagination } from '@mui/material';
 import { CalendarDays, User, Search, Filter, Download } from 'lucide-react';
 import BackendApi, { type PostDto } from '../service/BackendApi';
-import { excerpt, formatDate, getAuthorName } from '../lib/utils';
+import { excerpt, formatDate } from '../lib/utils';
 import { downloadPost, downloadPostPdf } from '../lib/download';
 
 const Blog: React.FC = () => {
@@ -131,6 +131,7 @@ const Blog: React.FC = () => {
           <>
             <Grid container spacing={4}>
               {filteredPosts.map((post, index) => (
+                //   @ts-ignore
                 <Grid xs={12} sm={6} lg={4} key={post.id || index}>
                   <Card
                     sx={{
