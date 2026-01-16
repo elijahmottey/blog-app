@@ -1,22 +1,38 @@
-import BackendApi from "./BackendApi.ts";
 import { useLocation, Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
-
-
-export const ProtectedRoute = ({ element:Component}:{element:any}) => {
+export const ProtectedRoute = ({ element: Component }: { element: any }) => {
     const location = useLocation();
+    const { isAuthenticated, loading } = useAuth();
 
-    return BackendApi.isAuthenticated() ? (
+    if (loading) {
+        // You can return a loading spinner here
+        return <div>Loading...</div>;
+    }
+
+    return isAuthenticated ? (
         Component
     ) : (
-        <Navigate to="/login" replace state={{ from: location }} />
+        <Navigate to="/auth/login" replace state={{ from: location }} />
     );
 };
 
-export const AdminRoute = ({ element:Component}:{element:any}) => {
+export const AdminRoute = ({ element: Component }: { element: any }) => {
     const location = useLocation();
-    return BackendApi.isAdmin() ? (Component)
-        :(<Navigate to="/login" replace state={{ from: location }} />);
+    const { isAdmin, loading, isAuthenticated } = useAuth();
+
+    if (loading) {
+        // You can return a loading spinner here
+        return <div>Loading...</div>;
+    }
+
+    if (!isAuthenticated) {
+        return <Navigate to="/auth/login" replace state={{ from: location }} />;
+    }
+
+    return isAdmin ? (
+        Component
+    ) : (
+        <Navigate to="/unauthorized" replace /> // Or a dedicated "unauthorized" page
+    );
 }
-
-

@@ -94,20 +94,18 @@ export default function Home() {
 
                         <div className="flex flex-col sm:flex-row gap-3 justify-center">
                             <Link
-                                to="#latest"
+                                to="/blog"
                                 className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
                             >
                                 <Button endIcon={<ChevronRight className="w-4 h-4" />}>
                                     Explore Articles
                                 </Button>
-
-
                             </Link>
                             <Link
-                                to="/archive"
+                                to="/about"
                                 className="px-6 py-3 bg-white text-gray-700 font-semibold rounded-lg border border-gray-200 hover:border-amber-300 hover:shadow-md transition-all duration-300"
                             >
-                                View All Posts
+                                Learn About Us
                             </Link>
                         </div>
                     </div>

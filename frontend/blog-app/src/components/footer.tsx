@@ -1,4 +1,5 @@
 import { Github, Twitter, Linkedin, BookOpen } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
     return (
@@ -31,16 +32,30 @@ const Footer = () => {
                             Blog
                         </h3>
                         <ul className="space-y-3 text-sm">
-                            {["All Posts", "Categories", "Tags"].map((item) => (
-                                <li key={item}>
-                                    <a
-                                        href={`/${item.toLowerCase().replace(" ", "")}`}
-                                        className="text-gray-600 transition-all hover:text-amber-600 hover:translate-x-1 inline-block"
-                                    >
-                                        {item}
-                                    </a>
-                                </li>
-                            ))}
+                            <li>
+                                <Link
+                                    to="/blog"
+                                    className="text-gray-600 transition-all hover:text-amber-600 hover:translate-x-1 inline-block"
+                                >
+                                    All Posts
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/blog"
+                                    className="text-gray-600 transition-all hover:text-amber-600 hover:translate-x-1 inline-block"
+                                >
+                                    Categories
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/blog"
+                                    className="text-gray-600 transition-all hover:text-amber-600 hover:translate-x-1 inline-block"
+                                >
+                                    Tags
+                                </Link>
+                            </li>
                         </ul>
                     </div>
 
@@ -50,20 +65,38 @@ const Footer = () => {
                             Resources
                         </h3>
                         <ul className="space-y-3 text-sm">
-                            {["About", "Contact", "Privacy Policy"].map(
-                                (item) => (
-                                    <li key={item}>
-                                        <a
-                                            href={`/${item
-                                                .toLowerCase()
-                                                .replace(" ", "")}`}
-                                            className="text-gray-600 transition-all hover:text-amber-600 hover:translate-x-1 inline-block"
-                                        >
-                                            {item}
-                                        </a>
-                                    </li>
-                                )
-                            )}
+                            <li>
+                                <Link
+                                    to="/about"
+                                    className="text-gray-600 transition-all hover:text-amber-600 hover:translate-x-1 inline-block"
+                                >
+                                    About
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/contact"
+                                    className="text-gray-600 transition-all hover:text-amber-600 hover:translate-x-1 inline-block"
+                                >
+                                    Contact
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/privacy-policy"
+                                    className="text-gray-600 transition-all hover:text-amber-600 hover:translate-x-1 inline-block"
+                                >
+                                    Privacy Policy
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/terms-of-service"
+                                    className="text-gray-600 transition-all hover:text-amber-600 hover:translate-x-1 inline-block"
+                                >
+                                    Terms of Service
+                                </Link>
+                            </li>
                         </ul>
                     </div>
 

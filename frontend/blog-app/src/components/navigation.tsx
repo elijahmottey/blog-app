@@ -136,7 +136,7 @@ export default function Navbar() {
                                         Dashboard
                                     </Button>
                                 </Link>
-                                <Link to="/create">
+                                <Link to="dashboard/posts/create">
                                     <Button startIcon={<PenSquare />}>
                                         Write Post
                                     </Button>

@@ -13,7 +13,7 @@ import {
     Check,
 } from "lucide-react";
 import { Button, Box, TextField, InputAdornment, IconButton } from '@mui/material';
-import ApiService from "../../service/BackendApi.ts";
+import { useAuth } from "../../context/AuthContext.tsx";
 import { toast } from "sonner";
 
 
@@ -28,6 +28,7 @@ export const Login: React.FC = () => {
     const [completedSteps, setCompletedSteps] = useState<number[]>([]);
 
     const navigate = useNavigate();
+    const { login } = useAuth();
     const location = useLocation();
     const from = (location.state as any)?.from?.pathname || "/dashboard";
 
@@ -119,7 +120,7 @@ export const Login: React.FC = () => {
 
         try {
             setLoading(true);
-            const response = await ApiService.loginUser({ email, password });
+            const response = await login({ email, password });
             toast.success(response.message || "Welcome back! 🎉");
             navigate(from, { replace: true });
         } catch (err: any) {

@@ -6,7 +6,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   isUser: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (credentials: {email: string, password: string}) => Promise<any>;
   register: (data: { email: string; password: string; name: string }) => Promise<void>;
   logout: () => void;
   loading: boolean;
@@ -50,8 +50,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initializeAuth();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    await BackendApi.loginUser({ email, password });
+  const login = async (credentials: {email: string, password: string}) => {
+    const response = await BackendApi.loginUser(credentials);
     const userProfile = await BackendApi.getUserProfile();
     const userWithRoles: UserDto = {
       ...userProfile,
@@ -60,6 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updatedAt: '',
     };
     setUser(userWithRoles);
+    return response;
   };
 
   const register = async (data: { email: string; password: string; name: string }) => {
@@ -79,7 +80,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
-  const isAuthenticated = BackendApi.isAuthenticated();
   const isAdmin = BackendApi.isAdmin();
   const isUser = BackendApi.isUser();
 
@@ -87,7 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated,
+        isAuthenticated: !!user,
         isAdmin,
         isUser,
         login,

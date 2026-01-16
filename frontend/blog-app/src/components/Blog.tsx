@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Typography, Container, Grid, Card, CardContent, CardMedia, Chip, Button, TextField, InputAdornment, Pagination } from '@mui/material';
 import { CalendarDays, User, Search, Filter } from 'lucide-react';
-import BackendApi, { type PostDto, type ApiResponse, type PagedResponse } from '../service/BackendApi';
+import BackendApi, { type PostDto } from '../service/BackendApi';
 import { excerpt, formatDate, getAuthorName } from '../lib/utils';
 
 const Blog: React.FC = () => {
@@ -37,7 +37,7 @@ const Blog: React.FC = () => {
     post.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     setCurrentPage(value);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -130,7 +130,7 @@ const Blog: React.FC = () => {
           <>
             <Grid container spacing={4}>
               {filteredPosts.map((post, index) => (
-                <Grid item xs={12} sm={6} lg={4} key={post.id || index}>
+                <Grid xs={12} sm={6} lg={4} key={post.id || index}>
                   <Card
                     sx={{
                       height: '100%',
@@ -198,7 +198,7 @@ const Blog: React.FC = () => {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                           <User size={16} />
                           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                            {getAuthorName(post)}
+                            {post.users || 'Anonymous'}
                           </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography, Container, Paper, Divider } from '@mui/material';
-import { Shield, Lock, Eye, Database } from 'lucide-react';
+import { Shield, Lock, Database, User } from 'lucide-react';
 
 const PrivacyPolicy: React.FC = () => {
   return (

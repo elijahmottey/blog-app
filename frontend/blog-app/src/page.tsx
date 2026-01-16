@@ -14,6 +14,10 @@ import { PostsManagement } from "./components/dashboard/PostsManagement";
 import { PostDetail } from "./components/dashboard/PostDetail";
 import { EditPost } from "./components/dashboard/EditPost";
 import { ProfileManagement } from "./components/dashboard/ProfileManagement";
+import About from "./components/About";
+import Blog from "./components/Blog";
+import PrivacyPolicy from "./components/PrivacyPolicy";
+import TermsOfService from "./components/TermsOfService";
 
 
 export const PagesRoute = () => {
@@ -32,17 +36,16 @@ export const PagesRoute = () => {
                             <Home />
                             <Footer/>
                         </>} />
-                        {/*<Route path="/forget-password" element={<ForgetPassword/>}/>*/}
-                        {/*<Route path="/available-rooms" element={<AvailableRooms/>}/>*/}
-
-                        {/*<Route path="/roomPage" element={<><Navbar /><RoomPage roomSearchResult={[]} />*/}
-                        {/*    <Footer/></>} />*/}
-                        {/*<Route path="/rooms" element={<><Navbar /><AllRooms /> <Footer/> </>} />*/}
-                        {/*<Route path="/find-bookings" element={<><Navbar /><FindBookingPage /> <Footer/> </>} />*/}
                         <Route path="auth/login" element={<><Login /> <Footer/></>} />
                         <Route path="auth/signup" element={<><Signup /> <Footer/></>} />
-                        {/*<Route path="/terms" element={<Terms />} />*/}
-                        {/*<Route path="/privacy" element={<PrivacyPolicy />} />*/}
+
+                        {/* Public pages */}
+                        <Route path="/about" element={<><Navbar /><About /><Footer/></>} />
+                        <Route path="/blog" element={<><Navbar /><Blog /><Footer/></>} />
+                        <Route path="/privacy-policy" element={<><Navbar /><PrivacyPolicy /><Footer/></>} />
+                        <Route path="/terms-of-service" element={<><Navbar /><TermsOfService /><Footer/></>} />
+
+
 
                         {/* Dashboard routes */}
                         <Route path="/dashboard" element={<DashboardLayout />}>
@@ -61,35 +64,9 @@ export const PagesRoute = () => {
                             <Route path="admin/settings" element={<div>System Settings</div>} />
                         </Route>
 
-                        {/*/!* Protected (User) routes *!/*/}
-                        {/*<Route*/}
-                        {/*    path="/room-details-booking/:roomId"*/}
-                        {/*    element={<ProtectedRoute element={<><Navbar/><RoomBookingDetails /><Footer/></>} />}*/}
-                        {/*/>*/}
-                        {/*<Route*/}
-                        {/*    path="/profile"*/}
-                        {/*    element={<ProtectedRoute element={<><Navbar/><Profile /><Footer/></>} />}*/}
-                        {/*/>*/}
-                        {/*<Route*/}
-                        {/*    path="/edit-profile"*/}
-                        {/*    element={<ProtectedRoute element={<EditProfile />} />}*/}
-                        {/*/>*/}
-
-                        {/*/!* Admin route *!/*/}
-                        {/*<Route path="/admin" element={<AdminRoute element={<AdminPage />} />} />*/}
-                        {/*<Route path="/admin-manage-users"  element={<ProtectedRoute element={<><Navbar /><ManageUsers /> <Footer/></>}/>} />*/}
-                        {/*<Route path="/admin-manage-bookings"  element={<ProtectedRoute element={<><Navbar /><ManageBookings /><Footer/></>}/>} />*/}
-
-                        {/*<Route path="/manager" element={<ManagerRoute element={<><ManagerDashboard /></>} />} />*/}
-
-                        {/*/!*<Route path="/admin"  element={<AdminPage />}  />*!/*/}
-
-                        {/*/!* Catch-all for 404s *!/*/}
-                        {/*<Route path="*" element={<NotFound/>} />*/}
                     </Routes>
                 </main>
 
-                {/* Footer */}
             </div>
         </BrowserRouter>
     );

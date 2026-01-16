@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography, Container, Grid, Paper, Avatar, Chip } from '@mui/material';
-import { Code, Users, BookOpen, Award, Target, Heart } from 'lucide-react';
+import { Code, Users, BookOpen, Award } from 'lucide-react';
 
 const About: React.FC = () => {
   const team = [
@@ -90,7 +90,7 @@ const About: React.FC = () => {
         {/* Values Grid */}
         <Grid container spacing={4} sx={{ mb: 8 }}>
           {values.map((value, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
+            <Grid xs={12} sm={6} md={3} key={index}>
               <Paper
                 sx={{
                   p: 3,
@@ -127,7 +127,7 @@ const About: React.FC = () => {
 
         <Grid container spacing={4}>
           {team.map((member, index) => (
-            <Grid item xs={12} md={4} key={index}>
+            <Grid xs={12} md={4} key={index}>
               <Paper sx={{ p: 3, textAlign: 'center', height: '100%' }}>
                 <Avatar
                   sx={{
@@ -173,7 +173,7 @@ const About: React.FC = () => {
             Our Impact
           </Typography>
           <Grid container spacing={4}>
-            <Grid item xs={12} sm={4}>
+            <Grid xs={12} sm={4}>
               <Paper sx={{ p: 3 }}>
                 <Typography variant="h3" sx={{ color: 'primary.main', fontWeight: 'bold', mb: 1 }}>
                   10K+
@@ -181,7 +181,7 @@ const About: React.FC = () => {
                 <Typography variant="body1">Active Developers</Typography>
               </Paper>
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid xs={12} sm={4}>
               <Paper sx={{ p: 3 }}>
                 <Typography variant="h3" sx={{ color: 'primary.main', fontWeight: 'bold', mb: 1 }}>
                   500+
@@ -189,7 +189,7 @@ const About: React.FC = () => {
                 <Typography variant="body1">Published Articles</Typography>
               </Paper>
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid xs={12} sm={4}>
               <Paper sx={{ p: 3 }}>
                 <Typography variant="h3" sx={{ color: 'primary.main', fontWeight: 'bold', mb: 1 }}>
                   50K+

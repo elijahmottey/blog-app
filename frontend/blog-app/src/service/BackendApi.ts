@@ -101,20 +101,20 @@ const apiClient = axios.create({
 export default class BackendApi {
     // ---- TOKEN HANDLING ----
     static getAccessToken() {
-        return localStorage.getItem("accessToken");
+        return localStorage.getItem("accessToken1");
     }
 
     static getRefreshToken() {
-        return localStorage.getItem("refreshToken");
+        return localStorage.getItem("refreshToken1");
     }
 
     static getAccessTokenExpiration(): Date | null {
-        const expirationStr = localStorage.getItem("accessTokenExpiration");
+        const expirationStr = localStorage.getItem("accessTokenExpiration1");
         return expirationStr ? new Date(expirationStr) : null;
     }
 
     static getRefreshTokenExpiration(): Date | null {
-        const expirationStr = localStorage.getItem("refreshTokenExpiration");
+        const expirationStr = localStorage.getItem("refreshTokenExpiration1");
         return expirationStr ? new Date(expirationStr) : null;
     }
 
@@ -124,18 +124,18 @@ export default class BackendApi {
         accessTokenExpiration: string,
         refreshTokenExpiration: string
     ) {
-        localStorage.setItem("accessToken", accessToken);
-        localStorage.setItem("refreshToken", refreshToken);
-        localStorage.setItem("accessTokenExpiration", accessTokenExpiration);
-        localStorage.setItem("refreshTokenExpiration", refreshTokenExpiration);
+        localStorage.setItem("accessToken1", accessToken);
+        localStorage.setItem("refreshToken1", refreshToken);
+        localStorage.setItem("accessTokenExpiration1", accessTokenExpiration);
+        localStorage.setItem("refreshTokenExpiration1", refreshTokenExpiration);
     }
 
     static clearTokens() {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("accessTokenExpiration");
-        localStorage.removeItem("refreshTokenExpiration");
-        localStorage.removeItem("roles");
+        localStorage.removeItem("accessToken1");
+        localStorage.removeItem("refreshToken1");
+        localStorage.removeItem("accessTokenExpiration1");
+        localStorage.removeItem("refreshTokenExpiration1");
+        localStorage.removeItem("roles1");
     }
 
     // ---- TOKEN VALIDATION ----
@@ -223,7 +223,7 @@ export default class BackendApi {
             response.accessTokenExpiration,
             response.refreshTokenExpiration
         );
-        localStorage.setItem("roles", JSON.stringify(response.role));
+        localStorage.setItem("roles1", JSON.stringify(response.role));
         return response;
     }
 
@@ -235,7 +235,7 @@ export default class BackendApi {
             response.accessTokenExpiration,
             response.refreshTokenExpiration
         );
-        localStorage.setItem("roles", JSON.stringify(response.role));
+        localStorage.setItem("roles1", JSON.stringify(response.role));
         return response;
     }
 
@@ -247,7 +247,7 @@ export default class BackendApi {
             response.accessTokenExpiration,
             response.refreshTokenExpiration
         );
-        localStorage.setItem("roles", JSON.stringify(response.role));
+        localStorage.setItem("roles1", JSON.stringify(response.role));
         return response;
     }
 
@@ -282,7 +282,7 @@ export default class BackendApi {
 
     // ---- ROLE HELPERS ----
     static getRoles(): Roles[] {
-        const roles = localStorage.getItem("roles");
+        const roles = localStorage.getItem("roles1");
         return roles ? JSON.parse(roles) : [];
     }
 
