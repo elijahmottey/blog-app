@@ -192,6 +192,7 @@ export const PostDetail: React.FC = () => {
 
   const postAuthorName =
       postData.users && typeof postData.users === 'object'
+          //@ts-ignore
           ? postData.users.author
           : 'Anonymous';
 

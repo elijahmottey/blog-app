@@ -17,7 +17,7 @@ const Footer = () => {
                                 <BookOpen className="h-5 w-5 text-amber-600" />
                             </div>
                             <span className="text-xl font-bold tracking-tight text-gray-900">
-                                DevBlog
+                                LIVBlog
                             </span>
                         </div>
                         <p className="text-sm leading-relaxed text-gray-600">
@@ -124,7 +124,7 @@ const Footer = () => {
                 {/* Bottom section */}
                 <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-6 text-center md:flex-row">
                     <p className="text-sm text-gray-500">
-                        © {new Date().getFullYear()} DevBlog. All rights reserved.
+                        © {new Date().getFullYear()} LIVBlog. All rights reserved.
                     </p>
 
                     <p className="text-sm text-gray-500">
