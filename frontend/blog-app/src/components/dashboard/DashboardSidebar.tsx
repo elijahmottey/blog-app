@@ -172,7 +172,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
         className={`${
           isMobile
             ? 'fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out'
-            : 'w-64 bg-white shadow-lg flex-shrink-0'
+            : 'lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 w-64 bg-white shadow-lg'
         } ${
           isMobile
             ? (isOpen ? 'translate-x-0' : '-translate-x-full')

@@ -10,13 +10,15 @@ import {
   Trash2,
   Send,
   ThumbsUp,
-  User
+  User,
+  Download
 } from 'lucide-react';
 import { Button, IconButton, Typography, Box, Paper, TextField, Avatar } from '@mui/material';
 import BackendApi, { type CommentDto } from '../../service/BackendApi';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { downloadPost } from '../../lib/download';
 
 export const PostDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -258,10 +260,11 @@ export const PostDetail: React.FC = () => {
               </Button>
 
               <Button
-                startIcon={<Share2 />}
+                onClick={() => downloadPost(postData)}
+                startIcon={<Download />}
                 sx={{ color: 'text.secondary', '&:hover': { color: 'success.main', bgcolor: 'success.light' } }}
               >
-                Share
+                Download
               </Button>
             </Box>
           </Box>

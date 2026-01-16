@@ -23,6 +23,7 @@ import TermsOfService from "./components/TermsOfService";
 
 export const PagesRoute = () => {
 
+    // @ts-ignore
     return (
         <BrowserRouter>
             <div >

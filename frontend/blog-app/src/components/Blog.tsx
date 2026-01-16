@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Typography, Container, Grid, Card, CardContent, CardMedia, Chip, Button, TextField, InputAdornment, Pagination } from '@mui/material';
-import { CalendarDays, User, Search, Filter } from 'lucide-react';
+import { Box, Typography, Container, Grid, Card, CardContent, CardMedia, Chip, Button, TextField, InputAdornment, Pagination, Stack } from '@mui/material';
+import { CalendarDays, User, Search, Filter, Download } from 'lucide-react';
 import BackendApi, { type PostDto } from '../service/BackendApi';
 import { excerpt, formatDate, getAuthorName } from '../lib/utils';
+import { downloadPost } from '../lib/download';
 
 const Blog: React.FC = () => {
   const [posts, setPosts] = useState<PostDto[]>([]);
@@ -201,11 +202,16 @@ const Blog: React.FC = () => {
                             {post.users || 'Anonymous'}
                           </Typography>
                         </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <CalendarDays size={16} />
-                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                            {formatDate(post.createdAt)}
-                          </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'space-between' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <CalendarDays size={16} />
+                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                              {formatDate(post.createdAt)}
+                            </Typography>
+                          </Box>
+                          <Button size="small" startIcon={<Download />} onClick={() => downloadPost(post)}>
+                            Download
+                          </Button>
                         </Box>
                       </Box>
                     </CardContent>

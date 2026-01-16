@@ -385,7 +385,7 @@ export default class BackendApi {
     }
 
     static async getAllPostComment(page:number=0,size:number=10) {
-        return this.get<ApiResponse<PagedResponse<CommentDto>>>(`/comment/post/list?page=${page}&size=${size}`);
+        return this.get<ApiResponse<PagedResponse<CommentDto>>>(`/comment/post?page=${page}&size=${size}`);
     }
 
     static async createPostComment(CommentData: CommentDto, postId:number) {
