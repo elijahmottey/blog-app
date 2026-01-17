@@ -40,17 +40,8 @@ export default function Home() {
 
     const allPosts = posts.length > 0 ? posts : [];
 
-    // Unsplash image placeholders for variety
-    const imageUrls = [
-        "https://images.unsplash.com/photo-1499750310107-5fef28a66643?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-    ];
-
-    const getImageUrl = (index: number) => imageUrls[index % imageUrls.length];
+    // Unified blog post image
+    const unifiedImageUrl = '/blog-unified-image.svg';
 
     return (
         <main className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-amber-50/20">
@@ -147,19 +138,20 @@ export default function Home() {
                                                 <div className="text-xs text-gray-500">Author</div>
                                             </div>
                                         </div>
-                                        <Link
-                                            to={`/dashboard/posts/:id`}
-                                            className="group inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-primary-foreground font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
+                                        <Button
+                                            component={Link}
+                                            to={`/dashboard/posts/${featuredPost.id}`}
+                                            variant="contained"
+                                            endIcon={<ArrowRight />}
                                         >
                                             Read Full Article
-                                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                        </Link>
+                                        </Button>
                                     </div>
                                 </div>
                                 <div className="md:w-1/3 relative min-h-[300px] md:min-h-full">
                                     <div className="absolute inset-0 bg-gradient-to-t from-gray-900/40 via-gray-900/10 to-transparent z-10"></div>
                                     <img
-                                        src={getImageUrl(0)}
+                                        src={unifiedImageUrl}
                                         alt={featuredPost.title}
                                         className="w-full h-full object-cover absolute inset-0"
                                     />
@@ -239,55 +231,53 @@ export default function Home() {
                     {!loading && !error && allPosts.length > 0 && (
                         <>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                                {(isMobile && featuredPost ? [featuredPost, ...gridPosts] : gridPosts).map((post, index) => (
-                                    <article
+                                {(isMobile && featuredPost ? [featuredPost, ...gridPosts] : gridPosts).map((post) => (
+                                    <Link
                                         key={post.id}
-                                        className="group bg-background rounded-xl sm:rounded-2xl border border-gray-200 overflow-hidden hover:border-amber-300 hover:shadow-xl transition-all duration-500 hover:-translate-y-2"
+                                        to={`/dashboard/posts/${post.id}`}
+                                        className="group block"
                                     >
-                                        <div className="relative overflow-hidden h-48 sm:h-56 bg-gradient-to-br from-gray-100 to-gray-200">
-                                            <img
-                                                src={getImageUrl(index + 1)}
-                                                alt={post.title}
-                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                            />
-                                            <div className="absolute top-4 right-4 bg-background/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm">
-                                                <time className="flex items-center gap-1 text-xs font-medium text-gray-700">
-                                                    <CalendarDays className="w-3 h-3" />
-                                                    {formatDate(post.createdAt)}
-                                                </time>
+                                        <article
+                                            className="bg-background rounded-xl sm:rounded-2xl border border-gray-200 overflow-hidden hover:border-amber-300 hover:shadow-xl transition-all duration-500 hover:-translate-y-2 cursor-pointer"
+                                        >
+                                            <div className="relative overflow-hidden h-48 sm:h-56 bg-gradient-to-br from-gray-100 to-gray-200">
+                                                <img
+                                                    src={unifiedImageUrl}
+                                                    alt={post.title}
+                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                                />
+                                                <div className="absolute top-4 right-4 bg-background/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm">
+                                                    <time className="flex items-center gap-1 text-xs font-medium text-gray-700">
+                                                        <CalendarDays className="w-3 h-3" />
+                                                        {formatDate(post.createdAt)}
+                                                    </time>
+                                                </div>
+                                                <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/30 to-transparent"></div>
                                             </div>
-                                            <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/30 to-transparent"></div>
-                                        </div>
-                                        <div className="p-5 sm:p-6">
-                                            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 group-hover:text-amber-700 transition-colors line-clamp-2">
-                                                {post.title}
-                                            </h3>
-                                            <p className="text-gray-600 mb-4 leading-relaxed text-sm sm:text-base line-clamp-3">
-                                                {excerpt(post.content, isMobile ? 100 : 120)}
-                                            </p>
-                                            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-8 h-8 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center">
-                                                        <User className="w-4 h-4 text-primary-foreground" />
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-semibold text-gray-800 text-sm">
-                                                            {/*@ts-ignore*/}
-                                                            {getAuthorName(post?.user)}
+                                            <div className="p-5 sm:p-6">
+                                                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 group-hover:text-amber-700 transition-colors line-clamp-2">
+                                                    {post.title}
+                                                </h3>
+                                                <p className="text-gray-600 mb-4 leading-relaxed text-sm sm:text-base line-clamp-3">
+                                                    {excerpt(post.content, isMobile ? 100 : 120)}
+                                                </p>
+                                                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-8 h-8 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center">
+                                                            <User className="w-4 h-4 text-primary-foreground" />
                                                         </div>
-                                                        <div className="text-xs text-gray-500">Author</div>
+                                                        <div>
+                                                            <div className="font-semibold text-gray-800 text-sm">
+                                                                {/*@ts-ignore*/}
+                                                                {getAuthorName(post?.user)}
+                                                            </div>
+                                                            <div className="text-xs text-gray-500">Author</div>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <Link
-                                                    to={`/dashboard/posts/:id`}
-                                                    className="inline-flex items-center gap-1 text-amber-600 hover:text-amber-700 font-semibold group/read text-sm sm:text-base"
-                                                >
-                                                    Read
-                                                    <ArrowRight className="w-4 h-4 group-hover/read:translate-x-1 transition-transform" />
-                                                </Link>
                                             </div>
-                                        </div>
-                                    </article>
+                                        </article>
+                                    </Link>
                                 ))}
                             </div>
 
@@ -303,13 +293,14 @@ export default function Home() {
                                                 Dive deeper into our most insightful articles and tutorials
                                             </p>
                                         </div>
-                                        <Link
-                                            to={`/post/${featuredPost.id}`}
-                                            className="hidden sm:inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-primary-foreground font-semibold rounded-lg hover:shadow-lg transition-all duration-300"
+                                        <Button
+                                            component={Link}
+                                            to={`/dashboard/posts/${featuredPost.id}`}
+                                            variant="contained"
+                                            endIcon={<ArrowRight />}
                                         >
                                             Discover More
-                                            <ArrowRight className="w-4 h-4" />
-                                        </Link>
+                                        </Button>
                                     </div>
                                 </div>
                             )}
@@ -339,7 +330,7 @@ export default function Home() {
                                 />
                                 <Button
                                     type="submit"
-                                    className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-primary-foreground font-semibold rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 text-sm sm:text-base"
+                                    variant="contained"
                                 >
                                     Subscribe Now
                                 </Button>

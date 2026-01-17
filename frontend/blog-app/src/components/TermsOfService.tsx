@@ -20,7 +20,7 @@ const TermsOfService: React.FC = () => {
           <Box sx={{ '& h2': { mt: 4, mb: 2, fontWeight: 'bold' }, '& h3': { mt: 3, mb: 1.5, fontWeight: 600 }, '& p': { mb: 2, lineHeight: 1.6 } }}>
 
             <Typography variant="body1" sx={{ mb: 4, fontStyle: 'italic' }}>
-              Welcome to DevBlog. By accessing or using our platform, you agree to be bound by these Terms of Service.
+              Welcome to LIV Blog. By accessing or using our platform, you agree to be bound by these Terms of Service.
               If you disagree with any part of these terms, please do not use our service.
             </Typography>
 
@@ -29,7 +29,7 @@ const TermsOfService: React.FC = () => {
             </Typography>
 
             <Typography variant="body1" sx={{ mb: 4 }}>
-              By accessing and using DevBlog, you accept and agree to be bound by the terms and provision of this agreement.
+              By accessing and using LIV Blog, you accept and agree to be bound by the terms and provision of this agreement.
               These Terms apply to all users of the site, including without limitation users who are browsers, vendors,
               customers, merchants, and/or contributors of content.
             </Typography>

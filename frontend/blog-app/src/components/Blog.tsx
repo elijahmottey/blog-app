@@ -16,6 +16,9 @@ const Blog: React.FC = () => {
   const postsPerPage = 9;
   const navigate = useNavigate();
 
+  // Unified blog post image
+  const unifiedImageUrl = '/blog-unified-image.svg';
+
   useEffect(() => {
     fetchPosts();
   }, [currentPage]);
@@ -157,8 +160,8 @@ const Blog: React.FC = () => {
                     <CardMedia
                       component="img"
                       height="200"
-                      image={`https://images.unsplash.com/photo-${1500000000000 + (index % 10)}?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80`}
-                      alt={post.title}
+                      image={unifiedImageUrl}
+                      alt="Blog post illustration"
                       sx={{ objectFit: 'cover' }}
                     />
                     <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -175,7 +178,7 @@ const Blog: React.FC = () => {
                       <Typography
                         variant="h6"
                         component={Link}
-                        to={`/posts/${post.id}`}
+                        to={`/dashboard/posts/${post.id}`}
                         sx={{
                           textDecoration: 'none',
                           color: 'text.primary',
