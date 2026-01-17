@@ -43,7 +43,11 @@ jwt:
 
 frontend:
   url: ${FRONTEND}
-
+app:
+  admin:
+    name: ${ADMIN_NAME}
+    email: ${ADMIN_EMAIL}
+    password: ${ADMIN_PASSWORD}
 
 logging:
   level:
