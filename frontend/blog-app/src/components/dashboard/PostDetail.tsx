@@ -10,10 +10,10 @@ import {
   Send,
   ThumbsUp,
   User,
-  Download
+  Download,
+  MoreHorizontal
 } from 'lucide-react';
 import { Button, IconButton, Typography, Box, Paper, TextField, Avatar, Menu, MenuItem } from '@mui/material';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import BackendApi, { type CommentDto } from '../../service/BackendApi';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
@@ -210,13 +210,9 @@ export const PostDetail: React.FC = () => {
   const postData = post.data;
 
 
-  // @ts-ignore
-  const postAuthorName =
-      postData.users && typeof postData.users === 'object'
-          ? postData.users.author
-          : 'Anonymous';
+  const postAuthorName = postData.users || 'Anonymous';
 
-  const isAuthor = user && postData && postData.users?.id === user.id;
+  const isAuthor = user && postData && postData.users === user.name;
 
   // 🔹 SAFELY ENSURE POST CONTENT IS A STRING
   const safePostContent =
@@ -251,7 +247,7 @@ export const PostDetail: React.FC = () => {
                     sx={{ color: 'text.secondary' }}
                     title="More options"
                 >
-                  <MoreVertIcon />
+                  <MoreHorizontal />
                 </IconButton>
                 <Menu
                     anchorEl={menuAnchor}

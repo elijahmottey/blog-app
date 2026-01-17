@@ -498,7 +498,7 @@ export const Signup = () => {
                             type="button"
                             onClick={handleBack}
                             disabled={currentStep === 0}
-                            variant="outlined"
+                            variant="contained"
                             startIcon={<ArrowLeft />}
                             fullWidth
                         >

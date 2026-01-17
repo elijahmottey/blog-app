@@ -10,7 +10,6 @@ import {
     PenSquare,
     Home,
     BookOpen,
-    Tag,
     Users,
     Settings
 } from "lucide-react";
