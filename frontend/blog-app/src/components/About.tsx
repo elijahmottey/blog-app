@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Container, Grid, Paper, Avatar, Chip } from '@mui/material';
+import { Box, Typography, Container, Paper, Avatar, Chip } from '@mui/material';
 import { Code, Users, BookOpen, Award } from 'lucide-react';
 
 const About: React.FC = () => {
@@ -88,9 +88,16 @@ const About: React.FC = () => {
         </Box>
 
         {/* Values Grid */}
-        <Grid container spacing={4} sx={{ mb: 8 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, mb: 8 }}>
           {values.map((value, index) => (
-            <Grid xs={12} sm={6} md={3} key={index}>
+            <Box
+              key={index}
+              sx={{
+                flex: '1 1 300px',
+                maxWidth: { xs: '100%', sm: 'calc(50% - 16px)', md: 'calc(33.333% - 16px)' },
+                minWidth: '250px'
+              }}
+            >
               <Paper
                 sx={{
                   p: 3,
@@ -110,9 +117,9 @@ const About: React.FC = () => {
                   {value.description}
                 </Typography>
               </Paper>
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
 
         {/* Team Section */}
         <Box sx={{ textAlign: 'center', mb: 6 }}>
@@ -125,9 +132,16 @@ const About: React.FC = () => {
           </Typography>
         </Box>
 
-        <Grid container spacing={4}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
           {team.map((member, index) => (
-            <Grid xs={12} md={4} key={index}>
+            <Box
+              key={index}
+              sx={{
+                flex: '1 1 300px',
+                maxWidth: { xs: '100%', md: 'calc(33.333% - 16px)' },
+                minWidth: '250px'
+              }}
+            >
               <Paper sx={{ p: 3, textAlign: 'center', height: '100%' }}>
                 <Avatar
                   sx={{
@@ -163,41 +177,41 @@ const About: React.FC = () => {
                   ))}
                 </Box>
               </Paper>
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
 
         {/* Stats Section */}
         <Box sx={{ mt: 8, textAlign: 'center' }}>
           <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold' }}>
             Our Impact
           </Typography>
-          <Grid container spacing={4}>
-            <Grid xs={12} sm={4}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'center' }}>
+            <Box sx={{ flex: '1 1 200px', maxWidth: { xs: '100%', sm: 'calc(33.333% - 16px)' }, minWidth: '200px' }}>
               <Paper sx={{ p: 3 }}>
                 <Typography variant="h3" sx={{ color: 'primary.main', fontWeight: 'bold', mb: 1 }}>
                   10K+
                 </Typography>
                 <Typography variant="body1">Active Developers</Typography>
               </Paper>
-            </Grid>
-            <Grid xs={12} sm={4}>
+            </Box>
+            <Box sx={{ flex: '1 1 200px', maxWidth: { xs: '100%', sm: 'calc(33.333% - 16px)' }, minWidth: '200px' }}>
               <Paper sx={{ p: 3 }}>
                 <Typography variant="h3" sx={{ color: 'primary.main', fontWeight: 'bold', mb: 1 }}>
                   500+
                 </Typography>
                 <Typography variant="body1">Published Articles</Typography>
               </Paper>
-            </Grid>
-            <Grid xs={12} sm={4}>
+            </Box>
+            <Box sx={{ flex: '1 1 200px', maxWidth: { xs: '100%', sm: 'calc(33.333% - 16px)' }, minWidth: '200px' }}>
               <Paper sx={{ p: 3 }}>
                 <Typography variant="h3" sx={{ color: 'primary.main', fontWeight: 'bold', mb: 1 }}>
                   50K+
                 </Typography>
                 <Typography variant="body1">Monthly Readers</Typography>
               </Paper>
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </Box>
       </Container>
     </Box>

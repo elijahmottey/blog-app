@@ -14,6 +14,8 @@ import {
     Tablet,
 } from "lucide-react";
 import { Button } from '@mui/material';
+import BackendApi, { type UserRegistration } from '../../service/BackendApi';
+import { toast } from 'sonner';
 
 // Type definitions
 interface PasswordStrength {
@@ -130,7 +132,7 @@ export const Signup = () => {
 
         // Handle text inputs
         if (name === 'name' || name === 'email' || name === 'password') {
-            setRegistrationData((prev) => ({ ...prev, [name]: value }));
+            setRegistrationData((prev: UserRegistration) => ({ ...prev, [name]: value }));
         }
 
         if (name === "password") {
@@ -230,7 +232,7 @@ export const Signup = () => {
             const payload: UserRegistration = {
                 ...registrationData
             };
-            const response = await ApiService.registerUser(payload);
+            const response = await BackendApi.registerUser(payload);
             toast.success(response.message || "Account created successfully! 🎉");
             setTimeout(() => navigate("/auth/login"), 1500);
         } catch (err: any) {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Box, Typography, Container, Grid, Card, CardContent, CardMedia, Chip, Button, TextField, InputAdornment, Pagination } from '@mui/material';
+import { Box, Typography, Container, Card, CardContent, CardMedia, Chip, Button, TextField, InputAdornment, Pagination } from '@mui/material';
 import { CalendarDays, User, Search, Filter, Download } from 'lucide-react';
 import BackendApi, { type PostDto } from '../service/BackendApi';
 import { excerpt, formatDate } from '../lib/utils';
@@ -130,10 +130,16 @@ const Blog: React.FC = () => {
           </Box>
         ) : (
           <>
-            <Grid container spacing={4}>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
               {filteredPosts.map((post, index) => (
-                //   @ts-ignore
-                <Grid xs={12} sm={6} lg={4} key={post.id || index}>
+                <Box
+                  key={post.id || index}
+                  sx={{
+                    flex: '1 1 300px',
+                    maxWidth: { xs: '100%', sm: 'calc(50% - 16px)', lg: 'calc(33.333% - 16px)' },
+                    minWidth: '300px'
+                  }}
+                >
                   <Card
                     sx={{
                       height: '100%',
@@ -225,9 +231,9 @@ const Blog: React.FC = () => {
                       </Box>
                     </CardContent>
                   </Card>
-                </Grid>
+                </Box>
               ))}
-            </Grid>
+            </Box>
 
             {/* Pagination */}
             {totalPages > 1 && (

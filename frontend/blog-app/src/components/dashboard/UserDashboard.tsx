@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FileText, MessageSquare, Heart, TrendingUp, Plus, Clock } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { FileText, MessageSquare, Heart, TrendingUp, Plus, Clock, Edit, Trash2, Eye } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import BackendApi from '../../service/BackendApi';
 import { AIChatWidget } from './AIChatWidget';
 import { AIChat } from './AIChat';
+import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton } from '@mui/material';
+import { toast } from 'sonner';
 
 export const UserDashboard: React.FC = () => {
   const { user, userProfile } = useAuth();
   const [isChatExpanded, setIsChatExpanded] = useState(false);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // Fetch all posts (for broader stats); your own posts are also in userProfile.posts
   const { data: postsData } = useQuery({
@@ -22,6 +26,19 @@ export const UserDashboard: React.FC = () => {
 
   const posts = postsData?.data?.content || [];
   const comments = userComments;
+  const userPosts = userProfile?.posts || [];
+
+  // Delete post mutation
+  const deleteMutation = useMutation({
+    mutationFn: (postId: number) => BackendApi.deletePostBlog(postId),
+    onSuccess: () => {
+      toast.success('Post deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+    },
+    onError: () => {
+      toast.error('Failed to delete post');
+    },
+  });
 
   // Calculate stats
   const totalPosts = posts.length;
@@ -144,7 +161,7 @@ export const UserDashboard: React.FC = () => {
         <div className="space-y-4">
           {recentActivity.map((activity, index) => (
             <div key={index} className="flex items-center space-x-3">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 {activity.type === 'post' && <FileText className="h-5 w-5 text-blue-600" />}
                 {activity.type === 'comment' && <MessageSquare className="h-5 w-5 text-green-600" />}
                 {activity.type === 'like' && <Heart className="h-5 w-5 text-red-600" />}
@@ -185,6 +202,67 @@ export const UserDashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* My Posts */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">My Posts</h2>
+          <Button
+            component={Link}
+            to="/dashboard/posts/create"
+            variant="contained"
+            startIcon={<Plus />}
+          >
+            Create New Post
+          </Button>
+        </div>
+        {userPosts.length === 0 ? (
+          <p className="text-gray-500">You haven't created any posts yet.</p>
+        ) : (
+          <TableContainer component={Paper} elevation={0}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Title</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {userPosts.map((post) => (
+                  <TableRow key={post.id}>
+                    <TableCell>{post.title}</TableCell>
+                    <TableCell>
+                      <IconButton
+                        onClick={() => navigate(`/dashboard/posts/${post.id}`)}
+                        title="View Post"
+                      >
+                        <Eye />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => navigate(`/dashboard/posts/${post.id}/edit`)}
+                        title="Edit Post"
+                      >
+                        <Edit />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => {
+                          if (window.confirm('Are you sure you want to delete this post?')) {
+                            deleteMutation.mutate(post.id);
+                          }
+                        }}
+                        title="Delete Post"
+                        disabled={deleteMutation.isPending}
+                      >
+                        <Trash2 />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </div>
 
       {/* AI Chat Widget */}
       {!isChatExpanded && (
