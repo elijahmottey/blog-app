@@ -18,6 +18,7 @@ import BackendApi, { type CommentDto } from '../../service/BackendApi';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { motion } from 'framer-motion';
 import { downloadPost, downloadPostPdf } from '../../lib/download';
 
 export const PostDetail: React.FC = () => {
@@ -242,13 +243,19 @@ export const PostDetail: React.FC = () => {
 
           {user && (
               <Box sx={{ display: 'flex', gap: 1 }}>
-                <IconButton
-                    onClick={handleMenuOpen}
-                    sx={{ color: 'text.secondary' }}
-                    title="More options"
+                <motion.div
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
-                  <MoreHorizontal />
-                </IconButton>
+                  <IconButton
+                      onClick={handleMenuOpen}
+                      sx={{ color: 'text.secondary' }}
+                      title="More options"
+                  >
+                    <MoreHorizontal />
+                  </IconButton>
+                </motion.div>
                 <Menu
                     anchorEl={menuAnchor}
                     open={Boolean(menuAnchor)}

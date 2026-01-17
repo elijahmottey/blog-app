@@ -16,6 +16,7 @@ import {
 
 import {Button, IconButton} from "@mui/material";
 import BackendApi from "../service/BackendApi.ts";
+import { motion } from "framer-motion";
 
 
 export default function Navbar() {
@@ -102,12 +103,18 @@ export default function Navbar() {
                     <div className="flex items-center space-x-4">
                         {/* Search */}
                         <div className="relative">
-                        <IconButton
-                            onClick={() => setIsSearchOpen(!isSearchOpen)}
-                            aria-label="Search"
+                        <motion.div
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 17 }}
                         >
-                            <Search />
-                        </IconButton>
+                            <IconButton
+                                onClick={() => setIsSearchOpen(!isSearchOpen)}
+                                aria-label="Search"
+                            >
+                                <Search />
+                            </IconButton>
+                        </motion.div>
                             {isSearchOpen && (
                                 <div className="absolute right-0 top-12 w-96 bg-white rounded-lg shadow-lg border p-4">
                                     <div className="relative">
@@ -139,9 +146,15 @@ export default function Navbar() {
                                         Write Post
                                     </Button>
                                 </Link>
-                                <IconButton>
-                                    <User />
-                                </IconButton>
+                                <motion.div
+                                    whileHover={{ scale: 1.1, rotate: 10 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                                >
+                                    <IconButton>
+                                        <User />
+                                    </IconButton>
+                                </motion.div>
                             </div>
                         ) : (
                             <div className="flex items-center space-x-3">

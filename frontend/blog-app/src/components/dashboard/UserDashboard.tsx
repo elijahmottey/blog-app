@@ -8,6 +8,7 @@ import { AIChatWidget } from './AIChatWidget';
 import { AIChat } from './AIChat';
 import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton } from '@mui/material';
 import { toast } from 'sonner';
+import { motion } from 'framer-motion';
 
 export const UserDashboard: React.FC = () => {
   const { user, userProfile } = useAuth();
@@ -232,29 +233,47 @@ export const UserDashboard: React.FC = () => {
                   <TableRow key={post.id}>
                     <TableCell>{post.title}</TableCell>
                     <TableCell>
-                      <IconButton
-                        onClick={() => navigate(`/dashboard/posts/${post.id}`)}
-                        title="View Post"
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
                       >
-                        <Eye />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => navigate(`/dashboard/posts/${post.id}/edit`)}
-                        title="Edit Post"
+                        <IconButton
+                          onClick={() => navigate(`/dashboard/posts/${post.id}`)}
+                          title="View Post"
+                        >
+                          <Eye />
+                        </IconButton>
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
                       >
-                        <Edit />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => {
-                          if (window.confirm('Are you sure you want to delete this post?')) {
-                            deleteMutation.mutate(post.id);
-                          }
-                        }}
-                        title="Delete Post"
-                        disabled={deleteMutation.isPending}
+                        <IconButton
+                          onClick={() => navigate(`/dashboard/posts/${post.id}/edit`)}
+                          title="Edit Post"
+                        >
+                          <Edit />
+                        </IconButton>
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
                       >
-                        <Trash2 />
-                      </IconButton>
+                        <IconButton
+                          onClick={() => {
+                            if (window.confirm('Are you sure you want to delete this post?')) {
+                              deleteMutation.mutate(post.id);
+                            }
+                          }}
+                          title="Delete Post"
+                          disabled={deleteMutation.isPending}
+                        >
+                          <Trash2 />
+                        </IconButton>
+                      </motion.div>
                     </TableCell>
                   </TableRow>
                 ))}

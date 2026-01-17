@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Edit, Trash2, Eye, Plus, Search, Filter } from 'lucide-react';
-import { Button, TextField, InputAdornment, Box, Typography, Paper, IconButton, Chip } from '@mui/material';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Eye, Plus, Search, Filter } from 'lucide-react';
+import { Button, TextField, InputAdornment, Box, Typography, Paper, IconButton, Chip, Pagination } from '@mui/material';
 import BackendApi, { type PostDto } from '../../service/BackendApi';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import useLocalStorage from '../../hooks/useLocalStorage';
+import { motion } from 'framer-motion';
 
 export const PostsManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -74,22 +75,6 @@ export const PostsManagement: React.FC = () => {
     staleTime: CACHE_DURATION,
   });
 
-  // Delete post mutation
-  const deleteMutation = useMutation({
-    mutationFn: (postId: number) => BackendApi.deletePostBlog(postId),
-    onSuccess: () => {
-      toast.success('Post deleted successfully');
-      // Invalidate all posts queries
-      queryClient.invalidateQueries({ queryKey: ['user-posts-management'] });
-      // Clear cache when post is deleted
-      setCachedPosts(null);
-      setLastFetchTime(0);
-    },
-    onError: () => {
-      toast.error('Failed to delete post');
-    },
-  });
-
   // Function to manually refresh posts
   const refreshPosts = () => {
     queryClient.invalidateQueries({ queryKey: ['user-posts-management'] });
@@ -106,12 +91,6 @@ export const PostsManagement: React.FC = () => {
       post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       post.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const handleDelete = (postId: number) => {
-    if (window.confirm('Are you sure you want to delete this post?')) {
-      deleteMutation.mutate(postId);
-    }
-  };
 
   const truncateContent = (content: string, maxLength: number = 150) => {
     if (!content) return '';
@@ -232,30 +211,36 @@ export const PostsManagement: React.FC = () => {
                         </Box>
                       </Box>
                       <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
-                        <IconButton
-                            component={Link}
-                            to={`/dashboard/posts/${post.id}`}
-                            sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main', bgcolor: 'primary.light' } }}
-                            title="View Post"
+                        <motion.div
+                          whileHover={{ scale: 1.1, rotate: 5 }}
+                          whileTap={{ scale: 0.95 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 17 }}
                         >
-                          <Eye />
-                        </IconButton>
-                        <IconButton
-                            component={Link}
-                            to={`/dashboard/posts/${post.id}/edit`}
-                            sx={{ color: 'text.secondary', '&:hover': { color: 'success.main', bgcolor: 'success.light' } }}
-                            title="Edit Post"
-                        >
-                          <Edit />
-                        </IconButton>
-                        <IconButton
-                            onClick={() => handleDelete(post.id!)}
-                            disabled={deleteMutation.isPending}
-                            sx={{ color: 'text.secondary', '&:hover': { color: 'error.main', bgcolor: 'error.light' }, '&:disabled': { opacity: 0.5 } }}
-                            title="Delete Post"
-                        >
-                          <Trash2 />
-                        </IconButton>
+                          <IconButton
+                              component={Link}
+                              to={`/dashboard/posts/${post.id}`}
+                              sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main', bgcolor: 'primary.light' } }}
+                              title="View Post"
+                          >
+                            <Eye />
+                          </IconButton>
+                        </motion.div>
+                        {/*<IconButton*/}
+                        {/*    component={Link}*/}
+                        {/*    to={`/dashboard/posts/${post.id}/edit`}*/}
+                        {/*    sx={{ color: 'text.secondary', '&:hover': { color: 'success.main', bgcolor: 'success.light' } }}*/}
+                        {/*    title="Edit Post"*/}
+                        {/*>*/}
+                        {/*  <Edit />*/}
+                        {/*</IconButton>*/}
+                        {/*<IconButton*/}
+                        {/*    onClick={() => handleDelete(post.id!)}*/}
+                        {/*    disabled={deleteMutation.isPending}*/}
+                        {/*    sx={{ color: 'text.secondary', '&:hover': { color: 'error.main', bgcolor: 'error.light' }, '&:disabled': { opacity: 0.5 } }}*/}
+                        {/*    title="Delete Post"*/}
+                        {/*>*/}
+                        {/*  <Trash2 />*/}
+                        {/*</IconButton>*/}
                       </Box>
                     </Box>
                   </Paper>
@@ -265,32 +250,14 @@ export const PostsManagement: React.FC = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, alignItems: 'center' }}>
-              <Button
-                  onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
-                  disabled={currentPage === 0}
-                  variant="outlined"
-              >
-                Previous
-              </Button>
-
-              {Array.from({ length: totalPages }, (_, i) => (
-                  <Button
-                      key={i}
-                      onClick={() => setCurrentPage(i)}
-                      variant={currentPage === i ? 'contained' : 'outlined'}
-                  >
-                    {i + 1}
-                  </Button>
-              ))}
-
-              <Button
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
-                  disabled={currentPage === totalPages - 1}
-                  variant="outlined"
-              >
-                Next
-              </Button>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+              <Pagination
+                count={totalPages}
+                page={currentPage + 1}
+                onChange={(_, page) => setCurrentPage(page - 1)}
+                color="primary"
+                size="large"
+              />
             </Box>
         )}
 
