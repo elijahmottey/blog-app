@@ -174,7 +174,7 @@ export const ProfileManagement: React.FC = () => {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-center space-x-4">
           <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
-            <User className="h-8 w-8 text-white" />
+            <User className="h-8 w-8 text-primary-foreground" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{user?.name || 'User'}</h1>
@@ -350,7 +350,7 @@ export const ProfileManagement: React.FC = () => {
                     <button
                       type="submit"
                       disabled={isProfileSubmitting || updateProfileMutation.isPending}
-                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-4 py-2 text-sm font-medium text-primary-foreground bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {updateProfileMutation.isPending ? (
                         <>
@@ -467,7 +467,7 @@ export const ProfileManagement: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isPasswordSubmitting || changePasswordMutation.isPending}
-                    className="px-6 py-3 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-6 py-3 text-sm font-medium text-primary-foreground bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {changePasswordMutation.isPending ? (
                       <>
@@ -653,7 +653,7 @@ export const ProfileManagement: React.FC = () => {
                         }
                       }
                     }}
-                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                    className="px-4 py-2 text-sm font-medium text-primary-foreground bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                   >
                     Delete Account
                   </button>

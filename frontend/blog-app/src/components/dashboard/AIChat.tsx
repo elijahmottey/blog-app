@@ -83,7 +83,7 @@ export const AIChat: React.FC<AIChatProps> = ({ isExpanded = true, onToggleExpan
       <div className="fixed bottom-6 right-6 z-40">
         <button
           onClick={handleToggle}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-shadow"
+          className="bg-gradient-to-r from-blue-600 to-purple-600 text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-xl transition-shadow"
         >
           <MessageCircle className="h-6 w-6" />
         </button>
@@ -94,7 +94,7 @@ export const AIChat: React.FC<AIChatProps> = ({ isExpanded = true, onToggleExpan
   return (
     <div className="bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col h-96 w-full md:w-96 fixed bottom-6 right-6 z-40">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-t-lg flex items-center justify-between">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-primary-foreground p-4 rounded-t-lg flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <MessageCircle className="h-5 w-5" />
           <h3 className="font-semibold">LIV Blog AI Assistant</h3>
@@ -125,7 +125,7 @@ export const AIChat: React.FC<AIChatProps> = ({ isExpanded = true, onToggleExpan
             <div
               className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                 message.type === 'user'
-                  ? 'bg-blue-600 text-white rounded-br-none'
+                  ? 'bg-blue-600 text-primary-foreground rounded-br-none'
                   : 'bg-gray-100 text-gray-900 rounded-bl-none'
               }`}
             >
@@ -170,7 +170,7 @@ export const AIChat: React.FC<AIChatProps> = ({ isExpanded = true, onToggleExpan
           <button
             type="submit"
             disabled={mutation.isPending || !input.trim()}
-            className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="p-2 bg-blue-600 text-primary-foreground rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
           >
             <Send className="h-4 w-4" />
           </button>

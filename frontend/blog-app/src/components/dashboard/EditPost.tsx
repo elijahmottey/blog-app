@@ -124,7 +124,7 @@ export const EditPost: React.FC = () => {
         <div className="text-red-600 mb-4">Post not found</div>
         <button
           onClick={() => navigate('/dashboard/posts')}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="px-4 py-2 bg-blue-600 text-primary-foreground rounded-lg hover:bg-blue-700"
         >
           Back to Posts
         </button>
@@ -216,7 +216,7 @@ export const EditPost: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSubmitting || updatePostMutation.isPending}
-                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="inline-flex items-center px-6 py-3 bg-blue-600 text-primary-foreground rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {updatePostMutation.isPending ? (
                   <Loader className="h-4 w-4 mr-2 animate-spin" />

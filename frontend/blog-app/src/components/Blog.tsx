@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Box, Typography, Container, Grid, Card, CardContent, CardMedia, Chip, Button, TextField, InputAdornment, Pagination } from '@mui/material';
 import { CalendarDays, User, Search, Filter, Download } from 'lucide-react';
 import BackendApi, { type PostDto } from '../service/BackendApi';
@@ -14,6 +14,7 @@ const Blog: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const postsPerPage = 9;
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchPosts();
@@ -107,7 +108,7 @@ const Blog: React.FC = () => {
             }}
           />
           <Button
-            variant="outlined"
+            variant="contained"
             startIcon={<Filter />}
             sx={{ textTransform: 'none' }}
           >
@@ -122,7 +123,7 @@ const Blog: React.FC = () => {
               {searchTerm ? 'No posts found matching your search.' : 'No posts available.'}
             </Typography>
             {searchTerm && (
-              <Button variant="outlined" onClick={() => setSearchTerm('')}>
+              <Button variant="contained" onClick={() => setSearchTerm('')}>
                 Clear Search
               </Button>
             )}
@@ -141,9 +142,11 @@ const Blog: React.FC = () => {
                       transition: 'transform 0.2s, box-shadow 0.2s',
                       '&:hover': {
                         transform: 'translateY(-4px)',
-                        boxShadow: 4
+                        boxShadow: 4,
+                        cursor: 'pointer'
                       }
                     }}
+                    onClick={() => navigate(`/dashboard/posts/${post.id}`)}
                   >
                     <CardMedia
                       component="img"

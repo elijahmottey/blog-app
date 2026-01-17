@@ -15,7 +15,7 @@ import {
     Settings
 } from "lucide-react";
 
-import {Button} from "@mui/material";
+import {Button, IconButton} from "@mui/material";
 import BackendApi from "../service/BackendApi.ts";
 
 
@@ -69,7 +69,7 @@ export default function Navbar() {
                     <div className="flex items-center">
                         <Link to="/" className="flex items-center space-x-2">
                             <div className="h-8 w-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                                <BookOpen className="h-5 w-5 text-white" />
+                                <BookOpen className="h-5 w-5 text-primary-foreground" />
                             </div>
                             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 LIVBlog
@@ -103,13 +103,12 @@ export default function Navbar() {
                     <div className="flex items-center space-x-4">
                         {/* Search */}
                         <div className="relative">
-                            <button
-                                onClick={() => setIsSearchOpen(!isSearchOpen)}
-                                className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors"
-                                aria-label="Search"
-                            >
-                                <Search className="h-5 w-5" />
-                            </button>
+                        <IconButton
+                            onClick={() => setIsSearchOpen(!isSearchOpen)}
+                            aria-label="Search"
+                        >
+                            <Search />
+                        </IconButton>
                             {isSearchOpen && (
                                 <div className="absolute right-0 top-12 w-96 bg-white rounded-lg shadow-lg border p-4">
                                     <div className="relative">
@@ -137,13 +136,13 @@ export default function Navbar() {
                                     </Button>
                                 </Link>
                                 <Link to="dashboard/posts/create">
-                                    <Button startIcon={<PenSquare />}>
+                                    <Button variant="contained" startIcon={<PenSquare />}>
                                         Write Post
                                     </Button>
                                 </Link>
-                                <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                                    <User className="h-5 w-5 text-gray-700" />
-                                </button>
+                                <IconButton>
+                                    <User />
+                                </IconButton>
                             </div>
                         ) : (
                             <div className="flex items-center space-x-3">
@@ -153,7 +152,7 @@ export default function Navbar() {
                                     </Button>
                                 </Link>
                                 <Link to="/auth/signup">
-                                    <Button>Get Started</Button>
+                                    <Button variant="contained">Get Started</Button>
                                 </Link>
                             </div>
                         )}
@@ -165,7 +164,7 @@ export default function Navbar() {
                     {/* Mobile Logo */}
                     <Link to="/" className="flex items-center space-x-2">
                         <div className="h-8 w-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                            <BookOpen className="h-5 w-5 text-white" />
+                            <BookOpen className="h-5 w-5 text-primary-foreground" />
                         </div>
                         <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               LIVBlog

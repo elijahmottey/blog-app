@@ -108,7 +108,7 @@ export const CreatePost: React.FC = () => {
           </Box>
         </Box>
         <Button
-          variant="outlined"
+          variant="contained"
           startIcon={isPreview ? <EyeOff /> : <Eye />}
           onClick={() => setIsPreview(!isPreview)}
         >

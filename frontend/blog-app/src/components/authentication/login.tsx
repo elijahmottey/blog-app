@@ -146,9 +146,9 @@ export const Login: React.FC = () => {
                     <div key={index} className="flex items-center">
                         <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
                             completedSteps.includes(index)
-                                ? "bg-green-500 border-green-500 text-white"
+                                ? "bg-green-500 border-green-500 text-primary-foreground"
                                 : currentStep === index
-                                    ? "border-amber-500 bg-amber-500 text-white"
+                                    ? "border-amber-500 bg-amber-500 text-primary-foreground"
                                     : "border-gray-300 text-gray-500"
                         }`}>
                             {completedSteps.includes(index) ? (
@@ -349,7 +349,7 @@ export const Login: React.FC = () => {
                     <Button
                         component={Link}
                         to="/signup"
-                        variant="outlined"
+                        variant="contained"
                         endIcon={<ArrowRight />}
                         sx={{ textTransform: 'none' }}
                     >

@@ -83,7 +83,7 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
                 className="flex items-center space-x-2 p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
-                  <User className="h-4 w-4 text-white" />
+                  <User className="h-4 w-4 text-primary-foreground" />
                 </div>
                 <span className="hidden md:block text-sm font-medium">
                   {user?.name || 'User'}

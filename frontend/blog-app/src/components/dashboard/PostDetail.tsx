@@ -12,7 +12,8 @@ import {
   User,
   Download
 } from 'lucide-react';
-import { Button, IconButton, Typography, Box, Paper, TextField, Avatar } from '@mui/material';
+import { Button, IconButton, Typography, Box, Paper, TextField, Avatar, Menu, MenuItem } from '@mui/material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import BackendApi, { type CommentDto } from '../../service/BackendApi';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
@@ -26,6 +27,7 @@ export const PostDetail: React.FC = () => {
   const queryClient = useQueryClient();
   const [commentText, setCommentText] = useState('');
   const [showComments, setShowComments] = useState(true);
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
 
   const postId = parseInt(id || '0');
 
@@ -113,6 +115,24 @@ export const PostDetail: React.FC = () => {
     }
   };
 
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setMenuAnchor(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchor(null);
+  };
+
+  const handleEdit = () => {
+    navigate(`/dashboard/posts/${postId}/edit`);
+    handleMenuClose();
+  };
+
+  const handleDeleteMenu = () => {
+    handleDelete();
+    handleMenuClose();
+  };
+
   // FIXED: Safe content formatting without dangerous HTML
   const renderContent = (content: string) => {
     if (!content) return null;
@@ -190,11 +210,13 @@ export const PostDetail: React.FC = () => {
   const postData = post.data;
 
 
+  // @ts-ignore
   const postAuthorName =
       postData.users && typeof postData.users === 'object'
-          //@ts-ignore
           ? postData.users.author
           : 'Anonymous';
+
+  const isAuthor = user && postData && postData.users?.id === user.id;
 
   // 🔹 SAFELY ENSURE POST CONTENT IS A STRING
   const safePostContent =
@@ -216,7 +238,7 @@ export const PostDetail: React.FC = () => {
           <Button
               component={Link}
               to="/dashboard/posts"
-              variant="outlined"
+              variant="contained"
               startIcon={<ArrowLeft />}
           >
             Back to Posts
@@ -225,21 +247,26 @@ export const PostDetail: React.FC = () => {
           {user && (
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <IconButton
-                    component={Link}
-                    to={`/dashboard/posts/${postId}/edit`}
-                    sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main', bgcolor: 'primary.light' } }}
-                    title="Edit Post"
+                    onClick={handleMenuOpen}
+                    sx={{ color: 'text.secondary' }}
+                    title="More options"
                 >
-                  <Edit />
+                  <MoreVertIcon />
                 </IconButton>
-                <IconButton
-                    onClick={handleDelete}
-                    disabled={deleteMutation.isPending}
-                    sx={{ color: 'text.secondary', '&:hover': { color: 'error.main', bgcolor: 'error.light' }, '&:disabled': { opacity: 0.5 } }}
-                    title="Delete Post"
+                <Menu
+                    anchorEl={menuAnchor}
+                    open={Boolean(menuAnchor)}
+                    onClose={handleMenuClose}
                 >
-                  <Trash2 />
-                </IconButton>
+                  <MenuItem onClick={handleEdit} disabled={!isAuthor}>
+                    <Edit style={{ marginRight: 8 }} />
+                    Edit Post
+                  </MenuItem>
+                  <MenuItem onClick={handleDeleteMenu} disabled={!isAuthor}>
+                    <Trash2 style={{ marginRight: 8 }} />
+                    Delete Post
+                  </MenuItem>
+                </Menu>
               </Box>
           )}
         </Box>

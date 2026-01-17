@@ -195,7 +195,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
           {/* Footer */}
           <div className="p-4 border-t border-gray-200">
             <div className="text-xs text-gray-500 text-center">
-              © {new Date().getFullYear()} LIVBlog. All rights reserved.
+              © 2024 BlogApp Dashboard
             </div>
           </div>
         </div>

@@ -63,13 +63,13 @@ export default function Home() {
 
                 <div className="container relative mx-auto max-w-4xl">
                     <div className="text-center">
-                        <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm border border-amber-100">
+                        <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 bg-background/90 backdrop-blur-sm rounded-full shadow-sm border border-amber-100">
                             <Sparkles className="w-4 h-4 text-amber-600" />
                             <span className="text-sm font-medium text-gray-700">Welcome to LIV Blog</span>
                         </div>
 
                         <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                            Where <span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-orange-500">Ideas</span> Meet <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-amber-500">Innovation</span>
+                            Where <span className="text-primary">Ideas</span> Meet <span className="text-primary">Innovation</span>
                         </h1>
 
                         <p className="text-lg sm:text-xl text-gray-600 mb-8 leading-relaxed max-w-2xl mx-auto px-4">
@@ -78,35 +78,36 @@ export default function Home() {
                         </p>
 
                         <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mb-8">
-                            <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-100">
+                            <div className="flex items-center gap-2 px-4 py-2 bg-background rounded-lg shadow-sm border border-gray-100">
                                 <TrendingUp className="w-4 h-4 text-amber-600" />
                                 <span className="text-sm font-medium text-gray-700">{posts.length}+ Articles</span>
                             </div>
-                            <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-100">
+                            <div className="flex items-center gap-2 px-4 py-2 bg-background rounded-lg shadow-sm border border-gray-100">
                                 <User className="w-4 h-4 text-amber-600" />
                                 <span className="text-sm font-medium text-gray-700">Expert Authors</span>
                             </div>
-                            <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-100">
+                            <div className="flex items-center gap-2 px-4 py-2 bg-background rounded-lg shadow-sm border border-gray-100">
                                 <Clock className="w-4 h-4 text-amber-600" />
                                 <span className="text-sm font-medium text-gray-700">Daily Updates</span>
                             </div>
                         </div>
 
                         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                            <Link
+                            <Button
+                                component={Link}
                                 to="/blog"
-                                className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                                variant="contained"
+                                endIcon={<ChevronRight />}
                             >
-                                <Button endIcon={<ChevronRight className="w-4 h-4" />}>
-                                    Explore Articles
-                                </Button>
-                            </Link>
-                            <Link
+                                Explore Articles
+                            </Button>
+                            <Button
+                                component={Link}
                                 to="/about"
-                                className="px-6 py-3 bg-white text-gray-700 font-semibold rounded-lg border border-gray-200 hover:border-amber-300 hover:shadow-md transition-all duration-300"
+                                variant="contained"
                             >
                                 Learn About Us
-                            </Link>
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -138,7 +139,7 @@ export default function Home() {
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                         <div className="flex items-center gap-2 text-gray-700">
                                             <div className="w-8 h-8 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center">
-                                                <User className="w-4 h-4 text-white" />
+                                                <User className="w-4 h-4 text-primary-foreground" />
                                             </div>
                                             <div>
                                                 {/*@ts-ignore*/}
@@ -148,7 +149,7 @@ export default function Home() {
                                         </div>
                                         <Link
                                             to={`/dashboard/posts/:id`}
-                                            className="group inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
+                                            className="group inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-primary-foreground font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
                                         >
                                             Read Full Article
                                             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -163,7 +164,7 @@ export default function Home() {
                                         className="w-full h-full object-cover absolute inset-0"
                                     />
                                     <div className="absolute bottom-4 left-4 z-20">
-                                        <div className="text-white text-sm font-medium bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+                                        <div className="text-primary-foreground text-sm font-medium bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-lg">
                                             📖 {Math.ceil(featuredPost.content?.length / 1000) || 5} min read
                                         </div>
                                     </div>
@@ -217,9 +218,8 @@ export default function Home() {
                             <div className="text-red-600 font-semibold mb-3 text-lg">Failed to load posts</div>
                             <p className="text-gray-600 mb-6 max-w-md mx-auto">{error.message}</p>
                             <Button
-
                                 onClick={() => window.location.reload()}
-                                className="px-6 font-white py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
+                                variant="contained"
                             >
                                 Try Again
                             </Button>
@@ -242,7 +242,7 @@ export default function Home() {
                                 {(isMobile && featuredPost ? [featuredPost, ...gridPosts] : gridPosts).map((post, index) => (
                                     <article
                                         key={post.id}
-                                        className="group bg-white rounded-xl sm:rounded-2xl border border-gray-200 overflow-hidden hover:border-amber-300 hover:shadow-xl transition-all duration-500 hover:-translate-y-2"
+                                        className="group bg-background rounded-xl sm:rounded-2xl border border-gray-200 overflow-hidden hover:border-amber-300 hover:shadow-xl transition-all duration-500 hover:-translate-y-2"
                                     >
                                         <div className="relative overflow-hidden h-48 sm:h-56 bg-gradient-to-br from-gray-100 to-gray-200">
                                             <img
@@ -250,7 +250,7 @@ export default function Home() {
                                                 alt={post.title}
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                             />
-                                            <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm">
+                                            <div className="absolute top-4 right-4 bg-background/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm">
                                                 <time className="flex items-center gap-1 text-xs font-medium text-gray-700">
                                                     <CalendarDays className="w-3 h-3" />
                                                     {formatDate(post.createdAt)}
@@ -268,7 +268,7 @@ export default function Home() {
                                             <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                                                 <div className="flex items-center gap-2">
                                                     <div className="w-8 h-8 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center">
-                                                        <User className="w-4 h-4 text-white" />
+                                                        <User className="w-4 h-4 text-primary-foreground" />
                                                     </div>
                                                     <div>
                                                         <div className="font-semibold text-gray-800 text-sm">
@@ -305,7 +305,7 @@ export default function Home() {
                                         </div>
                                         <Link
                                             to={`/post/${featuredPost.id}`}
-                                            className="hidden sm:inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300"
+                                            className="hidden sm:inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-primary-foreground font-semibold rounded-lg hover:shadow-lg transition-all duration-300"
                                         >
                                             Discover More
                                             <ArrowRight className="w-4 h-4" />
@@ -321,7 +321,7 @@ export default function Home() {
                         <div className="max-w-4xl mx-auto bg-gradient-to-br from-white to-amber-50/50 rounded-2xl sm:rounded-3xl p-6 sm:p-10 border border-amber-100 shadow-lg">
                             <div className="text-center mb-8">
                                 <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl mb-4">
-                                    <Mail className="w-6 h-6 text-white" />
+                                    <Mail className="w-6 h-6 text-primary-foreground" />
                                 </div>
                                 <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
                                     Never Miss an Update
@@ -339,7 +339,7 @@ export default function Home() {
                                 />
                                 <Button
                                     type="submit"
-                                    className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 text-sm sm:text-base"
+                                    className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-primary-foreground font-semibold rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 text-sm sm:text-base"
                                 >
                                     Subscribe Now
                                 </Button>

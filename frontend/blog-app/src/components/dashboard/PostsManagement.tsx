@@ -133,7 +133,7 @@ export const PostsManagement: React.FC = () => {
           <div className="text-red-600 mb-4">Failed to load posts</div>
           <button
               onClick={() => refreshPosts()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="px-4 py-2 bg-blue-600 text-primary-foreground rounded-lg hover:bg-blue-700"
           >
             Try Again
           </button>
@@ -160,7 +160,7 @@ export const PostsManagement: React.FC = () => {
             </Button>
             <Link
                 to="/dashboard/posts/create"
-                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center px-4 py-2 bg-blue-600 text-primary-foreground rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Plus className="h-4 w-4 mr-2" />
               Create New Post

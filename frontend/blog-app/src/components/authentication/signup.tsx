@@ -13,8 +13,7 @@ import {
     Monitor,
     Tablet,
 } from "lucide-react";
-import ApiService, { type UserRegistration } from "../../service/BackendApi.ts";
-import { toast } from "sonner";
+import { Button } from '@mui/material';
 
 // Type definitions
 interface PasswordStrength {
@@ -233,7 +232,7 @@ export const Signup = () => {
             };
             const response = await ApiService.registerUser(payload);
             toast.success(response.message || "Account created successfully! 🎉");
-            setTimeout(() => navigate("/login"), 1500);
+            setTimeout(() => navigate("/auth/login"), 1500);
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || "Signup failed";
             toast.error(errorMessage);
@@ -288,9 +287,9 @@ export const Signup = () => {
                     <div key={index} className="flex items-center">
                         <div className={`flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full border-2 ${
                             completedSteps.includes(index)
-                                ? "bg-green-500 border-green-500 text-white"
+                                ? "bg-green-500 border-green-500 text-primary-foreground"
                                 : currentStep === index
-                                    ? "border-amber-500 bg-amber-500 text-white"
+                                    ? "border-amber-500 bg-amber-500 text-primary-foreground"
                                     : "border-gray-300 text-gray-500"
                         }`}>
                             {completedSteps.includes(index) ? (
@@ -495,49 +494,36 @@ export const Signup = () => {
 
                     {/* Navigation Buttons */}
                     <div className="flex justify-between items-center gap-2">
-                        <button
+                        <Button
                             type="button"
                             onClick={handleBack}
                             disabled={currentStep === 0}
-                            className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors flex-1 justify-center ${
-                                currentStep === 0
-                                    ? "text-gray-400 cursor-not-allowed"
-                                    : "text-gray-600 hover:text-gray-800 hover:bg-gray-100"
-                            }`}
+                            variant="outlined"
+                            startIcon={<ArrowLeft />}
+                            fullWidth
                         >
-                            <ArrowLeft size={14} className="sm:w-4 sm:h-4" />
-                            <span className="hidden xs:inline">Back</span>
-                        </button>
+                            Back
+                        </Button>
 
                         {currentStep === steps.length - 1 ? (
-                            <motion.button
-                                whileHover={{ scale: acceptedPolicy && !loading ? 1.02 : 1 }}
-                                whileTap={{ scale: acceptedPolicy && !loading ? 0.98 : 1 }}
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                endIcon={<Check />}
+                                fullWidth
                                 disabled={loading || !acceptedPolicy}
-                                type="submit"
-                                className={`flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-2.5 text-xs sm:text-sm font-semibold text-white rounded-md transition-all flex-1 justify-center ${
-                                    acceptedPolicy && !loading
-                                        ? "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-sm"
-                                        : "bg-gray-300 cursor-not-allowed"
-                                }`}
                             >
-                                {loading ? (
-                                    <span className="text-xs sm:text-sm">Creating Account...</span>
-                                ) : (
-                                    <>
-                                        <span className="text-xs sm:text-sm">Create Account</span>
-                                        <Check size={14} className="sm:w-4 sm:h-4" />
-                                    </>
-                                )}
-                            </motion.button>
+                                {loading ? "Creating Account..." : "Create Account"}
+                            </Button>
                         ) : (
-                            <button
+                            <Button
                                 type="submit"
-                                className="flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-2.5 text-xs sm:text-sm font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-md shadow-sm transition-colors flex-1 justify-center"
+                                variant="contained"
+                                endIcon={<ArrowRight />}
+                                fullWidth
                             >
-                                <span className="text-xs sm:text-sm">Next</span>
-                                <ArrowRight size={14} className="sm:w-4 sm:h-4" />
-                            </button>
+                                Next
+                            </Button>
                         )}
                     </div>
                 </form>
@@ -545,7 +531,7 @@ export const Signup = () => {
                 <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-200">
                     <p className="text-xs text-center text-gray-600">
                         Already have an account?{" "}
-                        <Link to="/login" className="text-amber-600 underline font-semibold hover:text-amber-700">
+                        <Link to="/auth/login" className="text-amber-600 underline font-semibold hover:text-amber-700">
                             Login
                         </Link>
                     </p>
@@ -553,7 +539,7 @@ export const Signup = () => {
             </motion.div>
 
             {/* Responsive Device Indicators (for demo purposes) */}
-            <div className="fixed bottom-4 right-4 flex items-center gap-2 bg-black/80 text-white px-3 py-2 rounded-full text-xs">
+            <div className="fixed bottom-4 right-4 flex items-center gap-2 bg-black/80 text-primary-foreground px-3 py-2 rounded-full text-xs">
                 <Smartphone className="w-3 h-3 xs:hidden" />
                 <Tablet className="w-3 h-3 hidden xs:flex sm:hidden" />
                 <Monitor className="w-3 h-3 hidden sm:flex" />

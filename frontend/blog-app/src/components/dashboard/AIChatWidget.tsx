@@ -28,7 +28,7 @@ export const AIChatWidget: React.FC<AIChatWidgetProps> = ({
                 <p className="text-sm text-gray-600 mt-1">{description}</p>
                 <button
                   onClick={() => setIsExpanded(true)}
-                  className="mt-3 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                  className="mt-3 inline-flex items-center px-4 py-2 bg-blue-600 text-primary-foreground rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                 >
                   <Zap className="h-4 w-4 mr-2" />
                   Start Chatting
