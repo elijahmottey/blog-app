@@ -2,7 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Typography, Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import BackendApi, { PostDto } from '../../service/BackendApi';
+import BackendApi, { type PostDto } from '../../service/BackendApi';
 
 export const AdminPosts: React.FC = () => {
   const navigate = useNavigate();

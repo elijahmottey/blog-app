@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Users, FileText, MessageSquare, TrendingUp, AlertTriangle, Activity } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import BackendApi from '../../service/BackendApi';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { AIChatWidget } from './AIChatWidget';
-import { AIChat } from './AIChat';
 
 // Mock data for charts
 const userGrowthData = [
@@ -27,7 +25,6 @@ const postActivityData = [
 ];
 
 export const AdminDashboard: React.FC = () => {
-  const [isChatExpanded, setIsChatExpanded] = useState(false);
   
   // Fetch admin stats
   const { data: usersData } = useQuery({
@@ -240,19 +237,6 @@ export const AdminDashboard: React.FC = () => {
           </button>
         </div>
       </div>
-
-      {/* AI Chat Widget */}
-      {!isChatExpanded && (
-        <AIChatWidget
-          title="AI Platform Assistant"
-          description="Get AI insights on user behavior, content trends, and platform analytics"
-        />
-      )}
-
-      {/* Expanded AI Chat */}
-      {isChatExpanded && (
-        <AIChat isExpanded={true} onToggleExpand={setIsChatExpanded} />
-      )}
     </div>
   );
 };

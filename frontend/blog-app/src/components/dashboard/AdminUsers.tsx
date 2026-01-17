@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Typography, Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, Avatar } from '@mui/material';
-import BackendApi, { UserRegistration } from '../../service/BackendApi';
+import { Typography, Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Avatar } from '@mui/material';
+import BackendApi, { type UserRegistration } from '../../service/BackendApi';
 
 export const AdminUsers: React.FC = () => {
   const { data: usersData, isLoading, error } = useQuery({

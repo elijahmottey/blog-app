@@ -5,13 +5,52 @@ import { AIChat } from './AIChat';
 interface AIChatWidgetProps {
   title?: string;
   description?: string;
+  floating?: boolean;
 }
 
 export const AIChatWidget: React.FC<AIChatWidgetProps> = ({
   title = 'AI Writing Assistant',
   description = 'Get AI-powered suggestions for your blog posts',
+  floating = false,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  if (floating) {
+    return (
+      <>
+        {/* Floating Button */}
+        {!isExpanded && (
+          <button
+            onClick={() => setIsExpanded(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-colors"
+            title="AI Chat Assistant"
+          >
+            <Zap className="h-6 w-6" />
+          </button>
+        )}
+
+        {/* Expanded Chat - Modal style */}
+        {isExpanded && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+              <div className="flex justify-between items-center p-4 border-b">
+                <h3 className="text-lg font-semibold">{title}</h3>
+                <button
+                  onClick={() => setIsExpanded(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="p-4">
+                <AIChat isExpanded={true} onToggleExpand={setIsExpanded} />
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
 
   return (
     <>
