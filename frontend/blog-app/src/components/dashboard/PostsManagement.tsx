@@ -176,10 +176,10 @@ export const PostsManagement: React.FC = () => {
           <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'center' }, gap: 2 }}>
             <Box>
               <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'text.primary', mb: 0.5 }}>
-                Posts Management
+                View all Posts
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Manage your blog posts
+                Find your blog post
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 1 }}>
