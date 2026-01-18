@@ -330,7 +330,7 @@ export default function Home() {
                                 />
                                 <Button
                                     type="submit"
-                                    variant="contained"
+                                    variant="outlined"
                                 >
                                     Subscribe Now
                                 </Button>

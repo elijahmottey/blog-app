@@ -1,12 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Save, ArrowLeft, Eye, EyeOff, Loader } from 'lucide-react';
-import { Button, IconButton, Typography, Box, Paper, TextField } from '@mui/material';
+import {
+  Save,
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  Loader,
+  Bold,
+  Italic,
+  List,
+  ListOrdered,
+  Heading1,
+  Heading2,
+  Heading3,
+  Link,
+  Quote,
+  Code,
+  Undo,
+  Redo,
+  Type
+} from 'lucide-react';
+import {
+  Button,
+  IconButton,
+  Typography,
+  Box,
+  Paper,
+  TextField,
+  Tooltip,
+  Chip,
+  Alert
+} from '@mui/material';
 import BackendApi from '../../service/BackendApi';
+import Grid from "@mui/material/Grid";
 import { toast } from 'sonner';
 
 const schema = yup.object({
@@ -23,11 +53,16 @@ export const CreatePost: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isPreview, setIsPreview] = useState(false);
+  const [formattingHistory, setFormattingHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<PostFormData>({
     resolver: yupResolver(schema),
@@ -55,200 +90,777 @@ export const CreatePost: React.FC = () => {
   const watchedContent = watch('content', '');
   const watchedTitle = watch('title', '');
 
-  const formatContent = (content: string) => {
-    return content
-      .split('\n')
-      .map((line) => {
-        // Handle headers
-        if (line.startsWith('# ')) {
-          return `<h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; margin-top: 1.5rem; color: #1a1a1a;">${line.substring(2)}</h1>`;
-        }
-        if (line.startsWith('## ')) {
-          return `<h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; margin-top: 1.25rem; color: #1a1a1a;">${line.substring(3)}</h2>`;
-        }
-        if (line.startsWith('### ')) {
-          return `<h3 style="font-size: 1.125rem; font-weight: 500; margin-bottom: 0.5rem; margin-top: 1rem; color: #1a1a1a;">${line.substring(4)}</h3>`;
-        }
+  // Function to get selected text from textarea
+  const getSelectedText = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return { text: '', start: 0, end: 0 };
 
-        // Handle bold text
-        line = line.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 600; color: #1a1a1a;">$1</strong>');
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value.substring(start, end);
 
-        // Handle italic text
-        line = line.replace(/\*(.*?)\*/g, '<em style="font-style: italic; color: #666666;">$1</em>');
-
-        // Handle empty lines
-        if (line.trim() === '') {
-          return '<br>';
-        }
-
-        // Regular paragraphs
-        return `<p style="margin-bottom: 0.5rem; color: #1a1a1a; line-height: 1.6;">${line}</p>`;
-      })
-      .join('');
+    return { text, start, end };
   };
 
+  // Function to replace selected text
+  const replaceSelectedText = (replacement: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const { start, end } = getSelectedText();
+    const currentContent = getValues('content');
+
+    // Save to history before making changes
+    const newHistory = [...formattingHistory.slice(0, historyIndex + 1), currentContent];
+    setFormattingHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+
+    const newContent = currentContent.substring(0, start) + replacement + currentContent.substring(end);
+    setValue('content', newContent, { shouldValidate: true });
+
+    // Restore cursor position
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + replacement.length, start + replacement.length);
+    }, 0);
+  };
+
+  // Formatting functions
+  const applyBold = () => {
+    const { text } = getSelectedText();
+    if (text) {
+      replaceSelectedText(`**${text}**`);
+    } else {
+      insertAtCursor('**bold text**');
+    }
+  };
+
+  const applyItalic = () => {
+    const { text } = getSelectedText();
+    if (text) {
+      replaceSelectedText(`*${text}*`);
+    } else {
+      insertAtCursor('*italic text*');
+    }
+  };
+
+  const applyHeading = (level: number) => {
+    const { text } = getSelectedText();
+    const headingPrefix = '#'.repeat(level) + ' ';
+    if (text) {
+      replaceSelectedText(`${headingPrefix}${text}`);
+    } else {
+      insertAtCursor(`${headingPrefix}Heading`);
+    }
+  };
+
+  const applyList = (ordered: boolean) => {
+    //@ts-ignore
+    const { text, start, end } = getSelectedText();
+    if (text) {
+      const lines = text.split('\n');
+      const formattedLines = lines.map((line, index) => {
+        if (ordered) {
+          return `${index + 1}. ${line}`;
+        }
+        return `- ${line}`;
+      });
+      replaceSelectedText(formattedLines.join('\n'));
+    } else {
+      insertAtCursor(ordered ? '1. List item\n2. List item\n3. List item' : '- List item\n- List item\n- List item');
+    }
+  };
+
+  const insertLink = () => {
+    const { text } = getSelectedText();
+    const url = prompt('Enter URL:', 'https://');
+    if (url) {
+      const linkText = text || 'link text';
+      replaceSelectedText(`[${linkText}](${url})`);
+    }
+  };
+
+  const applyBlockquote = () => {
+    const { text } = getSelectedText();
+    if (text) {
+      const lines = text.split('\n');
+      const formattedLines = lines.map(line => `> ${line}`);
+      replaceSelectedText(formattedLines.join('\n'));
+    } else {
+      insertAtCursor('> Blockquote text');
+    }
+  };
+
+  const applyCode = () => {
+    const { text } = getSelectedText();
+    if (text) {
+      replaceSelectedText(`\`\`\`\n${text}\n\`\`\``);
+    } else {
+      insertAtCursor('```\ncode here\n```');
+    }
+  };
+
+  const insertAtCursor = (text: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const currentContent = getValues('content');
+
+    // Save to history
+    const newHistory = [...formattingHistory.slice(0, historyIndex + 1), currentContent];
+    setFormattingHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+
+    const newContent = currentContent.substring(0, start) + text + currentContent.substring(end);
+    setValue('content', newContent, { shouldValidate: true });
+
+    // Position cursor in the middle of inserted text for easy editing
+    const cursorPos = start + text.length;
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(cursorPos, cursorPos);
+    }, 0);
+  };
+
+  const undo = () => {
+    if (historyIndex > 0) {
+      const previousContent = formattingHistory[historyIndex - 1];
+      setValue('content', previousContent, { shouldValidate: true });
+      setHistoryIndex(historyIndex - 1);
+    }
+  };
+
+  const redo = () => {
+    if (historyIndex < formattingHistory.length - 1) {
+      const nextContent = formattingHistory[historyIndex + 1];
+      setValue('content', nextContent, { shouldValidate: true });
+      setHistoryIndex(historyIndex + 1);
+    }
+  };
+
+  // Initialize history
+  useEffect(() => {
+    if (watchedContent && formattingHistory.length === 0) {
+      setFormattingHistory([watchedContent]);
+      setHistoryIndex(0);
+    }
+  }, [watchedContent]);
+
+  const formatContent = (content: string) => {
+    return content
+        .split('\n')
+        .map((line, index) => {
+          // Handle blockquotes
+          if (line.trim().startsWith('>')) {
+            return `<blockquote style="border-left: 4px solid #e0e0e0; margin: 1rem 0; padding-left: 1rem; color: #666; font-style: italic;">${line.substring(1).trim()}</blockquote>`;
+          }
+
+          // Handle code blocks
+          if (line.trim().startsWith('```')) {
+            return '<pre style="background: #f5f5f5; padding: 1rem; border-radius: 4px; overflow-x: auto; margin: 1rem 0;"><code>';
+          }
+          if (line.trim() === '```') {
+            return '</code></pre>';
+          }
+
+          // Handle headers
+          if (line.startsWith('# ')) {
+            return `<h1 style="font-size: 1.875rem; font-weight: 800; margin-bottom: 1.5rem; margin-top: 2rem; color: #1a1a1a; border-bottom: 2px solid #e0e0e0; padding-bottom: 0.5rem;">${line.substring(2)}</h1>`;
+          }
+          if (line.startsWith('## ')) {
+            return `<h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; margin-top: 1.5rem; color: #1a1a1a;">${line.substring(3)}</h2>`;
+          }
+          if (line.startsWith('### ')) {
+            return `<h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; margin-top: 1.25rem; color: #1a1a1a;">${line.substring(4)}</h3>`;
+          }
+
+          // Handle bold text
+          line = line.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 700; color: #1a1a1a; background: linear-gradient(transparent 60%, #ffeb3b 40%);">$1</strong>');
+
+          // Handle italic text
+          line = line.replace(/\*(.*?)\*/g, '<em style="font-style: italic; color: #666666;">$1</em>');
+
+          // Handle inline code
+          line = line.replace(/`([^`]+)`/g, '<code style="background: #f5f5f5; padding: 0.2rem 0.4rem; border-radius: 3px; font-family: monospace; font-size: 0.875rem; color: #d63384;">$1</code>');
+
+          // Handle links
+          line = line.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color: #1976d2; text-decoration: none; border-bottom: 1px dashed #1976d2;" target="_blank" rel="noopener noreferrer">$1</a>');
+
+          // Handle ordered lists
+          if (/^\d+\.\s/.test(line)) {
+            return `<li style="margin-left: 1.5rem; margin-bottom: 0.25rem; list-style-type: decimal;">${line.substring(line.indexOf('.') + 2)}</li>`;
+          }
+
+          // Handle unordered lists
+          if (/^-\s/.test(line) || /^\*\s/.test(line)) {
+            return `<li style="margin-left: 1.5rem; margin-bottom: 0.25rem; list-style-type: disc;">${line.substring(2)}</li>`;
+          }
+
+          // Handle empty lines
+          if (line.trim() === '') {
+            return '<br>';
+          }
+
+          // Check if previous line was a list item
+          const prevLine = content.split('\n')[index - 1];
+          const isInList = prevLine && (/^\d+\.\s/.test(prevLine) || /^-\s/.test(prevLine) || /^\*\s/.test(prevLine));
+
+          if (isInList) {
+            return `<li style="margin-left: 1.5rem; margin-bottom: 0.25rem; list-style-type: disc;">${line}</li>`;
+          }
+
+          // Regular paragraphs
+          return `<p style="margin-bottom: 1rem; color: #1a1a1a; line-height: 1.8; font-size: 1.125rem;">${line}</p>`;
+        })
+        .join('');
+  };
+
+  // Calculate statistics
+  const wordCount = watchedContent.trim().split(/\s+/).filter(word => word.length > 0).length;
+  const paragraphCount = watchedContent.split('\n').filter(line => line.trim().length > 0).length;
+  const readingTime = Math.ceil(wordCount / 200);
+
+
+  // @ts-ignore
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <IconButton
-            onClick={() => navigate('/dashboard')}
-            sx={{ color: 'text.secondary', '&:hover': { bgcolor: 'action.hover' } }}
-          >
-            <ArrowLeft />
-          </IconButton>
-          <Box>
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
-              Create New Post
-            </Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              Share your thoughts with the world
-            </Typography>
+      <Box sx={{ maxWidth: 1000, mx: 'auto', p: { xs: 2, md: 3 } }}>
+        {/* Header */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Tooltip title="Go back">
+              <IconButton
+                  onClick={() => navigate('/dashboard')}
+                  sx={{
+                    color: 'primary.main',
+                    bgcolor: 'primary.50',
+                    '&:hover': {
+                      bgcolor: 'primary.100',
+                      transform: 'translateX(-2px)',
+                      transition: 'all 0.2s'
+                    }
+                  }}
+              >
+                <ArrowLeft />
+              </IconButton>
+            </Tooltip>
+            <Box>
+              <Typography
+                  variant="h4"
+                  component="h1"
+                  sx={{
+                    fontWeight: 'bold',
+                    color: 'text.primary',
+                    background: 'linear-gradient(45deg, #1976d2, #2196f3)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    mb: 0.5
+                  }}
+              >
+                Create New Post
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                Craft your story with our enhanced editor
+              </Typography>
+            </Box>
           </Box>
-        </Box>
-        <Button
-          variant="outlined"
-          startIcon={isPreview ? <EyeOff /> : <Eye />}
-          onClick={() => setIsPreview(!isPreview)}
-        >
-          {isPreview ? 'Edit' : 'Preview'}
-        </Button>
-      </Box>
-
-      <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-        {/* Title Input */}
-        <TextField
-          {...register('title')}
-          label="Post Title"
-          placeholder="Enter an engaging title..."
-          variant="outlined"
-          fullWidth
-          error={!!errors.title}
-          helperText={errors.title?.message}
-          sx={{
-            '& .MuiInputBase-input': {
-              fontSize: '1.125rem',
-              fontWeight: 500,
-            }
-          }}
-        />
-
-        {/* Content Input/Preview */}
-        <Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-            <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.primary' }}>
-              Content
-            </Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              Use **bold** and *italic* formatting
-            </Typography>
-          </Box>
-
-          {isPreview ? (
-            <Paper sx={{ minHeight: 400, p: 3, bgcolor: 'grey.50' }}>
-              <Box sx={{ '& h1': { typography: 'h3', mb: 3, pb: 2, borderBottom: 1, borderColor: 'divider' } }}>
-                {watchedTitle && (
-                  <Typography variant="h3" sx={{ mb: 3, pb: 2, borderBottom: 1, borderColor: 'divider', fontWeight: 'bold' }}>
-                    {watchedTitle}
-                  </Typography>
-                )}
-                <Box
-                  dangerouslySetInnerHTML={{ __html: formatContent(watchedContent) }}
-                  sx={{ color: 'text.primary', lineHeight: 1.6 }}
-                />
-              </Box>
-            </Paper>
-          ) : (
-            <TextField
-              {...register('content')}
-              multiline
-              rows={20}
-              placeholder={`Write your post content here...
-
-Use markdown-style formatting:
-# Heading 1
-## Heading 2
-**bold text**
-*italic text*
-
-Separate paragraphs with empty lines.`}
+          <Button
               variant="outlined"
-              fullWidth
-              error={!!errors.content}
-              helperText={errors.content?.message}
+              startIcon={isPreview ? <EyeOff /> : <Eye />}
+              onClick={() => setIsPreview(!isPreview)}
               sx={{
-                '& .MuiInputBase-input': {
-                  fontFamily: 'monospace',
-                  fontSize: '0.875rem',
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                borderWidth: 2,
+                '&:hover': {
+                  borderWidth: 2,
                 }
               }}
+          >
+            {isPreview ? 'Switch to Editor' : 'Live Preview'}
+          </Button>
+        </Box>
+
+        {/* Stats Bar */}
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+          {/*@ts-ignore*/}
+          <Grid item xs={6} sm={3}>
+            <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'primary.50', borderRadius: 2 }}>
+              <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600 }}>Words</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>{wordCount}</Typography>
+            </Paper>
+          </Grid>
+          {/*@ts-ignore*/}
+          <Grid item xs={6} sm={3}>
+            <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'secondary.50', borderRadius: 2 }}>
+              <Typography variant="body2" color="secondary.main" sx={{ fontWeight: 600 }}>Characters</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>{watchedContent.length}</Typography>
+            </Paper>
+
+          </Grid>
+
+          <Grid item xs={6} sm={3}>
+            <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'success.50', borderRadius: 2 }}>
+              <Typography variant="body2" color="success.main" sx={{ fontWeight: 600 }}>Paragraphs</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>{paragraphCount}</Typography>
+            </Paper>
+
+          </Grid>
+          {/*@ts-ignore*/}
+          <Grid item xs={6} sm={3}>
+            <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'warning.50', borderRadius: 2 }}>
+              <Typography variant="body2" color="warning.main" sx={{ fontWeight: 600 }}>Reading Time</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>{readingTime} min</Typography>
+            </Paper>
+          </Grid>
+        </Grid>
+
+        <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {/* Title Input */}
+          <Paper sx={{ p: 2, borderRadius: 2, border: 1, borderColor: 'divider' }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>
+              Post Title
+            </Typography>
+            <TextField
+                {...register('title')}
+                placeholder="Catchy title that grabs attention..."
+                variant="standard"
+                fullWidth
+                error={!!errors.title}
+                helperText={errors.title?.message}
+                InputProps={{
+                  disableUnderline: true,
+                  sx: {
+                    fontSize: '1.5rem',
+                    fontWeight: 700,
+                    '& input': {
+                      padding: 0,
+                    }
+                  }
+                }}
             />
+            <Typography variant="caption" sx={{ color: 'text.secondary', mt: 1, display: 'block' }}>
+              Keep it concise and engaging (3-10 words)
+            </Typography>
+          </Paper>
+
+          {/* Content Section */}
+          <Paper sx={{ borderRadius: 2, overflow: 'hidden', border: 1, borderColor: 'divider' }}>
+            {/* Toolbar */}
+            <Box sx={{
+              bgcolor: 'grey.50',
+              p: 1.5,
+              borderBottom: 1,
+              borderColor: 'divider',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 0.5,
+              alignItems: 'center'
+            }}>
+              <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', mr: 2 }}>
+                Formatting Tools:
+              </Typography>
+
+              <Tooltip title="Bold (Ctrl+B)">
+                <IconButton onClick={applyBold} size="small" sx={{ borderRadius: 1 }}>
+                  <Bold size={18} />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Italic (Ctrl+I)">
+                <IconButton onClick={applyItalic} size="small" sx={{ borderRadius: 1 }}>
+                  <Italic size={18} />
+                </IconButton>
+              </Tooltip>
+
+              <Box sx={{ width: 1, borderLeft: 1, borderColor: 'divider', mx: 1, height: 24 }} />
+
+              <Tooltip title="Heading 1">
+                <IconButton onClick={() => applyHeading(1)} size="small" sx={{ borderRadius: 1 }}>
+                  <Heading1 size={18} />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Heading 2">
+                <IconButton onClick={() => applyHeading(2)} size="small" sx={{ borderRadius: 1 }}>
+                  <Heading2 size={18} />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Heading 3">
+                <IconButton onClick={() => applyHeading(3)} size="small" sx={{ borderRadius: 1 }}>
+                  <Heading3 size={18} />
+                </IconButton>
+              </Tooltip>
+
+              <Box sx={{ width: 1, borderLeft: 1, borderColor: 'divider', mx: 1, height: 24 }} />
+
+              <Tooltip title="Bulleted List">
+                <IconButton onClick={() => applyList(false)} size="small" sx={{ borderRadius: 1 }}>
+                  <List size={18} />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Numbered List">
+                <IconButton onClick={() => applyList(true)} size="small" sx={{ borderRadius: 1 }}>
+                  <ListOrdered size={18} />
+                </IconButton>
+              </Tooltip>
+
+              <Box sx={{ width: 1, borderLeft: 1, borderColor: 'divider', mx: 1, height: 24 }} />
+
+              <Tooltip title="Insert Link">
+                <IconButton onClick={insertLink} size="small" sx={{ borderRadius: 1 }}>
+                  <Link size={18} />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Blockquote">
+                <IconButton onClick={applyBlockquote} size="small" sx={{ borderRadius: 1 }}>
+                  <Quote size={18} />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Code Block">
+                <IconButton onClick={applyCode} size="small" sx={{ borderRadius: 1 }}>
+                  <Code size={18} />
+                </IconButton>
+              </Tooltip>
+
+              <Box sx={{ flexGrow: 1 }} />
+
+              <Tooltip title="Undo (Ctrl+Z)">
+                <IconButton
+                    onClick={undo}
+                    disabled={historyIndex <= 0}
+                    size="small"
+                    sx={{ borderRadius: 1 }}
+                >
+                  <Undo size={18} />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Redo (Ctrl+Y)">
+                <IconButton
+                    onClick={redo}
+                    disabled={historyIndex >= formattingHistory.length - 1}
+                    size="small"
+                    sx={{ borderRadius: 1 }}
+                >
+                  <Redo size={18} />
+                </IconButton>
+              </Tooltip>
+            </Box>
+
+            {/* Content Input/Preview */}
+            <Box sx={{ minHeight: 500 }}>
+              {isPreview ? (
+                  <Box sx={{ p: 3 }}>
+                    {watchedTitle && (
+                        <Typography
+                            variant="h1"
+                            sx={{
+                              fontSize: '2.5rem',
+                              fontWeight: 800,
+                              mb: 4,
+                              color: 'text.primary',
+                              lineHeight: 1.2
+                            }}
+                        >
+                          {watchedTitle}
+                        </Typography>
+                    )}
+                    <Box
+                        dangerouslySetInnerHTML={{ __html: formatContent(watchedContent) }}
+                        sx={{
+                          '& h1': {
+                            fontSize: '2rem !important',
+                            fontWeight: 700,
+                            mb: 3,
+                            color: 'text.primary'
+                          },
+                          '& h2': {
+                            fontSize: '1.75rem !important',
+                            fontWeight: 600,
+                            mb: 2,
+                            color: 'text.primary'
+                          },
+                          '& h3': {
+                            fontSize: '1.5rem !important',
+                            fontWeight: 600,
+                            mb: 1.5,
+                            color: 'text.primary'
+                          },
+                          '& p': {
+                            fontSize: '1.125rem',
+                            lineHeight: 1.8,
+                            mb: 2
+                          },
+                          '& blockquote': {
+                            borderLeft: '4px solid',
+                            borderColor: 'primary.main',
+                            pl: 2,
+                            ml: 0,
+                            my: 2,
+                            color: 'text.secondary',
+                            fontStyle: 'italic'
+                          },
+                          '& pre': {
+                            bgcolor: 'grey.900',
+                            color: 'common.white',
+                            p: 2,
+                            borderRadius: 1,
+                            overflow: 'auto',
+                            my: 2
+                          },
+                          '& ul, & ol': {
+                            pl: 3,
+                            mb: 2
+                          },
+                          '& li': {
+                            mb: 0.5
+                          }
+                        }}
+                    />
+                  </Box>
+              ) : (
+                  <TextField
+                      {...register('content')}
+                      inputRef={textareaRef}
+                      multiline
+                      rows={20}
+                      placeholder={`Start writing your masterpiece here...
+
+# Main Heading
+Start with a compelling headline
+
+## Subheading
+Organize your content with headings
+
+**Highlight important points** with bold text
+*Add emphasis* with italic text
+
+- Create bullet lists
+- For easy reading
+
+1. Or numbered lists
+2. For step-by-step instructions
+
+> Use blockquotes for important insights
+
+\`\`\`
+Add code snippets when needed
+\`\`\`
+
+[Add links](https://example.com) to reference sources`}
+                      variant="outlined"
+                      fullWidth
+                      error={!!errors.content}
+                      helperText={errors.content?.message}
+                      InputProps={{
+                        sx: {
+                          fontFamily: "'JetBrains Mono', monospace",
+                          fontSize: '1rem',
+                          lineHeight: 1.7,
+                          p: 2,
+                          '& textarea': {
+                            resize: 'vertical',
+                            minHeight: '400px'
+                          }
+                        }
+                      }}
+                  />
+              )}
+            </Box>
+          </Paper>
+
+          {/* Validation Alert */}
+          {watchedContent.length > 0 && watchedContent.length < 10 && (
+              <Alert severity="warning" sx={{ borderRadius: 2 }}>
+                Content must be at least 10 characters. You need {10 - watchedContent.length} more characters.
+              </Alert>
           )}
+
+          {/* Keyboard Shortcuts Guide */}
+          <Paper sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
+              🎯 Quick Formatting Tips
+            </Typography>
+            <Grid container spacing={1}>
+              {/*@ts-ignore*/}
+              <Grid item xs={6} sm={3}>
+                <Chip
+                    label="Ctrl+B → Bold"
+                    size="small"
+                    variant="outlined"
+                    sx={{ fontSize: '0.75rem' }}
+                />
+              </Grid>
+              {/*@ts-ignore*/}
+              <Grid item xs={6} sm={3}>
+                <Chip
+                    label="Ctrl+I → Italic"
+                    size="small"
+                    variant="outlined"
+                    sx={{ fontSize: '0.75rem' }}
+                />
+                {/*@ts-ignore*/}
+              </Grid>
+              <Grid item xs={6} sm={3}>
+                <Chip
+                    label="Select text first"
+                    size="small"
+                    variant="outlined"
+                    sx={{ fontSize: '0.75rem' }}
+                />
+                {/*@ts-ignore*/}
+              </Grid>
+              <Grid item xs={6} sm={3}>
+                <Chip
+                    label="Click icons to format"
+                    size="small"
+                    variant="outlined"
+                    sx={{ fontSize: '0.75rem' }}
+                />
+              </Grid>
+            </Grid>
+          </Paper>
+
+          {/* Action Buttons */}
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            pt: 3,
+            mt: 2,
+            borderTop: 1,
+            borderColor: 'divider'
+          }}>
+            <Button
+                variant="outlined"
+                onClick={() => navigate('/dashboard')}
+                startIcon={<ArrowLeft />}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  px: 3
+                }}
+            >
+              Save as Draft
+            </Button>
+
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button
+                  variant="outlined"
+                  onClick={() => setIsPreview(!isPreview)}
+                  sx={{
+                    borderRadius: 2,
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    px: 3
+                  }}
+              >
+                {isPreview ? 'Back to Editor' : 'Preview'}
+              </Button>
+              <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={isSubmitting || createPostMutation.isPending || watchedContent.length < 10}
+                  startIcon={createPostMutation.isPending ? <Loader className="animate-spin" /> : <Save />}
+                  sx={{
+                    borderRadius: 2,
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    px: 4,
+                    py: 1,
+                    background: 'linear-gradient(45deg, #1976d2, #2196f3)',
+                    '&:hover': {
+                      background: 'linear-gradient(45deg, #1565c0, #1976d2)',
+                      transform: 'translateY(-1px)',
+                      boxShadow: 3
+                    },
+                    '&:disabled': {
+                      background: 'grey.300'
+                    }
+                  }}
+              >
+                {createPostMutation.isPending ? 'Publishing...' : 'Publish Post'}
+              </Button>
+            </Box>
+          </Box>
         </Box>
 
-        {/* Character Count */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', typography: 'body2', color: 'text.secondary' }}>
-          <Box>
-            {watchedContent.length} characters
-            {watchedContent.length < 10 && (
-              <Box component="span" sx={{ color: 'error.main', ml: 1 }}>
-                (minimum 10 required)
+        {/* Tips Section */}
+        <Paper sx={{
+          p: 3,
+          mt: 4,
+          bgcolor: 'primary.50',
+          border: 2,
+          borderColor: 'primary.100',
+          borderRadius: 3
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+            <Type color="#1976d2" />
+            <Typography variant="h6" sx={{ fontWeight: 800, color: 'primary.dark' }}>
+              ✨ Pro Writing Tips
+            </Typography>
+          </Box>
+          {/*@ts-ignore*/}
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              <Box sx={{
+                bgcolor: 'white',
+                p: 2,
+                borderRadius: 2,
+                height: '100%',
+                boxShadow: 1
+              }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main', mb: 1 }}>
+                  Structure & Formatting
+                </Typography>
+                <Box component="ul" sx={{ m: 0, p: 0, pl: 2 }}>
+                  <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
+                    Use <strong>headings</strong> to create a clear hierarchy
+                  </Typography>
+                  <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
+                    <strong>Bold key phrases</strong> for skimmers
+                  </Typography>
+                  <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
+                    Keep paragraphs under 4 lines
+                  </Typography>
+                </Box>
               </Box>
-            )}
-          </Box>
-          <Box>
-            {watchedContent.split('\n').filter(line => line.trim()).length} paragraphs
-          </Box>
-        </Box>
-
-        {/* Action Buttons */}
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, pt: 3, borderTop: 1, borderColor: 'divider' }}>
-          <Button
-            variant="outlined"
-            onClick={() => navigate('/dashboard')}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={isSubmitting || createPostMutation.isPending}
-            startIcon={createPostMutation.isPending ? <Loader /> : <Save />}
-          >
-            {createPostMutation.isPending ? 'Creating Post...' : 'Publish Post'}
-          </Button>
-        </Box>
+              {/*@ts-ignore*/}
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Box sx={{
+                bgcolor: 'white',
+                p: 2,
+                borderRadius: 2,
+                height: '100%',
+                boxShadow: 1
+              }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'success.main', mb: 1 }}>
+                  Engagement Boosters
+                </Typography>
+                <Box component="ul" sx={{ m: 0, p: 0, pl: 2 }}>
+                  <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
+                    Start with a question or surprising fact
+                  </Typography>
+                  <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
+                    Include <em>personal stories</em> or examples
+                  </Typography>
+                  <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
+                    End with a call-to-action
+                  </Typography>
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
+        </Paper>
       </Box>
-
-      {/* Tips Section */}
-      <Paper sx={{ p: 3, bgcolor: 'info.light', border: 1, borderColor: 'info.main' }}>
-        <Typography variant="h6" sx={{ mb: 2, color: 'info.dark', fontWeight: 'bold' }}>
-          Writing Tips
-        </Typography>
-        <Box component="ul" sx={{ m: 0, p: 0, listStyle: 'none', '& li': { mb: 1, display: 'flex', alignItems: 'flex-start' } }}>
-          <Box component="li" sx={{ color: 'info.dark' }}>
-            <Box component="span" sx={{ color: 'info.main', mr: 1 }}>•</Box>
-            Start with a compelling title that captures attention
-          </Box>
-          <Box component="li" sx={{ color: 'info.dark' }}>
-            <Box component="span" sx={{ color: 'info.main', mr: 1 }}>•</Box>
-            Use headings (# ## ###) to organize your content
-          </Box>
-          <Box component="li" sx={{ color: 'info.dark' }}>
-            <Box component="span" sx={{ color: 'info.main', mr: 1 }}>•</Box>
-            **Bold** important points and *emphasize* key ideas
-          </Box>
-          <Box component="li" sx={{ color: 'info.dark' }}>
-            <Box component="span" sx={{ color: 'info.main', mr: 1 }}>•</Box>
-            Keep paragraphs short and focused
-          </Box>
-          <Box component="li" sx={{ color: 'info.dark' }}>
-            <Box component="span" sx={{ color: 'info.main', mr: 1 }}>•</Box>
-            Preview your post before publishing to see the final result
-          </Box>
-        </Box>
-      </Paper>
-    </Box>
   );
 };
