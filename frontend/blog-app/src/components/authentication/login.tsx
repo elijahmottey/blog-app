@@ -322,7 +322,7 @@ export const Login: React.FC = () => {
                 <Box sx={{ textAlign: 'center' }}>
                     <Button
                         component={Link}
-                        to="/signup"
+                        to="/auth/signup"
                         variant="outlined"
                         endIcon={<ArrowRight />}
                         sx={{ textTransform: 'none' }}

@@ -53,7 +53,10 @@ export const PagesRoute = () => {
 
 
                         {/* Dashboard routes */}
-                        <Route path="/dashboard" element={<DashboardLayout />}>
+                        <Route path="/dashboard" element={
+                            <ProtectedRoute>
+                            <DashboardLayout />
+                        </ProtectedRoute>}>
                             <Route index element={<DashboardRouter />} />
                             {/* User routes */}
                             <Route path="posts" element={<PostsManagement />} />
@@ -64,10 +67,11 @@ export const PagesRoute = () => {
                             <Route path="profile" element={<ProfileManagement />} />
                             <Route path="ai-chat" element={<AIChatPage />} />
                             {/* Admin routes */}
-                            <Route path="admin/users" element={<AdminUsers/>} />
-                            <Route path="admin/content" element={<div>Content Moderation</div>} />
+                            <Route path="admin/users" element={
+                                <AdminRoute>
+                                <AdminUsers />
+                            </AdminRoute>} />
                             <Route path="admin/analytics" element={<div>Analytics</div>} />
-                            <Route path="admin/settings" element={<div>System Settings</div>} />
                         </Route>
 
                     </Routes>
