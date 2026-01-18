@@ -10,15 +10,13 @@ import {
   Send,
   ThumbsUp,
   User,
-  Download,
-  MoreHorizontal
+  Download
 } from 'lucide-react';
-import { Button, IconButton, Typography, Box, Paper, TextField, Avatar, Menu, MenuItem } from '@mui/material';
+import { Button, IconButton, Typography, Box, Paper, TextField, Avatar } from '@mui/material';
 import BackendApi, { type CommentDto } from '../../service/BackendApi';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { motion } from 'framer-motion';
 import { downloadPost, downloadPostPdf } from '../../lib/download';
 
 export const PostDetail: React.FC = () => {
@@ -28,7 +26,6 @@ export const PostDetail: React.FC = () => {
   const queryClient = useQueryClient();
   const [commentText, setCommentText] = useState('');
   const [showComments, setShowComments] = useState(true);
-  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
 
   const postId = parseInt(id || '0');
 
@@ -116,24 +113,6 @@ export const PostDetail: React.FC = () => {
     }
   };
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setMenuAnchor(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setMenuAnchor(null);
-  };
-
-  const handleEdit = () => {
-    navigate(`/dashboard/posts/${postId}/edit`);
-    handleMenuClose();
-  };
-
-  const handleDeleteMenu = () => {
-    handleDelete();
-    handleMenuClose();
-  };
-
   // FIXED: Safe content formatting without dangerous HTML
   const renderContent = (content: string) => {
     if (!content) return null;
@@ -211,9 +190,11 @@ export const PostDetail: React.FC = () => {
   const postData = post.data;
 
 
-  const postAuthorName = postData.users || 'Anonymous';
-
-  const isAuthor = user && postData && postData.users === user.name;
+  // @ts-ignore
+  const postAuthorName =
+      postData.users && typeof postData.users === 'object'
+          ? postData.users.author
+          : 'Anonymous';
 
   // 🔹 SAFELY ENSURE POST CONTENT IS A STRING
   const safePostContent =
@@ -235,7 +216,7 @@ export const PostDetail: React.FC = () => {
           <Button
               component={Link}
               to="/dashboard/posts"
-              variant="contained"
+              variant="outlined"
               startIcon={<ArrowLeft />}
           >
             Back to Posts
@@ -243,33 +224,22 @@ export const PostDetail: React.FC = () => {
 
           {user && (
               <Box sx={{ display: 'flex', gap: 1 }}>
-                <motion.div
-                  whileHover={{ scale: 1.1, rotate: 90 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                <IconButton
+                    component={Link}
+                    to={`/dashboard/posts/${postId}/edit`}
+                    sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main', bgcolor: 'primary.light' } }}
+                    title="Edit Post"
                 >
-                  <IconButton
-                      onClick={handleMenuOpen}
-                      sx={{ color: 'text.secondary' }}
-                      title="More options"
-                  >
-                    <MoreHorizontal />
-                  </IconButton>
-                </motion.div>
-                <Menu
-                    anchorEl={menuAnchor}
-                    open={Boolean(menuAnchor)}
-                    onClose={handleMenuClose}
+                  <Edit />
+                </IconButton>
+                <IconButton
+                    onClick={handleDelete}
+                    disabled={deleteMutation.isPending}
+                    sx={{ color: 'text.secondary', '&:hover': { color: 'error.main', bgcolor: 'error.light' }, '&:disabled': { opacity: 0.5 } }}
+                    title="Delete Post"
                 >
-                  <MenuItem onClick={handleEdit} disabled={!isAuthor}>
-                    <Edit style={{ marginRight: 8 }} />
-                    Edit Post
-                  </MenuItem>
-                  <MenuItem onClick={handleDeleteMenu} disabled={!isAuthor}>
-                    <Trash2 style={{ marginRight: 8 }} />
-                    Delete Post
-                  </MenuItem>
-                </Menu>
+                  <Trash2 />
+                </IconButton>
               </Box>
           )}
         </Box>

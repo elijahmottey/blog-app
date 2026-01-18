@@ -328,8 +328,12 @@ export default class BackendApi {
     }
 
     // ---- USER ----
-    static async getAllUsers(page:number=0,size:number=10) {
-        return this.get<PagedResponse<UserRegistration>>(`/user/list?page=${page}&size=${size}`);
+    static async getAllUsers(page: number = 0, size: number = 10) {
+        return this.get<PagedResponse<UserDto>>(`/user/list?page=${page}&size=${size}`);
+    }
+
+    static async createUser(userData: Partial<UserRegistration>) {
+        return this.post<UserDto>('/user/create', userData);
     }
 
     static async getUserById(userId: number) {

@@ -1,6 +1,6 @@
 // components/layout/Navbar.tsx
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
     Menu,
     X,
@@ -14,9 +14,8 @@ import {
     Settings
 } from "lucide-react";
 
-import {Button, IconButton} from "@mui/material";
+import {Button} from "@mui/material";
 import BackendApi from "../service/BackendApi.ts";
-import { motion } from "framer-motion";
 
 
 export default function Navbar() {
@@ -27,7 +26,7 @@ export default function Navbar() {
    // const isAdmin = BackendApi.isAdmin();
     const isAuthenticated = BackendApi.isAuthenticated();
    // const isUser = BackendApi.isUser();
-
+   const navigate = useNavigate();
 
     // Handle scroll effect
     useEffect(() => {
@@ -103,18 +102,13 @@ export default function Navbar() {
                     <div className="flex items-center space-x-4">
                         {/* Search */}
                         <div className="relative">
-                        <motion.div
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.95 }}
-                            transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                        >
-                            <IconButton
+                            <button
                                 onClick={() => setIsSearchOpen(!isSearchOpen)}
+                                className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors"
                                 aria-label="Search"
                             >
-                                <Search />
-                            </IconButton>
-                        </motion.div>
+                                <Search className="h-5 w-5" />
+                            </button>
                             {isSearchOpen && (
                                 <div className="absolute right-0 top-12 w-96 bg-white rounded-lg shadow-lg border p-4">
                                     <div className="relative">
@@ -141,20 +135,14 @@ export default function Navbar() {
                                         Dashboard
                                     </Button>
                                 </Link>
-                                <Link to="dashboard/posts/create">
-                                    <Button variant="contained" startIcon={<PenSquare />}>
+                                <div onClick={() => navigate(`/dashboard/posts/create`)}                                 >
+                                    <Button startIcon={<PenSquare />}>
                                         Write Post
                                     </Button>
-                                </Link>
-                                <motion.div
-                                    whileHover={{ scale: 1.1, rotate: 10 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                                >
-                                    <IconButton>
-                                        <User />
-                                    </IconButton>
-                                </motion.div>
+                                </div>
+                                <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                                    <User className="h-5 w-5 text-gray-700" />
+                                </button>
                             </div>
                         ) : (
                             <div className="flex items-center space-x-3">
@@ -164,7 +152,7 @@ export default function Navbar() {
                                     </Button>
                                 </Link>
                                 <Link to="/auth/signup">
-                                    <Button variant="contained">Get Started</Button>
+                                    <Button>Get Started</Button>
                                 </Link>
                             </div>
                         )}

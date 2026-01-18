@@ -69,6 +69,11 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
       href: '/dashboard/profile',
       icon: User,
     },
+    {
+      name: 'AI Chat',
+      href: '/dashboard/ai-chat',
+      icon: MessageSquare,
+    },
   ];
 
   const adminMenuItems: SidebarItem[] = [

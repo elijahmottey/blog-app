@@ -55,8 +55,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initializeAuth();
   }, []);
 
-  const login = async (credentials: {email: string, password: string}) => {
-    const response = await BackendApi.loginUser(credentials);
+  const login = async (credentials: { email: string, password: string }) => {
+    await BackendApi.loginUser(credentials);
     const profileResp = await BackendApi.getUserProfile();
     const profile = profileResp.data;
     setUserProfile(profile);
@@ -69,7 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updatedAt: profile.updatedAt,
     };
     setUser(userWithRoles);
-    return response;
+    return userWithRoles; // Return the user object
   };
 
   const register = async (data: { email: string; password: string; name: string }) => {
@@ -94,17 +94,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUserProfile(null);
   };
 
-  const isAdmin = BackendApi.isAdmin();
-  const isUser = BackendApi.isUser();
-
   return (
     <AuthContext.Provider
       value={{
         user,
         userProfile,
         isAuthenticated: !!user,
-        isAdmin,
-        isUser,
+        isAdmin: user?.roles.includes('ADMIN') ?? false,
+        isUser: user?.roles.includes('USER') ?? false,
         login,
         register,
         logout,

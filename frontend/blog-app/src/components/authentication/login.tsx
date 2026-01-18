@@ -30,75 +30,26 @@ export const Login: React.FC = () => {
     const navigate = useNavigate();
     const { login } = useAuth();
     const location = useLocation();
-    const from = (location.state as any)?.from?.pathname || "/dashboard";
-
-    const inputRefs = [
-        useRef<HTMLInputElement>(null),
-        useRef<HTMLInputElement>(null),
-    ];
 
     const steps = [
         {
             title: "Email Address",
-            description: "Enter your registered email",
-            field: "email",
-            placeholder: "Enter your email address",
-            type: "email"
+            description: "Enter the email address associated with your account.",
+            placeholder: "e.g., you@example.com",
+            validation: () => email.trim() !== "" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
         },
         {
             title: "Password",
-            description: "Enter your secure password",
-            field: "password",
-            placeholder: "Enter your password",
-            type: "password"
-        }
+            description: "Enter your secure password.",
+            placeholder: "Your secret password",
+            validation: () => password.trim() !== "",
+        },
     ];
-
-    useEffect(() => {
-        if (inputRefs[currentStep]?.current) {
-            inputRefs[currentStep].current?.focus();
-        }
-    }, [currentStep]);
-
-    const validateCurrentStep = (): boolean => {
-        switch (currentStep) {
-            case 0: // Email
-                if (!email.trim()) {
-                    setError("Please enter your email address");
-                    return false;
-                }
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(email)) {
-                    setError("Please enter a valid email address");
-                    return false;
-                }
-                break;
-
-            case 1: // Password
-                if (!password) {
-                    setError("Please enter your password");
-                    return false;
-                }
-                if (password.length < 6) {
-                    setError("Password must be at least 6 characters");
-                    return false;
-                }
-                break;
-
-            default:
-                return false;
-        }
-
-        setError("");
-        return true;
-    };
 
     const handleNext = () => {
         if (validateCurrentStep()) {
-            if (!completedSteps.includes(currentStep)) {
-                setCompletedSteps(prev => [...prev, currentStep]);
-            }
             if (currentStep < steps.length - 1) {
+                setCompletedSteps([...completedSteps, currentStep]);
                 setCurrentStep(currentStep + 1);
             } else {
                 handleLogin();
@@ -108,8 +59,30 @@ export const Login: React.FC = () => {
 
     const handleBack = () => {
         if (currentStep > 0) {
+            setCompletedSteps(completedSteps.filter(step => step !== currentStep - 1));
             setCurrentStep(currentStep - 1);
         }
+    };
+
+    const validateCurrentStep = () => {
+        const currentValidation = steps[currentStep].validation;
+        if (!currentValidation()) {
+            let errorMessage = "";
+            switch (currentStep) {
+                case 0:
+                    errorMessage = "Please enter a valid email address.";
+                    break;
+                case 1:
+                    errorMessage = "Password cannot be empty.";
+                    break;
+                default:
+                    errorMessage = "Please complete the required field.";
+            }
+            setError(errorMessage);
+            return false;
+        }
+        setError("");
+        return true;
     };
 
     const handleLogin = async () => {
@@ -120,8 +93,9 @@ export const Login: React.FC = () => {
 
         try {
             setLoading(true);
-            const response = await login({ email, password });
-            toast.success(response.message || "Welcome back! 🎉");
+            const user = await login({ email, password });
+            toast.success("Welcome back! 🎉");
+            const from = location.state?.from?.pathname || (user.roles.includes('ADMIN') ? '/dashboard/admin/users' : '/dashboard');
             navigate(from, { replace: true });
         } catch (err: any) {
             const errorMessage =
@@ -349,7 +323,7 @@ export const Login: React.FC = () => {
                     <Button
                         component={Link}
                         to="/signup"
-                        variant="contained"
+                        variant="outlined"
                         endIcon={<ArrowRight />}
                         sx={{ textTransform: 'none' }}
                     >

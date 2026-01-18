@@ -95,7 +95,7 @@ export default function Home() {
                             <Button
                                 component={Link}
                                 to="/about"
-                                variant="contained"
+                                variant="outlined"
                             >
                                 Learn About Us
                             </Button>
@@ -177,7 +177,7 @@ export default function Home() {
                         </div>
                         {posts.length > 3 && (
                             <Link
-                                to="/archive"
+                                to="/blog"
                                 className="inline-flex items-center gap-2 text-amber-600 hover:text-amber-700 font-semibold group"
                             >
                                 View All Posts
@@ -295,7 +295,7 @@ export default function Home() {
                                         </div>
                                         <Button
                                             component={Link}
-                                            to={`/dashboard/posts/${featuredPost.id}`}
+                                            to={`/blog`}
                                             variant="contained"
                                             endIcon={<ArrowRight />}
                                         >

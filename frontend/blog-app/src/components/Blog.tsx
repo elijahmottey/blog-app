@@ -38,8 +38,8 @@ const Blog: React.FC = () => {
   };
 
   const filteredPosts = posts.filter(post =>
-    post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    post.content.toLowerCase().includes(searchTerm.toLowerCase())
+      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
@@ -49,211 +49,210 @@ const Blog: React.FC = () => {
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-          <Typography variant="h6">Loading posts...</Typography>
-        </Box>
-      </Container>
+        <Container maxWidth="lg" sx={{ py: 8 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+            <Typography variant="h6">Loading posts...</Typography>
+          </Box>
+        </Container>
     );
   }
 
   if (error) {
     return (
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="h5" color="error" sx={{ mb: 2 }}>
-            {error}
-          </Typography>
-          <Button variant="contained" onClick={fetchPosts}>
-            Try Again
-          </Button>
-        </Box>
-      </Container>
+        <Container maxWidth="lg" sx={{ py: 8 }}>
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <Typography variant="h5" color="error" sx={{ mb: 2 }}>
+              {error}
+            </Typography>
+            <Button variant="contained" onClick={fetchPosts}>
+              Try Again
+            </Button>
+          </Box>
+        </Container>
     );
   }
 
   return (
-    <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
-      {/* Hero Section */}
-      <Box
-        sx={{
-          bgcolor: 'primary.main',
-          color: 'primary.contrastText',
-          py: { xs: 6, md: 8 },
-          textAlign: 'center'
-        }}
-      >
-        <Container maxWidth="md">
-          <Typography variant="h2" component="h1" sx={{ mb: 2, fontWeight: 'bold' }}>
-            Blog
-          </Typography>
-          <Typography variant="h6" sx={{ opacity: 0.9 }}>
-            Discover insights, tutorials, and stories from our developer community
-          </Typography>
-        </Container>
-      </Box>
-
-      <Container maxWidth="lg" sx={{ py: 6 }}>
-        {/* Search and Filter */}
-        <Box sx={{ mb: 4, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-          <TextField
-            placeholder="Search posts..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            variant="outlined"
-            sx={{ flex: 1, minWidth: 250 }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search />
-                </InputAdornment>
-              ),
+      <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
+        {/* Hero Section */}
+        <Box
+            sx={{
+              bgcolor: 'primary.main',
+              color: 'primary.contrastText',
+              py: { xs: 6, md: 8 },
+              textAlign: 'center'
             }}
-          />
-          <Button
-            variant="contained"
-            startIcon={<Filter />}
-            sx={{ textTransform: 'none' }}
-          >
-            Filter
-          </Button>
+        >
+          <Container maxWidth="md">
+            <Typography variant="h2" component="h1" sx={{ mb: 2, fontWeight: 'bold',color:'white' }}>
+              Blog
+            </Typography>
+            <Typography variant="h6" sx={{ opacity: 0.9 ,color:'white'}}>
+              Discover insights, tutorials, and stories from our developer community
+            </Typography>
+          </Container>
         </Box>
 
-        {/* Posts Grid */}
-        {filteredPosts.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 8 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              {searchTerm ? 'No posts found matching your search.' : 'No posts available.'}
-            </Typography>
-            {searchTerm && (
-              <Button variant="contained" onClick={() => setSearchTerm('')}>
-                Clear Search
-              </Button>
-            )}
+        <Container maxWidth="lg" sx={{ py: 6 }}>
+          {/* Search and Filter */}
+          <Box sx={{ mb: 4, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+            <TextField
+                placeholder="Search posts..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                variant="outlined"
+                sx={{ flex: 1, minWidth: 250 }}
+                InputProps={{
+                  startAdornment: (
+                      <InputAdornment position="start">
+                        <Search />
+                      </InputAdornment>
+                  ),
+                }}
+            />
+            <Button
+                variant="contained"
+                startIcon={<Filter />}
+                sx={{ textTransform: 'none' }}
+            >
+              Filter
+            </Button>
           </Box>
-        ) : (
-          <>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-              {filteredPosts.map((post, index) => (
-                <Box
-                  key={post.id || index}
-                  sx={{
-                    flex: '1 1 300px',
-                    maxWidth: { xs: '100%', sm: 'calc(50% - 16px)', lg: 'calc(33.333% - 16px)' },
-                    minWidth: '300px'
-                  }}
-                >
-                  <Card
-                    sx={{
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      transition: 'transform 0.2s, box-shadow 0.2s',
-                      '&:hover': {
-                        transform: 'translateY(-4px)',
-                        boxShadow: 4,
-                        cursor: 'pointer'
-                      }
-                    }}
-                    onClick={() => navigate(`/dashboard/posts/${post.id}`)}
-                  >
-                    <CardMedia
-                      component="img"
-                      height="200"
-                      image={unifiedImageUrl}
-                      alt="Blog post illustration"
-                      sx={{ objectFit: 'cover' }}
-                    />
-                    <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                      <Box sx={{ mb: 2 }}>
-                        <Chip
-                          label="Technology"
-                          size="small"
-                          color="primary"
-                          variant="outlined"
-                          sx={{ mb: 1 }}
-                        />
-                      </Box>
 
-                      <Typography
-                        variant="h6"
-                        component={Link}
-                        to={`/dashboard/posts/${post.id}`}
-                        sx={{
-                          textDecoration: 'none',
-                          color: 'text.primary',
-                          fontWeight: 'bold',
-                          mb: 2,
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
-                          '&:hover': { color: 'primary.main' }
-                        }}
-                      >
-                        {post.title}
-                      </Typography>
-
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: 'text.secondary',
-                          mb: 2,
-                          display: '-webkit-box',
-                          WebkitLineClamp: 3,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden'
-                        }}
-                      >
-                        {excerpt(post.content, 120)}
-                      </Typography>
-
-                      <Box sx={{ mt: 'auto', pt: 2 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                          <User size={16} />
-                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                            {post.users || 'Anonymous'}
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'space-between' }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <CalendarDays size={16} />
-                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                              {formatDate(post.createdAt)}
-                            </Typography>
-                          </Box>
-                          <Box sx={{ display: 'flex', gap: 1 }}>
-                            <Button size="small" startIcon={<Download />} onClick={() => downloadPost(post)}>
-                              TXT
-                            </Button>
-                            <Button size="small" onClick={() => downloadPostPdf(post)}>
-                              PDF
-                            </Button>
-                          </Box>
-                        </Box>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Box>
-              ))}
-            </Box>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
-                <Pagination
-                  count={totalPages}
-                  page={currentPage}
-                  onChange={handlePageChange}
-                  color="primary"
-                  size="large"
-                />
+          {/* Posts Grid */}
+          {filteredPosts.length === 0 ? (
+              <Box sx={{ textAlign: 'center', py: 8 }}>
+                <Typography variant="h6" sx={{ mb: 2 }}>
+                  {searchTerm ? 'No posts found matching your search.' : 'No posts available.'}
+                </Typography>
+                {searchTerm && (
+                    <Button variant="contained" onClick={() => setSearchTerm('')}>
+                      Clear Search
+                    </Button>
+                )}
               </Box>
-            )}
-          </>
-        )}
-      </Container>
-    </Box>
+          ) : (
+              <>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                  {filteredPosts.map((post, index) => (
+                      <Box
+                          key={post.id || index}
+                          sx={{
+                            flex: '1 1 300px',
+                            maxWidth: { xs: '100%', sm: 'calc(50% - 16px)', lg: 'calc(33.333% - 16px)' },
+                            minWidth: '300px'
+                          }}
+                      >
+                        <Card
+                            sx={{
+                              height: '100%',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              transition: 'transform 0.2s, box-shadow 0.2s',
+                              '&:hover': {
+                                transform: 'translateY(-4px)',
+                                boxShadow: 4,
+                                cursor: 'pointer'
+                              }
+                            }}
+                            onClick={() => navigate(`/dashboard/posts/${post.id}`)}
+                        >
+                          <CardMedia
+                              component="img"
+                              height="200"
+                              image={unifiedImageUrl}
+                              alt="Blog post illustration"
+                              sx={{ objectFit: 'cover' }}
+                          />
+                          <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                            <Box sx={{ mb: 2 }}>
+                              <Chip
+                                  size="small"
+                                  color="primary"
+                                  variant="outlined"
+                                  sx={{ mb: 1 }}
+                              />
+                            </Box>
+
+                            <Typography
+                                variant="h6"
+                                component={Link}
+                                to={`/dashboard/posts/${post.id}`}
+                                sx={{
+                                  textDecoration: 'none',
+                                  color: 'text.primary',
+                                  fontWeight: 'bold',
+                                  mb: 2,
+                                  display: '-webkit-box',
+                                  WebkitLineClamp: 2,
+                                  WebkitBoxOrient: 'vertical',
+                                  overflow: 'hidden',
+                                  '&:hover': { color: 'primary.main' }
+                                }}
+                            >
+                              {post.title}
+                            </Typography>
+
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                  color: 'text.secondary',
+                                  mb: 2,
+                                  display: '-webkit-box',
+                                  WebkitLineClamp: 3,
+                                  WebkitBoxOrient: 'vertical',
+                                  overflow: 'hidden'
+                                }}
+                            >
+                              {excerpt(post.content, 120)}
+                            </Typography>
+
+                            <Box sx={{ mt: 'auto', pt: 2 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                <User size={16} />
+                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                  {post.users || 'Anonymous'}
+                                </Typography>
+                              </Box>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'space-between' }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <CalendarDays size={16} />
+                                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                    {formatDate(post.createdAt)}
+                                  </Typography>
+                                </Box>
+                                <Box sx={{ display: 'flex', gap: 1 }}>
+                                  <Button size="small" startIcon={<Download />} onClick={() => downloadPost(post)}>
+                                    TXT
+                                  </Button>
+                                  <Button size="small" onClick={() => downloadPostPdf(post)}>
+                                    PDF
+                                  </Button>
+                                </Box>
+                              </Box>
+                            </Box>
+                          </CardContent>
+                        </Card>
+                      </Box>
+                  ))}
+                </Box>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
+                      <Pagination
+                          count={totalPages}
+                          page={currentPage}
+                          onChange={handlePageChange}
+                          color="primary"
+                          size="large"
+                      />
+                    </Box>
+                )}
+              </>
+          )}
+        </Container>
+      </Box>
   );
 };
 

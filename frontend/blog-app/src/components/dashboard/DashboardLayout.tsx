@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { DashboardNavbar } from './DashboardNavbar';
 import { DashboardSidebar } from './DashboardSidebar';
-import { AIChatWidget } from './AIChatWidget';
 
 export const DashboardLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -73,11 +72,6 @@ export const DashboardLayout: React.FC = () => {
             </div>
           </div>
         </main>
-      </div>
-
-      {/* AI Chat Widget - Fixed position */}
-      <div className="fixed bottom-4 right-4 z-50">
-        <AIChatWidget floating={true} />
       </div>
     </div>
   );

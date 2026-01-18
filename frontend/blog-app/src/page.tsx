@@ -15,12 +15,11 @@ import { PostDetail } from "./components/dashboard/PostDetail";
 import { EditPost } from "./components/dashboard/EditPost";
 import { ProfileManagement } from "./components/dashboard/ProfileManagement";
 import { CommentsManagement } from "./components/dashboard/CommentsManagement";
-import { AdminUsers } from "./components/dashboard/AdminUsers";
-import { AdminPosts } from "./components/dashboard/AdminPosts";
 import About from "./components/About";
 import Blog from "./components/Blog";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import TermsOfService from "./components/TermsOfService";
+import { AIChatPage } from "./components/dashboard/AIChatPage";
 
 
 export const PagesRoute = () => {
@@ -61,9 +60,10 @@ export const PagesRoute = () => {
                             <Route path="posts/:id/edit" element={<EditPost />} />
                             <Route path="comments" element={<CommentsManagement/>} />
                             <Route path="profile" element={<ProfileManagement />} />
+                            <Route path="ai-chat" element={<AIChatPage />} />
                             {/* Admin routes */}
-                            <Route path="admin/users" element={<AdminUsers />} />
-                            <Route path="admin/content" element={<AdminPosts />} />
+                            <Route path="admin/users" element={<div>User Management</div>} />
+                            <Route path="admin/content" element={<div>Content Moderation</div>} />
                             <Route path="admin/analytics" element={<div>Analytics</div>} />
                             <Route path="admin/settings" element={<div>System Settings</div>} />
                         </Route>
