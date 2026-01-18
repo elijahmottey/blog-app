@@ -1,7 +1,7 @@
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom"
 
 
-//import { ProtectedRoute, AdminRoute } from "./service/guard.tsx";
+import { ProtectedRoute, AdminRoute } from "./service/guard.tsx";
 import Navbar from "./components/navigation.tsx";
 import Footer from "./components/footer.tsx";
 import Home from "./components/home.tsx";

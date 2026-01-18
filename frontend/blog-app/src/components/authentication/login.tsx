@@ -208,7 +208,7 @@ export const Login: React.FC = () => {
                                 size="small"
                                 sx={{ textTransform: 'none', color: 'text.secondary' }}
                             >
-                                Forgot your password?
+                                {/*Forgot your password?*/}
                             </Button>
                         </Box>
                     </Box>
@@ -241,7 +241,7 @@ export const Login: React.FC = () => {
                         LIV Blog
                     </div>
                     <h2 className="text-2xl font-bold text-center text-gray-800 ">Welcome Back</h2>
-                    <p className="text-sm text-center text-gray-600">Sign in to your LIV Hotel account</p>
+                    <p className="text-sm text-center text-gray-600">Sign in to your LIV Blog account</p>
                 </div>
 
                 {/* Step Indicator */}

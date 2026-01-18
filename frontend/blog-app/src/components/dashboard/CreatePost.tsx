@@ -667,7 +667,7 @@ Add code snippets when needed
                           p: 2,
                           '& textarea': {
                             resize: 'vertical',
-                            minHeight: '400px'
+                            minHeight: '40px'
                           }
                         }
                       }}
