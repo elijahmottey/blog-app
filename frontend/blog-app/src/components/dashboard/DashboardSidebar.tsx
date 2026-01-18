@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { cn } from '../../lib/utils';
+import {Box, Typography} from "@mui/material";
 
 interface SidebarItem {
   name: string;
@@ -78,34 +79,17 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
 
   const adminMenuItems: SidebarItem[] = [
     {
-      name: 'Admin Dashboard',
-      href: '/dashboard/admin',
-      icon: BarChart3,
-    },
-    {
       name: 'User Management',
       href: '/dashboard/admin/users',
       icon: Users,
     },
-    {
-      name: 'Content Moderation',
-      href: '/dashboard/admin/content',
-      icon: Shield,
-      children: [
-        { name: 'All Posts', href: '/dashboard/admin/content/posts', icon: FileText },
-        { name: 'Flagged Content', href: '/dashboard/admin/content/flagged', icon: Shield },
-      ],
-    },
+
     {
       name: 'Analytics',
       href: '/dashboard/admin/analytics',
       icon: BarChart3,
     },
-    {
-      name: 'System Settings',
-      href: '/dashboard/admin/settings',
-      icon: Settings,
-    },
+
   ];
 
   const menuItems = isAdmin ? [...userMenuItems, ...adminMenuItems] : userMenuItems;
@@ -186,11 +170,35 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-center h-16 px-4 border-b border-gray-200">
-            <Link to="/dashboard" className="text-xl font-bold text-gray-900">
-              BlogApp
-            </Link>
-          </div>
+          <Link to="/dashboard" style={{ textDecoration: 'none',paddingLeft:"2rem" }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0 ,paddingTop:'1.5rem' ,paddingLeft:"2rem"}}>
+              <Box
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 1,
+                    bgcolor: 'primary.main',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+              >
+                <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
+                  LIV
+                </Typography>
+              </Box>
+              <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 'bold',
+                    color: 'primary.main',
+                    display: { xs: 'none', sm: 'block' },
+                  }}
+              >
+                Blog
+              </Typography>
+            </Box>
+          </Link>
 
           {/* Navigation */}
           <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">

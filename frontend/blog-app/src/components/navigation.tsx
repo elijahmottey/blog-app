@@ -1,4 +1,3 @@
-// components/layout/Navbar.tsx
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -14,19 +13,20 @@ import {
     Settings
 } from "lucide-react";
 
-import {Button} from "@mui/material";
+import {
+    Button,
+    Box,
+    Typography
+} from "@mui/material";
 import BackendApi from "../service/BackendApi.ts";
-
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const location = useLocation();
-   // const isAdmin = BackendApi.isAdmin();
     const isAuthenticated = BackendApi.isAuthenticated();
-   // const isUser = BackendApi.isUser();
-   const navigate = useNavigate();
+    const navigate = useNavigate();
 
     // Handle scroll effect
     useEffect(() => {
@@ -46,13 +46,9 @@ export default function Navbar() {
     const navigation = [
         { name: "Home", href: "/", icon: Home },
         { name: "Blog", href: "/blog", icon: BookOpen },
-       // // { name: "Categories", href: "/categories", icon: Tag },
-       //  { name: "Authors", href: "/authors", icon: Users },
         { name: "About", href: "/about", icon: Users },
     ];
 
-    // @ts-ignore
-    // @ts-ignore
     return (
         <nav
             className={`sticky top-0 z-50 w-full transition-all duration-300 ${
@@ -64,15 +60,36 @@ export default function Navbar() {
             <div className="container mx-auto px-4">
                 {/* Desktop Navigation */}
                 <div className="hidden md:flex items-center justify-between h-16">
-                    {/* Logo */}
+                    {/* Logo and Navigation Links */}
                     <div className="flex items-center">
-                        <Link to="/" className="flex items-center space-x-2">
-                            <div className="h-8 w-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                                <BookOpen className="h-5 w-5 text-primary-foreground" />
-                            </div>
-                            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                LIVBlog
-              </span>
+                        <Link to="/dashboard" style={{ textDecoration: 'none' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Box
+                                    sx={{
+                                        width: 32,
+                                        height: 32,
+                                        borderRadius: 1,
+                                        bgcolor: 'primary.main',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold', fontSize: '1rem' }}>
+                                        LIV
+                                    </Typography>
+                                </Box>
+                                <Typography
+                                    variant="h6"
+                                    sx={{
+                                        fontWeight: 'bold',
+                                        color: 'primary.main',
+                                        fontSize: '1.25rem',
+                                    }}
+                                >
+                                    Blog
+                                </Typography>
+                            </Box>
                         </Link>
 
                         {/* Navigation Links */}
@@ -128,18 +145,19 @@ export default function Navbar() {
                         </div>
 
                         {/* Auth Buttons */}
-                        {isAuthenticated? (
+                        {isAuthenticated ? (
                             <div className="flex items-center space-x-3">
                                 <Link to="/dashboard">
                                     <Button variant="outlined" startIcon={<User />}>
                                         Dashboard
                                     </Button>
                                 </Link>
-                                <div onClick={() => navigate(`/dashboard/posts/create`)}                                 >
-                                    <Button startIcon={<PenSquare />}>
-                                        Write Post
-                                    </Button>
-                                </div>
+                                <Button
+                                    onClick={() => navigate("/dashboard/posts/create")}
+                                    startIcon={<PenSquare />}
+                                >
+                                    Write Post
+                                </Button>
                                 <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                                     <User className="h-5 w-5 text-gray-700" />
                                 </button>
@@ -163,12 +181,30 @@ export default function Navbar() {
                 <div className="flex md:hidden items-center justify-between h-16">
                     {/* Mobile Logo */}
                     <Link to="/" className="flex items-center space-x-2">
-                        <div className="h-8 w-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                            <BookOpen className="h-5 w-5 text-primary-foreground" />
-                        </div>
-                        <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              LIVBlog
-            </span>
+                        <Box
+                            sx={{
+                                width: 32,
+                                height: 32,
+                                borderRadius: 1,
+                                bgcolor: 'primary.main',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}
+                        >
+                            <Typography sx={{ color: 'white', fontWeight: 'bold', fontSize: '0.875rem' }}>
+                                LIV
+                            </Typography>
+                        </Box>
+                        <Typography
+                            sx={{
+                                fontWeight: 'bold',
+                                color: 'primary.main',
+                                fontSize: '1.125rem',
+                            }}
+                        >
+                            Blog
+                        </Typography>
                     </Link>
 
                     {/* Mobile Menu Button */}
@@ -233,21 +269,21 @@ export default function Navbar() {
                                 {isAuthenticated ? (
                                     <>
                                         <Link
-                                            to="/create"
+                                            to="/dashboard/posts/create"
                                             className="flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                                         >
                                             <PenSquare className="h-5 w-5" />
                                             <span>Write Post</span>
                                         </Link>
                                         <Link
-                                            to="/profile"
+                                            to="/dashboard/profile"
                                             className="flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                                         >
                                             <User className="h-5 w-5" />
                                             <span>Profile</span>
                                         </Link>
                                         <Link
-                                            to="/settings"
+                                            to="/dashboard/settings"
                                             className="flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                                         >
                                             <Settings className="h-5 w-5" />
@@ -257,14 +293,14 @@ export default function Navbar() {
                                 ) : (
                                     <>
                                         <Link
-                                            to="/login"
+                                            to="/auth/login"
                                             className="flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                                         >
                                             <LogIn className="h-5 w-5" />
                                             <span>Sign In</span>
                                         </Link>
                                         <Link
-                                            to="/register"
+                                            to="/auth/signup"
                                             className="flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                                         >
                                             <PenSquare className="h-5 w-5" />

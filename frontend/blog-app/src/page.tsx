@@ -20,7 +20,8 @@ import Blog from "./components/Blog";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import TermsOfService from "./components/TermsOfService";
 import { AIChatPage } from "./components/dashboard/AIChatPage";
-import {AdminPosts} from "./components/dashboard/AdminPosts.tsx";
+import {AdminUsers} from "./components/dashboard/AdminUsers.tsx";
+
 
 
 export const PagesRoute = () => {
@@ -63,7 +64,7 @@ export const PagesRoute = () => {
                             <Route path="profile" element={<ProfileManagement />} />
                             <Route path="ai-chat" element={<AIChatPage />} />
                             {/* Admin routes */}
-                            <Route path="admin/users" element={<AdminPosts/>} />
+                            <Route path="admin/users" element={<AdminUsers/>} />
                             <Route path="admin/content" element={<div>Content Moderation</div>} />
                             <Route path="admin/analytics" element={<div>Analytics</div>} />
                             <Route path="admin/settings" element={<div>System Settings</div>} />
