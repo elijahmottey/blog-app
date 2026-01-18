@@ -21,6 +21,7 @@ import PrivacyPolicy from "./components/PrivacyPolicy";
 import TermsOfService from "./components/TermsOfService";
 import { AIChatPage } from "./components/dashboard/AIChatPage";
 import {AdminUsers} from "./components/dashboard/AdminUsers.tsx";
+import {NotFound} from "./components/not-found.tsx";
 
 
 
@@ -43,6 +44,9 @@ export const PagesRoute = () => {
                         </>} />
                         <Route path="auth/login" element={<><Login /> <Footer/></>} />
                         <Route path="auth/signup" element={<><Signup /> <Footer/></>} />
+
+                        {/*<Route path="/unauthorized" element={<Unauthorized />} />*/}
+                        <Route path="*" element={<NotFound/>} />
 
                         {/* Public pages */}
                         <Route path="/about" element={<><Navbar /><About /><Footer/></>} />
