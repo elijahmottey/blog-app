@@ -9,7 +9,7 @@ export const AdminPosts: React.FC = () => {
 
   const { data: postsData, isLoading, error } = useQuery({
     queryKey: ['admin-posts-list'],
-    queryFn: () => BackendApi.getAllPost(0, 1000), // Get all posts
+    queryFn: () => BackendApi.getAllUsers(), // Get all posts
   });
 
   const posts = postsData?.data?.content || [];
