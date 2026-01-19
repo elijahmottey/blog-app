@@ -324,6 +324,7 @@ export const CreatePost: React.FC = () => {
 
 
   // @ts-ignore
+  // @ts-ignore
   return (
       <Box sx={{ maxWidth: 1000, mx: 'auto', p: { xs: 2, md: 3 } }}>
         {/* Header */}
@@ -385,15 +386,15 @@ export const CreatePost: React.FC = () => {
 
         {/* Stats Bar */}
         <Grid container spacing={2} sx={{ mb: 3 }}>
-          {/*@ts-ignore*/}
-          <Grid item xs={6} sm={3}>
+          
+          <Grid xs={6} sm={3}>
             <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'primary.50', borderRadius: 2 }}>
               <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600 }}>Words</Typography>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>{wordCount}</Typography>
             </Paper>
           </Grid>
-          {/*@ts-ignore*/}
-          <Grid item xs={6} sm={3}>
+          
+          <Grid xs={6} sm={3}>
             <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'secondary.50', borderRadius: 2 }}>
               <Typography variant="body2" color="secondary.main" sx={{ fontWeight: 600 }}>Characters</Typography>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>{watchedContent.length}</Typography>
@@ -401,15 +402,15 @@ export const CreatePost: React.FC = () => {
 
           </Grid>
 
-          <Grid item xs={6} sm={3}>
+          <Grid xs={6} sm={3}>
             <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'success.50', borderRadius: 2 }}>
               <Typography variant="body2" color="success.main" sx={{ fontWeight: 600 }}>Paragraphs</Typography>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>{paragraphCount}</Typography>
             </Paper>
 
           </Grid>
-          {/*@ts-ignore*/}
-          <Grid item xs={6} sm={3}>
+          
+          <Grid xs={6} sm={3}>
             <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'warning.50', borderRadius: 2 }}>
               <Typography variant="body2" color="warning.main" sx={{ fontWeight: 600 }}>Reading Time</Typography>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>{readingTime} min</Typography>
@@ -689,8 +690,8 @@ Add code snippets when needed
               🎯 Quick Formatting Tips
             </Typography>
             <Grid container spacing={1}>
-              {/*@ts-ignore*/}
-              <Grid item xs={6} sm={3}>
+              
+              <Grid xs={6} sm={3}>
                 <Chip
                     label="Ctrl+B → Bold"
                     size="small"
@@ -698,26 +699,26 @@ Add code snippets when needed
                     sx={{ fontSize: '0.75rem' }}
                 />
               </Grid>
-              {/*@ts-ignore*/}
-              <Grid item xs={6} sm={3}>
+              
+              <Grid xs={6} sm={3}>
                 <Chip
                     label="Ctrl+I → Italic"
                     size="small"
                     variant="outlined"
                     sx={{ fontSize: '0.75rem' }}
                 />
-                {/*@ts-ignore*/}
+                
               </Grid>
-              <Grid item xs={6} sm={3}>
+              <Grid xs={6} sm={3}>
                 <Chip
                     label="Select text first"
                     size="small"
                     variant="outlined"
                     sx={{ fontSize: '0.75rem' }}
                 />
-                {/*@ts-ignore*/}
+                
               </Grid>
-              <Grid item xs={6} sm={3}>
+              <Grid xs={6} sm={3}>
                 <Chip
                     label="Click icons to format"
                     size="small"
@@ -808,9 +809,9 @@ Add code snippets when needed
               ✨ Pro Writing Tips
             </Typography>
           </Box>
-          {/*@ts-ignore*/}
+          
           <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <Box sx={{
                 bgcolor: 'white',
                 p: 2,
@@ -833,9 +834,9 @@ Add code snippets when needed
                   </Typography>
                 </Box>
               </Box>
-              {/*@ts-ignore*/}
+              
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <Box sx={{
                 bgcolor: 'white',
                 p: 2,

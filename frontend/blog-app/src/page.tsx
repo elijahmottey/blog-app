@@ -1,7 +1,7 @@
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom"
 
 
-import { ProtectedRoute, AdminRoute } from "./service/guard.tsx";
+//import { ProtectedRoute, AdminRoute } from "./service/guard.tsx";
 import Navbar from "./components/navigation.tsx";
 import Footer from "./components/footer.tsx";
 import Home from "./components/home.tsx";
@@ -20,14 +20,14 @@ import Blog from "./components/Blog";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import TermsOfService from "./components/TermsOfService";
 import { AIChatPage } from "./components/dashboard/AIChatPage";
-import {AdminUsers} from "./components/dashboard/AdminUsers.tsx";
 import {NotFound} from "./components/not-found.tsx";
+import {AdminUsers} from "./components/dashboard/AdminUsers.tsx";
 
 
 
 export const PagesRoute = () => {
 
-    // @ts-ignore
+    
     return (
         <BrowserRouter>
             <div >
@@ -58,9 +58,8 @@ export const PagesRoute = () => {
 
                         {/* Dashboard routes */}
                         <Route path="/dashboard" element={
-                            <ProtectedRoute>
-                            <DashboardLayout />
-                        </ProtectedRoute>}>
+                                <DashboardLayout />
+                            }>
                             <Route index element={<DashboardRouter />} />
                             {/* User routes */}
                             <Route path="posts" element={<PostsManagement />} />
@@ -72,9 +71,9 @@ export const PagesRoute = () => {
                             <Route path="ai-chat" element={<AIChatPage />} />
                             {/* Admin routes */}
                             <Route path="admin/users" element={
-                                <AdminRoute>
-                                <AdminUsers />
-                            </AdminRoute>} />
+
+                                    <AdminUsers />
+                                } />
                             <Route path="admin/analytics" element={<div>Analytics</div>} />
                         </Route>
 

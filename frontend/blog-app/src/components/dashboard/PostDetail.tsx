@@ -190,11 +190,7 @@ export const PostDetail: React.FC = () => {
   const postData = post.data;
 
 
-  // @ts-ignore
-  const postAuthorName =
-      postData.users && typeof postData.users === 'object'
-          ? postData.users.author
-          : 'Anonymous';
+  const postAuthorName = postData.users || 'Anonymous';
 
   // 🔹 SAFELY ENSURE POST CONTENT IS A STRING
   const safePostContent =
@@ -204,9 +200,7 @@ export const PostDetail: React.FC = () => {
 
   // 🔹 SAFELY EXTRACT COMMENT AUTHOR NAME HELPER
   const getCommentAuthorName = (users: any) => {
-    return users && typeof users === 'object'
-        ? users.name
-        : 'Anonymous';
+    return users || 'Anonymous';
   };
 
   return (

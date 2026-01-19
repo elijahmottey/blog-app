@@ -7,6 +7,7 @@ export interface UserRegistration {
     email: string;
     password: string;
     name: string;
+    role?: string;
 }
 
 
@@ -34,6 +35,8 @@ export interface  UserDto{
     updatedAt:string;
     post?: string[];
     comments?:string[]
+    likes?: number;
+    views?: number;
 }
 
 // Profile shapes returned by /user/get-user-profile
@@ -41,6 +44,10 @@ export interface UserProfilePost {
     id: number;
     title: string;
     content: string;
+    likes?: number;
+    views?: number;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface UserProfileComment {
@@ -67,6 +74,8 @@ export interface PostDto{
     createdAt?:string;
     updatedAt?:string;
     comments?:string[];
+    likes?: number;
+    views?: number;
 }
 
 export interface CommentDto{

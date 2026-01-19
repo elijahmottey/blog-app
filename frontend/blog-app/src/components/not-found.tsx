@@ -1,7 +1,7 @@
 // components/NotFound.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Home, ArrowLeft } from 'lucide-react';
+import { Home, ArrowLeft } from 'lucide-react';
 import { Button, Box, Typography, Paper } from '@mui/material';
 
 export const NotFound: React.FC = () => {

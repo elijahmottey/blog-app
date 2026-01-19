@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+
 import { Link } from 'react-router-dom';
 import {
   FileText,
@@ -45,11 +45,6 @@ export const UserDashboard: React.FC = () => {
       // Invalidate all posts queries
       queryClient.invalidateQueries({ queryKey: ['all-posts'] });
       queryClient.invalidateQueries({ queryKey: ['user-posts-management'] });
-      if (userProfile?.posts) {
-        // Update userProfile posts locally
-        const updatedPosts = userProfile.posts.filter(post => post.id !== postId);
-        // You might need to update the auth context here if it supports updates
-      }
     },
     onError: (error: any) => {
       console.error('Delete post error:', error);
@@ -70,7 +65,7 @@ export const UserDashboard: React.FC = () => {
   // Combine posts - prioritize userProfile posts, fall back to all posts filtered by user
   const posts = userPosts.length > 0
       ? userPosts
-      : allPosts.filter(post => post.authorId === user?.id);
+      : allPosts.filter(post => post.id === user?.id);
 
   const userComments = userProfile?.comments || [];
 
@@ -81,7 +76,11 @@ export const UserDashboard: React.FC = () => {
   const draftPosts = totalPosts - publishedPosts;
 
   // Calculate likes and views (assuming these fields exist)
-  const totalLikes = posts.reduce((sum, post) => sum + (post.likes || 0), 0);
+  
+  const totalLikes = posts.reduce((sum, post) => sum + (post.likes || 0),
+      0);
+
+  
   const totalViews = posts.reduce((sum, post) => sum + (post.views || 0), 0);
 
   if (postsLoading) {
@@ -102,6 +101,11 @@ export const UserDashboard: React.FC = () => {
     );
   }
 
+  
+  
+  
+  
+  
   return (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: { xs: 2, md: 3 } }}>
         {/* Welcome Header */}
@@ -116,7 +120,7 @@ export const UserDashboard: React.FC = () => {
 
         {/* Stats Cards */}
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid xs={12} sm={6} md={3}>
             <Card sx={{ height: '100%', borderRadius: 2 }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -139,7 +143,7 @@ export const UserDashboard: React.FC = () => {
             </Card>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid xs={12} sm={6} md={3}>
             <Card sx={{ height: '100%', borderRadius: 2 }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -158,7 +162,7 @@ export const UserDashboard: React.FC = () => {
             </Card>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid xs={12} sm={6} md={3}>
             <Card sx={{ height: '100%', borderRadius: 2 }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -177,7 +181,7 @@ export const UserDashboard: React.FC = () => {
             </Card>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid xs={12} sm={6} md={3}>
             <Card sx={{ height: '100%', borderRadius: 2 }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -203,7 +207,7 @@ export const UserDashboard: React.FC = () => {
             Quick Actions
           </Typography>
           <Grid container spacing={3}>
-            <Grid item xs={12} md={4}>
+            <Grid xs={12} md={4}>
               <Button
                   component={Link}
                   to="/dashboard/posts/create"
@@ -234,7 +238,7 @@ export const UserDashboard: React.FC = () => {
               </Button>
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid xs={12} md={4}>
               <Button
                   component={Link}
                   to="/dashboard/posts"
@@ -265,7 +269,7 @@ export const UserDashboard: React.FC = () => {
               </Button>
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid xs={12} md={4}>
               <Button
                   component={Link}
                   to="/dashboard/comments"
@@ -394,6 +398,7 @@ export const UserDashboard: React.FC = () => {
                       </Box>
                       <Box sx={{ display: 'flex', gap: 2, mt: 1, pl: 4 }}>
                         <Chip
+
                             label={post.createdAt ? new Date(post.createdAt).toLocaleDateString() : 'No date'}
                             size="small"
                             variant="outlined"

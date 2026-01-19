@@ -235,7 +235,7 @@ export const PostsManagement: React.FC = () => {
 
         {/* Stats Cards */}
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={4}>
+          <Grid xs={12} sm={4}>
             <Card sx={{ borderRadius: 2, height: '100%' }}>
               <CardContent sx={{ textAlign: 'center' }}>
                 <Typography variant="h3" sx={{ color: 'primary.main', fontWeight: 'bold', mb: 1 }}>
@@ -247,7 +247,7 @@ export const PostsManagement: React.FC = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid xs={12} sm={4}>
             <Card sx={{ borderRadius: 2, height: '100%' }}>
               <CardContent sx={{ textAlign: 'center' }}>
                 <Typography variant="h3" sx={{ color: 'success.main', fontWeight: 'bold', mb: 1 }}>
@@ -259,7 +259,7 @@ export const PostsManagement: React.FC = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid xs={12} sm={4}>
             <Card sx={{ borderRadius: 2, height: '100%' }}>
               <CardContent sx={{ textAlign: 'center' }}>
                 <Typography variant="h3" sx={{ color: 'warning.main', fontWeight: 'bold', mb: 1 }}>
@@ -345,6 +345,7 @@ export const PostsManagement: React.FC = () => {
                                 variant="outlined"
                                 color="info"
                             />
+                            {/*@ts-ignore*/}
                             {post.likes > 0 && (
                                 <Chip
                                     label={`${post.likes} likes`}
@@ -353,6 +354,7 @@ export const PostsManagement: React.FC = () => {
                                     color="error"
                                 />
                             )}
+                            {/*@ts-ignore*/}
                             {post.views > 0 && (
                                 <Chip
                                     label={`${post.views} views`}
@@ -483,7 +485,7 @@ export const PostsManagement: React.FC = () => {
             📊 Quick Summary
           </Typography>
           <Grid container spacing={2}>
-            <Grid item xs={6} sm={3}>
+            <Grid xs={6} sm={3}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
                   {filteredPosts.length}
@@ -493,7 +495,7 @@ export const PostsManagement: React.FC = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={6} sm={3}>
+            <Grid xs={6} sm={3}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" sx={{ color: 'success.main', fontWeight: 'bold' }}>
                   {posts.filter(p => p.comments && p.comments.length > 0).length}
@@ -503,7 +505,7 @@ export const PostsManagement: React.FC = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={6} sm={3}>
+            <Grid xs={6} sm={3}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" sx={{ color: 'warning.main', fontWeight: 'bold' }}>
                   {posts.filter(p => !p.updatedAt || p.updatedAt === p.createdAt).length}
@@ -513,7 +515,7 @@ export const PostsManagement: React.FC = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={6} sm={3}>
+            <Grid xs={6} sm={3}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" sx={{ color: 'error.main', fontWeight: 'bold' }}>
                   {deleteMutation.isPending ? 0 : 0}

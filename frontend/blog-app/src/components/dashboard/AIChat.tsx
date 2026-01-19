@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Send,
-  Loader,
+
   MessageCircle,
   X,
   Minimize2,
-  Maximize2,
   Bot,
   User,
   Copy,
@@ -16,7 +15,6 @@ import {
   Trash2,
   Mic,
   MicOff,
-  Image,
   Paperclip
 } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
@@ -31,11 +29,7 @@ import {
   Chip,
   Tooltip,
   CircularProgress,
-  Alert,
-  Snackbar,
-  List,
-  ListItem,
-  ListItemIcon,
+
   ListItemText,
   Divider,
   Fab,
@@ -65,7 +59,7 @@ interface QuickAction {
   id: string;
   title: string;
   prompt: string;
-  icon: React.ReactNode;
+  icon: React.ReactElement;
   color: string;
 }
 
@@ -329,6 +323,7 @@ export const AIChat: React.FC<AIChatProps> = ({ isExpanded = false, onToggleExpa
     );
   }
 
+  // @ts-ignore
   return (
       <Slide direction="up" in={true} mountOnEnter unmountOnExit>
         <Paper

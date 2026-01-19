@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import BackendApi, { type UserDto, type UserProfile } from '../service/BackendApi';
+import { Roles } from "../enums/Roles.ts";
 
 interface AuthContextType {
   user: UserDto | null;
@@ -95,20 +96,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        userProfile,
-        isAuthenticated: !!user,
-        isAdmin: user?.roles.includes('ADMIN' as Roles) ?? false,
-        isUser: user?.roles.includes('USER' as Roles) ?? false,
-        login,
-        register,
-        logout,
-        loading,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+      <AuthContext.Provider
+          value={{
+            user,
+            userProfile,
+            isAuthenticated: !!user,
+            isAdmin: user?.roles.includes('ADMIN' as Roles) ?? false,
+            isUser: user?.roles.includes('USER' as Roles) ?? false,
+            login,
+            register,
+            logout,
+            loading,
+          }}
+      >
+        {children}
+      </AuthContext.Provider>
   );
 };

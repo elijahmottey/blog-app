@@ -7,12 +7,10 @@ import {
   Bell,
   User,
   LogOut,
-  Settings,
   Home,
   MessageSquare,
   FileText,
   Users,
-  TrendingUp,
   ChevronDown,
   HelpCircle,
   Moon,
@@ -38,7 +36,6 @@ import {
   ListItemIcon,
   ListItemText,
   useTheme,
-  useMediaQuery,
   alpha,
   styled,
   Drawer,
@@ -101,7 +98,7 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
+  
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [darkMode, setDarkMode] = useState(false);

@@ -39,7 +39,6 @@ import {
   Delete,
   Add,
   Visibility,
-  CheckCircle,
   Refresh,
   Search,
   Email,
@@ -52,8 +51,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import BackendApi, { type UserDto, type UserRegistration, type ApiResponse } from '../../service/BackendApi';
-import { useAuth } from "../../context/AuthContext.tsx";
+import BackendApi, { type UserRegistration } from '../../service/BackendApi';
 
 interface PagedResponse<T> {
   content: T[];
@@ -75,6 +73,14 @@ interface ApiUser {
   comments?: any[];
 }
 
+// Define form data type that matches UserRegistration structure
+interface UserFormData {
+  name: string;
+  email: string;
+  password: string;
+  role: string; // Single role, not array
+}
+
 export const AdminUsers: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -84,11 +90,11 @@ export const AdminUsers: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize] = useState(10);
-  const [formData, setFormData] = useState<Partial<UserRegistration>>({
+  const [formData, setFormData] = useState<UserFormData>({
     name: '',
     email: '',
     password: '',
-    roles: []
+    role: 'USER'
   });
 
   // Fetch users with pagination
@@ -103,18 +109,15 @@ export const AdminUsers: React.FC = () => {
     staleTime: 30000,
   });
 
-
-
   // Safely extract users data - based on your API response structure
   const usersData = apiResponse?.data as PagedResponse<ApiUser> | undefined;
   const users: ApiUser[] = usersData?.content || [];
   const totalPages = usersData?.totalPages || 0;
   const totalElements = usersData?.totalElements || 0;
 
-
   // Create user mutation
   const createUserMutation = useMutation({
-    mutationFn: (userData: Partial<UserRegistration>) =>
+    mutationFn: (userData: UserRegistration) =>
         BackendApi.registerAdmin(userData),
     onSuccess: () => {
       toast.success('User created successfully');
@@ -128,7 +131,7 @@ export const AdminUsers: React.FC = () => {
 
   // Update user mutation
   const updateUserMutation = useMutation({
-    mutationFn: ({ userId, data }: { userId: number; data: Partial<UserRegistration> }) =>
+    mutationFn: ({ userId, data }: { userId: number; data: UserRegistration }) =>
         BackendApi.updateUser(userId, data),
     onSuccess: () => {
       toast.success('User updated successfully');
@@ -156,13 +159,10 @@ export const AdminUsers: React.FC = () => {
   // Filter users based on search
   const filteredUsers = users.filter(user => {
     if (!user) return false;
-    const userRoles = user.role ? [user.role] : []; // Convert single role to array for filtering
     return (
         (user.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
         (user.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-        userRoles.some(role =>
-            role?.toLowerCase().includes(searchTerm.toLowerCase())
-        )
+        (user.role?.toLowerCase() || '').includes(searchTerm.toLowerCase())
     );
   });
 
@@ -172,7 +172,7 @@ export const AdminUsers: React.FC = () => {
       name: '',
       email: '',
       password: '',
-      roles: []
+      role: 'USER'
     });
     setOpenDialog(true);
   };
@@ -183,7 +183,7 @@ export const AdminUsers: React.FC = () => {
       name: user.name || '',
       email: user.email || '',
       password: '', // Don't pre-fill password for security
-      roles: user.role ? [user.role] : [] // Convert single role to array
+      role: user.role || 'USER'
     });
     setOpenDialog(true);
   };
@@ -200,11 +200,11 @@ export const AdminUsers: React.FC = () => {
       name: '',
       email: '',
       password: '',
-      roles: []
+      role: 'USER'
     });
   };
 
-  const handleFormChange = (field: keyof UserRegistration, value: any) => {
+  const handleFormChange = (field: keyof UserFormData, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -212,25 +212,35 @@ export const AdminUsers: React.FC = () => {
   };
 
   const handleSubmit = () => {
+    // Validate required fields
+    if (!formData.name || !formData.email) {
+      toast.error('Name and email are required');
+      return;
+    }
+
+    // For new users, password is required
+    if (!selectedUser && !formData.password) {
+      toast.error('Password is required for new users');
+      return;
+    }
+
+    // Create proper UserRegistration object
+    const userData: UserRegistration = {
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+      role: formData.role
+    };
+
     if (selectedUser?.id) {
       // Update existing user
-      // Convert roles array back to single role string for API
-      const updateData = {
-        ...formData,
-        role: formData.roles?.[0] || 'USER' // Take first role as main role
-      };
       updateUserMutation.mutate({
         userId: selectedUser.id,
-        data: updateData
+        data: userData
       });
     } else {
       // Create new user
-      // Convert roles array to single role for API
-      const createData = {
-        ...formData,
-        role: formData.roles?.[0] || 'USER' // Take first role as main role
-      };
-      createUserMutation.mutate(createData);
+      createUserMutation.mutate(userData);
     }
   };
 
@@ -240,7 +250,7 @@ export const AdminUsers: React.FC = () => {
     }
   };
 
-  const getRoleColor = (role: string) => {
+  const getRoleColor = (role: string): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
     if (!role) return 'default';
     switch (role.toUpperCase()) {
       case 'ADMIN':
@@ -713,8 +723,8 @@ export const AdminUsers: React.FC = () => {
               <TextField
                   select
                   label="Role"
-                  value={formData.roles?.[0] || ''}
-                  onChange={(e) => handleFormChange('roles', [e.target.value])}
+                  value={formData.role}
+                  onChange={(e) => handleFormChange('role', e.target.value)}
                   fullWidth
                   disabled={updateUserMutation.isPending || createUserMutation.isPending}
               >
