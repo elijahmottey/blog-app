@@ -4,9 +4,6 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.7'
 	id 'org.graalvm.buildtools.native' version '0.11.3'
 }
-ext {
-	springAiVersion = "1.1.2"
-}
 
 group = 'liv.codveda'
 version = '0.0.1-SNAPSHOT'
@@ -14,10 +11,57 @@ description = 'blogging website'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(25)
+		languageVersion = JavaLanguageVersion.of(21)
 	}
 }
 
+ext {
+	springAiVersion = "1.1.2"
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	// Core
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+
+	// JPA
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	runtimeOnly 'org.postgresql:postgresql'
+
+	// JWT
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
+
+	// Cache
+	implementation 'com.github.ben-manes.caffeine:caffeine:3.2.2'
+
+	// Spring AI
+	implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+
+	// OpenAPI
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4'
+
+	// Lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// Tests
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.ai:spring-ai-bom:$springAiVersion"
+	}
+}
 
 graalvmNative {
 	binaries {
@@ -26,51 +70,9 @@ graalvmNative {
 			buildArgs.add('--no-fallback')
 			buildArgs.add('--enable-http')
 			buildArgs.add('--enable-https')
-			buildArgs.add('--initialize-at-build-time')
 		}
 	}
 }
-
-repositories {
-	mavenCentral()
-}
-
-dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.boot:spring-boot-starter-cache'
-
-	implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.ai:spring-ai-starter-model-openai'
-	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
-	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
-
-	implementation 'com.github.ben-manes.caffeine:caffeine:3.2.2'
-	runtimeOnly 'org.postgresql:postgresql'
-
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-
-   // Spring AI BOM
-	//implementation platform('org.springframework.ai:spring-ai-bom:1.0.0')
-
-	// Spring AI OpenAI (correct starter)
-	//implementation 'org.springframework.ai:spring-ai-starter-model-openai'
-
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4'
-
-
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
-}
-dependencyManagement {
-	imports {
-		mavenBom "org.springframework.ai:spring-ai-bom:$springAiVersion"
-	}
-}
-
 
 tasks.named('test') {
 	useJUnitPlatform()
