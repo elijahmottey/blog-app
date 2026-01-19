@@ -52,6 +52,9 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
+	// AOT (IMPORTANT for native)
+	implementation 'org.springframework.boot:spring-boot-starter-aot'
+
 	// Tests
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
@@ -67,8 +70,6 @@ graalvmNative {
 	binaries {
 		main {
 			imageName = 'blog-app'
-			buildArgs.add('--static')
-			buildArgs.add('--libc=musl')
 		}
 	}
 }
