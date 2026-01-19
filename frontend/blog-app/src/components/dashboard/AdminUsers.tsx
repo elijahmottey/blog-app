@@ -25,7 +25,6 @@ import {
   MenuItem,
   Alert,
   CircularProgress,
-  Grid,
   Card,
   CardContent,
   Tooltip,
@@ -333,128 +332,142 @@ export const AdminUsers: React.FC = () => {
     );
   }
 
-  // @ts-ignore
   return (
       <Box sx={{ p: { xs: 2, md: 3 } }}>
         {/* Header */}
         <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-          <Grid container spacing={2} alignItems="center" justifyContent="space-between">
-            <Grid item xs={12} md={6}>
+          <Box sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: { xs: 'flex-start', md: 'center' },
+            justifyContent: 'space-between',
+            gap: 2
+          }}>
+            <Box sx={{ flex: 1 }}>
               <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 0.5 }}>
                 Users Management
               </Typography>
               <Typography variant="body1" color="text.secondary">
                 Manage users, roles, and permissions ({users.length} users loaded)
               </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Box sx={{ display: 'flex', gap: 2, justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
-                <Button
-                    variant="outlined"
-                    startIcon={<Refresh />}
-                    onClick={() => refetch()}
-                >
-                  Refresh
-                </Button>
-                <Button
-                    variant="contained"
-                    startIcon={<Add />}
-                    onClick={handleOpenCreateDialog}
-                >
-                  Add New User
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
+            </Box>
+            <Box sx={{
+              display: 'flex',
+              gap: 2,
+              justifyContent: { xs: 'flex-start', md: 'flex-end' },
+              width: { xs: '100%', md: 'auto' }
+            }}>
+              <Button
+                  variant="outlined"
+                  startIcon={<Refresh />}
+                  onClick={() => refetch()}
+              >
+                Refresh
+              </Button>
+              <Button
+                  variant="contained"
+                  startIcon={<Add />}
+                  onClick={handleOpenCreateDialog}
+              >
+                Add New User
+              </Button>
+            </Box>
+          </Box>
         </Paper>
 
         {/* Stats Cards */}
-        <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ height: '100%', borderRadius: 2 }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <Avatar sx={{ bgcolor: 'primary.50', color: 'primary.main', mr: 2 }}>
-                    <Person />
-                  </Avatar>
-                  <Box>
-                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                      {totalElements || 0}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Total Users
-                    </Typography>
-                  </Box>
+        <Box sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr',
+            sm: 'repeat(2, 1fr)',
+            md: 'repeat(4, 1fr)'
+          },
+          gap: 2,
+          mb: 3
+        }}>
+          <Card sx={{ height: '100%', borderRadius: 2 }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <Avatar sx={{ bgcolor: 'primary.50', color: 'primary.main', mr: 2 }}>
+                  <Person />
+                </Avatar>
+                <Box>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                    {totalElements || 0}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Total Users
+                  </Typography>
                 </Box>
-              </CardContent>
-            </Card>
-          </Grid>
+              </Box>
+            </CardContent>
+          </Card>
 
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ height: '100%', borderRadius: 2 }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <Avatar sx={{ bgcolor: 'error.50', color: 'error.main', mr: 2 }}>
-                    <AdminPanelSettings />
-                  </Avatar>
-                  <Box>
-                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                      {getAdminCount()}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Admin Users
-                    </Typography>
-                  </Box>
+          <Card sx={{ height: '100%', borderRadius: 2 }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <Avatar sx={{ bgcolor: 'error.50', color: 'error.main', mr: 2 }}>
+                  <AdminPanelSettings />
+                </Avatar>
+                <Box>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                    {getAdminCount()}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Admin Users
+                  </Typography>
                 </Box>
-              </CardContent>
-            </Card>
-          </Grid>
+              </Box>
+            </CardContent>
+          </Card>
 
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ height: '100%', borderRadius: 2 }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <Avatar sx={{ bgcolor: 'info.50', color: 'info.main', mr: 2 }}>
-                    <PostAdd />
-                  </Avatar>
-                  <Box>
-                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                      {getTotalPostsCount()}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Total Posts
-                    </Typography>
-                  </Box>
+          <Card sx={{ height: '100%', borderRadius: 2 }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <Avatar sx={{ bgcolor: 'info.50', color: 'info.main', mr: 2 }}>
+                  <PostAdd />
+                </Avatar>
+                <Box>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                    {getTotalPostsCount()}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Total Posts
+                  </Typography>
                 </Box>
-              </CardContent>
-            </Card>
-          </Grid>
+              </Box>
+            </CardContent>
+          </Card>
 
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ height: '100%', borderRadius: 2 }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <Avatar sx={{ bgcolor: 'warning.50', color: 'warning.main', mr: 2 }}>
-                    <Comment />
-                  </Avatar>
-                  <Box>
-                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                      {getTotalCommentsCount()}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Total Comments
-                    </Typography>
-                  </Box>
+          <Card sx={{ height: '100%', borderRadius: 2 }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <Avatar sx={{ bgcolor: 'warning.50', color: 'warning.main', mr: 2 }}>
+                  <Comment />
+                </Avatar>
+                <Box>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                    {getTotalCommentsCount()}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Total Comments
+                  </Typography>
                 </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+              </Box>
+            </CardContent>
+          </Card>
+        </Box>
 
         {/* Search and Filter */}
         <Paper sx={{ p: 2, mb: 3, borderRadius: 2 }}>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={6}>
+          <Box sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: 'center',
+            gap: 2
+          }}>
+            <Box sx={{ flex: 1, width: '100%' }}>
               <TextField
                   fullWidth
                   placeholder="Search users by name, email, or role..."
@@ -470,15 +483,18 @@ export const AdminUsers: React.FC = () => {
                     ),
                   }}
               />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-                <Typography variant="body2" color="text.secondary">
-                  Showing {filteredUsers.length} of {totalElements} users
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
+            </Box>
+            <Box sx={{
+              display: 'flex',
+              gap: 1,
+              justifyContent: 'flex-end',
+              width: { xs: '100%', md: 'auto' }
+            }}>
+              <Typography variant="body2" color="text.secondary">
+                Showing {filteredUsers.length} of {totalElements} users
+              </Typography>
+            </Box>
+          </Box>
         </Paper>
 
         {/* Users Table */}
@@ -632,54 +648,56 @@ export const AdminUsers: React.FC = () => {
         {/* Pagination */}
         {totalPages > 1 && (
             <Paper sx={{ p: 2, mt: 3, borderRadius: 2 }}>
-              <Grid container spacing={2} alignItems="center" justifyContent="space-between">
-                <Grid item>
-                  <Typography variant="body2" color="text.secondary">
-                    Page {currentPage + 1} of {totalPages}
-                  </Typography>
-                </Grid>
-                <Grid item>
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Button
-                        variant="outlined"
-                        onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
-                        disabled={currentPage === 0}
-                    >
-                      Previous
-                    </Button>
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      let pageNumber;
-                      if (totalPages <= 5) {
-                        pageNumber = i;
-                      } else if (currentPage < 3) {
-                        pageNumber = i;
-                      } else if (currentPage > totalPages - 4) {
-                        pageNumber = totalPages - 5 + i;
-                      } else {
-                        pageNumber = currentPage - 2 + i;
-                      }
+              <Box sx={{
+                display: 'flex',
+                flexDirection: { xs: 'column', md: 'row' },
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 2
+              }}>
+                <Typography variant="body2" color="text.secondary">
+                  Page {currentPage + 1} of {totalPages}
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Button
+                      variant="outlined"
+                      onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+                      disabled={currentPage === 0}
+                  >
+                    Previous
+                  </Button>
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNumber;
+                    if (totalPages <= 5) {
+                      pageNumber = i;
+                    } else if (currentPage < 3) {
+                      pageNumber = i;
+                    } else if (currentPage > totalPages - 4) {
+                      pageNumber = totalPages - 5 + i;
+                    } else {
+                      pageNumber = currentPage - 2 + i;
+                    }
 
-                      return (
-                          <Button
-                              key={pageNumber}
-                              variant={currentPage === pageNumber ? 'contained' : 'outlined'}
-                              onClick={() => setCurrentPage(pageNumber)}
-                              sx={{ minWidth: '40px' }}
-                          >
-                            {pageNumber + 1}
-                          </Button>
-                      );
-                    })}
-                    <Button
-                        variant="outlined"
-                        onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
-                        disabled={currentPage === totalPages - 1}
-                    >
-                      Next
-                    </Button>
-                  </Box>
-                </Grid>
-              </Grid>
+                    return (
+                        <Button
+                            key={pageNumber}
+                            variant={currentPage === pageNumber ? 'contained' : 'outlined'}
+                            onClick={() => setCurrentPage(pageNumber)}
+                            sx={{ minWidth: '40px' }}
+                        >
+                          {pageNumber + 1}
+                        </Button>
+                    );
+                  })}
+                  <Button
+                      variant="outlined"
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
+                      disabled={currentPage === totalPages - 1}
+                  >
+                    Next
+                  </Button>
+                </Box>
+              </Box>
             </Paper>
         )}
 
