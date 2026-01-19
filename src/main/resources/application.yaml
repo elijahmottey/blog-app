@@ -1,4 +1,6 @@
 spring:
+  aot:
+    enabled: true
   ai:
     openai:
       api-key: ${OPENROUTER_API_KEY}
