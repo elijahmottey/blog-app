@@ -6,35 +6,24 @@ WORKDIR /app
 # Install build tools
 RUN microdnf install -y findutils zip unzip gcc glibc-devel zlib-devel
 
-# Copy Gradle files
-COPY gradlew gradlew
-COPY gradle gradle
-COPY build.gradle settings.gradle gradle.properties ./
-
-# Download dependencies first (for better caching)
-RUN chmod +x gradlew && ./gradlew dependencies --no-daemon
-
-# Copy source code
-COPY src src
+# Copy entire project
+COPY . .
 
 # Build native image
-ENV GRADLE_OPTS="-Xmx4g"
-RUN ./gradlew nativeCompile --no-daemon
+RUN chmod +x gradlew && ./gradlew nativeCompile --no-daemon
 
-# Stage 2: Runtime Image (Alpine for smaller size)
-FROM alpine:3.19
+# Stage 2: Runtime Image
+FROM debian:bookworm-slim
 
 WORKDIR /app
 
-# Install minimal runtime dependencies
-RUN apk add --no-cache libstdc++ libgcc
+# Install runtime dependencies
+RUN apt-get update && \
+    apt-get install -y libstdc++6 libgcc-s1 ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy the native executable
+# Copy native executable
 COPY --from=builder /app/build/native/nativeCompile/blog-app .
-
-# Set non-root user (optional but recommended)
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-USER appuser
 
 EXPOSE 8088
 
