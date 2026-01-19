@@ -21,7 +21,6 @@ ext {
 
 repositories {
 	mavenCentral()
-	maven { url 'https://repo.spring.io/milestone' }
 }
 
 dependencies {
@@ -43,8 +42,8 @@ dependencies {
 	// Cache
 	implementation 'com.github.ben-manes.caffeine:caffeine:3.2.2'
 
-	// Spring AI (remove if not needed for native)
-	// implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+	// Spring AI
+	implementation 'org.springframework.ai:spring-ai-starter-model-openai'
 
 	// OpenAPI
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4'
@@ -53,17 +52,10 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
-	// REMOVE this line - AOT is already included in Spring Boot 3.x
-	// implementation 'org.springframework.boot:spring-boot-starter-aot'
-
-	// Instead, add development dependencies for AOT processing
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
 	// Tests
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 dependencyManagement {
@@ -72,39 +64,8 @@ dependencyManagement {
 	}
 }
 
-graalvmNative {
-	binaries {
-		main {
-			imageName = 'blog-app'
-			// Add GraalVM Native Image arguments
-			buildArgs.addAll([
-					'--enable-url-protocols=http,https',
-					'--enable-all-security-services',
-					'--initialize-at-build-time=org.springframework.boot.SpringApplication,org.springframework.boot.autoconfigure.AutoConfigurationPackages',
-					'-H:+ReportExceptionStackTraces',
-					'-H:+ReportUnsupportedElementsAtRuntime',
-					'-H:+AddAllCharsets',
-					'-H:EnableURLProtocols=http,https',
-					'-H:NativeLinkerOption=-no-pie',
-					'--no-fallback',
-					'--verbose'
-			])
-		}
-	}
-	metadataRepository {
-		enabled = true
-	}
-}
+
 
 tasks.named('test') {
 	useJUnitPlatform()
-}
-
-// Add this to help with native compilation
-tasks.named('compileJava') {
-	dependsOn('processAot')
-}
-
-tasks.named('processAot') {
-	mustRunAfter('compileJava')
 }
