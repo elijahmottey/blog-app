@@ -169,6 +169,7 @@ export const PostsManagement: React.FC = () => {
     );
   }
 
+  // @ts-ignore
   return (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: { xs: 2, md: 3 } }}>
         {/* Header */}

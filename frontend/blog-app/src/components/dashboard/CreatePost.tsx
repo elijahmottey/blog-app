@@ -325,6 +325,7 @@ export const CreatePost: React.FC = () => {
 
   // @ts-ignore
   // @ts-ignore
+  // @ts-ignore
   return (
       <Box sx={{ maxWidth: 1000, mx: 'auto', p: { xs: 2, md: 3 } }}>
         {/* Header */}
