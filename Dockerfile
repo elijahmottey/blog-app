@@ -1,35 +1,40 @@
 # Stage 1: Build Native Image
-FROM ghcr.io/graalvm/graalvm-ce:21-java17 AS builder
+FROM ghcr.io/graalvm/native-image-community:21 AS builder
 
 WORKDIR /app
 
-# Install native-image
-RUN gu install native-image
+# Install build tools
+RUN microdnf install -y findutils zip unzip gcc glibc-devel zlib-devel
 
 # Copy Gradle files
 COPY gradlew gradlew
 COPY gradle gradle
 COPY build.gradle settings.gradle gradle.properties ./
 
-# Download dependencies
+# Download dependencies first (for better caching)
 RUN chmod +x gradlew && ./gradlew dependencies --no-daemon
 
 # Copy source code
 COPY src src
 
 # Build native image
+ENV GRADLE_OPTS="-Xmx4g"
 RUN ./gradlew nativeCompile --no-daemon
 
-# Stage 2: Runtime Image
-FROM debian:bookworm-slim
+# Stage 2: Runtime Image (Alpine for smaller size)
+FROM alpine:3.19
 
 WORKDIR /app
 
-RUN apt-get update && \
-    apt-get install -y libz1 ca-certificates && \
-    rm -rf /var/lib/apt/lists/*
+# Install minimal runtime dependencies
+RUN apk add --no-cache libstdc++ libgcc
 
+# Copy the native executable
 COPY --from=builder /app/build/native/nativeCompile/blog-app .
+
+# Set non-root user (optional but recommended)
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
 
 EXPOSE 8088
 
