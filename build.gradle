@@ -67,9 +67,8 @@ graalvmNative {
 	binaries {
 		main {
 			imageName = 'blog-app'
-			buildArgs.add('--no-fallback')
-			buildArgs.add('--enable-http')
-			buildArgs.add('--enable-https')
+			buildArgs.add('--static')
+			buildArgs.add('--libc=musl')
 		}
 	}
 }

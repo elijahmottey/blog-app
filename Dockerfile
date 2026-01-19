@@ -1,25 +1,11 @@
-# Stage 1: Build Native Image
-FROM ghcr.io/graalvm/native-image-community:21 AS builder
+FROM debian:bookworm-slim
+
+RUN apt-get update && \
+    apt-get install -y libz1 ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-RUN microdnf install -y git zip unzip findutils
+COPY blog-app .
 
-COPY gradlew gradlew
-COPY gradle gradle
-COPY build.gradle settings.gradle ./
-COPY src src
-
-RUN chmod +x gradlew
-RUN ./gradlew nativeCompile --no-daemon
-
-# Stage 2: Runtime (WITH zlib)
-FROM gcr.io/distroless/base-debian12:debug
-
-WORKDIR /app
-
-COPY --from=builder /app/build/native/nativeCompile/blog-app .
-
-EXPOSE 8088
-USER nonroot:nonroot
-
+EXPOSE 8080
 ENTRYPOINT ["./blog-app"]
