@@ -404,22 +404,22 @@ export const UserDashboard: React.FC = () => {
                             size="small"
                             variant="outlined"
                         />
-                        {post.likes > 0 && (
-                            <Chip
-                                label={`${post.likes} likes`}
-                                size="small"
-                                color="error"
-                                variant="outlined"
-                            />
-                        )}
-                        {post.views > 0 && (
-                            <Chip
-                                label={`${post.views} views`}
-                                size="small"
-                                color="info"
-                                variant="outlined"
-                            />
-                        )}
+                        {/*{post.likes > 0 && (*/}
+                        {/*    <Chip*/}
+                        {/*        label={`${post.likes} likes`}*/}
+                        {/*        size="small"*/}
+                        {/*        color="error"*/}
+                        {/*        variant="outlined"*/}
+                        {/*    />*/}
+                        {/*)}*/}
+                        {/*{post.views > 0 && (*/}
+                        {/*    <Chip*/}
+                        {/*        label={`${post.views} views`}*/}
+                        {/*        size="small"*/}
+                        {/*        color="info"*/}
+                        {/*        variant="outlined"*/}
+                        {/*    />*/}
+                        {/*)}*/}
                       </Box>
                     </Paper>
                 ))}
