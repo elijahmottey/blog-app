@@ -36,7 +36,6 @@ import {
   Alert
 } from '@mui/material';
 import BackendApi from '../../service/BackendApi';
-import Grid from "@mui/material/Grid";
 import { toast } from 'sonner';
 
 const schema = yup.object({
@@ -322,7 +321,6 @@ export const CreatePost: React.FC = () => {
   const paragraphCount = watchedContent.split('\n').filter(line => line.trim().length > 0).length;
   const readingTime = Math.ceil(wordCount / 200);
 
-
   // @ts-ignore
   // @ts-ignore
   // @ts-ignore
@@ -386,38 +384,35 @@ export const CreatePost: React.FC = () => {
         </Box>
 
         {/* Stats Bar */}
-        <Grid container spacing={2} sx={{ mb: 3 }}>
-          
-          <Grid xs={6} sm={3}>
-            <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'primary.50', borderRadius: 2 }}>
-              <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600 }}>Words</Typography>
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>{wordCount}</Typography>
-            </Paper>
-          </Grid>
-          
-          <Grid xs={6} sm={3}>
-            <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'secondary.50', borderRadius: 2 }}>
-              <Typography variant="body2" color="secondary.main" sx={{ fontWeight: 600 }}>Characters</Typography>
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>{watchedContent.length}</Typography>
-            </Paper>
+        <Box sx={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: 2,
+          mb: 3,
+          '@media (max-width: 600px)': {
+            gridTemplateColumns: 'repeat(2, 1fr)'
+          }
+        }}>
+          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'primary.50', borderRadius: 2 }}>
+            <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600 }}>Words</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>{wordCount}</Typography>
+          </Paper>
 
-          </Grid>
+          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'secondary.50', borderRadius: 2 }}>
+            <Typography variant="body2" color="secondary.main" sx={{ fontWeight: 600 }}>Characters</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>{watchedContent.length}</Typography>
+          </Paper>
 
-          <Grid xs={6} sm={3}>
-            <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'success.50', borderRadius: 2 }}>
-              <Typography variant="body2" color="success.main" sx={{ fontWeight: 600 }}>Paragraphs</Typography>
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>{paragraphCount}</Typography>
-            </Paper>
+          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'success.50', borderRadius: 2 }}>
+            <Typography variant="body2" color="success.main" sx={{ fontWeight: 600 }}>Paragraphs</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>{paragraphCount}</Typography>
+          </Paper>
 
-          </Grid>
-          
-          <Grid xs={6} sm={3}>
-            <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'warning.50', borderRadius: 2 }}>
-              <Typography variant="body2" color="warning.main" sx={{ fontWeight: 600 }}>Reading Time</Typography>
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>{readingTime} min</Typography>
-            </Paper>
-          </Grid>
-        </Grid>
+          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'warning.50', borderRadius: 2 }}>
+            <Typography variant="body2" color="warning.main" sx={{ fontWeight: 600 }}>Reading Time</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>{readingTime} min</Typography>
+          </Paper>
+        </Box>
 
         <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           {/* Title Input */}
@@ -690,44 +685,42 @@ Add code snippets when needed
             <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
               🎯 Quick Formatting Tips
             </Typography>
-            <Grid container spacing={1}>
-              
-              <Grid xs={6} sm={3}>
-                <Chip
-                    label="Ctrl+B → Bold"
-                    size="small"
-                    variant="outlined"
-                    sx={{ fontSize: '0.75rem' }}
-                />
-              </Grid>
-              
-              <Grid xs={6} sm={3}>
-                <Chip
-                    label="Ctrl+I → Italic"
-                    size="small"
-                    variant="outlined"
-                    sx={{ fontSize: '0.75rem' }}
-                />
-                
-              </Grid>
-              <Grid xs={6} sm={3}>
-                <Chip
-                    label="Select text first"
-                    size="small"
-                    variant="outlined"
-                    sx={{ fontSize: '0.75rem' }}
-                />
-                
-              </Grid>
-              <Grid xs={6} sm={3}>
-                <Chip
-                    label="Click icons to format"
-                    size="small"
-                    variant="outlined"
-                    sx={{ fontSize: '0.75rem' }}
-                />
-              </Grid>
-            </Grid>
+            <Box sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: 1,
+              '@media (max-width: 600px)': {
+                gridTemplateColumns: 'repeat(2, 1fr)'
+              }
+            }}>
+              <Chip
+                  label="Ctrl+B → Bold"
+                  size="small"
+                  variant="outlined"
+                  sx={{ fontSize: '0.75rem' }}
+              />
+
+              <Chip
+                  label="Ctrl+I → Italic"
+                  size="small"
+                  variant="outlined"
+                  sx={{ fontSize: '0.75rem' }}
+              />
+
+              <Chip
+                  label="Select text first"
+                  size="small"
+                  variant="outlined"
+                  sx={{ fontSize: '0.75rem' }}
+              />
+
+              <Chip
+                  label="Click icons to format"
+                  size="small"
+                  variant="outlined"
+                  sx={{ fontSize: '0.75rem' }}
+              />
+            </Box>
           </Paper>
 
           {/* Action Buttons */}
@@ -810,58 +803,61 @@ Add code snippets when needed
               ✨ Pro Writing Tips
             </Typography>
           </Box>
-          
-          <Grid container spacing={2}>
-            <Grid xs={12} md={6}>
-              <Box sx={{
-                bgcolor: 'white',
-                p: 2,
-                borderRadius: 2,
-                height: '100%',
-                boxShadow: 1
-              }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main', mb: 1 }}>
-                  Structure & Formatting
+
+          <Box sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: 2,
+            '@media (max-width: 900px)': {
+              gridTemplateColumns: '1fr'
+            }
+          }}>
+            <Box sx={{
+              bgcolor: 'white',
+              p: 2,
+              borderRadius: 2,
+              height: '100%',
+              boxShadow: 1
+            }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main', mb: 1 }}>
+                Structure & Formatting
+              </Typography>
+              <Box component="ul" sx={{ m: 0, p: 0, pl: 2 }}>
+                <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
+                  Use <strong>headings</strong> to create a clear hierarchy
                 </Typography>
-                <Box component="ul" sx={{ m: 0, p: 0, pl: 2 }}>
-                  <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
-                    Use <strong>headings</strong> to create a clear hierarchy
-                  </Typography>
-                  <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
-                    <strong>Bold key phrases</strong> for skimmers
-                  </Typography>
-                  <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
-                    Keep paragraphs under 4 lines
-                  </Typography>
-                </Box>
-              </Box>
-              
-            </Grid>
-            <Grid xs={12} md={6}>
-              <Box sx={{
-                bgcolor: 'white',
-                p: 2,
-                borderRadius: 2,
-                height: '100%',
-                boxShadow: 1
-              }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'success.main', mb: 1 }}>
-                  Engagement Boosters
+                <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
+                  <strong>Bold key phrases</strong> for skimmers
                 </Typography>
-                <Box component="ul" sx={{ m: 0, p: 0, pl: 2 }}>
-                  <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
-                    Start with a question or surprising fact
-                  </Typography>
-                  <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
-                    Include <em>personal stories</em> or examples
-                  </Typography>
-                  <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
-                    End with a call-to-action
-                  </Typography>
-                </Box>
+                <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
+                  Keep paragraphs under 4 lines
+                </Typography>
               </Box>
-            </Grid>
-          </Grid>
+            </Box>
+
+            <Box sx={{
+              bgcolor: 'white',
+              p: 2,
+              borderRadius: 2,
+              height: '100%',
+              boxShadow: 1
+            }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'success.main', mb: 1 }}>
+                Engagement Boosters
+              </Typography>
+              <Box component="ul" sx={{ m: 0, p: 0, pl: 2 }}>
+                <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
+                  Start with a question or surprising fact
+                </Typography>
+                <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
+                  Include <em>personal stories</em> or examples
+                </Typography>
+                <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
+                  End with a call-to-action
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
         </Paper>
       </Box>
   );

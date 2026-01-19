@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import {
   FileText,
@@ -16,7 +15,6 @@ import {
   Paper,
   Typography,
   Card,
-  Grid,
   CardContent,
   Button,
   Chip,
@@ -77,11 +75,11 @@ export const UserDashboard: React.FC = () => {
   const draftPosts = totalPosts - publishedPosts;
 
   // Calculate likes and views (assuming these fields exist)
-  
+
   const totalLikes = posts.reduce((sum, post) => sum + (post.likes || 0),
       0);
 
-  
+
   const totalViews = posts.reduce((sum, post) => sum + (post.views || 0), 0);
 
   if (postsLoading) {
@@ -102,11 +100,11 @@ export const UserDashboard: React.FC = () => {
     );
   }
 
-  
-  
-  
-  
-  
+
+
+
+
+
   // @ts-ignore
   return (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: { xs: 2, md: 3 } }}>
@@ -121,187 +119,190 @@ export const UserDashboard: React.FC = () => {
         </Paper>
 
         {/* Stats Cards */}
-        <Grid container spacing={3}>
-          <Grid xs={12} sm={6} md={3}>
-            <Card sx={{ height: '100%', borderRadius: 2 }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Box sx={{ p: 1, bgcolor: 'primary.50', borderRadius: 1, mr: 2 }}>
-                    <FileText color="primary" size={24} />
-                  </Box>
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">Total Posts</Typography>
-                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{totalPosts}</Typography>
-                  </Box>
+        <Box sx={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: 3,
+          '@media (max-width: 900px)': {
+            gridTemplateColumns: 'repeat(2, 1fr)'
+          },
+          '@media (max-width: 600px)': {
+            gridTemplateColumns: '1fr'
+          }
+        }}>
+          <Card sx={{ height: '100%', borderRadius: 2 }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Box sx={{ p: 1, bgcolor: 'primary.50', borderRadius: 1, mr: 2 }}>
+                  <FileText color="primary" size={24} />
                 </Box>
-                <Chip
-                    label={`${publishedPosts} published`}
-                    size="small"
-                    color="success"
-                    variant="outlined"
-                    sx={{ mt: 1 }}
-                />
-              </CardContent>
-            </Card>
-          </Grid>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">Total Posts</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{totalPosts}</Typography>
+                </Box>
+              </Box>
+              <Chip
+                  label={`${publishedPosts} published`}
+                  size="small"
+                  color="success"
+                  variant="outlined"
+                  sx={{ mt: 1 }}
+              />
+            </CardContent>
+          </Card>
 
-          <Grid xs={12} sm={6} md={3}>
-            <Card sx={{ height: '100%', borderRadius: 2 }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Box sx={{ p: 1, bgcolor: 'success.50', borderRadius: 1, mr: 2 }}>
-                    <MessageSquare color="success" size={24} />
-                  </Box>
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">Comments</Typography>
-                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{totalComments}</Typography>
-                  </Box>
+          <Card sx={{ height: '100%', borderRadius: 2 }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Box sx={{ p: 1, bgcolor: 'success.50', borderRadius: 1, mr: 2 }}>
+                  <MessageSquare color="success" size={24} />
                 </Box>
-                <Typography variant="caption" color="text.secondary">
-                  From your posts
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">Comments</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{totalComments}</Typography>
+                </Box>
+              </Box>
+              <Typography variant="caption" color="text.secondary">
+                From your posts
+              </Typography>
+            </CardContent>
+          </Card>
 
-          <Grid xs={12} sm={6} md={3}>
-            <Card sx={{ height: '100%', borderRadius: 2 }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Box sx={{ p: 1, bgcolor: 'error.50', borderRadius: 1, mr: 2 }}>
-                    <Heart color="error" size={24} />
-                  </Box>
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">Likes</Typography>
-                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{totalLikes}</Typography>
-                  </Box>
+          <Card sx={{ height: '100%', borderRadius: 2 }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Box sx={{ p: 1, bgcolor: 'error.50', borderRadius: 1, mr: 2 }}>
+                  <Heart color="error" size={24} />
                 </Box>
-                <Typography variant="caption" color="text.secondary">
-                  Total engagement
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">Likes</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{totalLikes}</Typography>
+                </Box>
+              </Box>
+              <Typography variant="caption" color="text.secondary">
+                Total engagement
+              </Typography>
+            </CardContent>
+          </Card>
 
-          <Grid xs={12} sm={6} md={3}>
-            <Card sx={{ height: '100%', borderRadius: 2 }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Box sx={{ p: 1, bgcolor: 'warning.50', borderRadius: 1, mr: 2 }}>
-                    <TrendingUp color="warning" size={24} />
-                  </Box>
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">Views</Typography>
-                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{totalViews}</Typography>
-                  </Box>
+          <Card sx={{ height: '100%', borderRadius: 2 }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Box sx={{ p: 1, bgcolor: 'warning.50', borderRadius: 1, mr: 2 }}>
+                  <TrendingUp color="warning" size={24} />
                 </Box>
-                <Typography variant="caption" color="text.secondary">
-                  Post impressions
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">Views</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{totalViews}</Typography>
+                </Box>
+              </Box>
+              <Typography variant="caption" color="text.secondary">
+                Post impressions
+              </Typography>
+            </CardContent>
+          </Card>
+        </Box>
 
         {/* Quick Actions */}
         <Paper sx={{ p: 3, borderRadius: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 3, color: 'text.primary' }}>
             Quick Actions
           </Typography>
-          <Grid container spacing={3}>
-            <Grid xs={12} md={4}>
-              <Button
-                  component={Link}
-                  to="/dashboard/posts/create"
-                  variant="outlined"
-                  fullWidth
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderColor: 'primary.main',
-                    '&:hover': {
-                      borderColor: 'primary.dark',
-                      bgcolor: 'primary.50'
-                    }
-                  }}
-              >
-                <Plus size={32} color="#1976d2" style={{ marginBottom: 8 }} />
-                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-                  Create New Post
-                </Typography>
-                <Typography variant="caption" color="text.secondary" align="center">
-                  Write and publish a new article
-                </Typography>
-              </Button>
-            </Grid>
+          <Box sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: 3,
+            '@media (max-width: 900px)': {
+              gridTemplateColumns: '1fr'
+            }
+          }}>
+            <Button
+                component={Link}
+                to="/dashboard/posts/create"
+                variant="outlined"
+                fullWidth
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderColor: 'primary.main',
+                  '&:hover': {
+                    borderColor: 'primary.dark',
+                    bgcolor: 'primary.50'
+                  }
+                }}
+            >
+              <Plus size={32} color="#1976d2" style={{ marginBottom: 8 }} />
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                Create New Post
+              </Typography>
+              <Typography variant="caption" color="text.secondary" align="center">
+                Write and publish a new article
+              </Typography>
+            </Button>
 
-            <Grid xs={12} md={4}>
-              <Button
-                  component={Link}
-                  to="/dashboard/posts"
-                  variant="outlined"
-                  fullWidth
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderColor: 'success.main',
-                    '&:hover': {
-                      borderColor: 'success.dark',
-                      bgcolor: 'success.50'
-                    }
-                  }}
-              >
-                <FileText size={32} color="#2e7d32" style={{ marginBottom: 8 }} />
-                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'success.main' }}>
-                  Manage Posts
-                </Typography>
-                <Typography variant="caption" color="text.secondary" align="center">
-                  Edit or delete your posts
-                </Typography>
-              </Button>
-            </Grid>
+            <Button
+                component={Link}
+                to="/dashboard/posts"
+                variant="outlined"
+                fullWidth
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderColor: 'success.main',
+                  '&:hover': {
+                    borderColor: 'success.dark',
+                    bgcolor: 'success.50'
+                  }
+                }}
+            >
+              <FileText size={32} color="#2e7d32" style={{ marginBottom: 8 }} />
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'success.main' }}>
+                Manage Posts
+              </Typography>
+              <Typography variant="caption" color="text.secondary" align="center">
+                Edit or delete your posts
+              </Typography>
+            </Button>
 
-            <Grid xs={12} md={4}>
-              <Button
-                  component={Link}
-                  to="/dashboard/comments"
-                  variant="outlined"
-                  fullWidth
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderColor: 'secondary.main',
-                    '&:hover': {
-                      borderColor: 'secondary.dark',
-                      bgcolor: 'secondary.50'
-                    }
-                  }}
-              >
-                <MessageSquare size={32} color="#9c27b0" style={{ marginBottom: 8 }} />
-                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'secondary.main' }}>
-                  View Comments
-                </Typography>
-                <Typography variant="caption" color="text.secondary" align="center">
-                  Respond to reader comments
-                </Typography>
-              </Button>
-            </Grid>
-          </Grid>
+            <Button
+                component={Link}
+                to="/dashboard/comments"
+                variant="outlined"
+                fullWidth
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderColor: 'secondary.main',
+                  '&:hover': {
+                    borderColor: 'secondary.dark',
+                    bgcolor: 'secondary.50'
+                  }
+                }}
+            >
+              <MessageSquare size={32} color="#9c27b0" style={{ marginBottom: 8 }} />
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'secondary.main' }}>
+                View Comments
+              </Typography>
+              <Typography variant="caption" color="text.secondary" align="center">
+                Respond to reader comments
+              </Typography>
+            </Button>
+          </Box>
         </Paper>
 
         {/* Recent Posts */}
