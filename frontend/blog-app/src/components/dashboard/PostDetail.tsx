@@ -13,7 +13,7 @@ import {
   Download
 } from 'lucide-react';
 import { Button, IconButton, Typography, Box, Paper, TextField, Avatar } from '@mui/material';
-import BackendApi, { type CommentDto } from '../../service/BackendApi';
+import BackendApi, { type CommentDto, type PostDto } from '../../service/BackendApi';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -56,7 +56,7 @@ export const PostDetail: React.FC = () => {
     },
   });
 
-  // Comment mutation - FIXED
+  // Comment mutation
   const commentMutation = useMutation({
     mutationFn: (content: string) =>
         BackendApi.createPostComment({
@@ -113,7 +113,7 @@ export const PostDetail: React.FC = () => {
     }
   };
 
-  // FIXED: Safe content formatting without dangerous HTML
+  // Safe content formatting without dangerous HTML
   const renderContent = (content: string) => {
     if (!content) return null;
 
@@ -161,6 +161,23 @@ export const PostDetail: React.FC = () => {
     });
   };
 
+  // Helper function to safely extract user name from user object
+  const getUserName = (userObject: any): string => {
+    if (!userObject) return 'Anonymous';
+
+    // If it's already a string, return it
+    if (typeof userObject === 'string') return userObject;
+
+    // If it's an object with a name property
+    if (typeof userObject === 'object' && userObject !== null) {
+      // Try different possible name fields
+      return userObject.name || userObject.username || userObject.email || 'Anonymous';
+    }
+
+    // Fallback
+    return 'Anonymous';
+  };
+
   if (postLoading) {
     return (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
@@ -187,20 +204,24 @@ export const PostDetail: React.FC = () => {
     );
   }
 
-  const postData = post.data;
+  const postData = post.data as PostDto;
 
+  // Safely get post author name
+  const postAuthorName = getUserName(postData.users);
 
-  const postAuthorName = postData.users || 'Anonymous';
+  // Safely ensure post content is a string
+  const safePostContent = typeof postData.content === 'string'
+      ? postData.content
+      : 'No content available';
 
-  // 🔹 SAFELY ENSURE POST CONTENT IS A STRING
-  const safePostContent =
-      typeof postData.content === 'string'
-          ? postData.content
-          : 'No content available';
-
-  // 🔹 SAFELY EXTRACT COMMENT AUTHOR NAME HELPER
-  const getCommentAuthorName = (users: any) => {
-    return users || 'Anonymous';
+  // Helper to safely get comment data
+  const getCommentData = (comment: CommentDto) => {
+    return {
+      id: comment.id,
+      content: comment.content || 'No content',
+      author: getUserName(comment.users),
+      createdAt: comment.createdAt
+    };
   };
 
   return (
@@ -247,9 +268,7 @@ export const PostDetail: React.FC = () => {
             </Typography>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', typography: 'body2', color: 'text.secondary' }}>
               <Box sx={{ display: 'flex', gap: 2 }}>
-                {/* 🔹 UPDATED: Safe author name display */}
                 <Box>By {postAuthorName}</Box>
-
                 <Box>Created: {postData.createdAt ? format(new Date(postData.createdAt), 'MMM dd, yyyy') : 'Unknown'}</Box>
                 {postData.updatedAt && postData.updatedAt !== postData.createdAt && (
                     <Box>Updated: {format(new Date(postData.updatedAt), 'MMM dd, yyyy')}</Box>
@@ -258,9 +277,8 @@ export const PostDetail: React.FC = () => {
             </Box>
           </Box>
 
-          {/* Post Body - FIXED: No dangerouslySetInnerHTML */}
+          {/* Post Body */}
           <Box sx={{ p: 3 }}>
-            {/* 🔹 UPDATED: Use safePostContent */}
             {renderContent(safePostContent) || (
                 <Typography variant="body1" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
                   No content available
@@ -321,7 +339,7 @@ export const PostDetail: React.FC = () => {
                   <Box component="form" onSubmit={handleComment} sx={{ mb: 3 }}>
                     <Box sx={{ display: 'flex', gap: 2 }}>
                       <Avatar sx={{ bgcolor: 'primary.main' }}>
-                        <User />
+                        {user.name ? user.name.charAt(0).toUpperCase() : <User />}
                       </Avatar>
                       <Box sx={{ flex: 1 }}>
                         <TextField
@@ -374,44 +392,46 @@ export const PostDetail: React.FC = () => {
                       </Typography>
                     </Box>
                 ) : (
-                    postComments.map((comment: CommentDto, index: number) => (
-                        <Box key={comment.id || index} sx={{ display: 'flex', gap: 2 }}>
-                          <Avatar sx={{ bgcolor: 'grey.400' }}>
-                            <User />
-                          </Avatar>
-                          <Box sx={{ flex: 1 }}>
-                            <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
-                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                                <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                                  {/* 🔹 UPDATED: Safe comment author name display */}
-                                  {getCommentAuthorName(comment.users)}
+                    postComments.map((comment: CommentDto, index: number) => {
+                      const commentData = getCommentData(comment);
+                      return (
+                          <Box key={commentData.id || index} sx={{ display: 'flex', gap: 2 }}>
+                            <Avatar sx={{ bgcolor: 'grey.400' }}>
+                              {commentData.author.charAt(0).toUpperCase()}
+                            </Avatar>
+                            <Box sx={{ flex: 1 }}>
+                              <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                  <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                                    {commentData.author}
+                                  </Typography>
+                                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                    {commentData.createdAt ? format(new Date(commentData.createdAt), 'MMM dd, yyyy') : 'Recently'}
+                                  </Typography>
+                                </Box>
+                                <Typography variant="body2" sx={{ color: 'text.primary' }}>
+                                  {commentData.content}
                                 </Typography>
-                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                  {comment.createdAt ? format(new Date(comment.createdAt), 'MMM dd, yyyy') : 'Recently'}
-                                </Typography>
+                              </Paper>
+                              <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
+                                <Button
+                                    size="small"
+                                    startIcon={<ThumbsUp />}
+                                    sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' }, typography: 'caption' }}
+                                >
+                                  Like
+                                </Button>
+                                <Button
+                                    size="small"
+                                    sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' }, typography: 'caption' }}
+                                >
+                                  Reply
+                                </Button>
                               </Box>
-                              <Typography variant="body2" sx={{ color: 'text.primary' }}>
-                                {comment.content || 'No content'}
-                              </Typography>
-                            </Paper>
-                            <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
-                              <Button
-                                  size="small"
-                                  startIcon={<ThumbsUp />}
-                                  sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' }, typography: 'caption' }}
-                              >
-                                Like
-                              </Button>
-                              <Button
-                                  size="small"
-                                  sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' }, typography: 'caption' }}
-                              >
-                                Reply
-                              </Button>
                             </Box>
                           </Box>
-                        </Box>
-                    ))
+                      );
+                    })
                 )}
               </Box>
             </Paper>
