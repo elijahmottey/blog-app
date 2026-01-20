@@ -98,7 +98,7 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const theme = useTheme();
-  
+
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [darkMode, setDarkMode] = useState(false);
