@@ -322,7 +322,7 @@ export const UserDashboard: React.FC = () => {
             </Button>
           </Box>
 
-          {posts.length === 0 ? (
+          {userProfile?.posts.length === 0 ? (
               <Box sx={{ textAlign: 'center', py: 4 }}>
                 <FileText size={48} color="#9e9e9e" style={{ marginBottom: 16 }} />
                 <Typography color="text.secondary">No posts yet. Create your first post!</Typography>
@@ -337,7 +337,7 @@ export const UserDashboard: React.FC = () => {
               </Box>
           ) : (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {posts.slice(0, 5).map((post) => (
+                {userProfile?.posts.slice(0, 5).map((post) => (
                     <Paper
                         key={post.id}
                         sx={{
