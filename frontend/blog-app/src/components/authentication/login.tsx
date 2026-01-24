@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -11,12 +11,75 @@ import {
     Shield,
     XCircle,
     Check,
+    Smartphone,
+    Monitor,
+    Tablet,
 } from "lucide-react";
-import { Button, Box, TextField, InputAdornment, IconButton } from '@mui/material';
-import { useAuth } from "../../context/AuthContext.tsx";
+import BackendApi from '../../service/BackendApi';
 import { toast } from "sonner";
 
+// Material UI imports
+import {
+    Button,
+    TextField,
+    Box,
+    Container,
+    Typography,
+    Paper,
+    Stepper,
+    Step,
+    StepLabel,
+    InputAdornment,
+    IconButton,
+    Alert,
+    Card,
+    CardContent,
+    useTheme,
+    useMediaQuery,
+    Divider,
+    Link as MuiLink,
+    CircularProgress,
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
 
+// Custom styled components
+const GradientPaper = styled(Paper)(({ theme }) => ({
+    background: `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.grey[50]} 100%)`,
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: theme.spacing(2),
+}));
+
+const StepIconContainer = styled('div')<{ completed: boolean; active: boolean }>(
+    ({ theme, completed, active }) => ({
+        width: 32,
+        height: 32,
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: completed
+            ? theme.palette.success.main
+            : active
+                ? theme.palette.primary.main
+                : theme.palette.grey[300],
+        color: completed || active ? theme.palette.common.white : theme.palette.grey[600],
+        fontWeight: 600,
+        fontSize: '0.875rem',
+        transition: 'all 0.3s ease',
+    })
+);
+
+// Type definitions
+interface StepConfig {
+    title: string;
+    description: string;
+    placeholder: string;
+    type: 'email' | 'password';
+    validation: () => boolean;
+}
 
 export const Login: React.FC = () => {
     const [email, setEmail] = useState("");
@@ -28,38 +91,53 @@ export const Login: React.FC = () => {
     const [completedSteps, setCompletedSteps] = useState<number[]>([]);
 
     const navigate = useNavigate();
-    const { login } = useAuth();
     const location = useLocation();
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
-    const steps = [
+    // Refs for each input field
+    const emailInputRef = useRef<HTMLInputElement>(null);
+    const passwordInputRef = useRef<HTMLInputElement>(null);
+    const inputRefs = [emailInputRef, passwordInputRef];
+
+    const steps: StepConfig[] = [
         {
             title: "Email Address",
-            description: "Enter the email address associated with your account.",
+            description: "Enter the email address associated with your account",
             placeholder: "e.g., you@example.com",
+            type: 'email',
             validation: () => email.trim() !== "" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
         },
         {
             title: "Password",
-            description: "Enter your secure password.",
-            placeholder: "Your secret password",
+            description: "Enter your secure password",
+            placeholder: "Your password",
+            type: 'password',
             validation: () => password.trim() !== "",
         },
     ];
 
+    useEffect(() => {
+        const currentRef = inputRefs[currentStep]?.current;
+        if (currentRef) {
+            setTimeout(() => currentRef.focus(), 100);
+        }
+    }, [currentStep]);
+
     const handleNext = () => {
         if (validateCurrentStep()) {
+            if (!completedSteps.includes(currentStep)) {
+                setCompletedSteps(prev => [...prev, currentStep]);
+            }
             if (currentStep < steps.length - 1) {
-                setCompletedSteps([...completedSteps, currentStep]);
                 setCurrentStep(currentStep + 1);
-            } else {
-                handleLogin();
             }
         }
     };
 
     const handleBack = () => {
         if (currentStep > 0) {
-            setCompletedSteps(completedSteps.filter(step => step !== currentStep - 1));
             setCurrentStep(currentStep - 1);
         }
     };
@@ -70,13 +148,13 @@ export const Login: React.FC = () => {
             let errorMessage = "";
             switch (currentStep) {
                 case 0:
-                    errorMessage = "Please enter a valid email address.";
+                    errorMessage = "Please enter a valid email address";
                     break;
                 case 1:
-                    errorMessage = "Password cannot be empty.";
+                    errorMessage = "Password cannot be empty";
                     break;
                 default:
-                    errorMessage = "Please complete the required field.";
+                    errorMessage = "Please complete the required field";
             }
             setError(errorMessage);
             return false;
@@ -85,7 +163,25 @@ export const Login: React.FC = () => {
         return true;
     };
 
-// In Login.tsx, fix the handleLogin function:
+    const CustomStepIcon = (props: any) => {
+        const { active, completed, icon } = props;
+        return (
+            <StepIconContainer completed={completed} active={active}>
+                {completed ? <Check fontSize="small" /> : icon}
+            </StepIconContainer>
+        );
+    };
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        if (currentStep === steps.length - 1) {
+            await handleLogin();
+        } else {
+            handleNext();
+        }
+    };
+
     const handleLogin = async () => {
         if (!validateCurrentStep()) {
             setTimeout(() => setError(""), 5000);
@@ -94,7 +190,12 @@ export const Login: React.FC = () => {
 
         try {
             setLoading(true);
-            await login({ email, password }); // UNCOMMENT THIS LINE
+            // Replace this with your actual login API call
+            // await BackendApi.login({ email, password });
+
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
             toast.success("Welcome back! 🎉");
             setTimeout(() => {
                 const from = location.state?.from?.pathname || '/dashboard';
@@ -102,7 +203,7 @@ export const Login: React.FC = () => {
             }, 100);
         } catch (err: any) {
             const errorMessage =
-                err.response?.data?.message || err.message || "Login failed";
+                err.response?.data?.message || err.message || "Login failed. Please check your credentials.";
             toast.error(errorMessage);
             setError(errorMessage);
             setTimeout(() => setError(""), 5000);
@@ -110,39 +211,6 @@ export const Login: React.FC = () => {
             setLoading(false);
         }
     };
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        handleNext();
-    };
-
-    const StepIndicator = () => (
-        <div className="flex items-center justify-center mb-6">
-            <div className="flex items-center space-x-4">
-                {steps.map((_step, index) => (
-                    <div key={index} className="flex items-center">
-                        <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
-                            completedSteps.includes(index)
-                                ? "bg-green-500 border-green-500 text-primary-foreground"
-                                : currentStep === index
-                                    ? "border-amber-500 bg-amber-500 text-primary-foreground"
-                                    : "border-gray-300 text-gray-500"
-                        }`}>
-                            {completedSteps.includes(index) ? (
-                                <Check size={16} />
-                            ) : (
-                                <span className="text-sm font-medium">{index + 1}</span>
-                            )}
-                        </div>
-                        {index < steps.length - 1 && (
-                            <div className={`w-12 h-0.5 ${
-                                completedSteps.includes(index + 1) ? "bg-green-500" : "bg-gray-300"
-                            }`} />
-                        )}
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
 
     const renderCurrentStep = () => {
         const currentStepConfig = steps[currentStep];
@@ -150,20 +218,22 @@ export const Login: React.FC = () => {
         switch (currentStep) {
             case 0: // Email
                 return (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box sx={{ mt: 3 }}>
                         <TextField
-                            label={currentStepConfig.title}
+                            inputRef={emailInputRef}
+                            fullWidth
+                            label="Email Address"
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder={currentStepConfig.placeholder}
-                            autoComplete="email"
-                            required
-                            fullWidth
+                            variant="outlined"
+                            error={!!error && currentStep === 0}
                             InputProps={{
+                                sx: { borderRadius: 2 },
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <Mail />
+                                        <Mail size={20} />
                                     </InputAdornment>
                                 ),
                             }}
@@ -173,20 +243,22 @@ export const Login: React.FC = () => {
 
             case 1: // Password
                 return (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box sx={{ mt: 3 }}>
                         <TextField
-                            label={currentStepConfig.title}
+                            inputRef={passwordInputRef}
+                            fullWidth
+                            label="Password"
                             type={showPassword ? "text" : "password"}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder={currentStepConfig.placeholder}
-                            autoComplete="current-password"
-                            required
-                            fullWidth
+                            variant="outlined"
+                            error={!!error && currentStep === 1}
                             InputProps={{
+                                sx: { borderRadius: 2 },
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <Lock />
+                                        <Lock size={20} />
                                     </InputAdornment>
                                 ),
                                 endAdornment: (
@@ -194,24 +266,26 @@ export const Login: React.FC = () => {
                                         <IconButton
                                             onClick={() => setShowPassword(!showPassword)}
                                             edge="end"
+                                            size="small"
                                         >
-                                            {showPassword ? <EyeOff /> : <Eye />}
+                                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                         </IconButton>
                                     </InputAdornment>
                                 ),
                             }}
                         />
 
-                        {/* Forgot Password */}
-                        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <Button
+                        {/* Forgot Password Link */}
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                            <MuiLink
                                 component={Link}
-                                to="/forget-password"
-                                size="small"
-                                sx={{ textTransform: 'none', color: 'text.secondary' }}
+                                to="/auth/forgot-password"
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{ textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
                             >
-                                {/*Forgot your password?*/}
-                            </Button>
+                                Forgot your password?
+                            </MuiLink>
                         </Box>
                     </Box>
                 );
@@ -222,125 +296,192 @@ export const Login: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen gap-5 bg-gradient-to-br from-slate-50 via-white to-amber-50 flex flex-col lg:flex-row-reverse items-center justify-center p-4 sm:p-6">
-
-            <motion.div
-                initial={{ x: 40, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ duration: 0.7, ease: "easeOut" }}
-                className="w-full max-w-md bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-sm relative"
-                style={{
-                    border: '1px solid #d1d5db',
-                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-                }}
-            >
-                {/*  Header Bar */}
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-amber-600 rounded-t-lg"></div>
-
-                {/* Logo Section */}
-                <div className="flex flex-col items-center mb-2">
-                    <div className="relative mb-2">
-                        LIV Blog
-                    </div>
-                    <h2 className="text-2xl font-bold text-center text-gray-800 ">Welcome Back</h2>
-                    <p className="text-sm text-center text-gray-600">Sign in to your LIV Blog account</p>
-                </div>
-
-                {/* Step Indicator */}
-                <StepIndicator />
-
-                <AnimatePresence>
-                    {error && (
-                        <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-3 mb-6 flex items-center gap-2"
-                        >
-                            <XCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
-                            <span className="flex-1">{error}</span>
-                            <button
-                                onClick={() => setError("")}
-                                className="text-red-600 hover:text-red-800 transition-colors"
-                            >
-                                <XCircle className="w-3 h-3" />
-                            </button>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-                <form onSubmit={handleSubmit}>
-                    {/* Current Step Content */}
-                    <div className="mb-5">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                            {steps[currentStep].title}
-                        </h3>
-                        <p className="text-sm text-gray-600 mb-4">
-                            {steps[currentStep].description}
-                        </p>
-                        {renderCurrentStep()}
-                    </div>
-
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Button
-                            type="button"
-                            onClick={handleBack}
-                            disabled={currentStep === 0}
-                            startIcon={<ArrowLeft />}
-                            variant="outlined"
-                        >
-                            Back
-                        </Button>
-
-                        <motion.div
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                        >
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                variant="contained"
-                                endIcon={<ArrowRight />}
-                                sx={{
-                                    bgcolor: 'primary.main',
-                                    '&:hover': { bgcolor: 'primary.dark' },
-                                    textTransform: 'none'
-                                }}
-                            >
-                                {loading ? 'Signing In...' : currentStep === steps.length - 1 ? 'Sign In' : 'Next'}
-                            </Button>
-                        </motion.div>
-                    </Box>
-                </form>
-
-                {/* Divider */}
-                <div className="my-4 flex items-center">
-                    <div className="flex-1 border-t border-gray-300"></div>
-                    <span className="px-3 text-gray-500 text-xs">New to LIV Hotel?</span>
-                    <div className="flex-1 border-t border-gray-300"></div>
-                </div>
-
-                {/* Create Account Link */}
-                <Box sx={{ textAlign: 'center' }}>
-                    <Button
-                        component={Link}
-                        to="/auth/signup"
-                        variant="outlined"
-                        endIcon={<ArrowRight />}
-                        sx={{ textTransform: 'none' }}
+        <GradientPaper>
+            <Container maxWidth="sm">
+                <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    <Card
+                        elevation={3}
+                        sx={{
+                            borderRadius: 3,
+                            overflow: 'hidden',
+                            position: 'relative',
+                        }}
                     >
-                        Create New Account
-                    </Button>
-                </Box>
+                        <Box
+                            sx={{
+                                height: 4,
+                                background: theme.palette.mode === 'light'
+                                    ? `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`
+                                    : `linear-gradient(90deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.dark})`,
+                            }}
+                        />
 
-                {/* Security Notice */}
-                <div className="mt-5 pt-4 border-t border-gray-200">
-                    <div className="flex items-center gap-2 text-xs text-gray-500 justify-center">
-                        <Shield className="w-3 h-3 text-green-500" />
-                        <span>Your login is secure and encrypted</span>
-                    </div>
-                </div>
-            </motion.div>
-        </div>
+                        <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
+                            {/* Header */}
+                            <Box sx={{ textAlign: 'center', mb: 4 }}>
+                                <Typography variant="h4" component="h1" gutterBottom fontWeight="bold">
+                                    Welcome Back
+                                </Typography>
+                                <Typography variant="body1" color="text.secondary">
+                                    Sign in to your LIV Blog account
+                                </Typography>
+                            </Box>
+
+                            {/* Stepper */}
+                            <Stepper
+                                activeStep={currentStep}
+                                alternativeLabel={isMobile}
+                                sx={{ mb: 4 }}
+                            >
+                                {steps.map((step, index) => (
+                                    <Step key={index} completed={completedSteps.includes(index)}>
+                                        <StepLabel
+                                            StepIconComponent={CustomStepIcon}
+                                            sx={{
+                                                '& .MuiStepLabel-label': {
+                                                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                                                },
+                                            }}
+                                        >
+                                            {isMobile ? `Step ${index + 1}` : step.title}
+                                        </StepLabel>
+                                    </Step>
+                                ))}
+                            </Stepper>
+
+                            {/* Error Alert */}
+                            <AnimatePresence>
+                                {error && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                    >
+                                        <Alert
+                                            severity="error"
+                                            sx={{ mb: 3 }}
+                                            onClose={() => setError('')}
+                                            icon={<XCircle fontSize="small" />}
+                                        >
+                                            {error}
+                                        </Alert>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            {/* Form */}
+                            <Box component="form" onSubmit={handleSubmit}>
+                                <Box sx={{ mb: 4 }}>
+                                    <Typography variant="h6" gutterBottom>
+                                        {steps[currentStep].title}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary" paragraph>
+                                        {steps[currentStep].description}
+                                    </Typography>
+                                    {renderCurrentStep()}
+                                </Box>
+
+                                {/* Navigation Buttons */}
+                                <div style={{
+                                    display: 'flex',
+                                    gap: '16px',
+                                    width: '100%'
+                                }}>
+                                    <div style={{ flex: 1 }}>
+                                        <Button
+                                            fullWidth
+                                            variant="outlined"
+                                            onClick={handleBack}
+                                            disabled={currentStep === 0}
+                                            startIcon={<ArrowLeft />}
+                                            size="large"
+                                        >
+                                            Back
+                                        </Button>
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <Button
+                                            fullWidth
+                                            variant="contained"
+                                            type="submit"
+                                            disabled={loading}
+                                            endIcon={loading ? <CircularProgress size={20} /> : currentStep === steps.length - 1 ? null : <ArrowRight />}
+                                            size="large"
+                                        >
+                                            {loading ? "Signing In..." : currentStep === steps.length - 1 ? "Sign In" : "Next"}
+                                        </Button>
+                                    </div>
+                                </div>
+                            </Box>
+
+                            {/* Divider & Create Account */}
+                            <Divider sx={{ my: 3 }}>
+                                <Typography variant="caption" color="text.secondary">
+                                    NEW TO LIV BLOG?
+                                </Typography>
+                            </Divider>
+
+                            <Box sx={{ textAlign: 'center' }}>
+                                <Button
+                                    component={Link}
+                                    to="/auth/signup"
+                                    variant="outlined"
+                                    fullWidth
+                                    endIcon={<ArrowRight />}
+                                    size="large"
+                                    sx={{ mb: 2 }}
+                                >
+                                    Create New Account
+                                </Button>
+                            </Box>
+
+                            {/* Security Notice */}
+                            <Box sx={{
+                                mt: 3,
+                                pt: 3,
+                                borderTop: 1,
+                                borderColor: 'divider',
+                                textAlign: 'center'
+                            }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                                    <Shield size={16} color={theme.palette.success.main} />
+                                    <Typography variant="caption" color="text.secondary">
+                                        Your login is secure and encrypted
+                                    </Typography>
+                                </Box>
+                            </Box>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+
+                {/* Responsive Indicator */}
+                <Box
+                    sx={{
+                        position: 'fixed',
+                        bottom: 16,
+                        right: 16,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        bgcolor: 'background.paper',
+                        px: 2,
+                        py: 1,
+                        borderRadius: 20,
+                        boxShadow: 1,
+                    }}
+                >
+                    {isMobile && <Smartphone size={16} />}
+                    {isTablet && <Tablet size={16} />}
+                    {!isMobile && !isTablet && <Monitor size={16} />}
+                    <Typography variant="caption" color="text.secondary">
+                        {isMobile ? 'Mobile' : isTablet ? 'Tablet' : 'Desktop'}
+                    </Typography>
+                </Box>
+            </Container>
+        </GradientPaper>
     );
 };
