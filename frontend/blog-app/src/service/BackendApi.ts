@@ -447,7 +447,7 @@ apiClient.interceptors.response.use(
             // Check if refresh token is still valid
             if (!BackendApi.isRefreshTokenValid()) {
                 BackendApi.clearTokens();
-                window.location.href = "/login";
+                window.location.href = "/auth/login";
                 return Promise.reject(new Error("Refresh token expired"));
             }
 
@@ -457,7 +457,7 @@ apiClient.interceptors.response.use(
                 return apiClient(originalRequest);
             } catch (refreshError) {
                 BackendApi.clearTokens();
-                window.location.href = "/login";
+                window.location.href = "/auth/login";
                 return Promise.reject(refreshError);
             }
         }

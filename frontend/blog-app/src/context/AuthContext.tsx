@@ -70,7 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updatedAt: profile.updatedAt,
     };
     setUser(userWithRoles);
-    return userWithRoles; // Return the user object
+    return userWithRoles;
   };
 
   const register = async (data: { email: string; password: string; name: string }) => {

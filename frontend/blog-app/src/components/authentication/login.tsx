@@ -85,6 +85,7 @@ export const Login: React.FC = () => {
         return true;
     };
 
+// In Login.tsx, fix the handleLogin function:
     const handleLogin = async () => {
         if (!validateCurrentStep()) {
             setTimeout(() => setError(""), 5000);
@@ -93,10 +94,12 @@ export const Login: React.FC = () => {
 
         try {
             setLoading(true);
-            const user = await login({ email, password });
+            await login({ email, password }); // UNCOMMENT THIS LINE
             toast.success("Welcome back! 🎉");
-            const from = location.state?.from?.pathname || (user.roles.includes('ADMIN') ? '/dashboard/admin/users' : '/dashboard');
-            navigate(from, { replace: true });
+            setTimeout(() => {
+                const from = location.state?.from?.pathname || '/dashboard';
+                navigate(from, { replace: true });
+            }, 100);
         } catch (err: any) {
             const errorMessage =
                 err.response?.data?.message || err.message || "Login failed";
@@ -107,7 +110,6 @@ export const Login: React.FC = () => {
             setLoading(false);
         }
     };
-
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         handleNext();
