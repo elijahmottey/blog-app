@@ -14,8 +14,8 @@ import {
     Smartphone,
     Monitor,
     Tablet,
+    LogIn,
 } from "lucide-react";
-import BackendApi from '../../service/BackendApi';
 import { toast } from "sonner";
 
 // Material UI imports
@@ -41,6 +41,9 @@ import {
     CircularProgress,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
+
+// Import your AuthContext
+import { useAuth } from "../../context/AuthContext";
 
 // Custom styled components
 const GradientPaper = styled(Paper)(({ theme }) => ({
@@ -72,6 +75,40 @@ const StepIconContainer = styled('div')<{ completed: boolean; active: boolean }>
     })
 );
 
+// Google Sign-In Button
+const GoogleButton = styled(Button)(({ theme }) => ({
+    backgroundColor: '#ffffff',
+    color: '#3c4043',
+    border: '1px solid #dadce0',
+    borderRadius: '8px',
+    padding: '10px 16px',
+    textTransform: 'none',
+    fontWeight: 500,
+    fontSize: '14px',
+    width: '100%',
+    '&:hover': {
+        backgroundColor: '#f8f9fa',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+    },
+    '&:active': {
+        backgroundColor: '#f1f3f4',
+    },
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '12px',
+    marginBottom: '16px',
+}));
+
+const GoogleIcon = () => (
+    <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+        <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+        <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+        <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+        <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+    </svg>
+);
+
 // Type definitions
 interface StepConfig {
     title: string;
@@ -81,11 +118,18 @@ interface StepConfig {
     validation: () => boolean;
 }
 
+// Login credentials interface
+interface LoginCredentials {
+    email: string;
+    password: string;
+}
+
 export const Login: React.FC = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [currentStep, setCurrentStep] = useState(0);
     const [completedSteps, setCompletedSteps] = useState<number[]>([]);
@@ -95,6 +139,9 @@ export const Login: React.FC = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+
+    // Use the AuthContext
+    const { login, isAuthenticated, googleLogin } = useAuth();
 
     // Refs for each input field
     const emailInputRef = useRef<HTMLInputElement>(null);
@@ -107,16 +154,40 @@ export const Login: React.FC = () => {
             description: "Enter the email address associated with your account",
             placeholder: "e.g., you@example.com",
             type: 'email',
-            validation: () => email.trim() !== "" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+            validation: () => {
+                if (!email.trim()) {
+                    setError("Please enter your email address");
+                    return false;
+                }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    setError("Please enter a valid email address");
+                    return false;
+                }
+                return true;
+            },
         },
         {
             title: "Password",
             description: "Enter your secure password",
             placeholder: "Your password",
             type: 'password',
-            validation: () => password.trim() !== "",
+            validation: () => {
+                if (!password.trim()) {
+                    setError("Please enter your password");
+                    return false;
+                }
+                return true;
+            },
         },
     ];
+
+    // Redirect if already authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            const from = location.state?.from?.pathname || '/dashboard';
+            navigate(from, { replace: true });
+        }
+    }, [isAuthenticated, navigate, location]);
 
     useEffect(() => {
         const currentRef = inputRefs[currentStep]?.current;
@@ -124,6 +195,20 @@ export const Login: React.FC = () => {
             setTimeout(() => currentRef.focus(), 100);
         }
     }, [currentStep]);
+
+    // Initialize Google OAuth
+    useEffect(() => {
+        // Load Google OAuth script
+        const script = document.createElement('script');
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.defer = true;
+        document.body.appendChild(script);
+
+        return () => {
+            document.body.removeChild(script);
+        };
+    }, []);
 
     const handleNext = () => {
         if (validateCurrentStep()) {
@@ -143,20 +228,9 @@ export const Login: React.FC = () => {
     };
 
     const validateCurrentStep = () => {
-        const currentValidation = steps[currentStep].validation;
-        if (!currentValidation()) {
-            let errorMessage = "";
-            switch (currentStep) {
-                case 0:
-                    errorMessage = "Please enter a valid email address";
-                    break;
-                case 1:
-                    errorMessage = "Password cannot be empty";
-                    break;
-                default:
-                    errorMessage = "Please complete the required field";
-            }
-            setError(errorMessage);
+        const isValid = steps[currentStep].validation();
+        if (!isValid) {
+            setTimeout(() => setError(""), 5000);
             return false;
         }
         setError("");
@@ -176,41 +250,119 @@ export const Login: React.FC = () => {
         e.preventDefault();
 
         if (currentStep === steps.length - 1) {
-            await handleLogin();
+            await handleEmailLogin();
         } else {
             handleNext();
         }
     };
 
-    const handleLogin = async () => {
+    const handleEmailLogin = async () => {
         if (!validateCurrentStep()) {
-            setTimeout(() => setError(""), 5000);
             return;
         }
 
         try {
             setLoading(true);
-            // Replace this with your actual login API call
-            // await BackendApi.login({ email, password });
+            setError("");
 
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const credentials: LoginCredentials = { email, password };
 
-            toast.success("Welcome back! 🎉");
+            // Call the login function from AuthContext
+            await login(credentials);
+
+            toast.success("Login successful! Welcome back 🎉");
+
+            // Small delay before redirecting
             setTimeout(() => {
                 const from = location.state?.from?.pathname || '/dashboard';
                 navigate(from, { replace: true });
-            }, 100);
+            }, 500);
+
         } catch (err: any) {
-            const errorMessage =
-                err.response?.data?.message || err.message || "Login failed. Please check your credentials.";
+            console.error("Login error:", err);
+
+            let errorMessage = "Login failed. Please check your credentials.";
+
+            if (err.response?.data?.message) {
+                errorMessage = err.response.data.message;
+            } else if (err.message) {
+                errorMessage = err.message;
+            } else if (err.status === 401) {
+                errorMessage = "Invalid email or password";
+            } else if (err.status === 404) {
+                errorMessage = "Account not found";
+            } else if (err.status === 500) {
+                errorMessage = "Server error. Please try again later";
+            }
+
             toast.error(errorMessage);
             setError(errorMessage);
-            setTimeout(() => setError(""), 5000);
+
+            // Reset to first step on error
+            setCurrentStep(0);
+            setCompletedSteps([]);
+
         } finally {
             setLoading(false);
         }
     };
+
+    const handleGoogleLogin = async () => {
+        try {
+            setGoogleLoading(true);
+            setError("");
+
+            // Check if Google OAuth is available in AuthContext
+            if (googleLogin) {
+                await googleLogin();
+                toast.success("Google login successful! 🎉");
+
+                setTimeout(() => {
+                    const from = location.state?.from?.pathname || '/dashboard';
+                    navigate(from, { replace: true });
+                }, 500);
+            } else {
+                // Fallback to direct Google OAuth flow
+                await handleDirectGoogleAuth();
+            }
+
+        } catch (err: any) {
+            console.error("Google login error:", err);
+            const errorMessage = err.response?.data?.message || err.message || "Google login failed";
+            toast.error(errorMessage);
+            setError(errorMessage);
+            setTimeout(() => setError(""), 5000);
+        } finally {
+            setGoogleLoading(false);
+        }
+    };
+
+    const handleDirectGoogleAuth = async () => {
+        // This is a fallback implementation if AuthContext doesn't have googleLogin
+        // In a real app, you would use Google's OAuth2 flow with your backend
+        const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID';
+        const redirectUri = `${window.location.origin}/auth/google/callback`;
+
+        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=email profile&prompt=select_account`;
+
+        // Redirect to Google OAuth
+        window.location.href = authUrl;
+    };
+
+    // Render Google Sign-In Button
+    const renderGoogleButton = () => (
+        <GoogleButton
+            onClick={handleGoogleLogin}
+            disabled={googleLoading || loading}
+            startIcon={<GoogleIcon />}
+        >
+            {googleLoading ? (
+                <CircularProgress size={20} />
+            ) : (
+                "Continue with Google"
+            )}
+        </GoogleButton>
+    );
 
     const renderCurrentStep = () => {
         const currentStepConfig = steps[currentStep];
@@ -225,10 +377,14 @@ export const Login: React.FC = () => {
                             label="Email Address"
                             type="email"
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={(e) => {
+                                setEmail(e.target.value);
+                                setError(""); // Clear error on input
+                            }}
                             placeholder={currentStepConfig.placeholder}
                             variant="outlined"
                             error={!!error && currentStep === 0}
+                            disabled={loading || googleLoading}
                             InputProps={{
                                 sx: { borderRadius: 2 },
                                 startAdornment: (
@@ -250,10 +406,14 @@ export const Login: React.FC = () => {
                             label="Password"
                             type={showPassword ? "text" : "password"}
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={(e) => {
+                                setPassword(e.target.value);
+                                setError(""); // Clear error on input
+                            }}
                             placeholder={currentStepConfig.placeholder}
                             variant="outlined"
                             error={!!error && currentStep === 1}
+                            disabled={loading || googleLoading}
                             InputProps={{
                                 sx: { borderRadius: 2 },
                                 startAdornment: (
@@ -267,6 +427,7 @@ export const Login: React.FC = () => {
                                             onClick={() => setShowPassword(!showPassword)}
                                             edge="end"
                                             size="small"
+                                            disabled={loading || googleLoading}
                                         >
                                             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                         </IconButton>
@@ -282,7 +443,12 @@ export const Login: React.FC = () => {
                                 to="/auth/forgot-password"
                                 variant="caption"
                                 color="text.secondary"
-                                sx={{ textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                                sx={{
+                                    textDecoration: 'none',
+                                    '&:hover': { textDecoration: 'underline' },
+                                    cursor: (loading || googleLoading) ? 'not-allowed' : 'pointer'
+                                }}
+                                onClick={(e) => (loading || googleLoading) && e.preventDefault()}
                             >
                                 Forgot your password?
                             </MuiLink>
@@ -331,6 +497,18 @@ export const Login: React.FC = () => {
                                 </Typography>
                             </Box>
 
+                            {/* Social Login Section */}
+                            <Box sx={{ mb: 4 }}>
+                                {renderGoogleButton()}
+
+                                {/* Divider */}
+                                <Divider sx={{ my: 3 }}>
+                                    <Typography variant="caption" color="text.secondary">
+                                        OR CONTINUE WITH
+                                    </Typography>
+                                </Divider>
+                            </Box>
+
                             {/* Stepper */}
                             <Stepper
                                 activeStep={currentStep}
@@ -373,7 +551,7 @@ export const Login: React.FC = () => {
                                 )}
                             </AnimatePresence>
 
-                            {/* Form */}
+                            {/* Email/Password Form */}
                             <Box component="form" onSubmit={handleSubmit}>
                                 <Box sx={{ mb: 4 }}>
                                     <Typography variant="h6" gutterBottom>
@@ -396,7 +574,7 @@ export const Login: React.FC = () => {
                                             fullWidth
                                             variant="outlined"
                                             onClick={handleBack}
-                                            disabled={currentStep === 0}
+                                            disabled={currentStep === 0 || loading || googleLoading}
                                             startIcon={<ArrowLeft />}
                                             size="large"
                                         >
@@ -408,7 +586,7 @@ export const Login: React.FC = () => {
                                             fullWidth
                                             variant="contained"
                                             type="submit"
-                                            disabled={loading}
+                                            disabled={loading || googleLoading}
                                             endIcon={loading ? <CircularProgress size={20} /> : currentStep === steps.length - 1 ? null : <ArrowRight />}
                                             size="large"
                                         >
@@ -419,7 +597,7 @@ export const Login: React.FC = () => {
                             </Box>
 
                             {/* Divider & Create Account */}
-                            <Divider sx={{ my: 3 }}>
+                            <Divider sx={{ my: 4 }}>
                                 <Typography variant="caption" color="text.secondary">
                                     NEW TO LIV BLOG?
                                 </Typography>
@@ -431,9 +609,10 @@ export const Login: React.FC = () => {
                                     to="/auth/signup"
                                     variant="outlined"
                                     fullWidth
-                                    endIcon={<ArrowRight />}
+                                    endIcon={<LogIn size={18} />}
                                     size="large"
                                     sx={{ mb: 2 }}
+                                    disabled={loading || googleLoading}
                                 >
                                     Create New Account
                                 </Button>
