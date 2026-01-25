@@ -34,7 +34,7 @@ export const PostsManagement: React.FC = () => {
   // Cache posts for 5 minutes
   const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 
-  const { isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   // Listen for post creation events (triggered from CreatePost component)
   useEffect(() => {
@@ -108,7 +108,14 @@ export const PostsManagement: React.FC = () => {
     },
     onError: (error: any) => {
       console.error('Delete post error:', error);
-      toast.error('Failed to delete post');
+      const status = error?.response?.status;
+      if (status === 403) {
+        toast.error('You are not authorized to delete this post.');
+      } else if (status === 404) {
+        toast.error('Post not found or already deleted.');
+      } else {
+        toast.error('Failed to delete post');
+      }
     },
   });
 
@@ -381,7 +388,7 @@ export const PostsManagement: React.FC = () => {
                             <Eye size={18} />
                           </IconButton>
 
-                          {isAdmin && (
+                          {(isAdmin || ((typeof post.users === 'string' ? post.users.toLowerCase() : '').includes((user?.name||'').toLowerCase()) || (typeof post.users === 'string' ? post.users.toLowerCase() : '').includes((user?.email||'').toLowerCase()))) && (
                               <>
                                 <IconButton
                                     component={Link}

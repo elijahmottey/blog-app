@@ -16,9 +16,13 @@ import {
 import {
     Button,
     Box,
-    Typography
+    Typography,
+    IconButton,
+    Tooltip
 } from "@mui/material";
 import BackendApi from "../service/BackendApi.ts";
+import { useThemeMode } from "../context/ThemeModeContext";
+import { Moon, Sun } from "lucide-react";
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -27,6 +31,7 @@ export default function Navbar() {
     const location = useLocation();
     const isAuthenticated = BackendApi.isAuthenticated();
     const navigate = useNavigate();
+    const { mode, toggleMode } = useThemeMode();
 
     // Handle scroll effect
     useEffect(() => {
@@ -53,8 +58,8 @@ export default function Navbar() {
         <nav
             className={`sticky top-0 z-50 w-full transition-all duration-300 ${
                 scrolled
-                    ? "bg-white/95 backdrop-blur-lg border-b shadow-sm"
-                    : "bg-white border-b"
+                    ? (mode === 'dark' ? 'bg-gray-900/80 backdrop-blur-lg border-b border-gray-800 shadow-sm text-gray-100' : 'bg-white/95 backdrop-blur-lg border-b shadow-sm')
+                    : (mode === 'dark' ? 'bg-gray-900 border-b border-gray-800 text-gray-100' : 'bg-white border-b')
             }`}
         >
             <div className="container mx-auto px-4">
@@ -143,6 +148,13 @@ export default function Navbar() {
                                 </div>
                             )}
                         </div>
+
+                        {/* Theme Toggle */}
+                        <Tooltip title="Toggle color mode">
+                          <IconButton onClick={() => toggleMode()} size="small" sx={{ color: 'text.secondary' }}>
+                            {mode === 'dark' ? <Sun size={18}/> : <Moon size={18}/>}
+                          </IconButton>
+                        </Tooltip>
 
                         {/* Auth Buttons */}
                         {isAuthenticated ? (

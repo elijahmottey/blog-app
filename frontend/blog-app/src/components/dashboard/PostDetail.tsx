@@ -80,8 +80,15 @@ export const PostDetail: React.FC = () => {
       toast.success('Post deleted successfully');
       navigate('/dashboard/posts');
     },
-    onError: () => {
-      toast.error('Failed to delete post');
+    onError: (err: any) => {
+      const status = err?.response?.status;
+      if (status === 403) {
+        toast.error('You are not authorized to delete this post.');
+      } else if (status === 404) {
+        toast.error('Post not found or already deleted.');
+      } else {
+        toast.error('Failed to delete post');
+      }
     },
   });
 
@@ -209,6 +216,12 @@ export const PostDetail: React.FC = () => {
   // Safely get post author name
   const postAuthorName = getUserName(postData.users);
 
+  // Determine if current user can edit/delete (author or admin)
+  const currentUserName = user?.name?.toLowerCase() || '';
+  const currentUserEmail = user?.email?.toLowerCase() || '';
+  const authorStr = (typeof postData.users === 'string' ? postData.users : getUserName(postData.users)).toLowerCase();
+  const canEditOrDelete = !!user && (authorStr.includes(currentUserName) || authorStr.includes(currentUserEmail) || (user?.roles?.includes('ADMIN' as any)));
+
   // Safely ensure post content is a string
   const safePostContent = typeof postData.content === 'string'
       ? postData.content
@@ -237,7 +250,7 @@ export const PostDetail: React.FC = () => {
             Back to Posts
           </Button>
 
-          {user && (
+          {canEditOrDelete && (
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <IconButton
                     component={Link}

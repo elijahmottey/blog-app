@@ -45,6 +45,7 @@ import {
 } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
+import { useThemeMode } from '../../context/ThemeModeContext';
 
 interface DashboardNavbarProps {
   onMenuClick: () => void;
@@ -101,9 +102,9 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
 
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [darkMode, setDarkMode] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [quickActionsOpen, setQuickActionsOpen] = useState(false);
+  const { mode, toggleMode } = useThemeMode();
 
   const handleProfileClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -217,15 +218,16 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
                   </Tooltip>
               )}
 
-              {/* Dark Mode Toggle */}
-              <Tooltip title={`${darkMode ? 'Light' : 'Dark'} mode`}>
+              {/* Theme Mode Toggle */}
+              <Tooltip title={`${mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}`}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  {darkMode ? <Moon size={18} /> : <Sun size={18} />}
+                  {mode === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
                   <Switch
                       size="small"
-                      checked={darkMode}
-                      onChange={handleToggleDarkMode}
+                      checked={mode === 'dark'}
+                      onChange={toggleMode}
                       color="primary"
+                      inputProps={{ 'aria-label': 'toggle color mode' }}
                   />
                 </Box>
               </Tooltip>

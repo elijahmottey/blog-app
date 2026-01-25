@@ -5,6 +5,8 @@ import liv.codveda.blog.app.exception.NotFoundException;
 import liv.codveda.blog.app.repository.UsersRepository;
 import liv.codveda.blog.app.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -23,6 +25,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = "users", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<Users> getAllUsers(Pageable pageable) {
         return usersRepository.findAll(pageable);
     }
@@ -30,6 +33,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
+    @Cacheable(value = "userById", key = "#id")
     public Users getUserById(Long id) {
         if ( id <= 0) {
             throw new IllegalArgumentException("Invalid user ID: " + id);
@@ -39,12 +43,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @CacheEvict(value = {"users", "userById", "userByEmail"}, allEntries = true)
     public void deleteUserById(long id) {
         this.getUserById(id);
         this.usersRepository.deleteById( id);
     }
 
     @Override
+    @CacheEvict(value = {"users", "userById", "userByEmail"}, allEntries = true)
     public Users updateUserById(long id, Users user) {
 
 
@@ -68,11 +74,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = "userBlogHistory", key = "#id")
     public Users getUserBlogHistory(long id) {
         return this.getUserById(id);
     }
 
     @Override
+    @Cacheable(value = "userByEmail", key = "#email")
     public Users getMyInfo(String email) {
         return this.usersRepository.findByEmail(email)
                 .orElseThrow(() ->

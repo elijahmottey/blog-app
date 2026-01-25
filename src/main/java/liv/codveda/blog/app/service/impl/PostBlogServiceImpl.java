@@ -4,10 +4,13 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import liv.codveda.blog.app.domain.entities.Post;
 import liv.codveda.blog.app.domain.entities.Users;
+import liv.codveda.blog.app.domain.enums.Roles;
 import liv.codveda.blog.app.repository.PostRepository;
 import liv.codveda.blog.app.repository.UsersRepository;
 import liv.codveda.blog.app.service.interfaces.BlogService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -37,11 +40,15 @@ public class PostBlogServiceImpl implements BlogService {
                         new EntityNotFoundException("User not found with email: " + email));
     }
 
-    // 🔐 Helper method to check post ownership
-    private void checkPostOwnership(Post post) {
-        Users currentUser = getAuthenticatedUser();
+    private boolean isAdmin(Users user) {
+        return user.getRole() == Roles.ADMIN;
+    }
 
-        if (!post.getUsers().getId().equals(currentUser.getId())) {
+    // 🔐 Helper method to check post ownership or admin
+    private void checkPostOwnershipOrAdmin(Post post) {
+        Users currentUser = getAuthenticatedUser();
+        boolean owner = post.getUsers().getId().equals(currentUser.getId());
+        if (!(owner || isAdmin(currentUser))) {
             throw new AccessDeniedException(
                     "You are not authorized to modify or delete this post");
         }
@@ -49,6 +56,7 @@ public class PostBlogServiceImpl implements BlogService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"posts", "postById", "postByTitle"}, allEntries = true)
     public Post postBlog(Post post) {
         Users user = getAuthenticatedUser();
         post.setUsers(user);
@@ -57,18 +65,21 @@ public class PostBlogServiceImpl implements BlogService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"posts", "postById", "postByTitle"}, allEntries = true)
     public void deletePost(Long id) {
         Post post = getPostById(id);
-        checkPostOwnership(post);
+        checkPostOwnershipOrAdmin(post);
         postRepository.delete(post);
     }
 
     @Override
+    @Cacheable(value = "posts")
     public Page<Post> getAllPosts(Pageable pageable) {
         return postRepository.findAll(pageable);
     }
 
     @Override
+    @Cacheable(value = "postById", key = "#id")
     public Post getPostById(Long id) {
         return postRepository.findById(id)
                 .orElseThrow(() ->
@@ -76,15 +87,17 @@ public class PostBlogServiceImpl implements BlogService {
     }
 
     @Override
+    @Cacheable(value = "postByTitle", key = "#title + '-' + #pageable.pageNumber")
     public Page<Post> getPostByTitle(String title, Pageable pageable) {
         return postRepository.findByTitleContainingIgnoreCase(title, pageable);
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = {"posts", "postById", "postByTitle"}, allEntries = true)
     public Post updatePost(Long id, Post post) {
         Post existingPost = getPostById(id);
-        checkPostOwnership(existingPost);
+        checkPostOwnershipOrAdmin(existingPost);
 
         if (post.getTitle() != null) {
             existingPost.setTitle(post.getTitle());
