@@ -502,7 +502,7 @@ export const AdminUsers: React.FC = () => {
           <TableContainer>
             <Table>
               <TableHead>
-                <TableRow sx={{ bgcolor: 'grey.50' }}>
+                <TableRow sx={(theme) => ({ bgcolor: theme.palette.action.hover })}>
                   <TableCell sx={{ fontWeight: 'bold' }}>User</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Email</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Role</TableCell>
@@ -626,14 +626,16 @@ export const AdminUsers: React.FC = () => {
                                 </IconButton>
                               </Tooltip>
                               <Tooltip title="Delete User">
-                                <IconButton
-                                    size="small"
-                                    onClick={() => handleOpenDeleteDialog(user)}
-                                    color="error"
-                                    disabled={user.role?.toUpperCase() === 'ADMIN'}
-                                >
-                                  <Delete fontSize="small" />
-                                </IconButton>
+                                <span>
+                                  <IconButton
+                                      size="small"
+                                      onClick={() => handleOpenDeleteDialog(user)}
+                                      color="error"
+                                      disabled={user.role?.toUpperCase() === 'ADMIN'}
+                                  >
+                                    <Delete fontSize="small" />
+                                  </IconButton>
+                                </span>
                               </Tooltip>
                             </Box>
                           </TableCell>

@@ -20,6 +20,7 @@ import {
     IconButton,
     Tooltip
 } from "@mui/material";
+import { useTheme, alpha } from '@mui/material/styles';
 import BackendApi from "../service/BackendApi.ts";
 import { useThemeMode } from "../context/ThemeModeContext";
 import { Moon, Sun } from "lucide-react";
@@ -32,6 +33,7 @@ export default function Navbar() {
     const isAuthenticated = BackendApi.isAuthenticated();
     const navigate = useNavigate();
     const { mode, toggleMode } = useThemeMode();
+    const theme = useTheme();
 
     // Handle scroll effect
     useEffect(() => {
@@ -56,11 +58,13 @@ export default function Navbar() {
 
     return (
         <nav
-            className={`sticky top-0 z-50 w-full transition-all duration-300 ${
-                scrolled
-                    ? (mode === 'dark' ? 'bg-gray-900/80 backdrop-blur-lg border-b border-gray-800 shadow-sm text-gray-100' : 'bg-white/95 backdrop-blur-lg border-b shadow-sm')
-                    : (mode === 'dark' ? 'bg-gray-900 border-b border-gray-800 text-gray-100' : 'bg-white border-b')
-            }`}
+            className={`sticky top-0 z-50 w-full transition-all duration-300`}
+            style={{
+                backgroundColor: scrolled ? (mode === 'dark' ? theme.palette.background.paper : alpha(theme.palette.background.paper, 0.98)) : theme.palette.background.paper,
+                borderBottom: `1px solid ${theme.palette.divider}`,
+                color: theme.palette.text.primary,
+                backdropFilter: scrolled ? 'blur(6px)' : undefined,
+            }}
         >
             <div className="container mx-auto px-4">
                 {/* Desktop Navigation */}
@@ -106,13 +110,12 @@ export default function Navbar() {
                                     <Link
                                         key={item.name}
                                         to={item.href}
-                                        className={`flex items-center space-x-1 text-sm font-medium transition-colors ${
-                                            isActive
-                                                ? "text-blue-600"
-                                                : "text-gray-700 hover:text-blue-600"
-                                        }`}
+                                        className={`flex items-center space-x-1 text-sm font-medium transition-colors`}
+                                        style={{
+                                            color: isActive ? theme.palette.primary.main : theme.palette.text.secondary,
+                                        }}
                                     >
-                                        <Icon className="h-4 w-4" />
+                                        <Icon className="h-4 w-4" style={{ color: isActive ? theme.palette.primary.main : (theme.palette as any).custom?.icon ?? theme.palette.text.secondary }} />
                                         <span>{item.name}</span>
                                     </Link>
                                 );
@@ -126,23 +129,25 @@ export default function Navbar() {
                         <div className="relative">
                             <button
                                 onClick={() => setIsSearchOpen(!isSearchOpen)}
-                                className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                className="p-2 rounded-lg transition-colors"
                                 aria-label="Search"
+                                style={{ color: theme.palette.text.secondary, backgroundColor: 'transparent' }}
                             >
                                 <Search className="h-5 w-5" />
                             </button>
                             {isSearchOpen && (
-                                <div className="absolute right-0 top-12 w-96 bg-white rounded-lg shadow-lg border p-4">
+                                <div className="absolute right-0 top-12 w-96 rounded-lg shadow-lg border p-4" style={{ backgroundColor: theme.palette.background.paper, borderColor: theme.palette.divider }}>
                                     <div className="relative">
-                                        <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                                        <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: theme.palette.text.secondary }} />
                                         <input
                                             type="text"
                                             placeholder="Search articles, tags, authors..."
-                                            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none"
+                                            style={{ borderColor: theme.palette.divider, color: theme.palette.text.primary, backgroundColor: theme.palette.background.paper }}
                                             autoFocus
                                         />
                                     </div>
-                                    <div className="mt-2 text-sm text-gray-500">
+                                    <div className="mt-2 text-sm" style={{ color: theme.palette.text.secondary }}>
                                         Press Enter to search
                                     </div>
                                 </div>
@@ -160,29 +165,30 @@ export default function Navbar() {
                         {isAuthenticated ? (
                             <div className="flex items-center space-x-3">
                                 <Link to="/dashboard">
-                                    <Button variant="outlined" startIcon={<User />}>
+                                    <Button variant="outlined" startIcon={<User />} sx={{ color: theme.palette.text.primary, borderColor: theme.palette.divider }}>
                                         Dashboard
                                     </Button>
                                 </Link>
                                 <Button
                                     onClick={() => navigate("/dashboard/posts/create")}
                                     startIcon={<PenSquare />}
+                                    sx={{ color: theme.palette.text.primary }}
                                 >
                                     Write Post
                                 </Button>
-                                <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                                    <User className="h-5 w-5 text-gray-700" />
+                                <button className="p-2 rounded-lg transition-colors" style={{ color: theme.palette.text.secondary }}>
+                                    <User className="h-5 w-5" style={{ color: (theme.palette as any).custom?.icon ?? theme.palette.text.secondary }} />
                                 </button>
                             </div>
                         ) : (
                             <div className="flex items-center space-x-3">
                                 <Link to="/auth/login">
-                                    <Button variant="contained" startIcon={<LogIn className="h-4 w-4" />}>
+                                    <Button variant="contained" startIcon={<LogIn className="h-4 w-4" />} sx={{ backgroundColor: theme.palette.primary.main, color: theme.palette.primary.contrastText }}>
                                         Sign In
                                     </Button>
                                 </Link>
                                 <Link to="/auth/signup">
-                                    <Button>Get Started</Button>
+                                    <Button sx={{ color: theme.palette.text.primary }}>Get Started</Button>
                                 </Link>
                             </div>
                         )}
@@ -223,15 +229,17 @@ export default function Navbar() {
                     <div className="flex items-center space-x-2">
                         <button
                             onClick={() => setIsSearchOpen(!isSearchOpen)}
-                            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors"
+                            className="p-2 rounded-lg transition-colors"
                             aria-label="Search"
+                            style={{ color: theme.palette.text.secondary, backgroundColor: 'transparent' }}
                         >
                             <Search className="h-5 w-5" />
                         </button>
                         <button
                             onClick={() => setIsOpen(!isOpen)}
-                            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors"
+                            className="p-2 rounded-lg transition-colors"
                             aria-label="Menu"
+                            style={{ color: theme.palette.text.secondary, backgroundColor: 'transparent' }}
                         >
                             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                         </button>
@@ -242,11 +250,12 @@ export default function Navbar() {
                 {isSearchOpen && (
                     <div className="md:hidden px-4 pb-4">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: theme.palette.text.secondary }} />
                             <input
                                 type="text"
                                 placeholder="Search articles, tags, authors..."
-                                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none"
+                                style={{ borderColor: theme.palette.divider, color: theme.palette.text.primary, backgroundColor: theme.palette.background.paper }}
                                 autoFocus
                             />
                         </div>
@@ -255,7 +264,7 @@ export default function Navbar() {
 
                 {/* Mobile Menu */}
                 {isOpen && (
-                    <div className="md:hidden border-t">
+                    <div className="md:hidden" style={{ borderTop: `1px solid ${theme.palette.divider}` }}>
                         <div className="px-2 pt-2 pb-3 space-y-1">
                             {navigation.map((item) => {
                                 const Icon = item.icon;
@@ -264,41 +273,44 @@ export default function Navbar() {
                                     <Link
                                         key={item.name}
                                         to={item.href}
-                                        className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium transition-colors ${
-                                            isActive
-                                                ? "bg-blue-50 text-blue-600"
-                                                : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                                        }`}
+                                        className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium transition-colors`}
+                                        style={{
+                                            backgroundColor: isActive ? alpha(theme.palette.primary.main, 0.06) : 'transparent',
+                                            color: isActive ? theme.palette.primary.main : theme.palette.text.primary,
+                                        }}
                                     >
-                                        <Icon className="h-5 w-5" />
+                                        <Icon className="h-5 w-5" style={{ color: isActive ? theme.palette.primary.main : (theme.palette as any).custom?.icon ?? theme.palette.text.secondary }} />
                                         <span>{item.name}</span>
                                     </Link>
                                 );
                             })}
 
                             {/* Mobile Auth Links */}
-                            <div className="px-3 pt-4 border-t">
+                            <div className="px-3 pt-4" style={{ borderTop: `1px solid ${theme.palette.divider}` }}>
                                 {isAuthenticated ? (
                                     <>
                                         <Link
                                             to="/dashboard/posts/create"
-                                            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                                            className="flex items-center space-x-3 px-3 py-2 rounded-lg textbase font-medium"
+                                            style={{ color: theme.palette.text.primary }}
                                         >
-                                            <PenSquare className="h-5 w-5" />
+                                            <PenSquare className="h-5 w-5" style={{ color: (theme.palette as any).custom?.icon ?? theme.palette.text.secondary }} />
                                             <span>Write Post</span>
                                         </Link>
                                         <Link
                                             to="/dashboard/profile"
-                                            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                                            className="flex items-center space-x-3 px-3 py-2 rounded-lg textbase font-medium"
+                                            style={{ color: theme.palette.text.primary }}
                                         >
-                                            <User className="h-5 w-5" />
+                                            <User className="h-5 w-5" style={{ color: (theme.palette as any).custom?.icon ?? theme.palette.text.secondary }} />
                                             <span>Profile</span>
                                         </Link>
                                         <Link
                                             to="/dashboard/settings"
-                                            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                                            className="flex items-center space-x-3 px-3 py-2 rounded-lg textbase font-medium"
+                                            style={{ color: theme.palette.text.primary }}
                                         >
-                                            <Settings className="h-5 w-5" />
+                                            <Settings className="h-5 w-5" style={{ color: (theme.palette as any).custom?.icon ?? theme.palette.text.secondary }} />
                                             <span>Settings</span>
                                         </Link>
                                     </>
@@ -306,16 +318,18 @@ export default function Navbar() {
                                     <>
                                         <Link
                                             to="/auth/login"
-                                            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                                            className="flex items-center space-x-3 px-3 py-2 rounded-lg textbase font-medium"
+                                            style={{ color: theme.palette.text.primary }}
                                         >
-                                            <LogIn className="h-5 w-5" />
+                                            <LogIn className="h-5 w-5" style={{ color: (theme.palette as any).custom?.icon ?? theme.palette.text.secondary }} />
                                             <span>Sign In</span>
                                         </Link>
                                         <Link
                                             to="/auth/signup"
-                                            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                                            className="flex items-center space-x-3 px-3 py-2 rounded-lg textbase font-medium"
+                                            style={{ color: theme.palette.text.primary }}
                                         >
-                                            <PenSquare className="h-5 w-5" />
+                                            <PenSquare className="h-5 w-5" style={{ color: (theme.palette as any).custom?.icon ?? theme.palette.text.secondary }} />
                                             <span>Get Started</span>
                                         </Link>
                                     </>

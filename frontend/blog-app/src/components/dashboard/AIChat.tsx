@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   Send,
 
@@ -42,6 +42,7 @@ import {
   MenuItem,
   InputAdornment
 } from '@mui/material';
+import { useTheme, alpha, darken } from '@mui/material/styles';
 import BackendApi from '../../service/BackendApi';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
@@ -60,7 +61,7 @@ interface QuickAction {
   title: string;
   prompt: string;
   icon: React.ReactElement;
-  color: string;
+  palette: 'primary' | 'success' | 'warning' | 'secondary';
 }
 
 interface ChatHistory {
@@ -104,28 +105,28 @@ export const AIChat: React.FC<AIChatProps> = ({ isExpanded = false, onToggleExpa
       title: 'Brainstorm Ideas',
       prompt: 'Brainstorm 5 blog post ideas about technology trends for next year',
       icon: <Sparkles size={16} />,
-      color: '#6366f1'
+      palette: 'primary'
     },
     {
       id: '2',
       title: 'Improve Writing',
       prompt: 'Help me improve this paragraph for better engagement:',
       icon: <Bot size={16} />,
-      color: '#10b981'
+      palette: 'success'
     },
     {
       id: '3',
       title: 'Generate Title',
       prompt: 'Generate 10 catchy titles for a post about AI in content creation',
       icon: <MessageCircle size={16} />,
-      color: '#f59e0b'
+      palette: 'warning'
     },
     {
       id: '4',
       title: 'Create Outline',
       prompt: 'Create a detailed outline for a beginner\'s guide to React',
       icon: <Paperclip size={16} />,
-      color: '#8b5cf6'
+      palette: 'secondary'
     }
   ];
 
@@ -298,19 +299,19 @@ export const AIChat: React.FC<AIChatProps> = ({ isExpanded = false, onToggleExpa
           <Fab
               color="primary"
               onClick={handleToggle}
-              sx={{
+              sx={(theme) => ({
                 position: 'fixed',
                 bottom: 24,
                 right: 24,
                 zIndex: 9999,
-                background: 'linear-gradient(135deg, #467eea 0%, #764ba2 100%)',
-                boxShadow: '0 8px 32px rgba(102, 126, 234, 0.4)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${darken(theme.palette.secondary.main, 0.1)} 100%)`,
+                boxShadow: `0 8px 32px ${alpha(theme.palette.primary.main, 0.4)}`,
                 '&:hover': {
-                  background: 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)',
+                  background: `linear-gradient(135deg, ${darken(theme.palette.primary.main, 0.05)} 0%, ${darken(theme.palette.secondary.main, 0.15)} 100%)`,
                   transform: 'scale(1.1)',
                 },
                 transition: 'all 0.3s ease',
-              }}
+              })}
           >
             <Badge
                 badgeContent={mutation.isPending ? '🤔' : messages.length}
@@ -328,7 +329,7 @@ export const AIChat: React.FC<AIChatProps> = ({ isExpanded = false, onToggleExpa
       <Slide direction="up" in={true} mountOnEnter unmountOnExit>
         <Paper
             elevation={15}
-            sx={{
+            sx={(theme) => ({
               position: 'fixed',
               bottom: 24,
               right: 24,
@@ -339,25 +340,25 @@ export const AIChat: React.FC<AIChatProps> = ({ isExpanded = false, onToggleExpa
               flexDirection: 'column',
               borderRadius: 2,
               overflow: 'hidden',
-              background: 'linear-gradient(135deg, #667eea15 0%, #764ba215 100%)',
-            }}
+              background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.08)} 0%, ${alpha(theme.palette.secondary.main, 0.08)} 100%)`,
+            })}
         >
           {/* Header */}
           <Box
-              sx={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
+              sx={(theme) => ({
+                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${darken(theme.palette.secondary.main, 0.1)} 100%)`,
+                color: theme.palette.getContrastText(theme.palette.primary.main),
                 p: 2,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-              }}
+              })}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Avatar
                   sx={{
                     bgcolor: 'white',
-                    color: '#667eea',
+                    color: 'primary.main',
                     width: 32,
                     height: 32,
                   }}
@@ -475,13 +476,16 @@ export const AIChat: React.FC<AIChatProps> = ({ isExpanded = false, onToggleExpa
                                 label={action.title}
                                 onClick={() => handleQuickAction(action.prompt)}
                                 icon={action.icon}
-                                sx={{
-                                  bgcolor: action.color + '15',
-                                  color: action.color,
-                                  border: `1px solid ${action.color}30`,
-                                  '&:hover': {
-                                    bgcolor: action.color + '25',
-                                  },
+                                sx={(theme) => {
+                                  const main = theme.palette[action.palette].main;
+                                  return {
+                                    bgcolor: alpha(main, 0.08),
+                                    color: main,
+                                    border: `1px solid ${alpha(main, 0.2)}`,
+                                    '&:hover': {
+                                      bgcolor: alpha(main, 0.15),
+                                    },
+                                  };
                                 }}
                                 size="small"
                             />
@@ -695,18 +699,18 @@ export const AIChat: React.FC<AIChatProps> = ({ isExpanded = false, onToggleExpa
                     variant="contained"
                     disabled={mutation.isPending || !input.trim()}
                     startIcon={mutation.isPending ? <CircularProgress size={16} /> : <Send size={16} />}
-                    sx={{
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    sx={(theme) => ({
+                      background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${darken(theme.palette.secondary.main, 0.1)} 100%)`,
                       borderRadius: 2,
                       textTransform: 'none',
                       px: 2,
                       '&:hover': {
-                        background: 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)',
+                        background: `linear-gradient(135deg, ${darken(theme.palette.primary.main, 0.05)} 0%, ${darken(theme.palette.secondary.main, 0.15)} 100%)`,
                       },
                       '&:disabled': {
-                        background: 'grey.300',
+                        background: theme.palette.action.disabledBackground,
                       },
-                    }}
+                    })}
                 >
                   {mutation.isPending ? 'Thinking...' : 'Send'}
                 </Button>

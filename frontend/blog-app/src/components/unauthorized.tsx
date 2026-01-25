@@ -1,26 +1,30 @@
 // components/unauthorized.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTheme } from '@mui/material/styles';
 
 export const Unauthorized: React.FC = () => {
+    const theme = useTheme();
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: theme.palette.background.default }}>
             <div className="text-center">
-                <h1 className="text-4xl font-bold text-red-600 mb-4">403</h1>
-                <h2 className="text-2xl font-semibold text-gray-800 mb-4">Unauthorized Access</h2>
-                <p className="text-gray-600 mb-6">
+                <h1 className="text-4xl font-bold mb-4" style={{ color: theme.palette.error.main }}>403</h1>
+                <h2 className="text-2xl font-semibold mb-4" style={{ color: theme.palette.text.primary }}>Unauthorized Access</h2>
+                <p style={{ color: theme.palette.text.secondary }} className="mb-6">
                     You don't have permission to access this page.
                 </p>
                 <div className="space-x-4">
                     <Link
                         to="/dashboard"
-                        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        className="px-6 py-3 rounded-lg transition-colors"
+                        style={{ backgroundColor: theme.palette.primary.main, color: theme.palette.primary.contrastText }}
                     >
                         Go to Dashboard
                     </Link>
                     <Link
                         to="/home"
-                        className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                        className="px-6 py-3 rounded-lg transition-colors"
+                        style={{ backgroundColor: (theme.palette as any).custom?.chipBg ?? theme.palette.action.selected, color: theme.palette.text.primary }}
                     >
                         Go to Home
                     </Link>

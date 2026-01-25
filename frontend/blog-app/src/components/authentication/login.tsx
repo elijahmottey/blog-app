@@ -47,7 +47,7 @@ import { useAuth } from "../../context/AuthContext";
 
 // Custom styled components
 const GradientPaper = styled(Paper)(({ theme }) => ({
-    background: `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.grey[50]} 100%)`,
+    background: `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
     minHeight: '100vh',
     display: 'flex',
     alignItems: 'center',
@@ -78,21 +78,21 @@ const StepIconContainer = styled('div')<{ completed: boolean; active: boolean }>
 // Google Sign-In Button
 //@ts-ignore
 const GoogleButton = styled(Button)(({ theme }) => ({
-    backgroundColor: '#ffffff',
-    color: '#3c4043',
-    border: '1px solid #dadce0',
-    borderRadius: '8px',
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.primary,
+    border: `1px solid ${theme.palette.divider}`,
+    borderRadius: 8,
     padding: '10px 16px',
     textTransform: 'none',
     fontWeight: 500,
     fontSize: '14px',
     width: '100%',
     '&:hover': {
-        backgroundColor: '#f8f9fa',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        backgroundColor: theme.palette.action.hover,
+        boxShadow: theme.shadows[1],
     },
     '&:active': {
-        backgroundColor: '#f1f3f4',
+        backgroundColor: theme.palette.action.selected,
     },
     display: 'flex',
     alignItems: 'center',

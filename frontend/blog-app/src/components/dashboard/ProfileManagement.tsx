@@ -25,6 +25,7 @@ import { Roles } from '../../enums/Roles';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { useTheme, alpha } from '@mui/material/styles';
 
 interface ProfileFormData {
     name: string;
@@ -59,6 +60,7 @@ const passwordSchema = yup.object({
 
 export const ProfileManagement: React.FC = () => {
     const { user, logout } = useAuth();
+    const theme = useTheme();
     const queryClient = useQueryClient();
     const [activeTab, setActiveTab] = useState<'profile' | 'password' | 'stats' | 'account'>('profile');
     const [isEditing, setIsEditing] = useState(false);
@@ -208,25 +210,75 @@ export const ProfileManagement: React.FC = () => {
     return (
         <div className="max-w-4xl mx-auto space-y-6">
             {/* Header */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div
+                style={{
+                    backgroundColor: theme.palette.background.paper,
+                    border: `1px solid ${theme.palette.divider}`,
+                    borderRadius: 8,
+                    padding: 24,
+                    boxShadow: theme.shadows[1],
+                }}
+            >
                 <div className="flex items-center space-x-4">
-                    <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
-                        <User className="h-8 w-8 text-primary-foreground" />
+                    <div
+                        style={{
+                            width: 64,
+                            height: 64,
+                            borderRadius: '50%',
+                            backgroundColor: theme.palette.primary.main,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <User style={{ height: 32, width: 32, color: theme.palette.primary.contrastText }} />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">{user?.name || 'User'}</h1>
-                        <p className="text-gray-600">{user?.email}</p>
+                        <h1
+                            style={{
+                                fontSize: '1.25rem',
+                                fontWeight: 700,
+                                color: theme.palette.text.primary,
+                            }}
+                        >
+                            {user?.name || 'User'}
+                        </h1>
+                        <p style={{ color: theme.palette.text.secondary }}>{user?.email}</p>
                         <div className="flex items-center mt-2 space-x-2">
                             {user?.roles?.includes(Roles.ADMIN) && (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                  <Shield className="h-3 w-3 mr-1" />
-                  Admin
-                </span>
+                                <span
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: 6,
+                                        padding: '2px 8px',
+                                        borderRadius: 9999,
+                                        fontSize: '0.75rem',
+                                        backgroundColor: alpha(theme.palette.error.main, 0.12),
+                                        color: theme.palette.error.main,
+                                        fontWeight: 500,
+                                    }}
+                                >
+                                    <Shield style={{ height: 12, width: 12, marginRight: 4 }} />
+                                    Admin
+                                </span>
                             )}
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                <User className="h-3 w-3 mr-1" />
-                User
-              </span>
+                            <span
+                                style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: 6,
+                                    padding: '2px 8px',
+                                    borderRadius: 9999,
+                                    fontSize: '0.75rem',
+                                    backgroundColor: alpha(theme.palette.primary.main, 0.12),
+                                    color: theme.palette.primary.main,
+                                    fontWeight: 500,
+                                }}
+                            >
+                                <User style={{ height: 12, width: 12, marginRight: 4 }} />
+                                User
+                            </span>
                         </div>
                     </div>
                 </div>

@@ -8,7 +8,9 @@ const TermsOfService: React.FC = () => {
       <Container maxWidth="md">
         <Paper sx={{ p: { xs: 3, md: 6 } }}>
           <Box sx={{ textAlign: 'center', mb: 4 }}>
-            <FileText size={48} color="#1976d2" style={{ marginBottom: 16 }} />
+            <Box sx={{ color: 'primary.main', display: 'inline-flex' }}>
+              <FileText size={48} style={{ marginBottom: 16 }} />
+            </Box>
             <Typography variant="h3" component="h1" sx={{ mb: 2, fontWeight: 'bold' }}>
               Terms of Service
             </Typography>
@@ -41,7 +43,9 @@ const TermsOfService: React.FC = () => {
             </Typography>
 
             <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 3 }}>
-              <Users size={24} color="#666" />
+              <Box sx={{ color: 'text.secondary', display: 'inline-flex' }}>
+                <Users size={24} />
+              </Box>
               <Box>
                 <Typography variant="h6" sx={{ mb: 1 }}>Account Creation</Typography>
                 <Typography variant="body2">
@@ -163,7 +167,7 @@ const TermsOfService: React.FC = () => {
               Contact Information
             </Typography>
 
-            <Box sx={{ bgcolor: 'grey.50', p: 3, borderRadius: 1 }}>
+            <Box sx={(theme) => ({ bgcolor: theme.palette.background.paper, p: 3, borderRadius: 1, border: `1px solid ${theme.palette.divider}` })}>
               <Typography variant="body2">
                 <strong>Email:</strong> legal@devblog.com<br />
                 <strong>Address:</strong> 123 Developer Street, Tech City, TC 12345

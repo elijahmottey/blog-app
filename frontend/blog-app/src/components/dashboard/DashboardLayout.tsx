@@ -1,77 +1,54 @@
 import React, { useState, useEffect } from 'react';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { Outlet } from 'react-router-dom';
 import { DashboardNavbar } from './DashboardNavbar';
 import { DashboardSidebar } from './DashboardSidebar';
+import { DashboardRightRail } from './DashboardRightRail';
 
 export const DashboardLayout: React.FC = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const theme = useTheme();
+  const mdDown = useMediaQuery(theme.breakpoints.down('lg'));
+  const [isSidebarOpen, setIsSidebarOpen] = useState(!mdDown);
 
-  // Check if mobile on initial render and resize
   useEffect(() => {
-    const checkMobile = () => {
-      const mobile = window.innerWidth < 1024; // lg breakpoint
-      setIsMobile(mobile);
-      if (!mobile) {
-        setIsSidebarOpen(true); // Keep sidebar open on desktop
-      } else {
-        setIsSidebarOpen(false); // Close sidebar on mobile by default
-      }
-    };
-
-    // Initial check
-    checkMobile();
-
-    // Add resize listener
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+    // When breakpoint changes, adjust sidebar open state
+    setIsSidebarOpen(!mdDown);
+  }, [mdDown]);
 
   const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+    setIsSidebarOpen(prev => !prev);
   };
 
   const closeSidebar = () => {
-    if (isMobile) {
-      setIsSidebarOpen(false);
-    }
+    if (mdDown) setIsSidebarOpen(false);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Mobile overlay */}
-      {isMobile && isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={closeSidebar}
-          aria-hidden="true"
-        />
-      )}
+    <div style={{ minHeight: '100vh', backgroundColor: theme.palette.background.default, display: 'flex' }}>
+      {/* Left Sidebar - always present on desktop, overlay on mobile */}
+      <div style={{ flex: '0 0 256px' }}>
+        <DashboardSidebar isOpen={isSidebarOpen} onClose={closeSidebar} isMobile={mdDown} />
+      </div>
 
-      {/* Sidebar */}
-      <DashboardSidebar
-        isOpen={isSidebarOpen}
-        onClose={closeSidebar}
-        isMobile={isMobile}
-      />
-
-      {/* Main content area */}
-      <div className={`flex-1 flex flex-col min-w-0 ${isMobile ? '' : 'lg:ml-64'}`}>
-        {/* Navbar */}
-        <DashboardNavbar
-          onMenuClick={toggleSidebar}
-          isSidebarOpen={isSidebarOpen}
-          isMobile={isMobile}
-        />
+      {/* Main area */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        {/* Navbar (top) */}
+        <DashboardNavbar onMenuClick={toggleSidebar} isSidebarOpen={isSidebarOpen} isMobile={mdDown} />
 
         {/* Page content */}
-        <main className="flex-1 overflow-x-hidden">
-          <div className="py-6">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <main style={{ flex: 1, overflowX: 'hidden' }}>
+          <div style={{ paddingTop: 24, paddingBottom: 24 }}>
+            <div style={{ maxWidth: 1280, margin: '0 auto', paddingLeft: 16, paddingRight: 16 }}>
               <Outlet />
             </div>
           </div>
         </main>
+      </div>
+
+      {/* Right rail - visible only on desktop */}
+      <div style={{ flex: '0 0 72px' }}>
+        <DashboardRightRail isMobile={mdDown} />
       </div>
     </div>
   );

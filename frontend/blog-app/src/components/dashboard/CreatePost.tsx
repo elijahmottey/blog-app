@@ -253,12 +253,12 @@ export const CreatePost: React.FC = () => {
         .map((line, index) => {
           // Handle blockquotes
           if (line.trim().startsWith('>')) {
-            return `<blockquote style="border-left: 4px solid #e0e0e0; margin: 1rem 0; padding-left: 1rem; color: #666; font-style: italic;">${line.substring(1).trim()}</blockquote>`;
+            return `<blockquote>${line.substring(1).trim()}</blockquote>`;
           }
 
           // Handle code blocks
           if (line.trim().startsWith('```')) {
-            return '<pre style="background: #f5f5f5; padding: 1rem; border-radius: 4px; overflow-x: auto; margin: 1rem 0;"><code>';
+            return '<pre><code>';
           }
           if (line.trim() === '```') {
             return '</code></pre>';
@@ -266,26 +266,26 @@ export const CreatePost: React.FC = () => {
 
           // Handle headers
           if (line.startsWith('# ')) {
-            return `<h1 style="font-size: 1.875rem; font-weight: 800; margin-bottom: 1.5rem; margin-top: 2rem; color: #1a1a1a; border-bottom: 2px solid #e0e0e0; padding-bottom: 0.5rem;">${line.substring(2)}</h1>`;
+            return `<h1 style="font-size: 1.875rem; font-weight: 800; margin-bottom: 1.5rem; margin-top: 2rem; padding-bottom: 0.5rem;">${line.substring(2)}</h1>`;
           }
           if (line.startsWith('## ')) {
-            return `<h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; margin-top: 1.5rem; color: #1a1a1a;">${line.substring(3)}</h2>`;
+            return `<h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; margin-top: 1.5rem;">${line.substring(3)}</h2>`;
           }
           if (line.startsWith('### ')) {
-            return `<h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; margin-top: 1.25rem; color: #1a1a1a;">${line.substring(4)}</h3>`;
+            return `<h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; margin-top: 1.25rem;">${line.substring(4)}</h3>`;
           }
 
           // Handle bold text
-          line = line.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 700; color: #1a1a1a; background: linear-gradient(transparent 60%, #ffeb3b 40%);">$1</strong>');
+          line = line.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 700;">$1</strong>');
 
           // Handle italic text
-          line = line.replace(/\*(.*?)\*/g, '<em style="font-style: italic; color: #666666;">$1</em>');
+          line = line.replace(/\*(.*?)\*/g, '<em style="font-style: italic;">$1</em>');
 
           // Handle inline code
-          line = line.replace(/`([^`]+)`/g, '<code style="background: #f5f5f5; padding: 0.2rem 0.4rem; border-radius: 3px; font-family: monospace; font-size: 0.875rem; color: #d63384;">$1</code>');
+          line = line.replace(/`([^`]+)`/g, '<code>$1</code>');
 
           // Handle links
-          line = line.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color: #1976d2; text-decoration: none; border-bottom: 1px dashed #1976d2;" target="_blank" rel="noopener noreferrer">$1</a>');
+          line = line.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
 
           // Handle ordered lists
           if (/^\d+\.\s/.test(line)) {
@@ -311,7 +311,7 @@ export const CreatePost: React.FC = () => {
           }
 
           // Regular paragraphs
-          return `<p style="margin-bottom: 1rem; color: #1a1a1a; line-height: 1.8; font-size: 1.125rem;">${line}</p>`;
+          return `<p style="margin-bottom: 1rem; line-height: 1.8; font-size: 1.125rem;">${line}</p>`;
         })
         .join('');
   };
@@ -351,10 +351,7 @@ export const CreatePost: React.FC = () => {
                   component="h1"
                   sx={{
                     fontWeight: 'bold',
-                    color: 'text.primary',
-                    background: 'linear-gradient(45deg, #1976d2, #2196f3)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
+                    color: 'primary.main',
                     mb: 0.5
                   }}
               >
@@ -446,8 +443,8 @@ export const CreatePost: React.FC = () => {
           {/* Content Section */}
           <Paper sx={{ borderRadius: 2, overflow: 'hidden', border: 1, borderColor: 'divider' }}>
             {/* Toolbar */}
-            <Box sx={{
-              bgcolor: 'grey.50',
+            <Box sx={(theme) => ({
+              bgcolor: theme.palette.action.hover,
               p: 1.5,
               borderBottom: 1,
               borderColor: 'divider',
@@ -455,7 +452,7 @@ export const CreatePost: React.FC = () => {
               flexWrap: 'wrap',
               gap: 0.5,
               alignItems: 'center'
-            }}>
+            })}>
               <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', mr: 2 }}>
                 Formatting Tools:
               </Typography>
@@ -595,6 +592,21 @@ export const CreatePost: React.FC = () => {
                             lineHeight: 1.8,
                             mb: 2
                           },
+                          '& a': {
+                            color: 'primary.main',
+                            textDecoration: 'none',
+                            borderBottom: '1px dashed',
+                            borderColor: 'primary.main',
+                            '&:hover': { textDecoration: 'underline' }
+                          },
+                          '& code': {
+                            bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
+                            borderRadius: 1,
+                            px: 0.5,
+                            py: 0.25,
+                            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+                            fontSize: '0.875rem'
+                          },
                           '& blockquote': {
                             borderLeft: '4px solid',
                             borderColor: 'primary.main',
@@ -681,7 +693,7 @@ Add code snippets when needed
           )}
 
           {/* Keyboard Shortcuts Guide */}
-          <Paper sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
+          <Paper sx={(theme) => ({ p: 2, bgcolor: theme.palette.background.paper, borderRadius: 2, border: `1px solid ${theme.palette.divider}` })}>
             <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
               🎯 Quick Formatting Tips
             </Typography>
@@ -765,22 +777,22 @@ Add code snippets when needed
                   variant="contained"
                   disabled={isSubmitting || createPostMutation.isPending || watchedContent.length < 10}
                   startIcon={createPostMutation.isPending ? <Loader className="animate-spin" /> : <Save />}
-                  sx={{
+                  sx={(theme) => ({
                     borderRadius: 2,
                     textTransform: 'none',
                     fontWeight: 600,
                     px: 4,
                     py: 1,
-                    background: 'linear-gradient(45deg, #1976d2, #2196f3)',
+                    background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
                     '&:hover': {
-                      background: 'linear-gradient(45deg, #1565c0, #1976d2)',
+                      background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                       transform: 'translateY(-1px)',
                       boxShadow: 3
                     },
                     '&:disabled': {
-                      background: 'grey.300'
+                      background: theme.palette.action.disabledBackground
                     }
-                  }}
+                  })}
               >
                 {createPostMutation.isPending ? 'Publishing...' : 'Publish Post'}
               </Button>
@@ -798,7 +810,9 @@ Add code snippets when needed
           borderRadius: 3
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-            <Type color="#1976d2" />
+            <Box sx={{ color: 'primary.main', display: 'inline-flex' }}>
+              <Type />
+            </Box>
             <Typography variant="h6" sx={{ fontWeight: 800, color: 'primary.dark' }}>
               ✨ Pro Writing Tips
             </Typography>
@@ -812,13 +826,14 @@ Add code snippets when needed
               gridTemplateColumns: '1fr'
             }
           }}>
-            <Box sx={{
-              bgcolor: 'white',
+            <Box sx={(theme) => ({
+              bgcolor: theme.palette.background.paper,
               p: 2,
               borderRadius: 2,
               height: '100%',
-              boxShadow: 1
-            }}>
+              boxShadow: 1,
+              border: `1px solid ${theme.palette.divider}`
+            })}>
               <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main', mb: 1 }}>
                 Structure & Formatting
               </Typography>
@@ -835,13 +850,14 @@ Add code snippets when needed
               </Box>
             </Box>
 
-            <Box sx={{
-              bgcolor: 'white',
+            <Box sx={(theme) => ({
+              bgcolor: theme.palette.background.paper,
               p: 2,
               borderRadius: 2,
               height: '100%',
-              boxShadow: 1
-            }}>
+              boxShadow: 1,
+              border: `1px solid ${theme.palette.divider}`
+            })}>
               <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'success.main', mb: 1 }}>
                 Engagement Boosters
               </Typography>

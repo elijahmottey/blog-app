@@ -1,12 +1,14 @@
 import { Github, Twitter, Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 
 const Footer = () => {
+    const theme = useTheme();
+
     return (
-        <footer className="relative mt-auto bg-gradient-to-b from-gray-50 to-white border-t">
+        <footer className="relative mt-auto" style={{ backgroundColor: theme.palette.background.default, borderTop: `1px solid ${theme.palette.divider}`, color: theme.palette.text.primary }}>
             {/* Accent line */}
-            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-primary via-primary to-primary" />
+            <div className="absolute inset-x-0 top-0 h-[2px]" style={{ background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})` }} />
 
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14">
                 {/* Top section */}
@@ -41,7 +43,7 @@ const Footer = () => {
                                 </Typography>
                             </Box>
                         </Link>
-                        <p className="text-sm leading-relaxed text-gray-600">
+                        <p className="text-sm leading-relaxed" style={{ color: theme.palette.text.secondary }}>
                             A modern blog platform for sharing ideas, tutorials,
                             and insights on software development and technology.
                         </p>
@@ -49,31 +51,22 @@ const Footer = () => {
 
                     {/* Blog Links */}
                     <div>
-                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-900">
+                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide" style={{ color: theme.palette.text.primary }}>
                             Blog
                         </h3>
                         <ul className="space-y-3 text-sm">
                             <li>
-                                <Link
-                                    to="/blog"
-                                    className="text-gray-600 transition-all hover:text-primary hover:translate-x-1 inline-block"
-                                >
+                                <Link to="/blog" className="transition-all inline-block" style={{ color: theme.palette.text.secondary }}>
                                     All Posts
                                 </Link>
                             </li>
                             <li>
-                                <Link
-                                    to="/blog"
-                                    className="text-gray-600 transition-all hover:text-primary hover:translate-x-1 inline-block"
-                                >
+                                <Link to="/blog" className="transition-all inline-block" style={{ color: theme.palette.text.secondary }}>
                                     Categories
                                 </Link>
                             </li>
                             <li>
-                                <Link
-                                    to="/blog"
-                                    className="text-gray-600 transition-all hover:text-primary hover:translate-x-1 inline-block"
-                                >
+                                <Link to="/blog" className="transition-all inline-block" style={{ color: theme.palette.text.secondary }}>
                                     Tags
                                 </Link>
                             </li>
@@ -82,7 +75,7 @@ const Footer = () => {
 
                     {/* Resources */}
                     <div>
-                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-900">
+                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide" style={{ color: theme.palette.text.primary }}>
                             Resources
                         </h3>
                         <ul className="space-y-3 text-sm">
@@ -123,16 +116,11 @@ const Footer = () => {
 
                     {/* Social */}
                     <div>
-                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-900">
+                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide" style={{ color: theme.palette.text.primary }}>
                             Community
                         </h3>
                         <div className="flex items-center gap-3">
-                            <a
-                                href="https://github.com"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="group flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-600 transition-all hover:bg-primary hover:text-primary-foreground hover:shadow-lg hover:shadow-amber-500/30"
-                            >
+                            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="group flex h-10 w-10 items-center justify-center rounded-full transition-all" style={{ backgroundColor: theme.palette.background.paper, color: (theme.palette as any).custom?.icon ?? theme.palette.text.secondary, border: `1px solid ${theme.palette.divider}` }}>
                                 <Github className="h-5 w-5" />
                             </a>
                             <a
@@ -156,16 +144,16 @@ const Footer = () => {
                 </div>
 
                 {/* Bottom section */}
-                <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-6 text-center md:flex-row">
-                    <p className="text-sm text-gray-500">
+                <div className="mt-12 flex flex-col items-center justify-between gap-4 pt-6 text-center md:flex-row" style={{ borderTop: `1px solid ${theme.palette.divider}` }}>
+                    <p className="text-sm" style={{ color: theme.palette.text.secondary }}>
                         © {new Date().getFullYear()} LIV Blog. All rights reserved.
                     </p>
 
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm" style={{ color: theme.palette.text.secondary }}>
                         Built with{" "}
-                        <span className="font-medium text-primary">React</span>{" "}
+                        <span className="font-medium" style={{ color: theme.palette.primary.main }}>React</span>{" "}
                         &{" "}
-                        <span className="font-medium text-primary">
+                        <span className="font-medium" style={{ color: theme.palette.primary.main }}>
                             Material-UI
                         </span>
                     </p>

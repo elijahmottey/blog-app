@@ -121,11 +121,6 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
     handleProfileClose();
   };
 
-  const handleToggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    toast.info(`${darkMode ? 'Light' : 'Dark'} mode ${darkMode ? 'disabled' : 'enabled'}`);
-  };
-
   const quickActions = [
     { label: 'Dashboard', icon: <Home size={16} />, path: '/home' },
     { label: 'Posts', icon: <FileText size={16} />, path: '/dashboard/posts' },
@@ -164,8 +159,8 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
 
 
 
-              {/* Quick Actions Menu (Desktop) */}
-              {!isMobile && (
+              {/* Quick Actions Menu: show in top bar only on mobile (desktop moved to right rail) */}
+              {isMobile && (
                   <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
                     {quickActions.map((action) => (
                         <Tooltip key={action.label} title={action.label}>
@@ -218,56 +213,60 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
                   </Tooltip>
               )}
 
-              {/* Theme Mode Toggle */}
-              <Tooltip title={`${mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}`}>
+              {/* Theme Mode Toggle (top bar) - show only on mobile; desktop uses right rail */}
+              {isMobile && (
+                <Tooltip title={`${mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}`}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {mode === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
+                    <Switch
+                        size="small"
+                        checked={mode === 'dark'}
+                        onChange={toggleMode}
+                        color="primary"
+                        inputProps={{ 'aria-label': 'toggle color mode' }}
+                    />
+                  </Box>
+                </Tooltip>
+              )}
+
+              {/* Notifications (top bar) - visible only on mobile; desktop uses right rail */}
+              {isMobile && (
+                <Tooltip title="Notifications">
+                  <IconButton color="inherit" sx={{ position: 'relative' }}>
+                    <Badge
+                        badgeContent={3}
+                        color="error"
+                        variant="dot"
+                        overlap="circular"
+                    >
+                      <Bell size={20} />
+                    </Badge>
+                  </IconButton>
+                </Tooltip>
+              )}
+
+
+              {/* Profile Section - show only on mobile; desktop profile moved to right rail */}
+              {isMobile && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  {mode === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
-                  <Switch
-                      size="small"
-                      checked={mode === 'dark'}
-                      onChange={toggleMode}
-                      color="primary"
-                      inputProps={{ 'aria-label': 'toggle color mode' }}
-                  />
-                </Box>
-              </Tooltip>
-
-              {/* Notifications */}
-              <Tooltip title="Notifications">
-                <IconButton color="inherit" sx={{ position: 'relative' }}>
-                  <Badge
-                      badgeContent={3}
-                      color="error"
-                      variant="dot"
-                      overlap="circular"
+                  <IconButton
+                      onClick={handleProfileClick}
+                      sx={{
+                        p: 0.5,
+                        '&:hover': {
+                          bgcolor: 'action.hover',
+                        },
+                      }}
                   >
-                    <Bell size={20} />
-                  </Badge>
-                </IconButton>
-              </Tooltip>
-
-
-
-              {/* Profile Section */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <IconButton
-                    onClick={handleProfileClick}
-                    sx={{
-                      p: 0.5,
-                      '&:hover': {
-                        bgcolor: 'action.hover',
-                      },
-                    }}
-                >
-                  <Box sx={{ position: 'relative' }}>
-                    <Avatar
-                        sx={{
-                          width: 36,
-                          height: 36,
-                          bgcolor: 'primary.main',
-                          fontSize: '0.875rem',
-                          fontWeight: 'bold',
-                        }}
+                    <Box sx={{ position: 'relative' }}>
+                      <Avatar
+                          sx={{
+                            width: 36,
+                            height: 36,
+                            bgcolor: 'primary.main',
+                            fontSize: '0.875rem',
+                            fontWeight: 'bold',
+                          }}
                     >
                       {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                     </Avatar>
@@ -293,25 +292,15 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
                   </Box>
                 </IconButton>
 
-                {!isMobile && (
-                    <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 'medium', lineHeight: 1 }}>
-                        {user?.name || 'User'}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {user?.email || 'user@example.com'}
-                      </Typography>
-                    </Box>
-                )}
-
                 <IconButton
                     size="small"
                     onClick={handleProfileClick}
-                    sx={{ display: { xs: 'none', sm: 'flex' } }}
+                    sx={{ display: { xs: 'flex', sm: 'flex' } }}
                 >
                   <ChevronDown size={16} />
                 </IconButton>
               </Box>
+              )}
             </Box>
           </Toolbar>
         </AppBar>
@@ -405,7 +394,7 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
 
           {/* Admin Section */}
           {isAdmin && (
-              <>
+              <Box>
                 <Box sx={{ px: 2, py: 1 }}>
                   <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
                     ADMIN PANEL
@@ -419,7 +408,7 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
                 </MenuItem>
 
                 <Divider />
-              </>
+              </Box>
           )}
 
           {/* Logout */}

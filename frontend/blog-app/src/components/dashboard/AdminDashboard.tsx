@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Users, FileText, MessageSquare, TrendingUp, AlertTriangle, Activity } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import BackendApi from '../../service/BackendApi';
+import { useTheme } from '@mui/material/styles';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 // import { AIChatWidget } from './AIChatWidget';
 // import { AIChat } from './AIChat';
@@ -30,6 +31,7 @@ const postActivityData = [
 type View = 'overview' | 'users' | 'posts' | 'comments' | 'analytics';
 
 export const AdminDashboard: React.FC = () => {
+  const theme = useTheme();
   //const [isChatExpanded, setIsChatExpanded] = useState(false);
   const [currentView, setCurrentView] = useState<View>('overview');
 
@@ -134,9 +136,9 @@ export const AdminDashboard: React.FC = () => {
                       <Line
                           type="monotone"
                           dataKey="users"
-                          stroke="#3B82F6"
+                          stroke={theme.palette.primary.main}
                           strokeWidth={2}
-                          dot={{ fill: '#3B82F6' }}
+                          dot={{ fill: theme.palette.primary.main }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -151,7 +153,7 @@ export const AdminDashboard: React.FC = () => {
                       <XAxis dataKey="day" />
                       <YAxis />
                       <Tooltip />
-                      <Bar dataKey="posts" fill="#10B981" />
+                      <Bar dataKey="posts" fill={theme.palette.success.main} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>

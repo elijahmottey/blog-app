@@ -19,9 +19,14 @@ spring:
 
   cache:
     type: caffeine          # Enable Caffeine as the cache provider
-    cache-names: # Define cache names
+    cache-names: # Define cache names used by @Cacheable/@CacheEvict across services
       - posts
-      - post
+      - postById
+      - postByTitle
+      - users
+      - userById
+      - userByEmail
+      - userBlogHistory
   jpa:
     hibernate:
       ddl-auto: update

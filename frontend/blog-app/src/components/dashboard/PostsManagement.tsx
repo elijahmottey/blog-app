@@ -488,7 +488,7 @@ export const PostsManagement: React.FC = () => {
         )}
 
         {/* Summary */}
-        <Paper sx={{ p: 3, borderRadius: 2, bgcolor: 'grey.50' }}>
+        <Paper sx={(theme) => ({ p: 3, borderRadius: 2, bgcolor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}` })}>
           <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: 'text.primary' }}>
             📊 Quick Summary
           </Typography>

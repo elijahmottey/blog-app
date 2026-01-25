@@ -300,7 +300,7 @@ export const PostDetail: React.FC = () => {
           </Box>
 
           {/* Post Actions */}
-          <Box sx={{ px: 3, py: 2, borderTop: 1, borderColor: 'divider', bgcolor: 'grey.50' }}>
+          <Box sx={(theme) => ({ px: 3, py: 2, borderTop: 1, borderColor: 'divider', bgcolor: theme.palette.background.paper })}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <Button
@@ -378,7 +378,7 @@ export const PostDetail: React.FC = () => {
                     </Box>
                   </Box>
               ) : (
-                  <Box sx={{ mb: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1, textAlign: 'center' }}>
+                  <Box sx={(theme) => ({ mb: 3, p: 2, bgcolor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 1, textAlign: 'center' })}>
                     <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
                       Please login to comment on this post
                     </Typography>
@@ -409,11 +409,11 @@ export const PostDetail: React.FC = () => {
                       const commentData = getCommentData(comment);
                       return (
                           <Box key={commentData.id || index} sx={{ display: 'flex', gap: 2 }}>
-                            <Avatar sx={{ bgcolor: 'grey.400' }}>
+                            <Avatar sx={{ bgcolor: 'primary.main' }}>
                               {commentData.author.charAt(0).toUpperCase()}
                             </Avatar>
                             <Box sx={{ flex: 1 }}>
-                              <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
+                              <Paper sx={(theme) => ({ p: 2, bgcolor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}` })}>
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                                   <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
                                     {commentData.author}

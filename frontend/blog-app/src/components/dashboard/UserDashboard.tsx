@@ -236,7 +236,9 @@ export const UserDashboard: React.FC = () => {
                   }
                 }}
             >
-              <Plus size={32} color="#1976d2" style={{ marginBottom: 8 }} />
+              <Box sx={{ color: 'primary.main', display: 'inline-flex', mb: 1 }}>
+                <Plus size={32} />
+              </Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
                 Create New Post
               </Typography>
@@ -265,7 +267,9 @@ export const UserDashboard: React.FC = () => {
                   }
                 }}
             >
-              <FileText size={32} color="#2e7d32" style={{ marginBottom: 8 }} />
+              <Box sx={{ color: 'success.main', display: 'inline-flex', mb: 1 }}>
+                <FileText size={32} />
+              </Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'success.main' }}>
                 Manage Posts
               </Typography>
@@ -294,7 +298,9 @@ export const UserDashboard: React.FC = () => {
                   }
                 }}
             >
-              <MessageSquare size={32} color="#9c27b0" style={{ marginBottom: 8 }} />
+              <Box sx={{ color: 'secondary.main', display: 'inline-flex', mb: 1 }}>
+                <MessageSquare size={32} />
+              </Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'secondary.main' }}>
                 View Comments
               </Typography>
@@ -324,7 +330,9 @@ export const UserDashboard: React.FC = () => {
 
           {userProfile?.posts.length === 0 ? (
               <Box sx={{ textAlign: 'center', py: 4 }}>
-                <FileText size={48} color="#9e9e9e" style={{ marginBottom: 16 }} />
+                <Box sx={{ color: 'text.secondary', display: 'inline-flex', mb: 2 }}>
+                  <FileText size={48} />
+                </Box>
                 <Typography color="text.secondary">No posts yet. Create your first post!</Typography>
                 <Button
                     component={Link}
@@ -352,7 +360,9 @@ export const UserDashboard: React.FC = () => {
                     >
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                          <FileText size={20} color="#757575" />
+                          <Box sx={{ color: 'text.secondary', display: 'inline-flex' }}>
+                            <FileText size={20} />
+                          </Box>
                           <Box>
                             <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                               {post.title || 'Untitled Post'}
@@ -434,7 +444,9 @@ export const UserDashboard: React.FC = () => {
             <Paper sx={{ p: 3, borderRadius: 2, bgcolor: 'warning.50' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Clock size={20} color="#ed6c02" />
+                  <Box sx={{ color: 'warning.main', display: 'inline-flex' }}>
+                    <Clock size={20} />
+                  </Box>
                   <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'warning.dark' }}>
                     Draft Posts ({draftPosts})
                   </Typography>
@@ -470,7 +482,9 @@ export const UserDashboard: React.FC = () => {
                         >
                           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                              <Clock size={20} color="#ed6c02" />
+                              <Box sx={{ color: 'warning.main', display: 'inline-flex' }}>
+                                                  <Clock size={20} />
+                                                </Box>
                               <Box>
                                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                                   {post.title || 'Untitled Draft'}
