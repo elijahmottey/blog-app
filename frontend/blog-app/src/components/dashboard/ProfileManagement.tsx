@@ -285,57 +285,35 @@ export const ProfileManagement: React.FC = () => {
             </div>
 
             {/* Navigation Tabs */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div className="border-b border-gray-200">
-                    <nav className="flex">
-                        <button
-                            onClick={() => setActiveTab('profile')}
-                            className={`px-6 py-3 text-sm font-medium border-b-2 ${
-                                activeTab === 'profile'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
-                        >
-                            <User className="h-4 w-4 inline mr-2" />
-                            Profile
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('password')}
-                            className={`px-6 py-3 text-sm font-medium border-b-2 ${
-                                activeTab === 'password'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
-                        >
-                            <Key className="h-4 w-4 inline mr-2" />
-                            Password
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('stats')}
-                            className={`px-6 py-3 text-sm font-medium border-b-2 ${
-                                activeTab === 'stats'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
-                        >
-                            <FileText className="h-4 w-4 inline mr-2" />
-                            Statistics
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('account')}
-                            className={`px-6 py-3 text-sm font-medium border-b-2 ${
-                                activeTab === 'account'
-                                    ? 'border-red-500 text-red-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
-                        >
-                            <Shield className="h-4 w-4 inline mr-2" />
-                            Account
-                        </button>
+            <div style={{ backgroundColor: theme.palette.background.paper, borderRadius: 12, border: `1px solid ${theme.palette.divider}`, boxShadow: theme.shadows[1] }}>
+                <div style={{ borderBottom: `1px solid ${theme.palette.divider}` }}>
+                    <nav style={{ display: 'flex' }}>
+                        {['profile','password','stats','account'].map((tab) => {
+                            const active = activeTab === tab;
+                            const labelMap: any = { profile: 'Profile', password: 'Password', stats: 'Statistics', account: 'Account' };
+                            const IconMap: any = { profile: User, password: Key, stats: FileText, account: Shield };
+                            const Icon = IconMap[tab];
+                            return (
+                                <button key={tab}
+                                    onClick={() => setActiveTab(tab as any)}
+                                    style={{
+                                        padding: '12px 24px',
+                                        fontSize: '0.875rem',
+                                        fontWeight: 500,
+                                        borderBottom: `2px solid ${active ? theme.palette.primary.main : 'transparent'}`,
+                                        color: active ? theme.palette.primary.main : theme.palette.text.secondary,
+                                        background: 'transparent'
+                                    }}
+                                >
+                                    <Icon style={{ width: 14, height: 14, display: 'inline-block', marginRight: 8, verticalAlign: 'middle', color: active ? theme.palette.primary.main : theme.palette.text.secondary }} />
+                                    {labelMap[tab]}
+                                </button>
+                            );
+                        })}
                     </nav>
                 </div>
 
-                <div className="p-6">
+                <div style={{ padding: 24 }}>
                     {/* Profile Tab */}
                     {activeTab === 'profile' && (
                         <div className="space-y-6">
@@ -371,9 +349,9 @@ export const ProfileManagement: React.FC = () => {
                                                 />
                                             </div>
                                         ) : (
-                                            <div className="flex items-center p-3 bg-gray-50 rounded-lg">
-                                                <User className="h-4 w-4 text-gray-400 mr-3" />
-                                                <span className="text-gray-900">{user?.name}</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', padding: 12, borderRadius: 8, backgroundColor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.default, 0.04) : alpha(theme.palette.background.paper, 0.6), border: `1px solid ${theme.palette.divider}` }}>
+                                                <User style={{ width: 16, height: 16, color: theme.palette.text.secondary, marginRight: 12 }} />
+                                                <span style={{ color: theme.palette.text.primary }}>{user?.name}</span>
                                             </div>
                                         )}
                                         {profileErrors.name && (
@@ -398,9 +376,9 @@ export const ProfileManagement: React.FC = () => {
                                                 />
                                             </div>
                                         ) : (
-                                            <div className="flex items-center p-3 bg-gray-50 rounded-lg">
-                                                <Mail className="h-4 w-4 text-gray-400 mr-3" />
-                                                <span className="text-gray-900">{user?.email}</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', padding: 12, borderRadius: 8, backgroundColor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.default, 0.04) : alpha(theme.palette.background.paper, 0.6), border: `1px solid ${theme.palette.divider}` }}>
+                                                <Mail style={{ width: 16, height: 16, color: theme.palette.text.secondary, marginRight: 12 }} />
+                                                <span style={{ color: theme.palette.text.primary }}>{user?.email}</span>
                                             </div>
                                         )}
                                         {profileErrors.email && (
@@ -415,9 +393,9 @@ export const ProfileManagement: React.FC = () => {
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             Account Created
                                         </label>
-                                        <div className="flex items-center p-3 bg-gray-50 rounded-lg">
-                                            <Calendar className="h-4 w-4 text-gray-400 mr-3" />
-                                            <span className="text-gray-900">
+                                        <div style={{ display: 'flex', alignItems: 'center', padding: 12, borderRadius: 8, backgroundColor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.default, 0.04) : alpha(theme.palette.background.paper, 0.6), border: `1px solid ${theme.palette.divider}` }}>
+                                            <Calendar style={{ width: 16, height: 16, color: theme.palette.text.secondary, marginRight: 12 }} />
+                                            <span style={{ color: theme.palette.text.primary }}>
                         {user?.createdAt ? format(new Date(user.createdAt), 'MMM dd, yyyy') : 'Unknown'}
                       </span>
                                         </div>
@@ -427,9 +405,9 @@ export const ProfileManagement: React.FC = () => {
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             Last Updated
                                         </label>
-                                        <div className="flex items-center p-3 bg-gray-50 rounded-lg">
-                                            <Calendar className="h-4 w-4 text-gray-400 mr-3" />
-                                            <span className="text-gray-900">
+                                        <div style={{ display: 'flex', alignItems: 'center', padding: 12, borderRadius: 8, backgroundColor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.default, 0.04) : alpha(theme.palette.background.paper, 0.6), border: `1px solid ${theme.palette.divider}` }}>
+                                            <Calendar style={{ width: 16, height: 16, color: theme.palette.text.secondary, marginRight: 12 }} />
+                                            <span style={{ color: theme.palette.text.primary }}>
                         {user?.updatedAt ? format(new Date(user.updatedAt), 'MMM dd, yyyy') : 'Unknown'}
                       </span>
                                         </div>
@@ -813,3 +791,4 @@ export const ProfileManagement: React.FC = () => {
         </div>
     );
 };
+

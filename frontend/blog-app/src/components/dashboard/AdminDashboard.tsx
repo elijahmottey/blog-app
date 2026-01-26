@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Users, FileText, MessageSquare, TrendingUp, AlertTriangle, Activity } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import BackendApi from '../../service/BackendApi';
-import { useTheme } from '@mui/material/styles';
+import { useTheme, alpha } from '@mui/material/styles';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 // import { AIChatWidget } from './AIChatWidget';
 // import { AIChat } from './AIChat';
@@ -62,206 +62,164 @@ export const AdminDashboard: React.FC = () => {
   const renderContent = () => {
     switch (currentView) {
       case 'users':
-        return  " " //<AdminUsers />;
+        return ""; // placeholder
       case 'overview':
       default:
         return (
-            <>
-              {/* Stats Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-white rounded-lg shadow p-6">
-                  <div className="flex items-center">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Users className="h-6 w-6 text-blue-600" />
+          <>
+            {/* Stats Cards (theme-aware) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { label: 'Total Users', value: totalUsers, icon: <Users />, accent: theme.palette.primary.main, note: '+12% from last month' },
+                { label: 'Total Posts', value: totalPosts, icon: <FileText />, accent: theme.palette.success.main, note: '+8% from last month' },
+                { label: 'Total Comments', value: totalComments, icon: <MessageSquare />, accent: theme.palette.secondary.main, note: '+15% from last month' },
+                { label: 'Flagged Content', value: flaggedContent, icon: <AlertTriangle />, accent: theme.palette.error.main, note: 'Requires attention' },
+              ].map((c) => (
+                <div key={c.label} style={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 12, padding: 24, boxShadow: theme.shadows[1] }}>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={{ padding: 8, borderRadius: 8, backgroundColor: alpha(c.accent, 0.12), display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {React.cloneElement(c.icon as any, { style: { width: 24, height: 24, color: c.accent } })}
                     </div>
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Total Users</p>
-                      <p className="text-2xl font-bold text-gray-900">{totalUsers}</p>
-                      <p className="text-sm text-green-600">+12% from last month</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-lg shadow p-6">
-                  <div className="flex items-center">
-                    <div className="p-2 bg-green-100 rounded-lg">
-                      <FileText className="h-6 w-6 text-green-600" />
-                    </div>
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Total Posts</p>
-                      <p className="text-2xl font-bold text-gray-900">{totalPosts}</p>
-                      <p className="text-sm text-green-600">+8% from last month</p>
+                    <div style={{ marginLeft: 16 }}>
+                      <div style={{ fontSize: 14, fontWeight: 500, color: theme.palette.text.secondary }}>{c.label}</div>
+                      <div style={{ fontSize: 20, fontWeight: 700, color: theme.palette.text.primary }}>{c.value}</div>
+                      <div style={{ fontSize: 13, color: c.accent }}>{c.note}</div>
                     </div>
                   </div>
                 </div>
+              ))}
+            </div>
 
-                <div className="bg-white rounded-lg shadow p-6">
-                  <div className="flex items-center">
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <MessageSquare className="h-6 w-6 text-purple-600" />
-                    </div>
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Total Comments</p>
-                      <p className="text-2xl font-bold text-gray-900">{totalComments}</p>
-                      <p className="text-sm text-green-600">+15% from last month</p>
+            {/* Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div style={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 12, padding: 24, boxShadow: theme.shadows[1] }}>
+                <h3 style={{ fontSize: 18, fontWeight: 600, color: theme.palette.text.primary, marginBottom: 12 }}>User Growth</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={userGrowthData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="users" stroke={theme.palette.primary.main} strokeWidth={2} dot={{ fill: theme.palette.primary.main }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div style={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 12, padding: 24, boxShadow: theme.shadows[1] }}>
+                <h3 style={{ fontSize: 18, fontWeight: 600, color: theme.palette.text.primary, marginBottom: 12 }}>Weekly Post Activity</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={postActivityData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="day" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="posts" fill={theme.palette.success.main} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* System Health & Recent Activity */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div style={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 12, padding: 24, boxShadow: theme.shadows[1] }}>
+                <h3 style={{ fontSize: 18, fontWeight: 600, color: theme.palette.text.primary, marginBottom: 12 }}>System Health</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div style={{ color: theme.palette.text.secondary }}>Server Status</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Activity style={{ width: 16, height: 16, color: theme.palette.success.main }} />
+                      <div style={{ color: theme.palette.success.main }}>Healthy</div>
                     </div>
                   </div>
-                </div>
-
-                <div className="bg-white rounded-lg shadow p-6">
-                  <div className="flex items-center">
-                    <div className="p-2 bg-red-100 rounded-lg">
-                      <AlertTriangle className="h-6 w-6 text-red-600" />
-                    </div>
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Flagged Content</p>
-                      <p className="text-2xl font-bold text-gray-900">{flaggedContent}</p>
-                      <p className="text-sm text-red-600">Requires attention</p>
-                    </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div style={{ color: theme.palette.text.secondary }}>Uptime</div>
+                    <div style={{ color: theme.palette.text.primary }}>{systemHealth}%</div>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div style={{ color: theme.palette.text.secondary }}>Database</div>
+                    <div style={{ color: theme.palette.success.main }}>Connected</div>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div style={{ color: theme.palette.text.secondary }}>API Response</div>
+                    <div style={{ color: theme.palette.success.main }}>Fast</div>
                   </div>
                 </div>
               </div>
 
-              {/* Charts */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* User Growth Chart */}
-                <div className="bg-white rounded-lg shadow p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">User Growth</h3>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={userGrowthData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip />
-                      <Line
-                          type="monotone"
-                          dataKey="users"
-                          stroke={theme.palette.primary.main}
-                          strokeWidth={2}
-                          dot={{ fill: theme.palette.primary.main }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-
-                {/* Post Activity Chart */}
-                <div className="bg-white rounded-lg shadow p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Weekly Post Activity</h3>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={postActivityData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="day" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="posts" fill={theme.palette.success.main} />
-                    </BarChart>
-                  </ResponsiveContainer>
+              <div style={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 12, padding: 24, boxShadow: theme.shadows[1] }}>
+                <h3 style={{ fontSize: 18, fontWeight: 600, color: theme.palette.text.primary, marginBottom: 12 }}>Recent Activity</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {[
+                    { color: theme.palette.primary.main, title: 'New user registered', subtitle: 'john.doe@example.com - 2 minutes ago' },
+                    { color: theme.palette.success.main, title: 'Post published', subtitle: '"React Best Practices" - 15 minutes ago' },
+                    { color: '#f59e0b', title: 'Comment flagged', subtitle: 'Spam content detected - 1 hour ago' },
+                    { color: theme.palette.error.main, title: 'User suspended', subtitle: 'Violation of terms - 2 hours ago' },
+                  ].map((a, i) => (
+                    <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                      <div style={{ width: 8, height: 8, borderRadius: 999, marginTop: 6, backgroundColor: a.color }} />
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: theme.palette.text.primary }}>{a.title}</div>
+                        <div style={{ fontSize: 12, color: theme.palette.text.secondary }}>{a.subtitle}</div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-
-              {/* System Health & Recent Activity */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* System Health */}
-                <div className="bg-white rounded-lg shadow p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">System Health</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-600">Server Status</span>
-                      <div className="flex items-center">
-                        <Activity className="h-4 w-4 text-green-500 mr-2" />
-                        <span className="text-sm text-green-600">Healthy</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-600">Uptime</span>
-                      <span className="text-sm text-gray-900">{systemHealth}%</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-600">Database</span>
-                      <span className="text-sm text-green-600">Connected</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-600">API Response</span>
-                      <span className="text-sm text-green-600">Fast</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Recent Activity */}
-                <div className="bg-white rounded-lg shadow p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-                  <div className="space-y-3">
-                    <div className="flex items-start space-x-3">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">New user registered</p>
-                        <p className="text-xs text-gray-500">john.doe@example.com - 2 minutes ago</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">Post published</p>
-                        <p className="text-xs text-gray-500">"React Best Practices" - 15 minutes ago</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">Comment flagged</p>
-                        <p className="text-xs text-gray-500">Spam content detected - 1 hour ago</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                      <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">User suspended</p>
-                        <p className="text-xs text-gray-500">Violation of terms - 2 hours ago</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </>
+            </div>
+          </>
         );
     }
   };
 
   return (
-      <div className="space-y-6">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
         {/* Header */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h1 className="text-2xl font-bold text-gray-900">Welcome to the Admin Dashboard</h1>
-          <p className="text-gray-600 mt-1">
+        <div style={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 12, padding: 24, boxShadow: theme.shadows[1] }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.text.primary }}>Welcome to the Admin Dashboard</h1>
+          <p style={{ color: theme.palette.text.secondary, marginTop: 8 }}>
             Monitor and manage your blog platform.
           </p>
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button onClick={() => setCurrentView('users')} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
-              <Users className="h-8 w-8 text-blue-600 mb-2" />
-              <p className="font-medium text-gray-900">Manage Users</p>
-              <p className="text-sm text-gray-600">View and moderate user accounts</p>
-            </button>
-            <button onClick={() => setCurrentView('posts')} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
-              <FileText className="h-8 w-8 text-green-600 mb-2" />
-              <p className="font-medium text-gray-900">Content Moderation</p>
-              <p className="text-sm text-gray-600">Review flagged posts and comments</p>
-            </button>
-            <button onClick={() => setCurrentView('analytics')} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
-              <TrendingUp className="h-8 w-8 text-purple-600 mb-2" />
-              <p className="font-medium text-gray-900">View Analytics</p>
-              <p className="text-sm text-gray-600">Detailed platform statistics</p>
-            </button>
+        <div style={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 12, padding: 24, boxShadow: theme.shadows[1] }}>
+          <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: theme.palette.text.primary, marginBottom: 16 }}>Quick Actions</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: 16 }}>
+            <div onClick={() => setCurrentView('users')} style={{ padding: 16, borderRadius: 12, border: `1px solid ${theme.palette.divider}`, cursor: 'pointer', display: 'flex', gap: 12, alignItems: 'flex-start', backgroundColor: 'transparent' }}>
+              <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: alpha(theme.palette.primary.main, 0.12) }}>
+                <Users style={{ width: 24, height: 24, color: theme.palette.primary.main }} />
+              </div>
+              <div>
+                <p style={{ fontWeight: 600, color: theme.palette.text.primary }}>Manage Users</p>
+                <p style={{ color: theme.palette.text.secondary, fontSize: '0.875rem' }}>View and moderate user accounts</p>
+              </div>
+            </div>
+            <div onClick={() => setCurrentView('posts')} style={{ padding: 16, borderRadius: 12, border: `1px solid ${theme.palette.divider}`, cursor: 'pointer', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+              <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: alpha(theme.palette.success.main, 0.12) }}>
+                <FileText style={{ width: 24, height: 24, color: theme.palette.success.main }} />
+              </div>
+              <div>
+                <p style={{ fontWeight: 600, color: theme.palette.text.primary }}>Content Moderation</p>
+                <p style={{ color: theme.palette.text.secondary, fontSize: '0.875rem' }}>Review flagged posts and comments</p>
+              </div>
+            </div>
+            <div onClick={() => setCurrentView('analytics')} style={{ padding: 16, borderRadius: 12, border: `1px solid ${theme.palette.divider}`, cursor: 'pointer', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+              <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: alpha(theme.palette.secondary.main, 0.12) }}>
+                <TrendingUp style={{ width: 24, height: 24, color: theme.palette.secondary.main }} />
+              </div>
+              <div>
+                <p style={{ fontWeight: 600, color: theme.palette.text.primary }}>View Analytics</p>
+                <p style={{ color: theme.palette.text.secondary, fontSize: '0.875rem' }}>Detailed platform statistics</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           {renderContent()}
         </div>
       </div>
   );
 };
+
+

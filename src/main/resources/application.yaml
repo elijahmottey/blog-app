@@ -12,9 +12,9 @@ spring:
 
 
   datasource:
-    password: ${DB_PASSWORD1}
-    url: ${DB_URL1}
-    username: ${DB_USERNAME1}
+    password: ${DB_PASSWORD}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
     driver-class-name: org.postgresql.Driver
 
   cache:

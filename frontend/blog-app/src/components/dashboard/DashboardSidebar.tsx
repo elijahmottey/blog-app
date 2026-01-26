@@ -170,17 +170,16 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
         {/* Sidebar */}
         <div
             style={{
-                position: isMobile ? 'fixed' : undefined,
-                top: isMobile ? 0 : undefined,
-                bottom: isMobile ? 0 : undefined,
-                left: isMobile ? 0 : undefined,
-                right: isMobile ? undefined : undefined,
+                position: isMobile ? 'fixed' : 'sticky',
+                top: 0,
+                height: '100vh',
                 zIndex: isMobile ? 50 : undefined,
                 width: 256,
                 backgroundColor: theme.palette.background.paper,
-                boxShadow: '0 10px 30px rgba(0,0,0,0.06)',
+                boxShadow: isMobile ? '0 10px 30px rgba(0,0,0,0.06)' : 'none',
                 transform: isMobile ? (isOpen ? 'translateX(0)' : 'translateX(-100%)') : undefined,
                 transition: isMobile ? 'transform 300ms ease-in-out' : undefined,
+                overflow: 'auto',
             }}
         >
           <div className="flex flex-col h-full">

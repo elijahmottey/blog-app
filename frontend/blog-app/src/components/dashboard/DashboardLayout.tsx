@@ -1,40 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import { Outlet } from 'react-router-dom';
 import { DashboardNavbar } from './DashboardNavbar';
 import { DashboardSidebar } from './DashboardSidebar';
 import { DashboardRightRail } from './DashboardRightRail';
 
 export const DashboardLayout: React.FC = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const theme = useTheme();
-  const mdDown = useMediaQuery(theme.breakpoints.down('lg'));
-  const [isSidebarOpen, setIsSidebarOpen] = useState(!mdDown);
 
+  // Check if mobile on initial render and resize
   useEffect(() => {
-    // When breakpoint changes, adjust sidebar open state
-    setIsSidebarOpen(!mdDown);
-  }, [mdDown]);
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 1024; // lg breakpoint
+      setIsMobile(mobile);
+      if (!mobile) {
+        setIsSidebarOpen(true); // Keep sidebar open on desktop
+      } else {
+        setIsSidebarOpen(false); // Close sidebar on mobile by default
+      }
+    };
+
+    // Initial check
+    checkMobile();
+
+    // Add resize listener
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const toggleSidebar = () => {
-    setIsSidebarOpen(prev => !prev);
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
   const closeSidebar = () => {
-    if (mdDown) setIsSidebarOpen(false);
+    if (isMobile) {
+      setIsSidebarOpen(false);
+    }
   };
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: theme.palette.background.default, display: 'flex' }}>
       {/* Left Sidebar - always present on desktop, overlay on mobile */}
       <div style={{ flex: '0 0 256px' }}>
-        <DashboardSidebar isOpen={isSidebarOpen} onClose={closeSidebar} isMobile={mdDown} />
+        <DashboardSidebar isOpen={isSidebarOpen} onClose={closeSidebar} isMobile={isMobile} />
       </div>
 
       {/* Main area */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         {/* Navbar (top) */}
-        <DashboardNavbar onMenuClick={toggleSidebar} isSidebarOpen={isSidebarOpen} isMobile={mdDown} />
+        <DashboardNavbar onMenuClick={toggleSidebar} isSidebarOpen={isSidebarOpen} isMobile={isMobile} />
 
         {/* Page content */}
         <main style={{ flex: 1, overflowX: 'hidden' }}>
@@ -48,7 +64,7 @@ export const DashboardLayout: React.FC = () => {
 
       {/* Right rail - visible only on desktop */}
       <div style={{ flex: '0 0 72px' }}>
-        <DashboardRightRail isMobile={mdDown} />
+        <DashboardRightRail isMobile={isMobile} />
       </div>
     </div>
   );
