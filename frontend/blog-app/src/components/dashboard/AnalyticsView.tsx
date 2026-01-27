@@ -28,9 +28,26 @@ export const AnalyticsView: React.FC = () => {
   });
 
   // Process data for analytics
-  const users = usersData?.content || [];
+  const users = usersData?.content || usersData?.data?.content || [];
   const posts = postsData?.data?.content || [];
   const comments = commentsData?.data?.content || [];
+  
+  // Get total counts from pagination
+  const totalUsers = usersData?.totalElements || usersData?.data?.totalElements || users.length;
+  const totalPosts = postsData?.data?.totalElements || posts.length;
+  const totalComments = commentsData?.data?.totalElements || comments.length;
+  
+  // Get drafts count from localStorage
+  const getDraftsCount = () => {
+    try {
+      const drafts = JSON.parse(localStorage.getItem('blog_drafts') || '[]');
+      return drafts.length;
+    } catch {
+      return 0;
+    }
+  };
+  
+  const totalDrafts = getDraftsCount();
 
   // Generate user growth data (last 30 days)
   const userGrowthData = React.useMemo(() => {
@@ -53,11 +70,14 @@ export const AnalyticsView: React.FC = () => {
     const data = [];
     for (let i = 6; i >= 0; i--) {
       const date = startOfDay(subDays(new Date(), i));
-      const postsOnDate = posts.filter(post => 
-        post.createdAt && startOfDay(new Date(post.createdAt)).getTime() === date.getTime()
-      ).length;
+      const postsOnDate = posts.filter(post => {
+        if (!post.createdAt) return false;
+        const postDate = startOfDay(new Date(post.createdAt));
+        return postDate.getTime() === date.getTime();
+      }).length;
       data.push({
         day: format(date, 'EEE'),
+        date: format(date, 'MMM dd'),
         posts: postsOnDate,
       });
     }
@@ -67,10 +87,8 @@ export const AnalyticsView: React.FC = () => {
   // User role distribution
   const roleDistribution = React.useMemo(() => {
     const roleCount = users.reduce((acc: any, user) => {
-      const roles = user.roles || ['USER'];
-      roles.forEach(role => {
-        acc[role] = (acc[role] || 0) + 1;
-      });
+      const role = user.role || 'USER';
+      acc[role] = (acc[role] || 0) + 1;
       return acc;
     }, {});
 
@@ -92,13 +110,13 @@ export const AnalyticsView: React.FC = () => {
   }, [posts, comments]);
 
   const totalStats = {
-    totalUsers: users.length,
-    totalPosts: posts.length,
-    totalComments: comments.length,
+    totalUsers: totalUsers,
+    totalPosts: totalPosts,
+    totalComments: totalComments,
     publishedPosts: posts.filter(post => post.content && post.content.length > 0).length,
-    draftPosts: posts.filter(post => !post.content || post.content.length === 0).length,
-    avgPostsPerUser: users.length > 0 ? (posts.length / users.length).toFixed(1) : '0',
-    avgCommentsPerPost: posts.length > 0 ? (comments.length / posts.length).toFixed(1) : '0',
+    draftPosts: totalDrafts,
+    avgPostsPerUser: totalUsers > 0 ? (totalPosts / totalUsers).toFixed(1) : '0',
+    avgCommentsPerPost: totalPosts > 0 ? (totalComments / totalPosts).toFixed(1) : '0',
   };
 
   return (
@@ -221,6 +239,11 @@ export const AnalyticsView: React.FC = () => {
                   backgroundColor: theme.palette.background.paper,
                   border: `1px solid ${theme.palette.divider}`,
                   borderRadius: 8,
+                }}
+                formatter={(value, name) => [`${value} posts`, `Posts`]}
+                labelFormatter={(label) => {
+                  const item = postActivityData.find(d => d.day === label);
+                  return item ? item.date : label;
                 }}
               />
               <Bar dataKey="posts" fill={theme.palette.success.main} radius={[4, 4, 0, 0]} />
@@ -346,8 +369,8 @@ export const AnalyticsView: React.FC = () => {
           gap: 16,
         }}>
           {[
-            { label: 'Active Users (Last 7 Days)', value: Math.floor(users.length * 0.7), total: users.length },
-            { label: 'Content Moderation Queue', value: 2, total: posts.length + comments.length },
+            { label: 'Active Users (Last 7 Days)', value: Math.floor(totalUsers * 0.7), total: totalUsers },
+            { label: 'Content Moderation Queue', value: 2, total: totalPosts + totalComments },
             { label: 'System Uptime', value: '99.9%', total: '100%' },
             { label: 'Average Response Time', value: '120ms', total: '<200ms' },
           ].map((metric, index) => (

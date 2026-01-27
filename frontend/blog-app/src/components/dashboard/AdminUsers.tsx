@@ -109,7 +109,7 @@ export const AdminUsers: React.FC = () => {
   });
 
   // Safely extract users data - based on your API response structure
-  const usersData = apiResponse as PagedResponse<ApiUser> | undefined;
+  const usersData = apiResponse?.content ? apiResponse : apiResponse?.data as PagedResponse<ApiUser> | undefined;
   const users: ApiUser[] = usersData?.content || [];
   const totalPages = usersData?.totalPages || 0;
   const totalElements = usersData?.totalElements || 0;
@@ -347,7 +347,7 @@ export const AdminUsers: React.FC = () => {
                 Users Management
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Manage users, roles, and permissions ({users.length} users loaded)
+                Manage users, roles, and permissions ({totalElements} total users)
               </Typography>
             </Box>
             <Box sx={{
