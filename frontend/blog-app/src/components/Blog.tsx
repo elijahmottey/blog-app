@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, Typography, Container, Card, CardContent, CardMedia, Chip, Button, TextField, InputAdornment, Pagination } from '@mui/material';
 import { CalendarDays, User, Search, Filter, Download } from 'lucide-react';
 import BackendApi, { type PostDto } from '../service/BackendApi';
@@ -13,6 +13,8 @@ const Blog: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [highlightedPost, setHighlightedPost] = useState<PostDto | null>(null);
+  const [searchParams] = useSearchParams();
   const postsPerPage = 9;
   const navigate = useNavigate();
 
@@ -21,7 +23,35 @@ const Blog: React.FC = () => {
 
   useEffect(() => {
     fetchPosts();
-  }, [currentPage]);
+    
+    // Check for specific post/comment ID in URL params
+    const postId = searchParams.get('postId');
+    const commentId = searchParams.get('commentId');
+    
+    if (postId || commentId) {
+      highlightSpecificContent(postId, commentId);
+    }
+  }, [currentPage, searchParams]);
+
+  const highlightSpecificContent = async (postId: string | null, commentId: string | null) => {
+    try {
+      if (postId) {
+        const response = await BackendApi.getPostById(parseInt(postId));
+        setHighlightedPost(response.data);
+      } else if (commentId) {
+        // Find post containing this comment
+        const allPosts = await BackendApi.getAllPost(0, 100);
+        const postWithComment = allPosts.data?.content?.find((post: any) => 
+          post.comments?.some((comment: any) => comment.id === parseInt(commentId))
+        );
+        if (postWithComment) {
+          setHighlightedPost(postWithComment);
+        }
+      }
+    } catch (error) {
+      console.error('Error highlighting content:', error);
+    }
+  };
 
   const fetchPosts = async () => {
     try {
@@ -118,6 +148,29 @@ const Blog: React.FC = () => {
               Filter
             </Button>
           </Box>
+
+          {/* Highlighted Post (from search) */}
+          {highlightedPost && (
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h5" sx={{ mb: 2, color: 'primary.main' }}>
+                Search Result
+              </Typography>
+              <Card sx={{ border: 2, borderColor: 'primary.main', mb: 4 }}>
+                <CardContent>
+                  <Typography variant="h4" sx={{ mb: 2, fontWeight: 'bold' }}>
+                    {highlightedPost.title}
+                  </Typography>
+                  <Typography variant="body1" sx={{ mb: 2, whiteSpace: 'pre-wrap' }}>
+                    {highlightedPost.content}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
+                    <Chip icon={<User size={16} />} label={highlightedPost.users || 'Anonymous'} />
+                    <Chip icon={<CalendarDays size={16} />} label={formatDate(highlightedPost.createdAt)} />
+                  </Box>
+                </CardContent>
+              </Card>
+            </Box>
+          )}
 
           {/* Posts Grid */}
           {filteredPosts.length === 0 ? (

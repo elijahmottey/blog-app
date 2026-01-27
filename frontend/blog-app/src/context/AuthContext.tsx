@@ -89,10 +89,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(userWithRoles);
   };
 
-  const logout = () => {
-    BackendApi.logoutUser();
-    setUser(null);
-    setUserProfile(null);
+  const logout = async () => {
+    try {
+      await BackendApi.logoutUser();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+      setUserProfile(null);
+    }
   };
 
   return (

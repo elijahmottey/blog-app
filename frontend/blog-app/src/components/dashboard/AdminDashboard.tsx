@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { Users, FileText, MessageSquare, TrendingUp, AlertTriangle, Activity } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import BackendApi from '../../service/BackendApi';
+import { Users, FileText, MessageSquare, TrendingUp, AlertTriangle, Activity, Eye, Trash2, Shield } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import BackendApi, { type UserDto } from '../../service/BackendApi';
 import { useTheme, alpha } from '@mui/material/styles';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-// import { AIChatWidget } from './AIChatWidget';
-// import { AIChat } from './AIChat';
-// import { AdminUsers } from './AdminUsers';
+import { format } from 'date-fns';
+import { toast } from 'sonner';
+import { UserActivityModal } from './UserActivityModal';
+import { AnalyticsView } from './AnalyticsView';
+import { Roles } from '../../enums/Roles';
 
 // Mock data for charts
 const userGrowthData = [
@@ -32,8 +34,9 @@ type View = 'overview' | 'users' | 'posts' | 'comments' | 'analytics';
 
 export const AdminDashboard: React.FC = () => {
   const theme = useTheme();
-  //const [isChatExpanded, setIsChatExpanded] = useState(false);
+  const queryClient = useQueryClient();
   const [currentView, setCurrentView] = useState<View>('overview');
+  const [selectedUser, setSelectedUser] = useState<UserDto | null>(null);
 
   // Fetch admin stats
   const { data: usersData } = useQuery({
@@ -51,6 +54,17 @@ export const AdminDashboard: React.FC = () => {
     queryFn: () => BackendApi.getAllPostComment(0, 100),
   });
 
+  const deleteUserMutation = useMutation({
+    mutationFn: (userId: number) => BackendApi.deleteUser(userId),
+    onSuccess: () => {
+      toast.success('User deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+    },
+    onError: () => {
+      toast.error('Failed to delete user');
+    },
+  });
+
   const totalUsers = usersData?.totalElements || 0;
   const totalPosts = postsData?.data?.totalElements || 0;
   const totalComments = commentsData?.data?.totalElements || 0;
@@ -59,10 +73,140 @@ export const AdminDashboard: React.FC = () => {
   const flaggedContent = 3;
   const systemHealth = 98;
 
+  const handleDeleteUser = (userId: number) => {
+    if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      deleteUserMutation.mutate(userId);
+    }
+  };
+
   const renderContent = () => {
     switch (currentView) {
       case 'users':
-        return ""; // placeholder
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <div style={{
+              backgroundColor: theme.palette.background.paper,
+              border: `1px solid ${theme.palette.divider}`,
+              borderRadius: 12,
+              padding: 24,
+              boxShadow: theme.shadows[1],
+            }}>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.text.primary, marginBottom: 16 }}>User Management</h2>
+              <p style={{ color: theme.palette.text.secondary, marginBottom: 24 }}>Manage user accounts and view their activities</p>
+              
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ borderBottom: `2px solid ${theme.palette.divider}` }}>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.875rem', fontWeight: 600, color: theme.palette.text.primary }}>User</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.875rem', fontWeight: 600, color: theme.palette.text.primary }}>Role</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.875rem', fontWeight: 600, color: theme.palette.text.primary }}>Joined</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.875rem', fontWeight: 600, color: theme.palette.text.primary }}>Posts</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.875rem', fontWeight: 600, color: theme.palette.text.primary }}>Comments</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: '0.875rem', fontWeight: 600, color: theme.palette.text.primary }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {usersData?.content?.map((user: UserDto) => {
+                      const userPosts = postsData?.data?.content?.filter((post: any) => 
+                        post.users === user.name || post.users === user.email
+                      ) || [];
+                      const userComments = commentsData?.data?.content?.filter((comment: any) => 
+                        comment.users === user.name || comment.users === user.email
+                      ) || [];
+                      
+                      return (
+                        <tr key={user.id} style={{ borderBottom: `1px solid ${theme.palette.divider}` }}>
+                          <td style={{ padding: '16px' }}>
+                            <div>
+                              <div style={{ fontSize: '0.875rem', fontWeight: 600, color: theme.palette.text.primary }}>{user.name}</div>
+                              <div style={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>{user.email}</div>
+                            </div>
+                          </td>
+                          <td style={{ padding: '16px' }}>
+                            <div style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 4,
+                              padding: '4px 8px',
+                              borderRadius: 12,
+                              fontSize: '0.75rem',
+                              fontWeight: 500,
+                              backgroundColor: user.roles?.includes(Roles.ADMIN) 
+                                ? alpha(theme.palette.error.main, 0.12)
+                                : alpha(theme.palette.primary.main, 0.12),
+                              color: user.roles?.includes(Roles.ADMIN) 
+                                ? theme.palette.error.main
+                                : theme.palette.primary.main,
+                            }}>
+                              {user.roles?.includes(Roles.ADMIN) && <Shield size={12} />}
+                              {user.roles?.includes(Roles.ADMIN) ? 'Admin' : 'User'}
+                            </div>
+                          </td>
+                          <td style={{ padding: '16px', fontSize: '0.875rem', color: theme.palette.text.secondary }}>
+                            {user.createdAt ? format(new Date(user.createdAt), 'MMM dd, yyyy') : 'Unknown'}
+                          </td>
+                          <td style={{ padding: '16px', fontSize: '0.875rem', color: theme.palette.text.primary, fontWeight: 600 }}>
+                            {userPosts.length}
+                          </td>
+                          <td style={{ padding: '16px', fontSize: '0.875rem', color: theme.palette.text.primary, fontWeight: 600 }}>
+                            {userComments.length}
+                          </td>
+                          <td style={{ padding: '16px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
+                              <button
+                                onClick={() => setSelectedUser(user)}
+                                style={{
+                                  padding: '6px 12px',
+                                  borderRadius: 6,
+                                  border: 'none',
+                                  backgroundColor: alpha(theme.palette.primary.main, 0.12),
+                                  color: theme.palette.primary.main,
+                                  fontSize: '0.75rem',
+                                  fontWeight: 500,
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 4,
+                                }}
+                              >
+                                <Eye size={12} />
+                                View Activity
+                              </button>
+                              {!user.roles?.includes(Roles.ADMIN) && (
+                                <button
+                                  onClick={() => handleDeleteUser(user.id!)}
+                                  style={{
+                                    padding: '6px 12px',
+                                    borderRadius: 6,
+                                    border: 'none',
+                                    backgroundColor: alpha(theme.palette.error.main, 0.12),
+                                    color: theme.palette.error.main,
+                                    fontSize: '0.75rem',
+                                    fontWeight: 500,
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 4,
+                                  }}
+                                >
+                                  <Trash2 size={12} />
+                                  Delete
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        );
+      case 'analytics':
+        return <AnalyticsView />;
       case 'overview':
       default:
         return (
@@ -71,11 +215,7 @@ export const AdminDashboard: React.FC = () => {
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: 24,
-              '@media (max-width: 768px)': {
-                gridTemplateColumns: '1fr',
-                gap: 16
-              }
+              gap: 24
             }}>
               {[
                 { label: 'Total Users', value: totalUsers, icon: <Users />, accent: theme.palette.primary.main, note: '+12% from last month' },
@@ -102,11 +242,7 @@ export const AdminDashboard: React.FC = () => {
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-              gap: 24,
-              '@media (max-width: 768px)': {
-                gridTemplateColumns: '1fr',
-                gap: 16
-              }
+              gap: 24
             }}>
               <div style={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 12, padding: 24, boxShadow: theme.shadows[1] }}>
                 <h3 style={{ fontSize: 18, fontWeight: 600, color: theme.palette.text.primary, marginBottom: 12 }}>User Growth</h3>
@@ -139,11 +275,7 @@ export const AdminDashboard: React.FC = () => {
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-              gap: 24,
-              '@media (max-width: 768px)': {
-                gridTemplateColumns: '1fr',
-                gap: 16
-              }
+              gap: 24
             }}>
               <div style={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 12, padding: 24, boxShadow: theme.shadows[1] }}>
                 <h3 style={{ fontSize: 18, fontWeight: 600, color: theme.palette.text.primary, marginBottom: 12 }}>System Health</h3>
@@ -242,6 +374,14 @@ export const AdminDashboard: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           {renderContent()}
         </div>
+        
+        {/* User Activity Modal */}
+        {selectedUser && (
+          <UserActivityModal
+            user={selectedUser}
+            onClose={() => setSelectedUser(null)}
+          />
+        )}
       </div>
   );
 };

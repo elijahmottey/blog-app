@@ -8,8 +8,8 @@ import { DashboardRightRail } from './DashboardRightRail';
 
 export const DashboardLayout: React.FC = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isPersistent = useMediaQuery(theme.breakpoints.up('md')); // md and up show persistent sidebar
+  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // Changed from 'sm' to 'md'
+  const isPersistent = useMediaQuery(theme.breakpoints.up('lg')); // Changed from 'md' to 'lg'
   const isWide = useMediaQuery(theme.breakpoints.up('lg')); // lg and up use wider sidebar
 
   // Sidebar open by default on persistent layouts, closed on overlay layouts
@@ -24,7 +24,7 @@ export const DashboardLayout: React.FC = () => {
   };
 
   const closeSidebar = () => {
-    if (isMobile) {
+    if (!isPersistent) { // Changed from isMobile to !isPersistent
       setIsSidebarOpen(false);
     }
   };

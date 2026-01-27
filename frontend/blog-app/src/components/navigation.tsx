@@ -81,21 +81,21 @@ export default function Navbar() {
                     id: post.id,
                     title: post.title,
                     content: post.content?.substring(0, 100) + '...',
-                    url: `/blog/${post.id}`
+                    url: `/dashboard/posts/${post.id}`
                 })));
                 
                 // Search users
-                const filteredUsers = users?.filter((user: any) => 
+                const filteredUsers = Array.isArray(users) ? users.filter((user: any) => 
                     user.name?.toLowerCase().includes(query) || 
                     user.email?.toLowerCase().includes(query)
-                ) || [];
+                ) : [];
                 
                 results.push(...filteredUsers.slice(0, 3).map((user: any) => ({
                     type: 'user',
                     id: user.id,
                     title: user.name,
                     content: user.email,
-                    url: `/user/${user.id}`
+                    url: `/about?userId=${user.id}`
                 })));
                 
                 // Search comments
@@ -108,7 +108,7 @@ export default function Navbar() {
                     id: comment.id,
                     title: 'Comment',
                     content: comment.content?.substring(0, 100) + '...',
-                    url: `/blog/${comment.postId}#comment-${comment.id}`
+                    url: `/dashboard/comments`
                 })));
                 
                 setSearchResults(results);

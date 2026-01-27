@@ -151,10 +151,10 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
         })));
         
         // Search users
-        const filteredUsers = users?.filter((u: any) => 
+        const filteredUsers = Array.isArray(users) ? users.filter((u: any) => 
           (u.name || '').toLowerCase().includes(q) || 
           (u.email || '').toLowerCase().includes(q)
-        ) || [];
+        ) : [];
         
         results.push(...filteredUsers.slice(0, 3).map((u: any) => ({
           type: 'user',
@@ -565,10 +565,13 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
              {/* show results */}
              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                {searchResults.map((r) => (
-                 <Button key={r.id} startIcon={<Search size={14} />} sx={{ justifyContent: 'flex-start' }} component={Link} to={`/dashboard/posts/${r.id}`} onClick={() => setSearchOpen(false)}>
+                 <Button key={`${r.type}-${r.id}`} startIcon={<Search size={14} />} sx={{ justifyContent: 'flex-start' }} component={Link} to={r.url} onClick={() => setSearchOpen(false)}>
                    <div style={{ textAlign: 'left' }}>
-                     <div style={{ fontWeight: 600 }}>{r.title}</div>
-                     <div style={{ fontSize: 12, color: theme.palette.text.secondary }}>{(r.content||'').slice(0,120)}{(r.content||'').length>120?'...':''}</div>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                       <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, backgroundColor: theme.palette.primary.light, color: theme.palette.primary.contrastText, textTransform: 'uppercase' }}>{r.type}</span>
+                       <div style={{ fontWeight: 600 }}>{r.title}</div>
+                     </div>
+                     <div style={{ fontSize: 12, color: theme.palette.text.secondary }}>{r.content}</div>
                    </div>
                  </Button>
                ))}

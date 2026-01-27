@@ -297,12 +297,14 @@ export const ProfileManagement: React.FC = () => {
                                         padding: '12px 16px',
                                         fontSize: '0.875rem',
                                         fontWeight: 500,
+                                        borderTop: 'none',
+                                        borderLeft: 'none',
+                                        borderRight: 'none',
                                         borderBottom: `2px solid ${active ? theme.palette.primary.main : 'transparent'}`,
                                         color: active ? theme.palette.primary.main : theme.palette.text.secondary,
                                         background: 'transparent',
                                         minWidth: '100px',
                                         textAlign: 'center',
-                                        border: 'none',
                                         cursor: 'pointer',
                                         display: 'flex',
                                         alignItems: 'center',
@@ -348,7 +350,7 @@ export const ProfileManagement: React.FC = () => {
                             </div>
 
                             <form onSubmit={handleSubmitProfile(onSubmitProfile)} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: 24, '@media (min-width: 768px)': { gridTemplateColumns: 'repeat(2, 1fr)' } } as any}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: 24, [theme.breakpoints.up('md')]: { gridTemplateColumns: 'repeat(2, 1fr)' } }}>
                                     {/* Name */}
                                     <div>
                                         <label htmlFor="name" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary, marginBottom: 8 }}>
@@ -421,7 +423,7 @@ export const ProfileManagement: React.FC = () => {
                                 </div>
 
                                 {/* Account Info (Read-only) */}
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: 24, paddingTop: 24, borderTop: `1px solid ${theme.palette.divider}`, '@media (min-width: 768px)': { gridTemplateColumns: 'repeat(2, 1fr)' } } as any}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: 24, paddingTop: 24, borderTop: `1px solid ${theme.palette.divider}`, [theme.breakpoints.up('md')]: { gridTemplateColumns: 'repeat(2, 1fr)' } }}>
                                     <div>
                                         <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary, marginBottom: 8 }}>
                                             Account Created
@@ -698,7 +700,7 @@ export const ProfileManagement: React.FC = () => {
                             </div>
 
                             {/* Stats Grid */}
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: 24, '@media (min-width: 768px)': { gridTemplateColumns: 'repeat(2, 1fr)' }, '@media (min-width: 1024px)': { gridTemplateColumns: 'repeat(4, 1fr)' } } as any}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: 24, [theme.breakpoints.up('md')]: { gridTemplateColumns: 'repeat(2, 1fr)' }, [theme.breakpoints.up('lg')]: { gridTemplateColumns: 'repeat(4, 1fr)' } }}>
                                 <div style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.2))', padding: 24, borderRadius: 12 }}>
                                     <div style={{ display: 'flex', alignItems: 'center' }}>
                                         <FileText style={{ height: 32, width: 32, color: theme.palette.primary.main }} />
@@ -793,7 +795,7 @@ export const ProfileManagement: React.FC = () => {
                             {/* Account Information */}
                             <div style={{ backgroundColor: alpha(theme.palette.grey[100], 0.5), borderRadius: 12, padding: 24 }}>
                                 <h3 style={{ fontSize: '1rem', fontWeight: 600, color: theme.palette.text.primary, marginBottom: 16 }}>Account Information</h3>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: 16, '@media (min-width: 768px)': { gridTemplateColumns: 'repeat(2, 1fr)' } } as any}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: 16, [theme.breakpoints.up('md')]: { gridTemplateColumns: 'repeat(2, 1fr)' } }}>
                                     <div>
                                         <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary, marginBottom: 4 }}>
                                             Account ID

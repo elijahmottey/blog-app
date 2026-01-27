@@ -522,26 +522,30 @@ export const CreatePost: React.FC = () => {
 
               <Box sx={{ flexGrow: 1 }} />
 
-              <Tooltip title="Undo (Ctrl+Z)">
-                <IconButton
-                    onClick={undo}
-                    disabled={historyIndex <= 0}
-                    size="small"
-                    sx={{ borderRadius: 1 }}
-                >
-                  <Undo size={18} />
-                </IconButton>
+              <Tooltip title={historyIndex <= 0 ? "No more actions to undo" : "Undo (Ctrl+Z)"}>
+                <span>
+                  <IconButton
+                      onClick={undo}
+                      disabled={historyIndex <= 0}
+                      size="small"
+                      sx={{ borderRadius: 1 }}
+                  >
+                    <Undo size={18} />
+                  </IconButton>
+                </span>
               </Tooltip>
 
-              <Tooltip title="Redo (Ctrl+Y)">
-                <IconButton
-                    onClick={redo}
-                    disabled={historyIndex >= formattingHistory.length - 1}
-                    size="small"
-                    sx={{ borderRadius: 1 }}
-                >
-                  <Redo size={18} />
-                </IconButton>
+              <Tooltip title={historyIndex >= formattingHistory.length - 1 ? "No more actions to redo" : "Redo (Ctrl+Y)"}>
+                <span>
+                  <IconButton
+                      onClick={redo}
+                      disabled={historyIndex >= formattingHistory.length - 1}
+                      size="small"
+                      sx={{ borderRadius: 1 }}
+                  >
+                    <Redo size={18} />
+                  </IconButton>
+                </span>
               </Tooltip>
             </Box>
 

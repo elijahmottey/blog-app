@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import type { ApiError } from "../service/BackendApi.ts";
 
 type ApiFunction<T> = () => Promise<T>;
@@ -25,11 +25,11 @@ export function useApi<T>(apiFn: ApiFunction<T>, immediate = false) {
     }, [apiFn]);
 
     // Optional auto-run
-    useState(() => {
+    useEffect(() => {
         if (immediate) {
             execute();
         }
-    });
+    }, [immediate]);
 
     return {
         data,

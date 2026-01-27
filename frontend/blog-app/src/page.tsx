@@ -20,7 +20,8 @@ import TermsOfService from "./components/TermsOfService";
 import { AIChatPage } from "./components/dashboard/AIChatPage";
 import { NotFound } from "./components/not-found.tsx";
 import { AdminUsers } from "./components/dashboard/AdminUsers.tsx";
-import { Unauthorized } from "./components/unauthorized.tsx"; // Add this component
+import { Unauthorized } from "./components/unauthorized.tsx";
+import {AnalyticsView} from "./components/dashboard/AnalyticsView.tsx"; // Add this component
 
 export const PagesRoute = () => {
     return (
@@ -121,7 +122,7 @@ export const PagesRoute = () => {
                                 {/* Admin-only routes - nested inside AdminRoute */}
                                 <Route element={<AdminRoute />}>
                                     <Route path="admin/users" element={<AdminUsers />} />
-                                    <Route path="admin/analytics" element={<div>Analytics</div>} />
+                                    <Route path="admin/analytics" element={<> <AnalyticsView/></>} />
                                 </Route>
                             </Route>
                         </Route>
