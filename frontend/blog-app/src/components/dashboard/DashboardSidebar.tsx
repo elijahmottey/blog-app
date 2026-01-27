@@ -56,7 +56,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
       children: [
         { name: 'All Posts', href: '/dashboard/posts', icon: FileText },
         { name: 'Create Post', href: '/dashboard/posts/create', icon: FileText },
-        { name: 'Drafts', href: '/dashboard/posts/drafts', icon: FileText },
+        { name: 'Drafts', href: '/dashboard/drafts', icon: FileText },
       ],
     },
     {

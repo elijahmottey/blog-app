@@ -13,6 +13,7 @@ import { PostDetail } from "./components/dashboard/PostDetail";
 import { EditPost } from "./components/dashboard/EditPost";
 import { ProfileManagement } from "./components/dashboard/ProfileManagement";
 import { CommentsManagement } from "./components/dashboard/CommentsManagement";
+import { DraftsManagement } from "./components/dashboard/DraftsManagement";
 import About from "./components/About";
 import Blog from "./components/Blog";
 import PrivacyPolicy from "./components/PrivacyPolicy";
@@ -116,6 +117,7 @@ export const PagesRoute = () => {
                                 <Route path="posts/create" element={<CreatePost />} />
                                 <Route path="posts/:id" element={<PostDetail />} />
                                 <Route path="posts/:id/edit" element={<EditPost />} />
+                                <Route path="drafts" element={<DraftsManagement />} />
                                 <Route path="comments" element={<CommentsManagement />} />
                                 <Route path="profile" element={<ProfileManagement />} />
                                 <Route path="ai-chat" element={<AIChatPage />} />

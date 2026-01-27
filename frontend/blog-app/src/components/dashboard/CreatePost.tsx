@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Save,
   ArrowLeft,
@@ -22,7 +22,8 @@ import {
   Code,
   Undo,
   Redo,
-  Type
+  Type,
+  FileText
 } from 'lucide-react';
 import {
   Button,
@@ -48,12 +49,22 @@ type PostFormData = {
   content: string;
 };
 
+interface DraftPost {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const CreatePost: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const [isPreview, setIsPreview] = useState(false);
   const [formattingHistory, setFormattingHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const {
@@ -67,10 +78,73 @@ export const CreatePost: React.FC = () => {
     resolver: yupResolver(schema),
   });
 
+  // Load draft if passed via navigation state
+  useEffect(() => {
+    const draft = location.state?.draft as DraftPost;
+    if (draft) {
+      setValue('title', draft.title);
+      setValue('content', draft.content);
+      setCurrentDraftId(draft.id);
+    }
+  }, [location.state, setValue]);
+
+  // Draft management functions
+  const saveDraft = () => {
+    const formData = getValues();
+    if (!formData.title && !formData.content) return;
+
+    const drafts = JSON.parse(localStorage.getItem('blog_drafts') || '[]');
+    const draftId = currentDraftId || Date.now().toString();
+    const now = new Date().toISOString();
+    
+    const draft: DraftPost = {
+      id: draftId,
+      title: formData.title || 'Untitled Draft',
+      content: formData.content || '',
+      createdAt: currentDraftId ? drafts.find((d: DraftPost) => d.id === draftId)?.createdAt || now : now,
+      updatedAt: now
+    };
+
+    const updatedDrafts = drafts.filter((d: DraftPost) => d.id !== draftId);
+    updatedDrafts.unshift(draft);
+    
+    localStorage.setItem('blog_drafts', JSON.stringify(updatedDrafts));
+    setCurrentDraftId(draftId);
+    toast.success('Draft saved successfully!');
+  };
+
+  // Auto-save draft every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const formData = getValues();
+      if (formData.title || formData.content) {
+        saveDraft();
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [currentDraftId]);
+
+  const deleteDraft = (draftId: string) => {
+    const drafts = JSON.parse(localStorage.getItem('blog_drafts') || '[]');
+    const updatedDrafts = drafts.filter((d: DraftPost) => d.id !== draftId);
+    localStorage.setItem('blog_drafts', JSON.stringify(updatedDrafts));
+    
+    if (currentDraftId === draftId) {
+      setCurrentDraftId(null);
+      setValue('title', '');
+      setValue('content', '');
+    }
+  };
+
   const createPostMutation = useMutation({
     mutationFn: (data: PostFormData) => BackendApi.createPost({ title: data.title, content: data.content }),
     onSuccess: () => {
-      toast.success('Post created successfully!');
+      toast.success('Post published successfully!');
+      // Delete draft after successful publish
+      if (currentDraftId) {
+        deleteDraft(currentDraftId);
+      }
       queryClient.invalidateQueries({ queryKey: ['user-posts'] });
       queryClient.invalidateQueries({ queryKey: ['admin-posts'] });
       queryClient.invalidateQueries({ queryKey: ['user-posts-management'] });
@@ -78,7 +152,7 @@ export const CreatePost: React.FC = () => {
     },
     onError: (error) => {
       console.error('Create post error:', error);
-      toast.error('Failed to create post. Please try again.');
+      toast.error('Failed to publish post. Please try again.');
     },
   });
 
@@ -747,8 +821,8 @@ Add code snippets when needed
           }}>
             <Button
                 variant="outlined"
-                onClick={() => navigate('/dashboard')}
-                startIcon={<ArrowLeft />}
+                onClick={saveDraft}
+                startIcon={<FileText />}
                 sx={{
                   borderRadius: 2,
                   textTransform: 'none',
