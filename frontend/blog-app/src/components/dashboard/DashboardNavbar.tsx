@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   Menu,
   X,
@@ -46,11 +46,13 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 import { useThemeMode } from '../../context/ThemeModeContext';
+import BackendApi, { type PostDto } from '../../service/BackendApi';
 
 interface DashboardNavbarProps {
   onMenuClick: () => void;
   isSidebarOpen: boolean;
   isMobile: boolean;
+  isDesktop: boolean;
 }
 
 const SearchWrapper = styled('div')(({ theme }) => ({
@@ -95,16 +97,93 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, isSidebarOpen, isMobile }) => {
+export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, isSidebarOpen, isMobile, isDesktop }) => {
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const theme = useTheme();
-
+  const location = useLocation();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedTerm, setDebouncedTerm] = useState('');
+  const [searchResults, setSearchResults] = useState<PostDto[]>([]);
   const [quickActionsOpen, setQuickActionsOpen] = useState(false);
   const { mode, toggleMode } = useThemeMode();
+  const searchRef = React.useRef<HTMLDivElement | null>(null);
+
+  // debounce
+  React.useEffect(() => {
+    const id = setTimeout(() => setDebouncedTerm(searchTerm.trim()), 300);
+    return () => clearTimeout(id);
+  }, [searchTerm]);
+
+  // fetch & filter when debounced term changes
+  React.useEffect(() => {
+    let active = true;
+    if (debouncedTerm.length === 0) {
+      setSearchResults([]);
+      return;
+    }
+    (async () => {
+      try {
+        const [posts, users, comments] = await Promise.all([
+          BackendApi.getAllPost(0, 50),
+          BackendApi.getAllUsers(),
+          BackendApi.getAllPostComment(0, 50)
+        ]);
+        
+        const q = debouncedTerm.toLowerCase();
+        const results = [];
+        
+        // Search posts
+        const filteredPosts = posts.data?.content?.filter((p: any) => 
+          (p.title || '').toLowerCase().includes(q) || 
+          (p.content || '').toLowerCase().includes(q)
+        ) || [];
+        
+        results.push(...filteredPosts.slice(0, 5).map((p: any) => ({
+          type: 'post',
+          id: p.id,
+          title: p.title,
+          content: (p.content || '').slice(0, 120) + ((p.content || '').length > 120 ? '...' : ''),
+          url: `/dashboard/posts/${p.id}`
+        })));
+        
+        // Search users
+        const filteredUsers = users?.filter((u: any) => 
+          (u.name || '').toLowerCase().includes(q) || 
+          (u.email || '').toLowerCase().includes(q)
+        ) || [];
+        
+        results.push(...filteredUsers.slice(0, 3).map((u: any) => ({
+          type: 'user',
+          id: u.id,
+          title: u.name,
+          content: u.email,
+          url: `/dashboard/admin/users`
+        })));
+        
+        // Search comments
+        const filteredComments = comments.data?.content?.filter((c: any) => 
+          (c.content || '').toLowerCase().includes(q)
+        ) || [];
+        
+        results.push(...filteredComments.slice(0, 3).map((c: any) => ({
+          type: 'comment',
+          id: c.id,
+          title: 'Comment',
+          content: (c.content || '').slice(0, 100) + ((c.content || '').length > 100 ? '...' : ''),
+          url: `/dashboard/comments`
+        })));
+        
+        if (active) setSearchResults(results);
+      } catch (e) {
+        if (active) setSearchResults([]);
+      }
+    })();
+    return () => { active = false; };
+  }, [debouncedTerm]);
 
   const handleProfileClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -130,8 +209,8 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
 
 
   return (
-      <>
-        <AppBar
+       <>
+         <AppBar
             position="sticky"
             elevation={1}
             sx={{
@@ -141,359 +220,398 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
               borderColor: 'divider',
               zIndex: theme.zIndex.drawer + 1,
             }}
-        >
-          <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 1, sm: 2 } }}>
-            {/* Left Section */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              {isMobile && (
-                  <IconButton
-                      edge="start"
-                      color="inherit"
-                      aria-label="menu"
-                      onClick={onMenuClick}
-                      sx={{ mr: 1 }}
-                  >
-                    {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-                  </IconButton>
-              )}
+         >
+           <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 1, sm: 2 }, minHeight: { xs: 56, sm: 64 } }}>
+             {/* Left Section */}
+             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+               {isMobile && (
+                   <IconButton
+                       edge="start"
+                       color="inherit"
+                       aria-label="menu"
+                       onClick={onMenuClick}
+                       sx={{ mr: 1 }}
+                   >
+                     {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+                   </IconButton>
+               )}
 
 
 
-              {/* Quick Actions Menu: show in top bar only on mobile (desktop moved to right rail) */}
-              {isMobile && (
-                  <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
-                    {quickActions.map((action) => (
-                        <Tooltip key={action.label} title={action.label}>
-                          <IconButton
-                              component={Link}
-                              to={action.path}
-                              size="small"
-                              sx={{
-                                color: 'text.secondary',
-                                '&:hover': {
-                                  color: 'primary.main',
-                                  bgcolor: 'primary.light',
-                                },
-                              }}
-                          >
-                            {action.icon}
-                          </IconButton>
-                        </Tooltip>
-                    ))}
-                  </Box>
-              )}
-            </Box>
+               {/* Quick Actions Menu: show in top bar only on mobile (desktop moved to right rail) */}
+               { (isMobile || (!isDesktop && !isMobile)) && (
+                   <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 0.5, ml: { xs: 1, sm: 2 }, flexWrap: 'wrap' }}>
+                     {quickActions.map((action) => (
+                         <Tooltip key={action.label} title={action.label}>
+                           <IconButton
+                               component={Link}
+                               to={action.path}
+                               size="small"
+                               sx={{
+                                 color: 'text.secondary',
+                                 minWidth: 40,
+                                 minHeight: 40,
+                                 '&:hover': {
+                                   color: 'primary.main',
+                                   bgcolor: 'primary.light',
+                                 },
+                               }}
+                           >
+                             {action.icon}
+                           </IconButton>
+                         </Tooltip>
+                     ))}
+                   </Box>
+               )}
+             </Box>
 
-            {/* Center Section - Search (Desktop) */}
-            {!isMobile && (
-                <SearchWrapper>
-                  <SearchIconWrapper>
-                    <Search size={20} />
-                  </SearchIconWrapper>
-                  <StyledInputBase
-                      placeholder="Search posts, users, comments..."
-                      inputProps={{ 'aria-label': 'search' }}
-                      sx={{ color: 'text.primary' }}
-                  />
-                </SearchWrapper>
-            )}
+             {/* Center Section - Search (desktop & tablet) */}
+             {(!isMobile) && (
+                 <SearchWrapper>
+                   <SearchIconWrapper>
+                     <Search size={20} />
+                   </SearchIconWrapper>
+                   <div style={{ position: 'relative' }} ref={searchRef}>
+                     <StyledInputBase
+                         value={searchTerm}
+                         onChange={(e) => setSearchTerm(e.target.value)}
+                         placeholder="Search posts, users, comments..."
+                         inputProps={{ 'aria-label': 'search' }}
+                         sx={{ color: 'text.primary' }}
+                         onKeyDown={(e) => {
+                           if (e.key === 'Enter') {
+                             // navigate to home with query
+                             navigate(`/?q=${encodeURIComponent(searchTerm)}`);
+                             setSearchResults([]);
+                             setSearchOpen(false);
+                           }
+                         }}
+                     />
 
-            {/* Right Section */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
-              {/* Search Button (Mobile) */}
-              {isMobile && (
-                  <Tooltip title="Search">
-                    <IconButton
-                        color="inherit"
-                        onClick={() => setSearchOpen(true)}
-                        sx={{ display: { xs: 'flex', md: 'none' } }}
-                    >
-                      <Search size={20} />
-                    </IconButton>
-                  </Tooltip>
-              )}
+                     {/* Dropdown results */}
+                     {searchResults.length > 0 && (
+                       <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, boxShadow: theme.shadows[8], zIndex: 1600, maxHeight: 360, overflow: 'auto', borderRadius: 8 }}>
+                         {searchResults.map((r) => (
+                           <div key={`${r.type}-${r.id}`} style={{ padding: 8, cursor: 'pointer', borderBottom: `1px solid ${theme.palette.divider}` }} onClick={() => { navigate(r.url); setSearchTerm(''); setSearchResults([]); }}>
+                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                               <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, backgroundColor: theme.palette.primary.light, color: theme.palette.primary.contrastText, textTransform: 'uppercase' }}>{r.type}</span>
+                               <div style={{ fontWeight: 600, color: theme.palette.text.primary }}>{r.title}</div>
+                             </div>
+                             <div style={{ fontSize: 12, color: theme.palette.text.secondary }}>{r.content}</div>
+                           </div>
+                         ))}
+                         <div style={{ padding: 8, textAlign: 'center' }}>
+                           <button onClick={() => { navigate(`/?q=${encodeURIComponent(searchTerm)}`); setSearchResults([]); }} style={{ background: 'transparent', border: 'none', color: theme.palette.primary.main, cursor: 'pointer' }}>See all results</button>
+                         </div>
+                       </div>
+                     )}
+                   </div>
+                 </SearchWrapper>
+             )}
 
-              {/* Theme Mode Toggle (top bar) - show only on mobile; desktop uses right rail */}
-              {isMobile && (
-                <Tooltip title={`${mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}`}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    {mode === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
-                    <Switch
-                        size="small"
-                        checked={mode === 'dark'}
-                        onChange={toggleMode}
-                        color="primary"
-                        inputProps={{ 'aria-label': 'toggle color mode' }}
-                    />
-                  </Box>
-                </Tooltip>
-              )}
+             {/* Right Section */}
+             <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
+               {/* Search Button (Mobile) */}
+               {isMobile && (
+                   <Tooltip title="Search">
+                     <IconButton
+                         color="inherit"
+                         onClick={() => setSearchOpen(true)}
+                         sx={{ display: { xs: 'flex', md: 'none' } }}
+                     >
+                       <Search size={20} />
+                     </IconButton>
+                   </Tooltip>
+               )}
 
-              {/* Notifications (top bar) - visible only on mobile; desktop uses right rail */}
-              {isMobile && (
-                <Tooltip title="Notifications">
-                  <IconButton color="inherit" sx={{ position: 'relative' }}>
-                    <Badge
-                        badgeContent={3}
-                        color="error"
-                        variant="dot"
-                        overlap="circular"
-                    >
-                      <Bell size={20} />
-                    </Badge>
-                  </IconButton>
-                </Tooltip>
-              )}
+               {/* Theme Mode Toggle (top bar) - show on mobile and tablet; desktop uses right rail */}
+               { (isMobile || (!isDesktop && !isMobile)) && (
+                 <Tooltip title={`${mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}`}>
+                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                     {mode === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
+                     <Switch
+                         size="small"
+                         checked={mode === 'dark'}
+                         onChange={toggleMode}
+                         color="primary"
+                         inputProps={{ 'aria-label': 'toggle color mode' }}
+                     />
+                   </Box>
+                 </Tooltip>
+               )}
 
-
-              {/* Profile Section - show only on mobile; desktop profile moved to right rail */}
-              {isMobile && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <IconButton
-                      onClick={handleProfileClick}
-                      sx={{
-                        p: 0.5,
-                        '&:hover': {
-                          bgcolor: 'action.hover',
-                        },
-                      }}
-                  >
-                    <Box sx={{ position: 'relative' }}>
-                      <Avatar
-                          sx={{
-                            width: 36,
-                            height: 36,
-                            bgcolor: 'primary.main',
-                            fontSize: '0.875rem',
-                            fontWeight: 'bold',
-                          }}
-                    >
-                      {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                    </Avatar>
-                    {isAdmin && (
-                        <Box
-                            sx={{
-                              position: 'absolute',
-                              bottom: -2,
-                              right: -2,
-                              bgcolor: 'error.main',
-                              borderRadius: '50%',
-                              width: 16,
-                              height: 16,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              border: '2px solid white',
-                            }}
-                        >
-                          <Shield size={8} color="white" />
-                        </Box>
-                    )}
-                  </Box>
-                </IconButton>
-
-                <IconButton
-                    size="small"
-                    onClick={handleProfileClick}
-                    sx={{ display: { xs: 'flex', sm: 'flex' } }}
-                >
-                  <ChevronDown size={16} />
-                </IconButton>
-              </Box>
-              )}
-            </Box>
-          </Toolbar>
-        </AppBar>
-
-        {/* Profile Menu */}
-        <MuiMenu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleProfileClose}
-            onClick={handleProfileClose}
-            PaperProps={{
-              elevation: 3,
-              sx: {
-                mt: 1.5,
-                minWidth: 280,
-                borderRadius: 2,
-                overflow: 'visible',
-                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.1))',
-                '&:before': {
-                  content: '""',
-                  display: 'block',
-                  position: 'absolute',
-                  top: 0,
-                  right: 14,
-                  width: 10,
-                  height: 10,
-                  bgcolor: 'background.paper',
-                  transform: 'translateY(-50%) rotate(45deg)',
-                  zIndex: 0,
-                },
-              },
-            }}
-            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-        >
-          {/* User Info Section */}
-          <Box sx={{ p: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-              <Avatar
-                  sx={{
-                    width: 48,
-                    height: 48,
-                    bgcolor: 'primary.main',
-                    fontSize: '1rem',
-                    fontWeight: 'bold',
-                  }}
-              >
-                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-              </Avatar>
-              <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                  {user?.name || 'User'}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {user?.email || 'user@example.com'}
-                </Typography>
-                {isAdmin && (
-                    <Chip
-                        label="Admin"
-                        size="small"
-                        color="error"
-                        variant="outlined"
-                        sx={{ mt: 0.5, height: 20 }}
-                        icon={<Shield size={12} />}
-                    />
-                )}
-              </Box>
-            </Box>
-
-          </Box>
-
-          <Divider />
-
-          {/* Menu Items */}
-          <MenuItem component={Link} to="/dashboard/profile">
-            <ListItemIcon>
-              <User size={18} />
-            </ListItemIcon>
-            <ListItemText primary="My Profile" />
-          </MenuItem>
+               {/* Notifications (top bar) - visible on mobile & tablet; desktop uses right rail */}
+               {(isMobile || (!isDesktop && !isMobile)) && (
+                 <Tooltip title="Notifications">
+                   <IconButton color="inherit" sx={{ position: 'relative' }}>
+                     <Badge
+                         badgeContent={3}
+                         color="error"
+                         variant="dot"
+                         overlap="circular"
+                     >
+                       <Bell size={20} />
+                     </Badge>
+                   </IconButton>
+                 </Tooltip>
+               )}
 
 
-          <MenuItem component={Link} to="/dashboard/help">
-            <ListItemIcon>
-              <HelpCircle size={18} />
-            </ListItemIcon>
-            <ListItemText primary="Help & Support" />
-          </MenuItem>
+               {/* Profile Section - show on mobile & tablet; desktop profile moved to right rail */}
+               {(isMobile || (!isDesktop && !isMobile)) && (
+                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                   <IconButton
+                       onClick={handleProfileClick}
+                       sx={{
+                         p: 0.5,
+                         '&:hover': {
+                           bgcolor: 'action.hover',
+                         },
+                       }}
+                   >
+                     <Box sx={{ position: 'relative' }}>
+                       <Avatar
+                           sx={{
+                             width: 36,
+                             height: 36,
+                             bgcolor: 'primary.main',
+                             fontSize: '0.875rem',
+                             fontWeight: 'bold',
+                           }}
+                     >
+                       {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                     </Avatar>
+                     {isAdmin && (
+                         <Box
+                             sx={{
+                               position: 'absolute',
+                               bottom: -2,
+                               right: -2,
+                               bgcolor: 'error.main',
+                               borderRadius: '50%',
+                               width: 16,
+                               height: 16,
+                               display: 'flex',
+                               alignItems: 'center',
+                               justifyContent: 'center',
+                               border: '2px solid white',
+                             }}
+                         >
+                           <Shield size={8} color="white" />
+                         </Box>
+                     )}
+                   </Box>
+                 </IconButton>
 
-          <Divider />
+                 <IconButton
+                     size="small"
+                     onClick={handleProfileClick}
+                     sx={{ display: { xs: 'flex', sm: 'flex' } }}
+                 >
+                   <ChevronDown size={16} />
+                 </IconButton>
+               </Box>
+               )}
+             </Box>
+           </Toolbar>
+         </AppBar>
 
-          {/* Admin Section */}
-          {isAdmin && (
-              <Box>
-                <Box sx={{ px: 2, py: 1 }}>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
-                    ADMIN PANEL
-                  </Typography>
-                </Box>
-                <MenuItem component={Link} to="/dashboard/admin/users">
-                  <ListItemIcon>
-                    <Users size={18} />
-                  </ListItemIcon>
-                  <ListItemText primary="Manage Users" />
-                </MenuItem>
+         {/* Profile Menu */}
+         <MuiMenu
+             anchorEl={anchorEl}
+             open={Boolean(anchorEl)}
+             onClose={handleProfileClose}
+             onClick={handleProfileClose}
+             PaperProps={{
+               elevation: 3,
+               sx: {
+                 mt: 1.5,
+                 minWidth: 280,
+                 borderRadius: 2,
+                 overflow: 'visible',
+                 filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.1))',
+                 '&:before': {
+                   content: '""',
+                   display: 'block',
+                   position: 'absolute',
+                   top: 0,
+                   right: 14,
+                   width: 10,
+                   height: 10,
+                   bgcolor: 'background.paper',
+                   transform: 'translateY(-50%) rotate(45deg)',
+                   zIndex: 0,
+                 },
+               },
+             }}
+             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+         >
+           {/* User Info Section */}
+           <Box sx={{ p: 2 }}>
+             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+               <Avatar
+                   sx={{
+                     width: 48,
+                     height: 48,
+                     bgcolor: 'primary.main',
+                     fontSize: '1rem',
+                     fontWeight: 'bold',
+                   }}
+               >
+                 {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+               </Avatar>
+               <Box>
+                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                   {user?.name || 'User'}
+                 </Typography>
+                 <Typography variant="body2" color="text.secondary">
+                   {user?.email || 'user@example.com'}
+                 </Typography>
+                 {isAdmin && (
+                     <Chip
+                         label="Admin"
+                         size="small"
+                         color="error"
+                         variant="outlined"
+                         sx={{ mt: 0.5, height: 20 }}
+                         icon={<Shield size={12} />}
+                     />
+                 )}
+               </Box>
+             </Box>
 
-                <Divider />
-              </Box>
-          )}
+           </Box>
 
-          {/* Logout */}
-          <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
-            <ListItemIcon sx={{ color: 'error.main' }}>
-              <LogOut size={18} />
-            </ListItemIcon>
-            <ListItemText primary="Logout" />
-          </MenuItem>
-        </MuiMenu>
+           <Divider />
 
-        {/* Mobile Search Drawer */}
-        <Drawer
-            anchor="top"
-            open={searchOpen}
-            onClose={() => setSearchOpen(false)}
-            PaperProps={{
-              sx: {
-                height: 'auto',
-                borderBottomLeftRadius: 8,
-                borderBottomRightRadius: 8,
-              },
-            }}
-        >
-          <Box sx={{ p: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <Search size={20} />
-              <InputBase
-                  fullWidth
-                  placeholder="Search posts, users, comments..."
-                  autoFocus
-                  sx={{ fontSize: '1rem' }}
-              />
-            </Box>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
-                Recent Searches
-              </Typography>
-              {['React Tutorial', 'User Management', 'Blog Analytics'].map((search) => (
-                  <Button
-                      key={search}
-                      size="small"
-                      startIcon={<Search size={14} />}
-                      sx={{ justifyContent: 'flex-start' }}
-                  >
-                    {search}
-                  </Button>
-              ))}
-            </Box>
-          </Box>
-        </Drawer>
+           {/* Menu Items */}
+           <MenuItem component={Link} to="/dashboard/profile">
+             <ListItemIcon>
+               <User size={18} />
+             </ListItemIcon>
+             <ListItemText primary="My Profile" />
+           </MenuItem>
 
-        {/* Quick Actions Drawer for Mobile */}
-        <Drawer
-            anchor="bottom"
-            open={quickActionsOpen}
-            onClose={() => setQuickActionsOpen(false)}
-            PaperProps={{
-              sx: {
-                height: 'auto',
-                borderTopLeftRadius: 8,
-                borderTopRightRadius: 8,
-              },
-            }}
-        >
-          <Box sx={{ p: 2 }}>
-            <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold', textAlign: 'center' }}>
-              Quick Actions
-            </Typography>
-            <List>
-              {quickActions.map((action) => (
-                  <ListItem key={action.label} disablePadding>
-                    <ListItemButton
-                        component={Link}
-                        to={action.path}
-                        onClick={() => setQuickActionsOpen(false)}
-                    >
-                      <ListItemIcon>{action.icon}</ListItemIcon>
-                      <ListItemText primary={action.label} />
-                    </ListItemButton>
-                  </ListItem>
-              ))}
-            </List>
-          </Box>
-        </Drawer>
-      </>
+
+           <MenuItem component={Link} to="/dashboard/help">
+             <ListItemIcon>
+               <HelpCircle size={18} />
+             </ListItemIcon>
+             <ListItemText primary="Help & Support" />
+           </MenuItem>
+
+           <Divider />
+
+           {/* Admin Section */}
+           {isAdmin && (
+               <Box>
+                 <Box sx={{ px: 2, py: 1 }}>
+                   <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
+                     ADMIN PANEL
+                   </Typography>
+                 </Box>
+                 <MenuItem component={Link} to="/dashboard/admin/users">
+                   <ListItemIcon>
+                     <Users size={18} />
+                   </ListItemIcon>
+                   <ListItemText primary="Manage Users" />
+                 </MenuItem>
+
+                 <Divider />
+               </Box>
+           )}
+
+           {/* Logout */}
+           <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
+             <ListItemIcon sx={{ color: 'error.main' }}>
+               <LogOut size={18} />
+             </ListItemIcon>
+             <ListItemText primary="Logout" />
+           </MenuItem>
+         </MuiMenu>
+
+         {/* Mobile Search Drawer */}
+         <Drawer
+             anchor="top"
+             open={searchOpen}
+             onClose={() => setSearchOpen(false)}
+             PaperProps={{
+               sx: {
+                 height: 'auto',
+                 borderBottomLeftRadius: 8,
+                 borderBottomRightRadius: 8,
+               },
+             }}
+         >
+           <Box sx={{ p: 2 }}>
+             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+               <Search size={20} />
+               <InputBase
+                   fullWidth
+                   value={searchTerm}
+                   onChange={(e) => setSearchTerm(e.target.value)}
+                   placeholder="Search posts, users, comments..."
+                   autoFocus
+                   sx={{ fontSize: '1rem' }}
+                   onKeyDown={(e) => {
+                     if (e.key === 'Enter') {
+                       navigate(`/?q=${encodeURIComponent(searchTerm)}`);
+                       setSearchOpen(false);
+                     }
+                   }}
+               />
+             </Box>
+             {/* show results */}
+             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+               {searchResults.map((r) => (
+                 <Button key={r.id} startIcon={<Search size={14} />} sx={{ justifyContent: 'flex-start' }} component={Link} to={`/dashboard/posts/${r.id}`} onClick={() => setSearchOpen(false)}>
+                   <div style={{ textAlign: 'left' }}>
+                     <div style={{ fontWeight: 600 }}>{r.title}</div>
+                     <div style={{ fontSize: 12, color: theme.palette.text.secondary }}>{(r.content||'').slice(0,120)}{(r.content||'').length>120?'...':''}</div>
+                   </div>
+                 </Button>
+               ))}
+               <Button onClick={() => { navigate(`/?q=${encodeURIComponent(searchTerm)}`); setSearchOpen(false); }}>
+                 See all results
+               </Button>
+             </Box>
+           </Box>
+         </Drawer>
+
+         {/* Quick Actions Drawer for Mobile */}
+         <Drawer
+             anchor="bottom"
+             open={quickActionsOpen}
+             onClose={() => setQuickActionsOpen(false)}
+             PaperProps={{
+               sx: {
+                 height: 'auto',
+                 borderTopLeftRadius: 8,
+                 borderTopRightRadius: 8,
+               },
+             }}
+         >
+           <Box sx={{ p: 2 }}>
+             <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold', textAlign: 'center' }}>
+               Quick Actions
+             </Typography>
+             <List>
+               {quickActions.map((action) => (
+                   <ListItem key={action.label} disablePadding>
+                     <ListItemButton
+                         component={Link}
+                         to={action.path}
+                         onClick={() => setQuickActionsOpen(false)}
+                     >
+                       <ListItemIcon>{action.icon}</ListItemIcon>
+                       <ListItemText primary={action.label} />
+                     </ListItemButton>
+                   </ListItem>
+               ))}
+             </List>
+           </Box>
+         </Drawer>
+       </>
   );
 };

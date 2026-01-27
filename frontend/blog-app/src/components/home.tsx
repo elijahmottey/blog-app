@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import BackendApi, { type PostDto, type ApiResponse, type PagedResponse } from "../service/BackendApi.ts";
 import { useApi } from "../hooks/useApi";
 import { CalendarDays, User, ArrowRight, Sparkles, TrendingUp, Clock, ChevronRight, Mail } from "lucide-react";
@@ -18,6 +18,10 @@ export default function Home() {
     );
 
     const [isMobile, setIsMobile] = useState(false);
+    const location = useLocation();
+    const params = new URLSearchParams(location.search);
+    const qParam = params.get('q') || '';
+    const [searchResults, setSearchResults] = useState<PostDto[]>([]);
 
     useEffect(() => {
         const checkMobile = () => {
@@ -27,6 +31,26 @@ export default function Home() {
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
+
+    useEffect(() => {
+        let mounted = true;
+        const q = qParam.trim();
+        if (!q) {
+            setSearchResults([]);
+            return;
+        }
+        (async () => {
+            try {
+                const resp = await BackendApi.getAllPost(0, 200);
+                const postsList = resp.data?.content || [];
+                const filtered = postsList.filter(p => (p.title||'').toLowerCase().includes(q.toLowerCase()) || (p.content||'').toLowerCase().includes(q.toLowerCase()));
+                if (mounted) setSearchResults(filtered);
+            } catch (e) {
+                // ignore
+            }
+        })();
+        return () => { mounted = false; };
+    }, [qParam]);
 
     const posts = data?.data?.content || [];
     const latestPosts = [...posts]
@@ -231,7 +255,29 @@ export default function Home() {
                         </div>
                     )}
 
-                    {/* Posts Grid */}
+                    {/* If search query present show searchResults */}
+                    {qParam && (
+                      <div className="mb-6">
+                        <h3 className="text-xl font-semibold" style={{ color: theme.palette.text.primary }}>Search results for "{qParam}"</h3>
+                        {searchResults.length === 0 ? (
+                          <p style={{ color: theme.palette.text.secondary }}>No results found.</p>
+                        ) : (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                            {searchResults.map((post) => (
+                              <Link key={post.id} to={`/dashboard/posts/${post.id}`} className="group block">
+                                <article style={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}` }} className="rounded-xl overflow-hidden">
+                                    <div className="p-4">
+                                        <h4 style={{ color: theme.palette.text.primary, fontWeight: 700 }}>{post.title}</h4>
+                                        <p style={{ color: theme.palette.text.secondary }}>{excerpt(post.content, 120)}</p>
+                                    </div>
+                                </article>
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {!loading && !error && allPosts.length > 0 && (
                         <>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">

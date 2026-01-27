@@ -29,6 +29,8 @@ export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchResults, setSearchResults] = useState<any[]>([]);
     const location = useLocation();
     const isAuthenticated = BackendApi.isAuthenticated();
     const navigate = useNavigate();
@@ -49,6 +51,76 @@ export default function Navbar() {
         setIsOpen(false);
         setIsSearchOpen(false);
     }, [location]);
+
+    // Search functionality
+    useEffect(() => {
+        const searchData = async () => {
+            if (searchTerm.trim().length < 2) {
+                setSearchResults([]);
+                return;
+            }
+            
+            try {
+                const [posts, users, comments] = await Promise.all([
+                    BackendApi.getAllPost(0, 50),
+                    BackendApi.getAllUsers(),
+                    BackendApi.getAllPostComment(0, 50)
+                ]);
+                
+                const query = searchTerm.toLowerCase();
+                const results = [];
+                
+                // Search posts
+                const filteredPosts = posts.data?.content?.filter((post: any) => 
+                    post.title?.toLowerCase().includes(query) || 
+                    post.content?.toLowerCase().includes(query)
+                ) || [];
+                
+                results.push(...filteredPosts.slice(0, 5).map((post: any) => ({
+                    type: 'post',
+                    id: post.id,
+                    title: post.title,
+                    content: post.content?.substring(0, 100) + '...',
+                    url: `/blog/${post.id}`
+                })));
+                
+                // Search users
+                const filteredUsers = users?.filter((user: any) => 
+                    user.name?.toLowerCase().includes(query) || 
+                    user.email?.toLowerCase().includes(query)
+                ) || [];
+                
+                results.push(...filteredUsers.slice(0, 3).map((user: any) => ({
+                    type: 'user',
+                    id: user.id,
+                    title: user.name,
+                    content: user.email,
+                    url: `/user/${user.id}`
+                })));
+                
+                // Search comments
+                const filteredComments = comments.data?.content?.filter((comment: any) => 
+                    comment.content?.toLowerCase().includes(query)
+                ) || [];
+                
+                results.push(...filteredComments.slice(0, 3).map((comment: any) => ({
+                    type: 'comment',
+                    id: comment.id,
+                    title: 'Comment',
+                    content: comment.content?.substring(0, 100) + '...',
+                    url: `/blog/${comment.postId}#comment-${comment.id}`
+                })));
+                
+                setSearchResults(results);
+            } catch (error) {
+                console.error('Search error:', error);
+                setSearchResults([]);
+            }
+        };
+        
+        const timeoutId = setTimeout(searchData, 300);
+        return () => clearTimeout(timeoutId);
+    }, [searchTerm]);
 
     const navigation = [
         { name: "Home", href: "/", icon: Home },
@@ -141,14 +213,50 @@ export default function Navbar() {
                                         <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: theme.palette.text.secondary }} />
                                         <input
                                             type="text"
-                                            placeholder="Search articles, tags, authors..."
+                                            placeholder="Search posts, users, comments..."
                                             className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none"
                                             style={{ borderColor: theme.palette.divider, color: theme.palette.text.primary, backgroundColor: theme.palette.background.paper }}
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' && searchResults.length > 0) {
+                                                    navigate(searchResults[0].url);
+                                                    setIsSearchOpen(false);
+                                                }
+                                            }}
                                             autoFocus
                                         />
                                     </div>
+                                    {searchResults.length > 0 && (
+                                        <div className="mt-3 max-h-64 overflow-y-auto">
+                                            {searchResults.map((result, index) => (
+                                                <div
+                                                    key={`${result.type}-${result.id}`}
+                                                    className="p-2 rounded cursor-pointer hover:bg-gray-50"
+                                                    style={{ backgroundColor: 'transparent' }}
+                                                    onClick={() => {
+                                                        navigate(result.url);
+                                                        setIsSearchOpen(false);
+                                                        setSearchTerm('');
+                                                    }}
+                                                >
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className="text-xs px-2 py-1 rounded" style={{ backgroundColor: theme.palette.primary.light, color: theme.palette.primary.contrastText }}>
+                                                            {result.type}
+                                                        </span>
+                                                        <span className="font-medium" style={{ color: theme.palette.text.primary }}>
+                                                            {result.title}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-sm mt-1" style={{ color: theme.palette.text.secondary }}>
+                                                        {result.content}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                     <div className="mt-2 text-sm" style={{ color: theme.palette.text.secondary }}>
-                                        Press Enter to search
+                                        {searchTerm.length > 0 ? `${searchResults.length} results found` : 'Type to search...'}
                                     </div>
                                 </div>
                             )}
@@ -253,12 +361,47 @@ export default function Navbar() {
                             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: theme.palette.text.secondary }} />
                             <input
                                 type="text"
-                                placeholder="Search articles, tags, authors..."
+                                placeholder="Search posts, users, comments..."
                                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none"
                                 style={{ borderColor: theme.palette.divider, color: theme.palette.text.primary, backgroundColor: theme.palette.background.paper }}
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && searchResults.length > 0) {
+                                        navigate(searchResults[0].url);
+                                        setIsSearchOpen(false);
+                                    }
+                                }}
                                 autoFocus
                             />
                         </div>
+                        {searchResults.length > 0 && (
+                            <div className="mt-3 max-h-48 overflow-y-auto">
+                                {searchResults.map((result) => (
+                                    <div
+                                        key={`${result.type}-${result.id}`}
+                                        className="p-2 rounded cursor-pointer"
+                                        onClick={() => {
+                                            navigate(result.url);
+                                            setIsSearchOpen(false);
+                                            setSearchTerm('');
+                                        }}
+                                    >
+                                        <div className="flex items-center space-x-2">
+                                            <span className="text-xs px-2 py-1 rounded" style={{ backgroundColor: theme.palette.primary.light, color: theme.palette.primary.contrastText }}>
+                                                {result.type}
+                                            </span>
+                                            <span className="font-medium" style={{ color: theme.palette.text.primary }}>
+                                                {result.title}
+                                            </span>
+                                        </div>
+                                        <p className="text-sm mt-1" style={{ color: theme.palette.text.secondary }}>
+                                            {result.content}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
 

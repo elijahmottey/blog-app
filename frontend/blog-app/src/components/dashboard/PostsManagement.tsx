@@ -243,11 +243,8 @@ export const PostsManagement: React.FC = () => {
         {/* Stats Cards */}
         <Box sx={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 2,
-          '@media (max-width: 600px)': {
-            gridTemplateColumns: '1fr'
-          }
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
+          gap: 2
         }}>
           <Card sx={{ borderRadius: 2, height: '100%' }}>
             <CardContent sx={{ textAlign: 'center' }}>
@@ -374,7 +371,7 @@ export const PostsManagement: React.FC = () => {
                           </Box>
                         </Box>
 
-                        <Box sx={{ display: 'flex', gap: 1, justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
+                        <Box sx={{ display: 'flex', gap: 1, justifyContent: { xs: 'flex-start', md: 'flex-end' }, flexWrap: 'wrap' }}>
                           <IconButton
                               component={Link}
                               to={`/dashboard/posts/${post.id}`}
@@ -494,11 +491,8 @@ export const PostsManagement: React.FC = () => {
           </Typography>
           <Box sx={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: 2,
-            '@media (max-width: 600px)': {
-              gridTemplateColumns: 'repeat(2, 1fr)'
-            }
+            gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
+            gap: 2
           }}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 'bold' }}>

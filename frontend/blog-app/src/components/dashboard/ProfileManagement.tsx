@@ -38,7 +38,6 @@ interface PasswordFormData {
     confirmPassword: string;
 }
 
-
 const profileSchema = yup.object({
     name: yup.string().required('Name is required').min(2, 'Name must be at least 2 characters'),
     email: yup.string().required('Email is required').email('Invalid email format'),
@@ -70,7 +69,6 @@ export const ProfileManagement: React.FC = () => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [deleteConfirmation, setDeleteConfirmation] = useState('');
 
-    // Fetch user statistics
     const { data: userStats } = useQuery({
         queryKey: ['user-stats'],
         queryFn: async () => {
@@ -119,7 +117,6 @@ export const ProfileManagement: React.FC = () => {
         resolver: yupResolver(passwordSchema),
     });
 
-    // Update profile mutation
     const updateProfileMutation = useMutation({
         mutationFn: (data: ProfileFormData) =>
             BackendApi.updateUser(user?.id || 0, data),
@@ -133,10 +130,8 @@ export const ProfileManagement: React.FC = () => {
         },
     });
 
-    // Change password mutation
     const changePasswordMutation = useMutation({
         mutationFn: async (_data: PasswordFormData) => {
-            // This would typically be a separate endpoint for password change
             return new Promise((resolve) => {
                 setTimeout(() => resolve({ success: true }), 1000);
             });
@@ -150,7 +145,6 @@ export const ProfileManagement: React.FC = () => {
         },
     });
 
-    // Delete user mutation
     const deleteUserMutation = useMutation({
         mutationFn: async () => {
             if (!user?.id) throw new Error('User ID not found');
@@ -208,7 +202,7 @@ export const ProfileManagement: React.FC = () => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div style={{ maxWidth: '64rem', margin: '0 auto', padding: '0 1rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {/* Header */}
             <div
                 style={{
@@ -219,33 +213,51 @@ export const ProfileManagement: React.FC = () => {
                     boxShadow: theme.shadows[1],
                 }}
             >
-                <div className="flex items-center space-x-4">
-                    <div
-                        style={{
-                            width: 64,
-                            height: 64,
-                            borderRadius: '50%',
-                            backgroundColor: theme.palette.primary.main,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
-                    >
-                        <User style={{ height: 32, width: 32, color: theme.palette.primary.contrastText }} />
-                    </div>
-                    <div>
-                        <h1
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div
                             style={{
-                                fontSize: '1.25rem',
-                                fontWeight: 700,
-                                color: theme.palette.text.primary,
+                                width: 64,
+                                height: 64,
+                                borderRadius: '50%',
+                                backgroundColor: theme.palette.primary.main,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
                             }}
                         >
-                            {user?.name || 'User'}
-                        </h1>
-                        <p style={{ color: theme.palette.text.secondary }}>{user?.email}</p>
-                        <div className="flex items-center mt-2 space-x-2">
-                            {user?.roles?.includes(Roles.ADMIN) && (
+                            <User style={{ height: 32, width: 32, color: theme.palette.primary.contrastText }} />
+                        </div>
+                        <div>
+                            <h1
+                                style={{
+                                    fontSize: '1.25rem',
+                                    fontWeight: 700,
+                                    color: theme.palette.text.primary,
+                                }}
+                            >
+                                {user?.name || 'User'}
+                            </h1>
+                            <p style={{ color: theme.palette.text.secondary }}>{user?.email}</p>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', marginTop: '0.5rem', gap: '0.5rem' }}>
+                                {user?.roles?.includes(Roles.ADMIN) && (
+                                    <span
+                                        style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: 6,
+                                            padding: '2px 8px',
+                                            borderRadius: 9999,
+                                            fontSize: '0.75rem',
+                                            backgroundColor: alpha(theme.palette.error.main, 0.12),
+                                            color: theme.palette.error.main,
+                                            fontWeight: 500,
+                                        }}
+                                    >
+                                        <Shield style={{ height: 12, width: 12, marginRight: 4 }} />
+                                        Admin
+                                    </span>
+                                )}
                                 <span
                                     style={{
                                         display: 'inline-flex',
@@ -254,31 +266,15 @@ export const ProfileManagement: React.FC = () => {
                                         padding: '2px 8px',
                                         borderRadius: 9999,
                                         fontSize: '0.75rem',
-                                        backgroundColor: alpha(theme.palette.error.main, 0.12),
-                                        color: theme.palette.error.main,
+                                        backgroundColor: alpha(theme.palette.primary.main, 0.12),
+                                        color: theme.palette.primary.main,
                                         fontWeight: 500,
                                     }}
                                 >
-                                    <Shield style={{ height: 12, width: 12, marginRight: 4 }} />
-                                    Admin
+                                    <User style={{ height: 12, width: 12, marginRight: 4 }} />
+                                    User
                                 </span>
-                            )}
-                            <span
-                                style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: 6,
-                                    padding: '2px 8px',
-                                    borderRadius: 9999,
-                                    fontSize: '0.75rem',
-                                    backgroundColor: alpha(theme.palette.primary.main, 0.12),
-                                    color: theme.palette.primary.main,
-                                    fontWeight: 500,
-                                }}
-                            >
-                                <User style={{ height: 12, width: 12, marginRight: 4 }} />
-                                User
-                            </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -287,25 +283,33 @@ export const ProfileManagement: React.FC = () => {
             {/* Navigation Tabs */}
             <div style={{ backgroundColor: theme.palette.background.paper, borderRadius: 12, border: `1px solid ${theme.palette.divider}`, boxShadow: theme.shadows[1] }}>
                 <div style={{ borderBottom: `1px solid ${theme.palette.divider}` }}>
-                    <nav style={{ display: 'flex' }}>
-                        {['profile','password','stats','account'].map((tab) => {
+                    <nav style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
+                        {['profile', 'password', 'stats', 'account'].map((tab) => {
                             const active = activeTab === tab;
                             const labelMap: any = { profile: 'Profile', password: 'Password', stats: 'Statistics', account: 'Account' };
                             const IconMap: any = { profile: User, password: Key, stats: FileText, account: Shield };
                             const Icon = IconMap[tab];
                             return (
-                                <button key={tab}
+                                <button
+                                    key={tab}
                                     onClick={() => setActiveTab(tab as any)}
                                     style={{
-                                        padding: '12px 24px',
+                                        padding: '12px 16px',
                                         fontSize: '0.875rem',
                                         fontWeight: 500,
                                         borderBottom: `2px solid ${active ? theme.palette.primary.main : 'transparent'}`,
                                         color: active ? theme.palette.primary.main : theme.palette.text.secondary,
-                                        background: 'transparent'
+                                        background: 'transparent',
+                                        minWidth: '100px',
+                                        textAlign: 'center',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
                                     }}
                                 >
-                                    <Icon style={{ width: 14, height: 14, display: 'inline-block', marginRight: 8, verticalAlign: 'middle', color: active ? theme.palette.primary.main : theme.palette.text.secondary }} />
+                                    <Icon style={{ width: 14, height: 14, marginRight: 8, color: active ? theme.palette.primary.main : theme.palette.text.secondary }} />
                                     {labelMap[tab]}
                                 </button>
                             );
@@ -316,35 +320,56 @@ export const ProfileManagement: React.FC = () => {
                 <div style={{ padding: 24 }}>
                     {/* Profile Tab */}
                     {activeTab === 'profile' && (
-                        <div className="space-y-6">
-                            <div className="flex items-center justify-between">
-                                <h2 className="text-lg font-semibold text-gray-900">Profile Information</h2>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: theme.palette.text.primary }}>
+                                    Profile Information
+                                </h2>
                                 {!isEditing && (
                                     <button
                                         onClick={() => setIsEditing(true)}
-                                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                                        style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            padding: '8px 16px',
+                                            fontSize: '0.875rem',
+                                            fontWeight: 500,
+                                            color: theme.palette.primary.main,
+                                            backgroundColor: 'transparent',
+                                            border: 'none',
+                                            borderRadius: 8,
+                                            cursor: 'pointer',
+                                        }}
                                     >
-                                        <Edit className="h-4 w-4 mr-2" />
+                                        <Edit style={{ height: 16, width: 16, marginRight: 8 }} />
                                         Edit Profile
                                     </button>
                                 )}
                             </div>
 
-                            <form onSubmit={handleSubmitProfile(onSubmitProfile)} className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <form onSubmit={handleSubmitProfile(onSubmitProfile)} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: 24, '@media (min-width: 768px)': { gridTemplateColumns: 'repeat(2, 1fr)' } } as any}>
                                     {/* Name */}
                                     <div>
-                                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                                        <label htmlFor="name" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary, marginBottom: 8 }}>
                                             Full Name
                                         </label>
                                         {isEditing ? (
-                                            <div className="relative">
-                                                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                            <div style={{ position: 'relative' }}>
+                                                <User style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', height: 16, width: 16, color: theme.palette.text.secondary }} />
                                                 <input
                                                     {...registerProfile('name')}
                                                     type="text"
                                                     id="name"
-                                                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: '8px 8px 8px 40px',
+                                                        border: `1px solid ${theme.palette.divider}`,
+                                                        borderRadius: 8,
+                                                        fontSize: '0.875rem',
+                                                        color: theme.palette.text.primary,
+                                                        backgroundColor: theme.palette.background.paper,
+                                                    }}
                                                     placeholder="Enter your full name"
                                                 />
                                             </div>
@@ -355,23 +380,31 @@ export const ProfileManagement: React.FC = () => {
                                             </div>
                                         )}
                                         {profileErrors.name && (
-                                            <p className="mt-1 text-sm text-red-600">{profileErrors.name.message}</p>
+                                            <p style={{ marginTop: 4, fontSize: '0.75rem', color: theme.palette.error.main }}>{profileErrors.name.message}</p>
                                         )}
                                     </div>
 
                                     {/* Email */}
                                     <div>
-                                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                                        <label htmlFor="email" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary, marginBottom: 8 }}>
                                             Email Address
                                         </label>
                                         {isEditing ? (
-                                            <div className="relative">
-                                                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                            <div style={{ position: 'relative' }}>
+                                                <Mail style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', height: 16, width: 16, color: theme.palette.text.secondary }} />
                                                 <input
                                                     {...registerProfile('email')}
                                                     type="email"
                                                     id="email"
-                                                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: '8px 8px 8px 40px',
+                                                        border: `1px solid ${theme.palette.divider}`,
+                                                        borderRadius: 8,
+                                                        fontSize: '0.875rem',
+                                                        color: theme.palette.text.primary,
+                                                        backgroundColor: theme.palette.background.paper,
+                                                    }}
                                                     placeholder="Enter your email"
                                                 />
                                             </div>
@@ -382,62 +415,85 @@ export const ProfileManagement: React.FC = () => {
                                             </div>
                                         )}
                                         {profileErrors.email && (
-                                            <p className="mt-1 text-sm text-red-600">{profileErrors.email.message}</p>
+                                            <p style={{ marginTop: 4, fontSize: '0.75rem', color: theme.palette.error.main }}>{profileErrors.email.message}</p>
                                         )}
                                     </div>
                                 </div>
 
                                 {/* Account Info (Read-only) */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-200">
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: 24, paddingTop: 24, borderTop: `1px solid ${theme.palette.divider}`, '@media (min-width: 768px)': { gridTemplateColumns: 'repeat(2, 1fr)' } } as any}>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary, marginBottom: 8 }}>
                                             Account Created
                                         </label>
                                         <div style={{ display: 'flex', alignItems: 'center', padding: 12, borderRadius: 8, backgroundColor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.default, 0.04) : alpha(theme.palette.background.paper, 0.6), border: `1px solid ${theme.palette.divider}` }}>
                                             <Calendar style={{ width: 16, height: 16, color: theme.palette.text.secondary, marginRight: 12 }} />
                                             <span style={{ color: theme.palette.text.primary }}>
-                        {user?.createdAt ? format(new Date(user.createdAt), 'MMM dd, yyyy') : 'Unknown'}
-                      </span>
+                                                {user?.createdAt ? format(new Date(user.createdAt), 'MMM dd, yyyy') : 'Unknown'}
+                                            </span>
                                         </div>
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary, marginBottom: 8 }}>
                                             Last Updated
                                         </label>
                                         <div style={{ display: 'flex', alignItems: 'center', padding: 12, borderRadius: 8, backgroundColor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.default, 0.04) : alpha(theme.palette.background.paper, 0.6), border: `1px solid ${theme.palette.divider}` }}>
                                             <Calendar style={{ width: 16, height: 16, color: theme.palette.text.secondary, marginRight: 12 }} />
                                             <span style={{ color: theme.palette.text.primary }}>
-                        {user?.updatedAt ? format(new Date(user.updatedAt), 'MMM dd, yyyy') : 'Unknown'}
-                      </span>
+                                                {user?.updatedAt ? format(new Date(user.updatedAt), 'MMM dd, yyyy') : 'Unknown'}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Action Buttons */}
                                 {isEditing && (
-                                    <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, paddingTop: 24, borderTop: `1px solid ${theme.palette.divider}` }}>
                                         <button
                                             type="button"
                                             onClick={handleCancelEdit}
-                                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                                            style={{
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                padding: '8px 16px',
+                                                fontSize: '0.875rem',
+                                                fontWeight: 500,
+                                                color: theme.palette.text.primary,
+                                                backgroundColor: theme.palette.background.paper,
+                                                border: `1px solid ${theme.palette.divider}`,
+                                                borderRadius: 8,
+                                                cursor: 'pointer',
+                                            }}
                                         >
-                                            <X className="h-4 w-4 inline mr-2" />
+                                            <X style={{ height: 16, width: 16, marginRight: 8 }} />
                                             Cancel
                                         </button>
                                         <button
                                             type="submit"
                                             disabled={isProfileSubmitting || updateProfileMutation.isPending}
-                                            className="px-4 py-2 text-sm font-medium text-primary-foreground bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            style={{
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                padding: '8px 16px',
+                                                fontSize: '0.875rem',
+                                                fontWeight: 500,
+                                                color: theme.palette.primary.contrastText,
+                                                backgroundColor: theme.palette.primary.main,
+                                                border: 'none',
+                                                borderRadius: 8,
+                                                cursor: 'pointer',
+                                                opacity: (isProfileSubmitting || updateProfileMutation.isPending) ? 0.5 : 1,
+                                            }}
                                         >
                                             {updateProfileMutation.isPending ? (
                                                 <>
-                                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                                    <div style={{ animation: 'spin 1s linear infinite', borderRadius: '50%', height: 16, width: 16, border: `2px solid ${theme.palette.primary.contrastText}`, borderTopColor: 'transparent', marginRight: 8 }}></div>
                                                     Saving...
                                                 </>
                                             ) : (
                                                 <>
-                                                    <Save className="h-4 w-4 inline mr-2" />
+                                                    <Save style={{ height: 16, width: 16, marginRight: 8 }} />
                                                     Save Changes
                                                 </>
                                             )}
@@ -450,111 +506,176 @@ export const ProfileManagement: React.FC = () => {
 
                     {/* Password Tab */}
                     {activeTab === 'password' && (
-                        <div className="space-y-6">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                             <div>
-                                <h2 className="text-lg font-semibold text-gray-900 mb-2">Change Password</h2>
-                                <p className="text-sm text-gray-600">
+                                <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: theme.palette.text.primary, marginBottom: 8 }}>
+                                    Change Password
+                                </h2>
+                                <p style={{ fontSize: '0.875rem', color: theme.palette.text.secondary }}>
                                     Ensure your account is using a strong password to keep your account secure.
                                 </p>
                             </div>
 
-                            <form onSubmit={handleSubmitPassword(onSubmitPassword)} className="space-y-6">
+                            <form onSubmit={handleSubmitPassword(onSubmitPassword)} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                                 {/* Current Password */}
                                 <div>
-                                    <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label htmlFor="currentPassword" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary, marginBottom: 8 }}>
                                         Current Password
                                     </label>
-                                    <div className="relative">
-                                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                    <div style={{ position: 'relative' }}>
+                                        <Lock style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', height: 16, width: 16, color: theme.palette.text.secondary }} />
                                         <input
                                             {...registerPassword('currentPassword')}
                                             type={showCurrentPassword ? 'text' : 'password'}
                                             id="currentPassword"
-                                            className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            style={{
+                                                width: '100%',
+                                                padding: '8px 8px 8px 40px',
+                                                border: `1px solid ${theme.palette.divider}`,
+                                                borderRadius: 8,
+                                                fontSize: '0.875rem',
+                                                color: theme.palette.text.primary,
+                                                backgroundColor: theme.palette.background.paper,
+                                            }}
                                             placeholder="Enter your current password"
                                         />
                                         <button
                                             type="button"
                                             onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                            style={{
+                                                position: 'absolute',
+                                                right: 12,
+                                                top: '50%',
+                                                transform: 'translateY(-50%)',
+                                                background: 'transparent',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                color: theme.palette.text.secondary,
+                                            }}
                                         >
-                                            {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                            {showCurrentPassword ? <EyeOff style={{ height: 16, width: 16 }} /> : <Eye style={{ height: 16, width: 16 }} />}
                                         </button>
                                     </div>
                                     {passwordErrors.currentPassword && (
-                                        <p className="mt-1 text-sm text-red-600">{passwordErrors.currentPassword.message}</p>
+                                        <p style={{ marginTop: 4, fontSize: '0.75rem', color: theme.palette.error.main }}>{passwordErrors.currentPassword.message}</p>
                                     )}
                                 </div>
 
                                 {/* New Password */}
                                 <div>
-                                    <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label htmlFor="newPassword" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary, marginBottom: 8 }}>
                                         New Password
                                     </label>
-                                    <div className="relative">
-                                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                    <div style={{ position: 'relative' }}>
+                                        <Lock style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', height: 16, width: 16, color: theme.palette.text.secondary }} />
                                         <input
                                             {...registerPassword('newPassword')}
                                             type={showNewPassword ? 'text' : 'password'}
                                             id="newPassword"
-                                            className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            style={{
+                                                width: '100%',
+                                                padding: '8px 8px 8px 40px',
+                                                border: `1px solid ${theme.palette.divider}`,
+                                                borderRadius: 8,
+                                                fontSize: '0.875rem',
+                                                color: theme.palette.text.primary,
+                                                backgroundColor: theme.palette.background.paper,
+                                            }}
                                             placeholder="Enter your new password"
                                         />
                                         <button
                                             type="button"
                                             onClick={() => setShowNewPassword(!showNewPassword)}
-                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                            style={{
+                                                position: 'absolute',
+                                                right: 12,
+                                                top: '50%',
+                                                transform: 'translateY(-50%)',
+                                                background: 'transparent',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                color: theme.palette.text.secondary,
+                                            }}
                                         >
-                                            {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                            {showNewPassword ? <EyeOff style={{ height: 16, width: 16 }} /> : <Eye style={{ height: 16, width: 16 }} />}
                                         </button>
                                     </div>
                                     {passwordErrors.newPassword && (
-                                        <p className="mt-1 text-sm text-red-600">{passwordErrors.newPassword.message}</p>
+                                        <p style={{ marginTop: 4, fontSize: '0.75rem', color: theme.palette.error.main }}>{passwordErrors.newPassword.message}</p>
                                     )}
                                 </div>
 
                                 {/* Confirm Password */}
                                 <div>
-                                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label htmlFor="confirmPassword" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary, marginBottom: 8 }}>
                                         Confirm New Password
                                     </label>
-                                    <div className="relative">
-                                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                    <div style={{ position: 'relative' }}>
+                                        <Lock style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', height: 16, width: 16, color: theme.palette.text.secondary }} />
                                         <input
                                             {...registerPassword('confirmPassword')}
                                             type={showConfirmPassword ? 'text' : 'password'}
                                             id="confirmPassword"
-                                            className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            style={{
+                                                width: '100%',
+                                                padding: '8px 8px 8px 40px',
+                                                border: `1px solid ${theme.palette.divider}`,
+                                                borderRadius: 8,
+                                                fontSize: '0.875rem',
+                                                color: theme.palette.text.primary,
+                                                backgroundColor: theme.palette.background.paper,
+                                            }}
                                             placeholder="Confirm your new password"
                                         />
                                         <button
                                             type="button"
                                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                            style={{
+                                                position: 'absolute',
+                                                right: 12,
+                                                top: '50%',
+                                                transform: 'translateY(-50%)',
+                                                background: 'transparent',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                color: theme.palette.text.secondary,
+                                            }}
                                         >
-                                            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                            {showConfirmPassword ? <EyeOff style={{ height: 16, width: 16 }} /> : <Eye style={{ height: 16, width: 16 }} />}
                                         </button>
                                     </div>
                                     {passwordErrors.confirmPassword && (
-                                        <p className="mt-1 text-sm text-red-600">{passwordErrors.confirmPassword.message}</p>
+                                        <p style={{ marginTop: 4, fontSize: '0.75rem', color: theme.palette.error.main }}>{passwordErrors.confirmPassword.message}</p>
                                     )}
                                 </div>
 
                                 {/* Submit Button */}
-                                <div className="flex justify-end pt-6 border-t border-gray-200">
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: 24, borderTop: `1px solid ${theme.palette.divider}` }}>
                                     <button
                                         type="submit"
                                         disabled={isPasswordSubmitting || changePasswordMutation.isPending}
-                                        className="px-6 py-3 text-sm font-medium text-primary-foreground bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            padding: '12px 24px',
+                                            fontSize: '0.875rem',
+                                            fontWeight: 500,
+                                            color: theme.palette.primary.contrastText,
+                                            backgroundColor: theme.palette.primary.main,
+                                            border: 'none',
+                                            borderRadius: 8,
+                                            cursor: 'pointer',
+                                            opacity: (isPasswordSubmitting || changePasswordMutation.isPending) ? 0.5 : 1,
+                                        }}
                                     >
                                         {changePasswordMutation.isPending ? (
                                             <>
-                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                                <div style={{ animation: 'spin 1s linear infinite', borderRadius: '50%', height: 16, width: 16, border: `2px solid ${theme.palette.primary.contrastText}`, borderTopColor: 'transparent', marginRight: 8 }}></div>
                                                 Changing Password...
                                             </>
                                         ) : (
                                             <>
-                                                <Key className="h-4 w-4 inline mr-2" />
+                                                <Key style={{ height: 16, width: 16, marginRight: 8 }} />
                                                 Change Password
                                             </>
                                         )}
@@ -566,87 +687,89 @@ export const ProfileManagement: React.FC = () => {
 
                     {/* Statistics Tab */}
                     {activeTab === 'stats' && (
-                        <div className="space-y-6">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                             <div>
-                                <h2 className="text-lg font-semibold text-gray-900 mb-2">Account Statistics</h2>
-                                <p className="text-sm text-gray-600">
+                                <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: theme.palette.text.primary, marginBottom: 8 }}>
+                                    Account Statistics
+                                </h2>
+                                <p style={{ fontSize: '0.875rem', color: theme.palette.text.secondary }}>
                                     Overview of your activity on the platform.
                                 </p>
                             </div>
 
                             {/* Stats Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg">
-                                    <div className="flex items-center">
-                                        <FileText className="h-8 w-8 text-blue-600" />
-                                        <div className="ml-4">
-                                            <p className="text-sm font-medium text-blue-600">Total Posts</p>
-                                            <p className="text-2xl font-bold text-blue-900">{stats.totalPosts}</p>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: 24, '@media (min-width: 768px)': { gridTemplateColumns: 'repeat(2, 1fr)' }, '@media (min-width: 1024px)': { gridTemplateColumns: 'repeat(4, 1fr)' } } as any}>
+                                <div style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.2))', padding: 24, borderRadius: 12 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <FileText style={{ height: 32, width: 32, color: theme.palette.primary.main }} />
+                                        <div style={{ marginLeft: 16 }}>
+                                            <p style={{ fontSize: '0.875rem', fontWeight: 500, color: theme.palette.primary.main }}>Total Posts</p>
+                                            <p style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.primary.dark }}>{stats.totalPosts}</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-lg">
-                                    <div className="flex items-center">
-                                        <FileText className="h-8 w-8 text-green-600" />
-                                        <div className="ml-4">
-                                            <p className="text-sm font-medium text-green-600">Published</p>
-                                            <p className="text-2xl font-bold text-green-900">{stats.publishedPosts}</p>
+                                <div style={{ background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.2))', padding: 24, borderRadius: 12 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <FileText style={{ height: 32, width: 32, color: theme.palette.success.main }} />
+                                        <div style={{ marginLeft: 16 }}>
+                                            <p style={{ fontSize: '0.875rem', fontWeight: 500, color: theme.palette.success.main }}>Published</p>
+                                            <p style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.success.dark }}>{stats.publishedPosts}</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-lg">
-                                    <div className="flex items-center">
-                                        <FileText className="h-8 w-8 text-orange-600" />
-                                        <div className="ml-4">
-                                            <p className="text-sm font-medium text-orange-600">Drafts</p>
-                                            <p className="text-2xl font-bold text-orange-900">{stats.draftPosts}</p>
+                                <div style={{ background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(249, 115, 22, 0.2))', padding: 24, borderRadius: 12 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <FileText style={{ height: 32, width: 32, color: theme.palette.warning.main }} />
+                                        <div style={{ marginLeft: 16 }}>
+                                            <p style={{ fontSize: '0.875rem', fontWeight: 500, color: theme.palette.warning.main }}>Drafts</p>
+                                            <p style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.warning.dark }}>{stats.draftPosts}</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-lg">
-                                    <div className="flex items-center">
-                                        <MessageSquare className="h-8 w-8 text-purple-600" />
-                                        <div className="ml-4">
-                                            <p className="text-sm font-medium text-purple-600">Comments</p>
-                                            <p className="text-2xl font-bold text-purple-900">{stats.totalComments}</p>
+                                <div style={{ background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(168, 85, 247, 0.2))', padding: 24, borderRadius: 12 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <MessageSquare style={{ height: 32, width: 32, color: theme.palette.secondary.main }} />
+                                        <div style={{ marginLeft: 16 }}>
+                                            <p style={{ fontSize: '0.875rem', fontWeight: 500, color: theme.palette.secondary.main }}>Comments</p>
+                                            <p style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.secondary.dark }}>{stats.totalComments}</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Recent Activity */}
-                            <div className="bg-gray-50 rounded-lg p-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-                                <div className="space-y-3">
-                                    <div className="flex items-center p-3 bg-white rounded-lg">
-                                        <FileText className="h-5 w-5 text-blue-600 mr-3" />
-                                        <div className="flex-1">
-                                            <p className="text-sm font-medium text-gray-900">Account created</p>
-                                            <p className="text-xs text-gray-500">
+                            <div style={{ backgroundColor: alpha(theme.palette.grey[100], 0.5), borderRadius: 12, padding: 24 }}>
+                                <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: theme.palette.text.primary, marginBottom: 16 }}>Recent Activity</h3>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', padding: 12, backgroundColor: theme.palette.background.paper, borderRadius: 8 }}>
+                                        <FileText style={{ height: 20, width: 20, color: theme.palette.primary.main, marginRight: 12 }} />
+                                        <div style={{ flex: 1 }}>
+                                            <p style={{ fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary }}>Account created</p>
+                                            <p style={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
                                                 {user?.createdAt ? format(new Date(user.createdAt), 'MMM dd, yyyy \'at\' h:mm a') : 'Unknown'}
                                             </p>
                                         </div>
                                     </div>
 
                                     {stats.totalPosts > 0 && (
-                                        <div className="flex items-center p-3 bg-white rounded-lg">
-                                            <FileText className="h-5 w-5 text-green-600 mr-3" />
-                                            <div className="flex-1">
-                                                <p className="text-sm font-medium text-gray-900">First post created</p>
-                                                <p className="text-xs text-gray-500">Started your blogging journey</p>
+                                        <div style={{ display: 'flex', alignItems: 'center', padding: 12, backgroundColor: theme.palette.background.paper, borderRadius: 8 }}>
+                                            <FileText style={{ height: 20, width: 20, color: theme.palette.success.main, marginRight: 12 }} />
+                                            <div style={{ flex: 1 }}>
+                                                <p style={{ fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary }}>First post created</p>
+                                                <p style={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>Started your blogging journey</p>
                                             </div>
                                         </div>
                                     )}
 
                                     {stats.totalComments > 0 && (
-                                        <div className="flex items-center p-3 bg-white rounded-lg">
-                                            <MessageSquare className="h-5 w-5 text-purple-600 mr-3" />
-                                            <div className="flex-1">
-                                                <p className="text-sm font-medium text-gray-900">First comment posted</p>
-                                                <p className="text-xs text-gray-500">Joined the community discussion</p>
+                                        <div style={{ display: 'flex', alignItems: 'center', padding: 12, backgroundColor: theme.palette.background.paper, borderRadius: 8 }}>
+                                            <MessageSquare style={{ height: 20, width: 20, color: theme.palette.secondary.main, marginRight: 12 }} />
+                                            <div style={{ flex: 1 }}>
+                                                <p style={{ fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary }}>First comment posted</p>
+                                                <p style={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>Joined the community discussion</p>
                                             </div>
                                         </div>
                                     )}
@@ -657,47 +780,49 @@ export const ProfileManagement: React.FC = () => {
 
                     {/* Account Tab */}
                     {activeTab === 'account' && (
-                        <div className="space-y-6">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                             <div>
-                                <h2 className="text-lg font-semibold text-gray-900 mb-2">Account Settings</h2>
-                                <p className="text-sm text-gray-600">
+                                <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: theme.palette.text.primary, marginBottom: 8 }}>
+                                    Account Settings
+                                </h2>
+                                <p style={{ fontSize: '0.875rem', color: theme.palette.text.secondary }}>
                                     Manage your account settings and data.
                                 </p>
                             </div>
 
                             {/* Account Information */}
-                            <div className="bg-gray-50 rounded-lg p-6">
-                                <h3 className="text-md font-semibold text-gray-900 mb-4">Account Information</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div style={{ backgroundColor: alpha(theme.palette.grey[100], 0.5), borderRadius: 12, padding: 24 }}>
+                                <h3 style={{ fontSize: '1rem', fontWeight: 600, color: theme.palette.text.primary, marginBottom: 16 }}>Account Information</h3>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: 16, '@media (min-width: 768px)': { gridTemplateColumns: 'repeat(2, 1fr)' } } as any}>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary, marginBottom: 4 }}>
                                             Account ID
                                         </label>
-                                        <p className="text-sm text-gray-900 bg-white px-3 py-2 rounded border">
+                                        <p style={{ fontSize: '0.875rem', color: theme.palette.text.primary, backgroundColor: theme.palette.background.paper, padding: '8px 12px', borderRadius: 6, border: `1px solid ${theme.palette.divider}` }}>
                                             {user?.id || 'N/A'}
                                         </p>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary, marginBottom: 4 }}>
                                             Account Type
                                         </label>
-                                        <p className="text-sm text-gray-900 bg-white px-3 py-2 rounded border">
+                                        <p style={{ fontSize: '0.875rem', color: theme.palette.text.primary, backgroundColor: theme.palette.background.paper, padding: '8px 12px', borderRadius: 6, border: `1px solid ${theme.palette.divider}` }}>
                                             {user?.roles?.includes(Roles.ADMIN) ? 'Administrator' : 'User'}
                                         </p>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary, marginBottom: 4 }}>
                                             Member Since
                                         </label>
-                                        <p className="text-sm text-gray-900 bg-white px-3 py-2 rounded border">
+                                        <p style={{ fontSize: '0.875rem', color: theme.palette.text.primary, backgroundColor: theme.palette.background.paper, padding: '8px 12px', borderRadius: 6, border: `1px solid ${theme.palette.divider}` }}>
                                             {user?.createdAt ? format(new Date(user.createdAt), 'MMM dd, yyyy') : 'Unknown'}
                                         </p>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary, marginBottom: 4 }}>
                                             Last Updated
                                         </label>
-                                        <p className="text-sm text-gray-900 bg-white px-3 py-2 rounded border">
+                                        <p style={{ fontSize: '0.875rem', color: theme.palette.text.primary, backgroundColor: theme.palette.background.paper, padding: '8px 12px', borderRadius: 6, border: `1px solid ${theme.palette.divider}` }}>
                                             {user?.updatedAt ? format(new Date(user.updatedAt), 'MMM dd, yyyy') : 'Unknown'}
                                         </p>
                                     </div>
@@ -705,43 +830,54 @@ export const ProfileManagement: React.FC = () => {
                             </div>
 
                             {/* Danger Zone */}
-                            <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-                                <div className="flex items-start mb-6">
-                                    <AlertTriangle className="h-6 w-6 text-red-600 mr-3 flex-shrink-0" />
+                            <div style={{ backgroundColor: alpha(theme.palette.error.main, 0.04), border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`, borderRadius: 12, padding: 24 }}>
+                                <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 24 }}>
+                                    <AlertTriangle style={{ height: 24, width: 24, color: theme.palette.error.main, marginRight: 12, flexShrink: 0 }} />
                                     <div>
-                                        <h3 className="text-md font-semibold text-red-900 mb-2">Danger Zone</h3>
-                                        <p className="text-sm text-red-700">
+                                        <h3 style={{ fontSize: '1rem', fontWeight: 600, color: theme.palette.error.dark, marginBottom: 8 }}>Danger Zone</h3>
+                                        <p style={{ fontSize: '0.875rem', color: theme.palette.error.main }}>
                                             Once you delete your account, there is no going back. This action will permanently:
                                         </p>
-                                        <ul className="mt-2 text-sm text-red-700 list-disc list-inside space-y-1">
-                                            <li>Delete all your posts and comments</li>
-                                            <li>Remove your profile and account data</li>
-                                            <li>Cancel any active subscriptions</li>
+                                        <ul style={{ marginTop: 8, fontSize: '0.875rem', color: theme.palette.error.main, listStyleType: 'disc', paddingLeft: 20 }}>
+                                            <li style={{ marginBottom: 4 }}>Delete all your posts and comments</li>
+                                            <li style={{ marginBottom: 4 }}>Remove your profile and account data</li>
+                                            <li style={{ marginBottom: 4 }}>Cancel any active subscriptions</li>
                                             <li>This action cannot be undone</li>
                                         </ul>
                                     </div>
                                 </div>
 
                                 {!isDeleting ? (
-                                    <div className="flex items-center justify-between">
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                         <div>
-                                            <h4 className="text-sm font-medium text-red-900">Delete Account</h4>
-                                            <p className="text-sm text-red-700">
+                                            <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: theme.palette.error.dark }}>Delete Account</h4>
+                                            <p style={{ fontSize: '0.875rem', color: theme.palette.error.main }}>
                                                 Permanently delete your account and all associated data.
                                             </p>
                                         </div>
                                         <button
                                             onClick={() => setIsDeleting(true)}
-                                            className="px-4 py-2 text-sm font-medium text-primary-foreground bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                                            style={{
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                padding: '8px 16px',
+                                                fontSize: '0.875rem',
+                                                fontWeight: 500,
+                                                color: theme.palette.error.contrastText,
+                                                backgroundColor: theme.palette.error.main,
+                                                border: 'none',
+                                                borderRadius: 8,
+                                                cursor: 'pointer',
+                                            }}
                                         >
-                                            <Trash2 className="h-4 w-4 inline mr-2" />
+                                            <Trash2 style={{ height: 16, width: 16, marginRight: 8 }} />
                                             Delete Account
                                         </button>
                                     </div>
                                 ) : (
-                                    <div className="space-y-4">
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                                         <div>
-                                            <label htmlFor="deleteConfirmation" className="block text-sm font-medium text-red-900 mb-2">
+                                            <label htmlFor="deleteConfirmation" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: theme.palette.error.dark, marginBottom: 8 }}>
                                                 Type "DELETE" to confirm account deletion
                                             </label>
                                             <input
@@ -749,33 +885,62 @@ export const ProfileManagement: React.FC = () => {
                                                 id="deleteConfirmation"
                                                 value={deleteConfirmation}
                                                 onChange={(e) => setDeleteConfirmation(e.target.value)}
-                                                className="w-full px-3 py-2 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '8px 12px',
+                                                    border: `1px solid ${theme.palette.error.main}`,
+                                                    borderRadius: 8,
+                                                    fontSize: '0.875rem',
+                                                    color: theme.palette.text.primary,
+                                                    backgroundColor: theme.palette.background.paper,
+                                                }}
                                                 placeholder="Type DELETE to confirm"
                                             />
                                         </div>
-                                        <div className="flex justify-end space-x-3">
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
                                             <button
                                                 onClick={() => {
                                                     setIsDeleting(false);
                                                     setDeleteConfirmation('');
                                                 }}
-                                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                                                style={{
+                                                    padding: '8px 16px',
+                                                    fontSize: '0.875rem',
+                                                    fontWeight: 500,
+                                                    color: theme.palette.text.primary,
+                                                    backgroundColor: theme.palette.background.paper,
+                                                    border: `1px solid ${theme.palette.divider}`,
+                                                    borderRadius: 8,
+                                                    cursor: 'pointer',
+                                                }}
                                             >
                                                 Cancel
                                             </button>
                                             <button
                                                 onClick={handleDeleteAccount}
                                                 disabled={deleteUserMutation.isPending || deleteConfirmation !== 'DELETE'}
-                                                className="px-4 py-2 text-sm font-medium text-primary-foreground bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                style={{
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    padding: '8px 16px',
+                                                    fontSize: '0.875rem',
+                                                    fontWeight: 500,
+                                                    color: theme.palette.error.contrastText,
+                                                    backgroundColor: theme.palette.error.main,
+                                                    border: 'none',
+                                                    borderRadius: 8,
+                                                    cursor: 'pointer',
+                                                    opacity: (deleteUserMutation.isPending || deleteConfirmation !== 'DELETE') ? 0.5 : 1,
+                                                }}
                                             >
                                                 {deleteUserMutation.isPending ? (
                                                     <>
-                                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                                        <div style={{ animation: 'spin 1s linear infinite', borderRadius: '50%', height: 16, width: 16, border: `2px solid ${theme.palette.error.contrastText}`, borderTopColor: 'transparent', marginRight: 8 }}></div>
                                                         Deleting...
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <Trash2 className="h-4 w-4 inline mr-2" />
+                                                        <Trash2 style={{ height: 16, width: 16, marginRight: 8 }} />
                                                         Delete Account
                                                     </>
                                                 )}
@@ -791,4 +956,3 @@ export const ProfileManagement: React.FC = () => {
         </div>
     );
 };
-

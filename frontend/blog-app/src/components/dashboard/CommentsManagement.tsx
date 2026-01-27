@@ -1,60 +1,91 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { MessageSquare } from 'lucide-react';
+import {
+  Box,
+  Paper,
+  Typography,
+  CircularProgress,
+  Avatar,
+  Divider
+} from '@mui/material';
 
 export const CommentsManagement: React.FC = () => {
   const { userProfile, loading } = useAuth();
 
   if (loading) {
     return (
-        <div className="flex items-center justify-center min-h-[200px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '200px' }}>
+        <CircularProgress size={48} />
+      </Box>
     );
   }
 
   const comments = userProfile?.comments ?? [];
 
   return (
-      <div className="space-y-6">
-        <div className="bg-white rounded-lg shadow p-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Your Comments</h1>
-            <p className="text-gray-600 mt-1">Manage and review the comments you have made across posts.</p>
-          </div>
-          <div className="flex items-center gap-2 text-blue-600">
-            <MessageSquare className="h-6 w-6" />
-            <span className="font-semibold">{comments.length}</span>
-          </div>
-        </div>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: { xs: 2, md: 3 } }}>
+      <Paper sx={{ p: 3, borderRadius: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2 }}>
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'text.primary', mb: 0.5 }}>
+              Your Comments
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Manage and review the comments you have made across posts.
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'primary.main' }}>
+            <MessageSquare size={24} />
+            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              {comments.length}
+            </Typography>
+          </Box>
+        </Box>
+      </Paper>
 
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">All Comments</h2>
-          </div>
-          <div className="divide-y divide-gray-100">
-            {comments.length === 0 ? (
-                <div className="p-6 text-center text-gray-500">You haven't made any comments yet.</div>
-            ) : (
-                comments.map((c) => (
-                    <div key={c.id} className="p-4">
-                      <div className="flex items-start">
-                        <div className="flex-shrink-0 mr-3">
-                          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                            <MessageSquare className="h-5 w-5 text-blue-600" />
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-gray-900">{c.content}</p>
-                          <p className="text-sm text-gray-500 mt-1">Comment ID: {c.id}</p>
-                        </div>
-                      </div>
-                    </div>
-                ))
-            )}
-          </div>
-        </div>
-      </div>
+      <Paper sx={{ borderRadius: 2 }}>
+        <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider' }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
+            All Comments
+          </Typography>
+        </Box>
+        
+        {comments.length === 0 ? (
+          <Box sx={{ p: 6, textAlign: 'center' }}>
+            <Box sx={{ color: 'text.secondary', display: 'inline-flex', mb: 2 }}>
+              <MessageSquare size={48} />
+            </Box>
+            <Typography color="text.secondary">
+              You haven't made any comments yet.
+            </Typography>
+          </Box>
+        ) : (
+          <Box>
+            {comments.map((c, index) => (
+              <Box key={c.id}>
+                <Box sx={{ p: 3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                    <Avatar sx={{ bgcolor: 'primary.light', color: 'primary.main', width: 40, height: 40 }}>
+                      <MessageSquare size={20} />
+                    </Avatar>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="body1" sx={{ color: 'text.primary', mb: 1 }}>
+                        {c.content}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Comment ID: {c.id}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+                {index < comments.length - 1 && <Divider />}
+              </Box>
+            ))}
+          </Box>
+        )}
+      </Paper>
+    </Box>
   );
 };
 

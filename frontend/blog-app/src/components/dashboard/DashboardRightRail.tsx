@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeModeContext';
 
-export const DashboardRightRail: React.FC<{ isMobile?: boolean }> = ({ isMobile = false }) => {
+export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDesktop = false }) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const { user, logout, isAdmin } = useAuth();
@@ -30,7 +30,7 @@ export const DashboardRightRail: React.FC<{ isMobile?: boolean }> = ({ isMobile 
     ...(isAdmin ? [{ label: 'Users', icon: <Users size={16} />, to: '/dashboard/admin/users' }] : []),
   ];
 
-  if (isMobile) return null; // hide on mobile (use top navbar instead)
+  if (!isDesktop) return null; // show only on desktop
 
   return (
     <Box

@@ -121,14 +121,8 @@ export const UserDashboard: React.FC = () => {
         {/* Stats Cards */}
         <Box sx={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: 3,
-          '@media (max-width: 900px)': {
-            gridTemplateColumns: 'repeat(2, 1fr)'
-          },
-          '@media (max-width: 600px)': {
-            gridTemplateColumns: '1fr'
-          }
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' },
+          gap: { xs: 2, md: 3 }
         }}>
           <Card sx={{ height: '100%', borderRadius: 2 }}>
             <CardContent>
@@ -210,11 +204,8 @@ export const UserDashboard: React.FC = () => {
           </Typography>
           <Box sx={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 3,
-            '@media (max-width: 900px)': {
-              gridTemplateColumns: '1fr'
-            }
+            gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+            gap: { xs: 2, md: 3 }
           }}>
             <Button
                 component={Link}
@@ -222,9 +213,10 @@ export const UserDashboard: React.FC = () => {
                 variant="outlined"
                 fullWidth
                 sx={{
-                  p: 2,
+                  p: { xs: 1.5, md: 2 },
                   borderRadius: 2,
                   height: '100%',
+                  minHeight: { xs: '120px', md: '140px' },
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',

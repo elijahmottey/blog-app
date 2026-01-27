@@ -68,7 +68,15 @@ export const AdminDashboard: React.FC = () => {
         return (
           <>
             {/* Stats Cards (theme-aware) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: 24,
+              '@media (max-width: 768px)': {
+                gridTemplateColumns: '1fr',
+                gap: 16
+              }
+            }}>
               {[
                 { label: 'Total Users', value: totalUsers, icon: <Users />, accent: theme.palette.primary.main, note: '+12% from last month' },
                 { label: 'Total Posts', value: totalPosts, icon: <FileText />, accent: theme.palette.success.main, note: '+8% from last month' },
@@ -91,10 +99,18 @@ export const AdminDashboard: React.FC = () => {
             </div>
 
             {/* Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+              gap: 24,
+              '@media (max-width: 768px)': {
+                gridTemplateColumns: '1fr',
+                gap: 16
+              }
+            }}>
               <div style={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 12, padding: 24, boxShadow: theme.shadows[1] }}>
                 <h3 style={{ fontSize: 18, fontWeight: 600, color: theme.palette.text.primary, marginBottom: 12 }}>User Growth</h3>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={250}>
                   <LineChart data={userGrowthData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
@@ -107,7 +123,7 @@ export const AdminDashboard: React.FC = () => {
 
               <div style={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 12, padding: 24, boxShadow: theme.shadows[1] }}>
                 <h3 style={{ fontSize: 18, fontWeight: 600, color: theme.palette.text.primary, marginBottom: 12 }}>Weekly Post Activity</h3>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={250}>
                   <BarChart data={postActivityData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="day" />
@@ -120,7 +136,15 @@ export const AdminDashboard: React.FC = () => {
             </div>
 
             {/* System Health & Recent Activity */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+              gap: 24,
+              '@media (max-width: 768px)': {
+                gridTemplateColumns: '1fr',
+                gap: 16
+              }
+            }}>
               <div style={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 12, padding: 24, boxShadow: theme.shadows[1] }}>
                 <h3 style={{ fontSize: 18, fontWeight: 600, color: theme.palette.text.primary, marginBottom: 12 }}>System Health</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -184,7 +208,7 @@ export const AdminDashboard: React.FC = () => {
         {/* Quick Actions */}
         <div style={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 12, padding: 24, boxShadow: theme.shadows[1] }}>
           <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: theme.palette.text.primary, marginBottom: 16 }}>Quick Actions</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
             <div onClick={() => setCurrentView('users')} style={{ padding: 16, borderRadius: 12, border: `1px solid ${theme.palette.divider}`, cursor: 'pointer', display: 'flex', gap: 12, alignItems: 'flex-start', backgroundColor: 'transparent' }}>
               <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: alpha(theme.palette.primary.main, 0.12) }}>
                 <Users style={{ width: 24, height: 24, color: theme.palette.primary.main }} />

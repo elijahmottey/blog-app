@@ -28,10 +28,10 @@ interface DashboardSidebarProps {
 }
 
 export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onClose, isMobile }) => {
-  const { isAdmin } = useAuth();
-  const location = useLocation();
-  const theme = useTheme();
-  const [expandedItems, setExpandedItems] = React.useState<Set<string>>(new Set());
+   const { isAdmin } = useAuth();
+   const location = useLocation();
+   const theme = useTheme();
+   const [expandedItems, setExpandedItems] = React.useState<Set<string>>(new Set());
 
   const toggleExpanded = (itemName: string) => {
     const newExpanded = new Set(expandedItems);
@@ -109,11 +109,12 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
                     width: '100%',
                     display: 'flex',
                     alignItems: 'center',
-                    padding: '0.5rem 0.75rem',
+                    padding: '0.75rem',
                     fontSize: '0.875rem',
                     borderRadius: 8,
                     transition: 'background-color 150ms',
                     marginLeft: level > 0 ? 16 : 0,
+                    minHeight: 44,
                     backgroundColor: isActive ? (theme.palette.mode === 'dark' ? alpha(theme.palette.primary.main, 0.12) : alpha(theme.palette.primary.main, 0.12)) : 'transparent',
                     color: isActive ? theme.palette.primary.main : theme.palette.text.secondary,
                   }}
@@ -133,11 +134,12 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    padding: '0.5rem 0.75rem',
+                    padding: '0.75rem',
                     fontSize: '0.875rem',
                     borderRadius: 8,
                     transition: 'background-color 150ms',
                     marginLeft: level > 0 ? 16 : 0,
+                    minHeight: 44,
                     backgroundColor: isActive ? (theme.palette.mode === 'dark' ? alpha(theme.palette.primary.main, 0.12) : alpha(theme.palette.primary.main, 0.12)) : 'transparent',
                     color: isActive ? theme.palette.primary.main : theme.palette.text.secondary,
                     textDecoration: 'none',
@@ -157,12 +159,22 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
     );
   };
 
+  // Prevent body scroll when overlay sidebar is open on mobile
+  React.useEffect(() => {
+    if (isMobile && isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isMobile, isOpen]);
+
   return (
       <>
         {/* Mobile overlay - only show when sidebar is open on mobile */}
         {isMobile && isOpen && (
             <div
-                style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 40, backgroundColor: theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)' }}
+                style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1300, backgroundColor: theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)' }}
                 onClick={onClose}
             />
         )}
@@ -173,13 +185,15 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
                 position: isMobile ? 'fixed' : 'sticky',
                 top: 0,
                 height: '100vh',
-                zIndex: isMobile ? 50 : undefined,
-                width: 256,
+                zIndex: isMobile ? 1400 : undefined,
+                width: isMobile ? 'min(80vw, 320px)' : 256,
+                boxSizing: 'border-box',
                 backgroundColor: theme.palette.background.paper,
-                boxShadow: isMobile ? '0 10px 30px rgba(0,0,0,0.06)' : 'none',
-                transform: isMobile ? (isOpen ? 'translateX(0)' : 'translateX(-100%)') : undefined,
+                boxShadow: isMobile ? '0 10px 30px rgba(0,0,0,0.25)' : 'none',
+                transform: isMobile ? (isOpen ? 'translateX(0)' : 'translateX(-110%)') : undefined,
                 transition: isMobile ? 'transform 300ms ease-in-out' : undefined,
                 overflow: 'auto',
+                left: isMobile ? 0 : undefined,
             }}
         >
           <div className="flex flex-col h-full">

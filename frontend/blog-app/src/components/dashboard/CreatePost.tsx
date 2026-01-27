@@ -327,7 +327,7 @@ export const CreatePost: React.FC = () => {
   return (
       <Box sx={{ maxWidth: 1000, mx: 'auto', p: { xs: 2, md: 3 } }}>
         {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 4 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', mb: 4, gap: { xs: 2, sm: 0 } }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Tooltip title="Go back">
               <IconButton
@@ -383,12 +383,9 @@ export const CreatePost: React.FC = () => {
         {/* Stats Bar */}
         <Box sx={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
+          gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
           gap: 2,
-          mb: 3,
-          '@media (max-width: 600px)': {
-            gridTemplateColumns: 'repeat(2, 1fr)'
-          }
+          mb: 3
         }}>
           <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'primary.50', borderRadius: 2 }}>
             <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600 }}>Words</Typography>
@@ -699,11 +696,8 @@ Add code snippets when needed
             </Typography>
             <Box sx={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: 1,
-              '@media (max-width: 600px)': {
-                gridTemplateColumns: 'repeat(2, 1fr)'
-              }
+              gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
+              gap: 1
             }}>
               <Chip
                   label="Ctrl+B → Bold"
@@ -738,12 +732,14 @@ Add code snippets when needed
           {/* Action Buttons */}
           <Box sx={{
             display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
             justifyContent: 'space-between',
-            alignItems: 'center',
+            alignItems: { xs: 'stretch', sm: 'center' },
             pt: 3,
             mt: 2,
             borderTop: 1,
-            borderColor: 'divider'
+            borderColor: 'divider',
+            gap: { xs: 2, sm: 0 }
           }}>
             <Button
                 variant="outlined"
@@ -759,7 +755,7 @@ Add code snippets when needed
               Save as Draft
             </Button>
 
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, width: { xs: '100%', sm: 'auto' } }}>
               <Button
                   variant="outlined"
                   onClick={() => setIsPreview(!isPreview)}
@@ -820,11 +816,8 @@ Add code snippets when needed
 
           <Box sx={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: 2,
-            '@media (max-width: 900px)': {
-              gridTemplateColumns: '1fr'
-            }
+            gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
+            gap: 2
           }}>
             <Box sx={(theme) => ({
               bgcolor: theme.palette.background.paper,

@@ -17,3 +17,180 @@
     border-color: var(--color-gray-200, currentcolor);
   }
 }
+
+/* Dashboard Responsive Styles */
+
+/* Mobile-first responsive design improvements */
+@media (max-width: 599px) {
+  /* Ensure proper touch targets on mobile */
+  .MuiIconButton-root {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+  
+  /* Improve button spacing on mobile */
+  .MuiButton-root {
+    min-height: 44px !important;
+    padding: 8px 16px !important;
+  }
+  
+  /* Better text sizing on mobile */
+  .MuiTypography-h4 {
+    font-size: 1.75rem !important;
+  }
+  
+  .MuiTypography-h6 {
+    font-size: 1.1rem !important;
+  }
+  
+  /* Improve card padding on mobile */
+  .MuiCard-root .MuiCardContent-root {
+    padding: 12px !important;
+  }
+  
+  /* Better spacing for dashboard content */
+  .dashboard-content {
+    padding: 8px !important;
+  }
+}
+
+/* Tablet responsive adjustments */
+@media (min-width: 600px) and (max-width: 959px) {
+  /* Optimize for tablet landscape */
+  .MuiContainer-root {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  
+  /* Better grid spacing on tablets */
+  .MuiGrid-container {
+    margin: -12px !important;
+  }
+  
+  .MuiGrid-item {
+    padding: 12px !important;
+  }
+}
+
+/* Desktop optimizations */
+@media (min-width: 960px) {
+  /* Ensure proper spacing on larger screens */
+  .dashboard-main-content {
+    padding: 24px !important;
+  }
+}
+
+/* Improve scrolling on mobile */
+@media (max-width: 959px) {
+  .dashboard-sidebar {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Prevent horizontal scroll */
+  .dashboard-content {
+    overflow-x: hidden;
+  }
+}
+
+/* Better focus states for accessibility */
+.MuiButton-root:focus,
+.MuiIconButton-root:focus {
+  outline: 2px solid #2563EB;
+  outline-offset: 2px;
+}
+
+/* Improve mobile menu animations */
+@media (max-width: 599px) {
+  .mobile-menu-transition {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Better responsive images */
+.responsive-image {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Improve table responsiveness */
+@media (max-width: 959px) {
+  .responsive-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .responsive-table table {
+    min-width: 600px;
+  }
+}
+
+/* Better form layouts on mobile */
+@media (max-width: 599px) {
+  .form-actions {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+  
+  .form-actions .MuiButton-root {
+    width: 100% !important;
+  }
+}
+
+/* Improve loading states on mobile */
+.mobile-loading {
+  padding: 40px 20px !important;
+}
+
+/* Better error message display */
+@media (max-width: 599px) {
+  .MuiAlert-root {
+    font-size: 0.875rem !important;
+    padding: 12px !important;
+  }
+}
+
+/* Optimize dashboard stats cards */
+@media (max-width: 599px) {
+  .stats-card {
+    text-align: center !important;
+    padding: 16px 12px !important;
+  }
+  
+  .stats-card .MuiTypography-h4 {
+    font-size: 1.5rem !important;
+  }
+}
+
+/* Better mobile navigation */
+@media (max-width: 959px) {
+  .mobile-nav-item {
+    padding: 12px 16px !important;
+    min-height: 48px !important;
+  }
+}
+
+/* Improve mobile search */
+@media (max-width: 599px) {
+  .mobile-search {
+    width: 100% !important;
+    margin: 8px 0 !important;
+  }
+}
+
+/* Better mobile modals */
+@media (max-width: 599px) {
+  .MuiDialog-paper {
+    margin: 16px !important;
+    width: calc(100% - 32px) !important;
+    max-height: calc(100% - 32px) !important;
+  }
+}
+
+/* Improve mobile tooltips */
+@media (max-width: 959px) {
+  .MuiTooltip-tooltip {
+    font-size: 0.75rem !important;
+    padding: 8px 12px !important;
+  }
+}
