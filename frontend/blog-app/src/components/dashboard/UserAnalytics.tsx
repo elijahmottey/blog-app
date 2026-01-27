@@ -132,7 +132,7 @@ export const UserAnalytics: React.FC = () => {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>Comments this week:</span>
-              <strong>{comments.filter(c => c.createdAt && new Date(c.createdAt) > subDays(new Date(), 7)).length}</strong>
+              <strong>{comments.length}</strong>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>Most viewed post:</span>
