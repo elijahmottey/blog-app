@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Users, FileText, MessageSquare, TrendingUp, AlertTriangle, Activity, Eye, Trash2, Shield } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import BackendApi, { type UserDto } from '../../service/BackendApi';
 import { useTheme, alpha } from '@mui/material/styles';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { UserActivityModal } from './UserActivityModal';
 import { AnalyticsView } from './AnalyticsView';
 import { Roles } from '../../enums/Roles';
 
@@ -35,8 +35,8 @@ type View = 'overview' | 'users' | 'posts' | 'comments' | 'analytics';
 export const AdminDashboard: React.FC = () => {
   const theme = useTheme();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<View>('overview');
-  const [selectedUser, setSelectedUser] = useState<UserDto | null>(null);
 
   // Fetch admin stats
   const { data: usersData } = useQuery({
@@ -155,7 +155,7 @@ export const AdminDashboard: React.FC = () => {
                           <td style={{ padding: '16px' }}>
                             <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
                               <button
-                                onClick={() => setSelectedUser(user)}
+                                onClick={() => navigate(`/dashboard/admin/user/${user.id}/view`)}
                                 style={{
                                   padding: '6px 12px',
                                   borderRadius: 6,
@@ -374,14 +374,6 @@ export const AdminDashboard: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           {renderContent()}
         </div>
-        
-        {/* User Activity Modal */}
-        {selectedUser && (
-          <UserActivityModal
-            user={selectedUser}
-            onClose={() => setSelectedUser(null)}
-          />
-        )}
       </div>
   );
 };

@@ -298,7 +298,7 @@ export const AdminUsers: React.FC = () => {
 
   // Function to view user details
   const handleViewUserDetails = (user: ApiUser) => {
-    navigate(`/admin/users/${user.id}`, {
+    navigate(`/dashboard/admin/user/${user.id}/view`, {
       state: {
         user,
         postCount: getUserPostCount(user),
@@ -750,7 +750,7 @@ export const AdminUsers: React.FC = () => {
                   fullWidth
                   disabled={updateUserMutation.isPending || createUserMutation.isPending}
               >
-                {['USER', 'EDITOR', 'MODERATOR', 'ADMIN'].map((role) => (
+                {['USER', 'ADMIN'].map((role) => (
                     <MenuItem key={role} value={role}>
                       {role}
                     </MenuItem>

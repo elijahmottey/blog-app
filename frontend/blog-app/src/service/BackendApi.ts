@@ -309,6 +309,7 @@ export default class BackendApi {
             response.data.accessTokenExpiration,
             response.data.refreshTokenExpiration
         );
+        localStorage.setItem("roles1", JSON.stringify(response.data.role));
         return response.data.accessToken;
     }
 

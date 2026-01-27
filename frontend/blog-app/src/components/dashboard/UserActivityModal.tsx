@@ -16,53 +16,53 @@ export const UserActivityModal: React.FC<UserActivityModalProps> = ({ user, onCl
   const { data: userPosts } = useQuery({
     queryKey: ['user-posts', user.id],
     queryFn: async () => {
-      const posts = await BackendApi.getAllPost(0, 100);
-      return posts.data?.content?.filter((post: any) => 
-        post.users === user.name || post.users === user.email
-      ) || [];
+      if (!user.id) return [];
+      try {
+        const response = await BackendApi.getUserPostHistoryByUserId(user.id);
+        return response || [];
+      } catch (error) {
+        console.error('Error fetching user posts:', error);
+        return [];
+      }
     },
+    enabled: !!user.id,
   });
 
   const { data: userComments } = useQuery({
     queryKey: ['user-comments', user.id],
     queryFn: async () => {
-      const comments = await BackendApi.getAllPostComment(0, 100);
-      return comments.data?.content?.filter((comment: any) => 
-        comment.users === user.name || comment.users === user.email
-      ) || [];
+      if (!user.id) return [];
+      try {
+        // Get all comments and filter by user
+        const comments = await BackendApi.getAllPostComment(0, 1000);
+        return comments.data?.content?.filter((comment: any) => 
+          comment.users === user.name || comment.users === user.email
+        ) || [];
+      } catch (error) {
+        console.error('Error fetching user comments:', error);
+        return [];
+      }
     },
+    enabled: !!user.id,
   });
 
   const stats = {
-    totalPosts: userPosts?.length || 0,
-    totalComments: userComments?.length || 0,
-    publishedPosts: userPosts?.filter((post: any) => post.content && post.content.length > 0).length || 0,
-    draftPosts: userPosts?.filter((post: any) => !post.content || post.content.length === 0).length || 0,
+    totalPosts: Array.isArray(userPosts) ? userPosts.length : 0,
+    totalComments: Array.isArray(userComments) ? userComments.length : 0,
+    publishedPosts: Array.isArray(userPosts) ? userPosts.filter((post: any) => post.content && post.content.length > 0).length : 0,
+    draftPosts: Array.isArray(userPosts) ? userPosts.filter((post: any) => !post.content || post.content.length === 0).length : 0,
   };
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1000,
-      padding: 16,
-    }}>
+    <div style={{ padding: 24 }}>
       <div style={{
         backgroundColor: theme.palette.background.paper,
         borderRadius: 12,
         padding: 24,
-        maxWidth: 800,
+        maxWidth: 1200,
         width: '100%',
-        maxHeight: '90vh',
-        overflow: 'auto',
-        boxShadow: theme.shadows[24],
+        margin: '0 auto',
+        boxShadow: theme.shadows[4],
       }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
@@ -118,10 +118,10 @@ export const UserActivityModal: React.FC<UserActivityModalProps> = ({ user, onCl
         {/* Recent Posts */}
         <div style={{ marginBottom: 24 }}>
           <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: theme.palette.text.primary, marginBottom: 16 }}>
-            Recent Posts ({userPosts?.length || 0})
+            Recent Posts ({Array.isArray(userPosts) ? userPosts.length : 0})
           </h3>
           <div style={{ maxHeight: 200, overflow: 'auto' }}>
-            {userPosts && userPosts.length > 0 ? (
+            {Array.isArray(userPosts) && userPosts.length > 0 ? (
               userPosts.slice(0, 5).map((post: any) => (
                 <div key={post.id} style={{
                   padding: 12,
@@ -154,10 +154,10 @@ export const UserActivityModal: React.FC<UserActivityModalProps> = ({ user, onCl
         {/* Recent Comments */}
         <div>
           <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: theme.palette.text.primary, marginBottom: 16 }}>
-            Recent Comments ({userComments?.length || 0})
+            Recent Comments ({Array.isArray(userComments) ? userComments.length : 0})
           </h3>
           <div style={{ maxHeight: 200, overflow: 'auto' }}>
-            {userComments && userComments.length > 0 ? (
+            {Array.isArray(userComments) && userComments.length > 0 ? (
               userComments.slice(0, 5).map((comment: any) => (
                 <div key={comment.id} style={{
                   padding: 12,
