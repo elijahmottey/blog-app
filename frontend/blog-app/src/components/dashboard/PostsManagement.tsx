@@ -243,7 +243,7 @@ export const PostsManagement: React.FC = () => {
         {/* Stats Cards */}
         <Box sx={{
           display: 'grid',
-          gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(4, 1fr)' },
           gap: 2
         }}>
           <Card sx={{ borderRadius: 2, height: '100%' }}>
@@ -262,17 +262,34 @@ export const PostsManagement: React.FC = () => {
                 {posts.filter(post => post.content && post.content.length > 100).length}
               </Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Published Posts
+                Published (Current Page)
               </Typography>
             </CardContent>
           </Card>
           <Card sx={{ borderRadius: 2, height: '100%' }}>
             <CardContent sx={{ textAlign: 'center' }}>
               <Typography variant="h3" sx={{ color: 'warning.main', fontWeight: 'bold', mb: 1 }}>
-                {posts.filter(post => !post.content || post.content.length <= 100).length}
+                {(() => {
+                  try {
+                    const drafts = JSON.parse(localStorage.getItem('blog_drafts') || '[]');
+                    return drafts.length;
+                  } catch {
+                    return 0;
+                  }
+                })()}
               </Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                 Draft Posts
+              </Typography>
+            </CardContent>
+          </Card>
+          <Card sx={{ borderRadius: 2, height: '100%' }}>
+            <CardContent sx={{ textAlign: 'center' }}>
+              <Typography variant="h3" sx={{ color: 'info.main', fontWeight: 'bold', mb: 1 }}>
+                {posts.length}
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                Current Page
               </Typography>
             </CardContent>
           </Card>

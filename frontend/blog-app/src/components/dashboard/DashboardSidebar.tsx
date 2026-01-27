@@ -60,6 +60,11 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
       ],
     },
     {
+      name: 'Analytics',
+      href: '/dashboard/analytics',
+      icon: BarChart3,
+    },
+    {
       name: 'Comments',
       href: '/dashboard/comments',
       icon: MessageSquare,

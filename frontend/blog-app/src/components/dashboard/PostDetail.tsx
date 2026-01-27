@@ -238,7 +238,7 @@ export const PostDetail: React.FC = () => {
   };
 
   return (
-      <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
+      <Box sx={{ maxWidth: { xs: '100%', md: 1200 }, mx: 'auto', p: { xs: 2, md: 3 } }}>
         {/* Header */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Button
@@ -301,36 +301,73 @@ export const PostDetail: React.FC = () => {
 
           {/* Post Actions */}
           <Box sx={(theme) => ({ px: 3, py: 2, borderTop: 1, borderColor: 'divider', bgcolor: theme.palette.background.paper })}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button
-                    onClick={handleLike}
-                    disabled={likeMutation.isPending}
-                    startIcon={<Heart />}
-                    sx={{ color: 'text.secondary', '&:hover': { color: 'error.main', bgcolor: 'error.light' } }}
-                >
-                  Like
-                </Button>
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: { xs: 'column', sm: 'row' },
+              justifyContent: 'space-between', 
+              alignItems: { xs: 'stretch', sm: 'center' },
+              gap: { xs: 2, sm: 0 }
+            }}>
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: 1,
+                width: '100%'
+              }}>
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                  <Button
+                      onClick={handleLike}
+                      disabled={likeMutation.isPending}
+                      startIcon={<Heart />}
+                      size="small"
+                      sx={{ 
+                        color: 'text.secondary', 
+                        '&:hover': { color: 'error.main', bgcolor: 'error.light' },
+                        minWidth: { xs: 'auto', sm: 'unset' },
+                        px: { xs: 1, sm: 2 }
+                      }}
+                  >
+                    Like
+                  </Button>
 
-                <Button
-                    onClick={() => setShowComments(!showComments)}
-                    startIcon={<MessageCircle />}
-                    sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main', bgcolor: 'primary.light' } }}
-                >
-                  {postComments.length} Comments
-                </Button>
+                  <Button
+                      onClick={() => setShowComments(!showComments)}
+                      startIcon={<MessageCircle />}
+                      size="small"
+                      sx={{ 
+                        color: 'text.secondary', 
+                        '&:hover': { color: 'primary.main', bgcolor: 'primary.light' },
+                        minWidth: { xs: 'auto', sm: 'unset' },
+                        px: { xs: 1, sm: 2 }
+                      }}
+                  >
+                    {postComments.length} Comments
+                  </Button>
+                </Box>
 
-                <Box sx={{ display: 'flex', gap: 1 }}>
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                   <Button
                       onClick={() => downloadPost(postData)}
                       startIcon={<Download />}
-                      sx={{ color: 'text.secondary', '&:hover': { color: 'success.main', bgcolor: 'success.light' } }}
+                      size="small"
+                      sx={{ 
+                        color: 'text.secondary', 
+                        '&:hover': { color: 'success.main', bgcolor: 'success.light' },
+                        minWidth: { xs: 'auto', sm: 'unset' },
+                        px: { xs: 1, sm: 2 }
+                      }}
                   >
                     TXT
                   </Button>
                   <Button
                       onClick={() => downloadPostPdf(postData)}
-                      sx={{ color: 'text.secondary', '&:hover': { color: 'success.main', bgcolor: 'success.light' } }}
+                      size="small"
+                      sx={{ 
+                        color: 'text.secondary', 
+                        '&:hover': { color: 'success.main', bgcolor: 'success.light' },
+                        minWidth: { xs: 'auto', sm: 'unset' },
+                        px: { xs: 1, sm: 2 }
+                      }}
                   >
                     PDF
                   </Button>

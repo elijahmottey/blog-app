@@ -34,10 +34,16 @@ import {
   TextField,
   Tooltip,
   Chip,
-  Alert
+  Alert,
+  FormControl,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio
 } from '@mui/material';
 import BackendApi from '../../service/BackendApi';
 import { toast } from 'sonner';
+import { useAuth } from '../../context/AuthContext';
 
 const schema = yup.object({
   title: yup.string().required('Title is required').min(3, 'Title must be at least 3 characters'),
@@ -61,10 +67,12 @@ export const CreatePost: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [isPreview, setIsPreview] = useState(false);
   const [formattingHistory, setFormattingHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
+  const [authorChoice, setAuthorChoice] = useState<'name' | 'anonymous'>('name');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const {
@@ -138,7 +146,14 @@ export const CreatePost: React.FC = () => {
   };
 
   const createPostMutation = useMutation({
-    mutationFn: (data: PostFormData) => BackendApi.createPost({ title: data.title, content: data.content }),
+    mutationFn: (data: PostFormData) => {
+      const authorName = authorChoice === 'anonymous' ? 'Anonymous' : (user?.name || 'Anonymous');
+      return BackendApi.createPost({ 
+        title: data.title, 
+        content: data.content,
+        users: authorName
+      });
+    },
     onSuccess: () => {
       toast.success('Post published successfully!');
       // Delete draft after successful publish
