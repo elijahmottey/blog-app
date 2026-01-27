@@ -119,7 +119,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
                     color: isActive ? theme.palette.primary.main : theme.palette.text.secondary,
                   }}
               >
-                <Icon style={{ marginRight: 12, width: 20, height: 20, flexShrink: 0, color: isActive ? theme.palette.primary.main : (theme.palette as any).custom?.icon ?? theme.palette.text.secondary }} />
+                <Icon style={{ marginRight: 12, width: 20, height: 20, flexShrink: 0, color: isActive ? theme.palette.primary.main : theme.palette.text.secondary }} />
                 <span style={{ flex: 1, textAlign: 'left' }}>{item.name}</span>
                 {isExpanded ? (
                     <ChevronDown style={{ width: 16, height: 16 }} />
@@ -145,7 +145,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
                     textDecoration: 'none',
                   }}
               >
-                <Icon style={{ marginRight: 12, width: 20, height: 20, flexShrink: 0, color: isActive ? theme.palette.primary.main : (theme.palette as any).custom?.icon ?? theme.palette.text.secondary }} />
+                <Icon style={{ marginRight: 12, width: 20, height: 20, flexShrink: 0, color: isActive ? theme.palette.primary.main : theme.palette.text.secondary }} />
                 {item.name}
               </Link>
           )}

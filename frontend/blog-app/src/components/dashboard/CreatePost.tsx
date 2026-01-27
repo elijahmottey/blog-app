@@ -228,8 +228,7 @@ export const CreatePost: React.FC = () => {
   };
 
   const applyList = (ordered: boolean) => {
-    //@ts-ignore
-    const { text, start, end } = getSelectedText();
+    const { text } = getSelectedText();
     if (text) {
       const lines = text.split('\n');
       const formattedLines = lines.map((line, index) => {
@@ -395,9 +394,6 @@ export const CreatePost: React.FC = () => {
   const paragraphCount = watchedContent.split('\n').filter(line => line.trim().length > 0).length;
   const readingTime = Math.ceil(wordCount / 200);
 
-  // @ts-ignore
-  // @ts-ignore
-  // @ts-ignore
   return (
       <Box sx={{ maxWidth: 1000, mx: 'auto', p: { xs: 2, md: 3 } }}>
         {/* Header */}

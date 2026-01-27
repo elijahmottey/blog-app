@@ -109,8 +109,7 @@ export const AdminUsers: React.FC = () => {
   });
 
   // Safely extract users data - based on your API response structure
-  // @ts-ignore
-  const usersData = apiResponse?.data as PagedResponse<ApiUser> | undefined;
+  const usersData = apiResponse as PagedResponse<ApiUser> | undefined;
   const users: ApiUser[] = usersData?.content || [];
   const totalPages = usersData?.totalPages || 0;
   const totalElements = usersData?.totalElements || 0;

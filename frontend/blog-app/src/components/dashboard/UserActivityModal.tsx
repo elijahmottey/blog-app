@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, FileText, MessageSquare, Calendar, Eye } from 'lucide-react';
+import { X, FileText, MessageSquare, Eye } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useTheme, alpha } from '@mui/material/styles';
 import { format } from 'date-fns';
@@ -13,44 +13,39 @@ interface UserActivityModalProps {
 export const UserActivityModal: React.FC<UserActivityModalProps> = ({ user, onClose }) => {
   const theme = useTheme();
 
-  const { data: userPosts } = useQuery({
-    queryKey: ['user-posts', user.id],
+  const { data: userData, isLoading, error } = useQuery({
+    queryKey: ['user-details', user.id],
     queryFn: async () => {
-      if (!user.id) return [];
-      try {
-        const response = await BackendApi.getUserPostHistoryByUserId(user.id);
-        return response || [];
-      } catch (error) {
-        console.error('Error fetching user posts:', error);
-        return [];
-      }
+      if (!user.id) throw new Error('User ID required');
+      const response = await BackendApi.getUserById(user.id);
+      return response;
     },
     enabled: !!user.id,
   });
 
-  const { data: userComments } = useQuery({
-    queryKey: ['user-comments', user.id],
-    queryFn: async () => {
-      if (!user.id) return [];
-      try {
-        // Get all comments and filter by user
-        const comments = await BackendApi.getAllPostComment(0, 1000);
-        return comments.data?.content?.filter((comment: any) => 
-          comment.users === user.name || comment.users === user.email
-        ) || [];
-      } catch (error) {
-        console.error('Error fetching user comments:', error);
-        return [];
-      }
-    },
-    enabled: !!user.id,
-  });
+  // Extract posts and comments from user data
+  //@ts-ignore
+  const userPosts = userData?.data?.posts || [];
+    //@ts-ignore
+  const userComments = userData?.data?.comments || [];
+  
+  // Get drafts count from localStorage
+  const getDraftsCount = () => {
+    try {
+      const drafts = JSON.parse(localStorage.getItem('blog_drafts') || '[]');
+      return drafts.length;
+    } catch {
+      return 0;
+    }
+  };
+  
+  const draftsCount = getDraftsCount();
 
   const stats = {
     totalPosts: Array.isArray(userPosts) ? userPosts.length : 0,
     totalComments: Array.isArray(userComments) ? userComments.length : 0,
     publishedPosts: Array.isArray(userPosts) ? userPosts.filter((post: any) => post.content && post.content.length > 0).length : 0,
-    draftPosts: Array.isArray(userPosts) ? userPosts.filter((post: any) => !post.content || post.content.length === 0).length : 0,
+    draftPosts: draftsCount,
   };
 
   return (
@@ -86,6 +81,7 @@ export const UserActivityModal: React.FC<UserActivityModalProps> = ({ user, onCl
             <X size={24} />
           </button>
         </div>
+
 
         {/* Stats Overview */}
         <div style={{
