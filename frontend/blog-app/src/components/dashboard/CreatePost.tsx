@@ -77,7 +77,7 @@ export const CreatePost: React.FC = () => {
     getValues,
     formState: { errors, isSubmitting },
   } = useForm<PostFormData>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as any,
   });
 
   // Load draft if passed via navigation state

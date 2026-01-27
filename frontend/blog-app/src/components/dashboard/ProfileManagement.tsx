@@ -101,7 +101,7 @@ export const ProfileManagement: React.FC = () => {
         reset: resetProfile,
         formState: { errors: profileErrors, isSubmitting: isProfileSubmitting },
     } = useForm<ProfileFormData>({
-        resolver: yupResolver(profileSchema),
+        resolver: yupResolver(profileSchema) as any,
         defaultValues: {
             name: user?.name || '',
             email: user?.email || '',
@@ -114,7 +114,7 @@ export const ProfileManagement: React.FC = () => {
         reset: resetPassword,
         formState: { errors: passwordErrors, isSubmitting: isPasswordSubmitting },
     } = useForm<PasswordFormData>({
-        resolver: yupResolver(passwordSchema),
+        resolver: yupResolver(passwordSchema) as any,
     });
 
     const updateProfileMutation = useMutation({

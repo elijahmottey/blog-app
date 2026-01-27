@@ -155,7 +155,7 @@ export const EditPost: React.FC = () => {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<PostFormData>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as any,
   });
 
   // Set form values when post data loads

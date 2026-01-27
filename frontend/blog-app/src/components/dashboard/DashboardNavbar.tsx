@@ -97,6 +97,14 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
+interface SearchResult {
+  type: string;
+  id: number;
+  title: string;
+  content: string;
+  url: string;
+}
+
 export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, isSidebarOpen, isMobile, isDesktop }) => {
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
@@ -107,7 +115,7 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedTerm, setDebouncedTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<PostDto[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [quickActionsOpen, setQuickActionsOpen] = useState(false);
   const { mode, toggleMode } = useThemeMode();
   const searchRef = React.useRef<HTMLDivElement | null>(null);

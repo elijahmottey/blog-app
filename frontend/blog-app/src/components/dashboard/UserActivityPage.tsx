@@ -17,7 +17,7 @@ export const UserActivityPage: React.FC = () => {
       if (!id) throw new Error('User ID is required');
       const response = await BackendApi.getAllUsers(0, 1000);
       // Handle the API response structure properly
-      const usersData = response?.content || response?.data?.content || [];
+      const usersData = response?.content || [];
       const foundUser = usersData.find((u: UserDto) => u.id?.toString() === id);
       if (!foundUser) throw new Error('User not found');
       return foundUser;

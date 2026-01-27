@@ -28,12 +28,12 @@ export const AnalyticsView: React.FC = () => {
   });
 
   // Process data for analytics
-  const users = usersData?.content || usersData?.data?.content || [];
+  const users = usersData?.content || [];
   const posts = postsData?.data?.content || [];
   const comments = commentsData?.data?.content || [];
   
   // Get total counts from pagination
-  const totalUsers = usersData?.totalElements || usersData?.data?.totalElements || users.length;
+  const totalUsers = usersData?.totalElements || users.length;
   const totalPosts = postsData?.data?.totalElements || posts.length;
   const totalComments = commentsData?.data?.totalElements || comments.length;
   
@@ -87,6 +87,7 @@ export const AnalyticsView: React.FC = () => {
   // User role distribution
   const roleDistribution = React.useMemo(() => {
     const roleCount = users.reduce((acc: any, user) => {
+      //@ts-ignore
       const role = user.role || 'USER';
       acc[role] = (acc[role] || 0) + 1;
       return acc;
