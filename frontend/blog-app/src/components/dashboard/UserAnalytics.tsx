@@ -18,8 +18,11 @@ export const UserAnalytics: React.FC = () => {
   });
 
   const profile = userProfile?.data;
+  //@ts-ignore
   const posts = profile?.posts || [];
+  //@ts-ignore
   const comments = profile?.comments || [];
+
   
   // Get drafts count
   const draftsCount = React.useMemo(() => {

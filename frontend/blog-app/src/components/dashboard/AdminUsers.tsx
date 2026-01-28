@@ -65,10 +65,10 @@ interface ApiUser {
   id: number;
   name: string;
   email: string;
-  role: string;
+  role: string; // API returns single role as string
   createdAt: string;
   updatedAt: string;
-  posts?: any[];
+  posts?: any[]; // API returns posts array
   comments?: any[];
 }
 
@@ -108,13 +108,27 @@ export const AdminUsers: React.FC = () => {
     staleTime: 30000,
   });
 
-  // Safely extract users data - based on your API response structure
-  //@ts-ignore
-  const usersData = apiResponse?.content ? apiResponse : apiResponse as PagedResponse<ApiUser> | undefined;
-  //@ts-ignore
-  const users: ApiUser[] = usersData?.content || [];
-  const totalPages = usersData?.totalPages || 0;
-  const totalElements = usersData?.totalElements || 0;
+
+
+  // Safely extract users data - the API returns ApiResponse<PagedResponse<UserDto>>
+  const users: ApiUser[] = apiResponse?.data?.content || [];
+  const totalPages = apiResponse?.data?.totalPages || 0;
+  const totalElements = apiResponse?.data?.totalElements || 0;
+
+  // Filter users based on search (client-side filtering on current page)
+  const filteredUsers = users.filter(user => {
+    if (!user) return false;
+    return (
+        (user.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        (user.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        (user.role?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+    );
+  });
+
+  // Decide which users to display
+  // Note: When searching, we're filtering client-side which may not match pagination
+  // For proper implementation, search should be server-side
+  const displayUsers = searchTerm ? filteredUsers : users;
 
   // Create user mutation
   const createUserMutation = useMutation({
@@ -155,16 +169,6 @@ export const AdminUsers: React.FC = () => {
     onError: (error: any) => {
       toast.error(`Failed to delete user: ${error.message}`);
     },
-  });
-
-  // Filter users based on search
-  const filteredUsers = users.filter(user => {
-    if (!user) return false;
-    return (
-        (user.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-        (user.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-        (user.role?.toLowerCase() || '').includes(searchTerm.toLowerCase())
-    );
   });
 
   const handleOpenCreateDialog = () => {
@@ -492,10 +496,15 @@ export const AdminUsers: React.FC = () => {
               width: { xs: '100%', md: 'auto' }
             }}>
               <Typography variant="body2" color="text.secondary">
-                Showing {filteredUsers.length} of {totalElements} users
+                Showing {displayUsers.length} of {searchTerm ? filteredUsers.length : totalElements} users
               </Typography>
             </Box>
           </Box>
+          {searchTerm && filteredUsers.length === 0 && users.length > 0 && (
+              <Alert severity="info" sx={{ mt: 1 }}>
+                No users found matching "{searchTerm}" on this page. Try clearing the search or checking other pages.
+              </Alert>
+          )}
         </Paper>
 
         {/* Users Table */}
@@ -514,7 +523,7 @@ export const AdminUsers: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredUsers.length === 0 ? (
+                {displayUsers.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
                         <Typography color="text.secondary">
@@ -523,7 +532,7 @@ export const AdminUsers: React.FC = () => {
                       </TableCell>
                     </TableRow>
                 ) : (
-                    filteredUsers.map((user) => (
+                    displayUsers.map((user) => (
                         <TableRow
                             key={user.id}
                             hover
@@ -627,16 +636,16 @@ export const AdminUsers: React.FC = () => {
                                 </IconButton>
                               </Tooltip>
                               <Tooltip title="Delete User">
-                                <span>
-                                  <IconButton
-                                      size="small"
-                                      onClick={() => handleOpenDeleteDialog(user)}
-                                      color="error"
-                                      disabled={user.role?.toUpperCase() === 'ADMIN'}
-                                  >
-                                    <Delete fontSize="small" />
-                                  </IconButton>
-                                </span>
+                          <span>
+                            <IconButton
+                                size="small"
+                                onClick={() => handleOpenDeleteDialog(user)}
+                                color="error"
+                                disabled={user.role?.toUpperCase() === 'ADMIN'}
+                            >
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          </span>
                               </Tooltip>
                             </Box>
                           </TableCell>

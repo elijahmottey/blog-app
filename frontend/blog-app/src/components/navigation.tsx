@@ -335,6 +335,13 @@ export default function Navbar() {
 
                     {/* Mobile Menu Button */}
                     <div className="flex items-center space-x-2">
+                        {/* Theme Toggle for Mobile */}
+                        <Tooltip title="Toggle color mode">
+                          <IconButton onClick={() => toggleMode()} size="small" sx={{ color: 'text.secondary' }}>
+                            {mode === 'dark' ? <Sun size={18}/> : <Moon size={18}/>}
+                          </IconButton>
+                        </Tooltip>
+                        
                         <button
                             onClick={() => setIsSearchOpen(!isSearchOpen)}
                             className="p-2 rounded-lg transition-colors"

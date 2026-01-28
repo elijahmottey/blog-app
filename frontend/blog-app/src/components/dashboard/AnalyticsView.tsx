@@ -14,21 +14,21 @@ export const AnalyticsView: React.FC = () => {
 
   const { data: usersData } = useQuery({
     queryKey: ['admin-users'],
-    queryFn: () => BackendApi.getAllUsers(0, 1000),
+    queryFn: () => BackendApi.getAllUsers(),
   });
 
   const { data: postsData } = useQuery({
     queryKey: ['admin-posts'],
-    queryFn: () => BackendApi.getAllPost(0, 1000),
+    queryFn: () => BackendApi.getAllPost(),
   });
 
   const { data: commentsData } = useQuery({
     queryKey: ['admin-comments'],
-    queryFn: () => BackendApi.getAllPostComment(0, 1000),
+    queryFn: () => BackendApi.getAllPostComment(),
   });
 
   // Process data for analytics
-  const users = usersData?.content || [];
+  const users = usersData?.data?.content || [];
   const posts = postsData?.data?.content || [];
   const comments = commentsData?.data?.content || [];
   

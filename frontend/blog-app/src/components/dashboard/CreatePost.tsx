@@ -39,6 +39,7 @@ import {
 import BackendApi from '../../service/BackendApi';
 import { toast } from 'sonner';
 import { useAuth } from '../../context/AuthContext';
+import { AIChat } from './AIChat';
 
 const schema = yup.object({
   title: yup.string().required('Title is required').min(3, 'Title must be at least 3 characters'),
@@ -950,6 +951,9 @@ Add code snippets when needed
             </Box>
           </Box>
         </Paper>
+        
+        {/* AI Chat Assistant */}
+        <AIChat isExpanded={false} />
       </Box>
   );
 };

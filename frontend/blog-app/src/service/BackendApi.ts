@@ -18,6 +18,7 @@ export interface UserLogin {
 }
 
 export interface PagedResponse<T> {
+    data: any;
     content: T[];
     pageNumber: number;
     pageSize: number;
