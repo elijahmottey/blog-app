@@ -94,4 +94,9 @@ public class CommentServiceImpl implements CommentService {
         existingComment.setContent(comment.getContent());
         return commentRepository.save(existingComment);
     }
+
+    @Override
+    public Integer getTotalComments() {
+        return Math.toIntExact(commentRepository.count());
+    }
 }

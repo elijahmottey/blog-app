@@ -14,5 +14,6 @@ public interface CommentService {
     Page<Comment> getCommentsByPostById(Long id,Pageable pageable);
     Comment getCommentById(long id);
     Comment updateComment(Comment comment);
+    Integer getTotalComments();
 
 }
