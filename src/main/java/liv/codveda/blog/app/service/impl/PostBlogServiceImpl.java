@@ -108,4 +108,9 @@ public class PostBlogServiceImpl implements BlogService {
 
         return postRepository.save(existingPost);
     }
+
+    @Override
+    public Integer getTotalPosts() {
+        return Math.toIntExact(postRepository.count());
+    }
 }

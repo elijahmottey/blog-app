@@ -13,5 +13,6 @@ public interface BlogService {
     Post getPostById(Long id);
     Page<Post> getPostByTitle(String title, Pageable pageable);
     Post updatePost(Long id,Post post);
+    Integer getTotalPosts();
 
 }
