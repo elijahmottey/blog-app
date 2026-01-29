@@ -86,4 +86,9 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() ->
                         new NotFoundException("user not found with email: " + email));
     }
+
+    @Override
+    public Integer getUserTotal() {
+        return Math.toIntExact(usersRepository.count());
+    }
 }

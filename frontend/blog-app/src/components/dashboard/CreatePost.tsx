@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Save,
@@ -34,7 +34,11 @@ import {
   TextField,
   Tooltip,
   Chip,
-  Alert
+  Alert,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel
 } from '@mui/material';
 import BackendApi from '../../service/BackendApi';
 import { toast } from 'sonner';
@@ -49,6 +53,7 @@ const schema = yup.object({
 type PostFormData = {
   title: string;
   content: string;
+  category: string;
 };
 
 interface DraftPost {
@@ -68,7 +73,16 @@ export const CreatePost: React.FC = () => {
   const [formattingHistory, setFormattingHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('General');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Fetch categories
+  const { data: categoriesResponse } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => BackendApi.getCategories(),
+  });
+
+  const categories = categoriesResponse?.data || ['General', 'Technology', 'Lifestyle', 'Business', 'Health', 'Education'];
 
   const {
     register,
@@ -145,6 +159,7 @@ export const CreatePost: React.FC = () => {
       return BackendApi.createPost({ 
         title: data.title, 
         content: data.content,
+        category: data.category,
         users: user?.name || 'Anonymous'
       });
     },
@@ -166,7 +181,8 @@ export const CreatePost: React.FC = () => {
   });
 
   const onSubmit = (data: PostFormData) => {
-    createPostMutation.mutate(data);
+    const postData = { ...data, category: selectedCategory };
+    createPostMutation.mutate(postData);
   };
 
   const watchedContent = watch('content', '');
@@ -513,6 +529,29 @@ export const CreatePost: React.FC = () => {
             />
             <Typography variant="caption" sx={{ color: 'text.secondary', mt: 1, display: 'block' }}>
               Keep it concise and engaging (3-10 words)
+            </Typography>
+          </Paper>
+
+          {/* Category Selection */}
+          <Paper sx={{ p: 2, borderRadius: 2, border: 1, borderColor: 'divider' }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>
+              Category
+            </Typography>
+            <FormControl fullWidth variant="outlined">
+              <Select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                sx={{ fontSize: '1rem' }}
+              >
+                {categories.map((category) => (
+                  <MenuItem key={category} value={category}>
+                    {category}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Typography variant="caption" sx={{ color: 'text.secondary', mt: 1, display: 'block' }}>
+              Choose the most relevant category for your post
             </Typography>
           </Paper>
 

@@ -10,14 +10,16 @@ import {
   Send,
   ThumbsUp,
   User,
-  Download
+  Download,
+  Tag
 } from 'lucide-react';
-import { Button, IconButton, Typography, Box, Paper, TextField, Avatar } from '@mui/material';
+import { Button, IconButton, Typography, Box, Paper, TextField, Avatar, Chip } from '@mui/material';
 import BackendApi, { type CommentDto, type PostDto } from '../../service/BackendApi';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { downloadPost, downloadPostPdf } from '../../lib/download';
+import { LikeButton } from './LikeButton';
 
 export const PostDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -279,6 +281,20 @@ export const PostDetail: React.FC = () => {
             <Typography variant="h4" sx={{ mb: 2, fontWeight: 'bold' }}>
               {postData.title || 'Untitled Post'}
             </Typography>
+            
+            {/* Category */}
+            {postData.category && (
+              <Box sx={{ mb: 2 }}>
+                <Chip 
+                  icon={<Tag size={16} />}
+                  label={postData.category}
+                  variant="outlined"
+                  size="small"
+                  sx={{ color: 'primary.main', borderColor: 'primary.main' }}
+                />
+              </Box>
+            )}
+            
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', typography: 'body2', color: 'text.secondary' }}>
               <Box sx={{ display: 'flex', gap: 2 }}>
                 <Box>By {postAuthorName}</Box>
@@ -315,20 +331,11 @@ export const PostDetail: React.FC = () => {
                 width: '100%'
               }}>
                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                  <Button
-                      onClick={handleLike}
-                      disabled={likeMutation.isPending}
-                      startIcon={<Heart />}
-                      size="small"
-                      sx={{ 
-                        color: 'text.secondary', 
-                        '&:hover': { color: 'error.main', bgcolor: 'error.light' },
-                        minWidth: { xs: 'auto', sm: 'unset' },
-                        px: { xs: 1, sm: 2 }
-                      }}
-                  >
-                    Like
-                  </Button>
+                  <LikeButton 
+                    postId={postId}
+                    likes={postData.likes || 0}
+                    isLiked={postData.isLiked || false}
+                  />
 
                   <Button
                       onClick={() => setShowComments(!showComments)}

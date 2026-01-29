@@ -45,10 +45,12 @@ export interface UserProfilePost {
     id: number;
     title: string;
     content: string;
+    category?: string;
     likes?: number;
     views?: number;
     createdAt?: string;
     updatedAt?: string;
+    isLiked?: boolean;
 }
 
 export interface UserProfileComment {
@@ -71,12 +73,14 @@ export interface PostDto{
     id?: number;
     title: string;
     content: string;
+    category?: string;
     users?: string;
     createdAt?:string;
     updatedAt?:string;
     comments?:string[];
     likes?: number;
     views?: number;
+    isLiked?: boolean;
 }
 
 export interface CommentDto{
@@ -419,6 +423,20 @@ export default class BackendApi {
         return this.get<ApiResponse<string>>("/ai/chat", {
             params: {prompt},
         })
+    }
+
+    // ---- LIKES ----
+    static async likePost(postId: number) {
+        return this.post<ApiResponse<any>>(`/post/${postId}/like`, {});
+    }
+
+    static async unlikePost(postId: number) {
+        return this.delete<ApiResponse<any>>(`/post/${postId}/like`);
+    }
+
+    // ---- CATEGORIES ----
+    static async getCategories() {
+        return this.get<ApiResponse<string[]>>('/post/categories');
     }
 
 

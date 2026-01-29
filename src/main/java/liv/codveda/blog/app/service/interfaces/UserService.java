@@ -13,5 +13,6 @@ public interface UserService {
     Users updateUserById(long id, Users user);
     Users getUserBlogHistory(long id);
     Users getMyInfo(String email);
+    Integer getUserTotal();
 
 }

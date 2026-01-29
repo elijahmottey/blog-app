@@ -33,6 +33,12 @@ public class UserController {
         this.postMapper = postMapper;
     }
 
+    @GetMapping("/total-users")
+    public ResponseEntity<ApiResponse<Integer>> getUserTotal() {
+        return ResponseEntity.ok(new ApiResponse<>(userService.getUserTotal(),
+                "total users retrieved successfully"));
+    }
+
 
     @GetMapping("/list")
 //    @PreAuthorize("hasAuthority('ADMIN') ")
