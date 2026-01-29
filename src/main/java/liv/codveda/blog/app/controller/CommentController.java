@@ -41,6 +41,12 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @GetMapping("/total-comments")
+    public ResponseEntity<ApiResponse<Integer>> getTotalComments(){
+        Integer totalComments = commentService.getTotalComments();
+        return ResponseEntity.ok(new ApiResponse<>(totalComments, "Total comments retrieved successfully"));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteComment(@PathVariable Long id) {
         commentService.deleteComment(id);
