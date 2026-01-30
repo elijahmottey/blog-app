@@ -12,6 +12,21 @@ import { format, subDays, startOfDay } from 'date-fns';
 export const AnalyticsView: React.FC = () => {
   const theme = useTheme();
 
+  const { data: totalUsersData } = useQuery({
+    queryKey: ['total-users'],
+    queryFn: () => BackendApi.getTotalUsers(),
+  });
+
+  const { data: totalPostsData } = useQuery({
+    queryKey: ['total-posts'],
+    queryFn: () => BackendApi.getTotalPost(),
+  });
+
+  const { data: totalCommentsData } = useQuery({
+    queryKey: ['total-comments'],
+    queryFn: () => BackendApi.getTotalPostComment(),
+  });
+
   const { data: usersData } = useQuery({
     queryKey: ['admin-users'],
     queryFn: () => BackendApi.getAllUsers(),
@@ -32,10 +47,10 @@ export const AnalyticsView: React.FC = () => {
   const posts = postsData?.data?.content || [];
   const comments = commentsData?.data?.content || [];
   
-  // Get total counts from pagination
-  const totalUsers = usersData?.totalElements || users.length;
-  const totalPosts = postsData?.data?.totalElements || posts.length;
-  const totalComments = commentsData?.data?.totalElements || comments.length;
+  // Get total counts from new API endpoints
+  const totalUsers = totalUsersData?.data || 0;
+  const totalPosts = totalPostsData?.data || 0;
+  const totalComments = totalCommentsData?.data || 0;
   
   // Get drafts count from localStorage
   const getDraftsCount = () => {
@@ -109,6 +124,8 @@ export const AnalyticsView: React.FC = () => {
       comments: comments.filter(comment => comment.posts === post.title).length,
     }));
   }, [posts, comments]);
+
+  console.log(totalUsers)
 
   const totalStats = {
     totalUsers: totalUsers,

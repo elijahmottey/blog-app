@@ -39,6 +39,21 @@ export const AdminDashboard: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('overview');
 
   // Fetch admin stats
+  const { data: totalUsersData } = useQuery({
+    queryKey: ['total-users'],
+    queryFn: () => BackendApi.getTotalUsers(),
+  });
+
+  const { data: totalPostsData } = useQuery({
+    queryKey: ['total-posts'],
+    queryFn: () => BackendApi.getTotalPost(),
+  });
+
+  const { data: totalCommentsData } = useQuery({
+    queryKey: ['total-comments'],
+    queryFn: () => BackendApi.getTotalPostComment(),
+  });
+
   const { data: usersData } = useQuery({
     queryKey: ['admin-users'],
     queryFn: () => BackendApi.getAllUsers(),
@@ -65,9 +80,9 @@ export const AdminDashboard: React.FC = () => {
     },
   });
 
-  const totalUsers = usersData?.totalElements || 0;
-  const totalPosts = postsData?.data?.totalElements || 0;
-  const totalComments = commentsData?.data?.totalElements || 0;
+  const totalUsers = totalUsersData?.data || 0;
+  const totalPosts = totalPostsData?.data || 0;
+  const totalComments = totalCommentsData?.data || 0;
 
   // Mock additional stats
   const flaggedContent = 3;

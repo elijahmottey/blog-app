@@ -321,7 +321,27 @@ export default class BackendApi {
     // ---- ROLE HELPERS ----
     static getRoles(): Roles[] {
         const roles = localStorage.getItem("roles1");
-        return roles ? JSON.parse(roles) : [];
+        
+        if (!roles) return [];
+        
+        const parsedRoles = JSON.parse(roles);
+        console.log('Parsed roles:', parsedRoles);
+        
+        // Handle both string and array formats from backend
+        let roleArray: string[];
+        if (typeof parsedRoles === 'string') {
+            roleArray = [parsedRoles];
+        } else if (Array.isArray(parsedRoles)) {
+            roleArray = parsedRoles;
+        } else {
+            return [];
+        }
+        
+        // Remove ROLE_ prefix if present and convert to Roles enum
+        return roleArray.map(role => {
+            const cleanRole = role.startsWith('ROLE_') ? role.substring(5) : role;
+            return cleanRole as Roles;
+        });
     }
 
     static isUser() {
@@ -349,6 +369,10 @@ export default class BackendApi {
 
     static async createUser(userData: Partial<UserRegistration>) {
         return this.post<UserDto>('/user/create', userData);
+    }
+
+    static async getTotalUsers() {
+        return this.get<ApiResponse<number>>(`/user/total`);
     }
 
     static async getUserById(userId: number) {
@@ -381,6 +405,10 @@ export default class BackendApi {
         return this.get<ApiResponse<PostDto>>(`/post/${postId}`);
     }
 
+    static async getTotalPost() {
+        return this.get<ApiResponse<number>>(`/post/total`);
+    }
+
     static async getAllPost(page:number=0, size:number= 10) {
         return this.get<ApiResponse<PagedResponse<PostDto>>>(`/post/list?page=${page}&size=${size}`);
     }
@@ -401,6 +429,9 @@ export default class BackendApi {
 
     static async getPostCommentById(commentId: number) {
         return this.get<ApiResponse<CommentDto>>(`/comment/${commentId}`);
+    }
+    static async getTotalPostComment() {
+        return this.get<ApiResponse<number>>(`/comment/total`);
     }
 
     static async getAllPostComment(page:number=0,size:number=10) {

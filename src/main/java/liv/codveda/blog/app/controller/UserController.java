@@ -33,7 +33,7 @@ public class UserController {
         this.postMapper = postMapper;
     }
 
-    @GetMapping("/total-users")
+    @GetMapping("/total")
     public ResponseEntity<ApiResponse<Integer>> getUserTotal() {
         return ResponseEntity.ok(new ApiResponse<>(userService.getUserTotal(),
                 "total users retrieved successfully"));
@@ -41,7 +41,7 @@ public class UserController {
 
 
     @GetMapping("/list")
-//    @PreAuthorize("hasAuthority('ADMIN') ")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Paged<UsersDto>>> getAllUsers(Pageable pageable) {
         Page<Users> users = userService.getAllUsers(pageable);
         Paged<UsersDto> response = new Paged<>(

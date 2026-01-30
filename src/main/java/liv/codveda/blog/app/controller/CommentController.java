@@ -41,7 +41,7 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/total-comments")
+    @GetMapping("/total")
     public ResponseEntity<ApiResponse<Integer>> getTotalComments(){
         Integer totalComments = commentService.getTotalComments();
         return ResponseEntity.ok(new ApiResponse<>(totalComments, "Total comments retrieved successfully"));

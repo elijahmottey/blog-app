@@ -106,8 +106,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             user,
             userProfile,
             isAuthenticated: !!user,
-            isAdmin: user?.roles.includes('ADMIN' as Roles) ?? false,
-            isUser: user?.roles.includes('USER' as Roles) ?? false,
+            isAdmin: (() => {
+              console.log('Checking admin role:', user?.roles, 'includes ADMIN:', user?.roles?.includes(Roles.ADMIN));
+              return user?.roles?.includes(Roles.ADMIN) ?? false;
+            })(),
+            isUser: user?.roles?.includes(Roles.USER) ?? false,
             login,
             register,
             logout,

@@ -28,7 +28,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/admin")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> registerAdmin(
             @RequestBody @Valid Register request
     ) {

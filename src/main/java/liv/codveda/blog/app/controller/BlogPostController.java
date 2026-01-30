@@ -54,7 +54,7 @@ public class BlogPostController  {
         blogService.deletePost(id);
         return ResponseEntity.ok(new ApiResponse<>(null, "Post deleted successfully"));
     }
-    @GetMapping("/total-post")
+    @GetMapping("/total")
     public ResponseEntity<ApiResponse<Integer>> getTotalPosts(){
         Integer totalPosts = blogService.getTotalPosts();
         return ResponseEntity.ok(new ApiResponse<>(totalPosts, "Total posts retrieved successfully"));

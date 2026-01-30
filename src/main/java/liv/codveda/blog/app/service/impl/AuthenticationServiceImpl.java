@@ -1,11 +1,8 @@
 package liv.codveda.blog.app.service.impl;
 
-import io.jsonwebtoken.JwtException;
-import jakarta.servlet.http.HttpServletRequest;
 import liv.codveda.blog.app.domain.dto.request.Login;
 import liv.codveda.blog.app.domain.dto.request.Register;
 import liv.codveda.blog.app.domain.dto.response.BlogResponse;
-import liv.codveda.blog.app.domain.dto.response.Token;
 import liv.codveda.blog.app.domain.entities.Users;
 import liv.codveda.blog.app.domain.enums.Roles;
 import liv.codveda.blog.app.exception.ConflictException;
@@ -13,23 +10,18 @@ import liv.codveda.blog.app.exception.NotFoundException;
 import liv.codveda.blog.app.repository.UsersRepository;
 import liv.codveda.blog.app.security.jwt.JWTUtils;
 import liv.codveda.blog.app.service.interfaces.AuthenticationService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
-    private static final Logger logger = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
     private final UsersRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTUtils jwtUtils;
@@ -121,7 +113,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .name(request.getName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Roles.USER)
+                .role(Roles.ADMIN)
                 .build();
 
         userRepository.save(admin);
