@@ -1,0 +1,12 @@
+/* Fix for ARIA-hidden focus issue */
+[aria-hidden="true"] button:focus,
+[aria-hidden="true"] [role="button"]:focus,
+[aria-hidden="true"] .MuiButtonBase-root:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Alternative: Use inert instead of aria-hidden where possible */
+.modal-backdrop {
+  inert: true;
+}

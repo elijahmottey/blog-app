@@ -6,6 +6,7 @@ public record UsersReferenceDto(
         Long id,
         String name,
         String email,
+        String description,
         Roles role
 
 ) {

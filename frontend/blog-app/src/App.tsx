@@ -1,6 +1,7 @@
 // App.tsx - Updated to use ApiService methods
 // @ts-ignore
 import './App.css'
+import './aria-fix.css'
 import {PagesRoute} from "./page.tsx";
 import {toast, Toaster} from "sonner";
 import {useEffect} from "react";

@@ -89,7 +89,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
     },
 
     {
-      name: 'Analytics',
+      name: 'Admin Analytics',
       href: '/dashboard/admin/analytics',
       icon: BarChart3,
     },
@@ -106,7 +106,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
     const Icon = item.icon as React.ElementType;
 
     return (
-        <div key={item.name}>
+        <div key={`${item.href}-${level}`}>
           {hasChildren ? (
               <button
                   onClick={() => toggleExpanded(item.name)}

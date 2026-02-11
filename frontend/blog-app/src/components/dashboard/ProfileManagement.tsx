@@ -18,7 +18,8 @@ import {
     Shield,
     Key,
     Trash2,
-    AlertTriangle
+    AlertTriangle,
+    Type
 } from 'lucide-react';
 import BackendApi from '../../service/BackendApi';
 import { Roles } from '../../enums/Roles';
@@ -30,6 +31,7 @@ import { useTheme, alpha } from '@mui/material/styles';
 interface ProfileFormData {
     name: string;
     email: string;
+    description: string;
 }
 
 interface PasswordFormData {
@@ -41,6 +43,7 @@ interface PasswordFormData {
 const profileSchema = yup.object({
     name: yup.string().required('Name is required').min(2, 'Name must be at least 2 characters'),
     email: yup.string().required('Email is required').email('Invalid email format'),
+    description: yup.string().max(500, 'Description must be less than 500 characters'),
 });
 
 const passwordSchema = yup.object({
@@ -105,6 +108,7 @@ export const ProfileManagement: React.FC = () => {
         defaultValues: {
             name: user?.name || '',
             email: user?.email || '',
+            description: user?.description || '',
         },
     });
 
@@ -123,7 +127,10 @@ export const ProfileManagement: React.FC = () => {
         onSuccess: () => {
             toast.success('Profile updated successfully!');
             queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+            queryClient.invalidateQueries({ queryKey: ['auth-user'] });
             setIsEditing(false);
+            // Force page reload to refresh auth context
+            window.location.reload();
         },
         onError: (error: any) => {
             toast.error(error.response?.data?.message || 'Failed to update profile');
@@ -174,6 +181,7 @@ export const ProfileManagement: React.FC = () => {
         resetProfile({
             name: user?.name || '',
             email: user?.email || '',
+            description: user?.description || '',
         });
         setIsEditing(false);
     };
@@ -418,6 +426,39 @@ export const ProfileManagement: React.FC = () => {
                                         )}
                                         {profileErrors.email && (
                                             <p style={{ marginTop: 4, fontSize: '0.75rem', color: theme.palette.error.main }}>{profileErrors.email.message}</p>
+                                        )}
+                                    </div>
+
+                                    {/* Description */}
+                                    <div style={{ gridColumn: '1 / -1' }}>
+                                        <label htmlFor="description" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary, marginBottom: 8 }}>
+                                            Description
+                                        </label>
+                                        {isEditing ? (
+                                            <textarea
+                                                {...registerProfile('description')}
+                                                id="description"
+                                                rows={3}
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '8px 12px',
+                                                    border: `1px solid ${theme.palette.divider}`,
+                                                    borderRadius: 8,
+                                                    fontSize: '0.875rem',
+                                                    color: theme.palette.text.primary,
+                                                    backgroundColor: theme.palette.background.paper,
+                                                    resize: 'vertical',
+                                                    minHeight: '80px',
+                                                }}
+                                                placeholder="Tell us about yourself..."
+                                            />
+                                        ) : (
+                                            <div style={{ padding: 12, borderRadius: 8, backgroundColor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.default, 0.04) : alpha(theme.palette.background.paper, 0.6), border: `1px solid ${theme.palette.divider}`, minHeight: '80px' }}>
+                                                <span style={{ color: theme.palette.text.primary }}>{user?.description || 'No description provided'}</span>
+                                            </div>
+                                        )}
+                                        {profileErrors.description && (
+                                            <p style={{ marginTop: 4, fontSize: '0.75rem', color: theme.palette.error.main }}>{profileErrors.description.message}</p>
                                         )}
                                     </div>
                                 </div>

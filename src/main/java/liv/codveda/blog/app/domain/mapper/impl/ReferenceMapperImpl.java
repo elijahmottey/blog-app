@@ -20,6 +20,7 @@ public class ReferenceMapperImpl implements ReferenceMapper {
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
+                user.getDescription(),
                 user.getRole()
         );
     }
@@ -30,6 +31,7 @@ public class ReferenceMapperImpl implements ReferenceMapper {
         return new PostReferenceDto(
                 post.getId(),
                 post.getTitle(),
+                post.getCategory(),
                 post.getContent()
         );
     }

@@ -28,6 +28,10 @@ public class Post {
     @Column(nullable = false, name = "title")
     private String title;
 
+    @NotBlank(message = "Categories is required")
+    @Column(nullable = false, length = 50)
+    private String category;
+
     @NotBlank(message = "Content is required")
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;

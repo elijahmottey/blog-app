@@ -11,6 +11,7 @@ public record UsersDto(
         Long id,
         String name,
         String email,
+        String description,
         Roles role,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,

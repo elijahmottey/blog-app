@@ -9,6 +9,7 @@ import java.util.List;
 public record PostDto(
         Long id,
         String title,
+        String category,
         String content,
         UsersReferenceDto user,
         LocalDateTime createdAt,

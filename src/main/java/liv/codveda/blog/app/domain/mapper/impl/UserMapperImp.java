@@ -26,6 +26,7 @@ public class UserMapperImp implements UserMapper {
         users.setId(usersDto.id());
         users.setName(usersDto.name());
         users.setEmail(usersDto.email());
+        users.setDescription(usersDto.description());
         users.setRole(usersDto.role());
         users.setCreatedAt(usersDto.createdAt());
         users.setUpdatedAt(usersDto.updatedAt());
@@ -39,6 +40,7 @@ public class UserMapperImp implements UserMapper {
                 users.getId(),
                 users.getName(),
                 users.getEmail(),
+                users.getDescription(),
                 users.getRole(),
                 users.getCreatedAt(),
                 users.getUpdatedAt(),

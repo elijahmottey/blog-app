@@ -88,7 +88,7 @@ export const AdminUsers: React.FC = () => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize] = useState(10);
+  const [pageSize] = useState(50); // Increased to show more users
   const [formData, setFormData] = useState<UserFormData>({
     name: '',
     email: '',

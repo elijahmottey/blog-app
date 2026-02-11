@@ -12,8 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -65,6 +63,10 @@ public class UserServiceImpl implements UserService {
 
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             existingUser.setPassword(user.getPassword());
+        }
+
+        if (user.getDescription() != null) {
+            existingUser.setDescription(user.getDescription());
         }
         if (user.getRole() != null) {
             existingUser.setRole(user.getRole());

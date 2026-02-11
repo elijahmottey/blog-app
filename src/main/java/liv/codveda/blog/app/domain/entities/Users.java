@@ -42,6 +42,11 @@ public class Users implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @Column(length = 1000)
+    private String description;
+
+    private String avatar;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Roles role;

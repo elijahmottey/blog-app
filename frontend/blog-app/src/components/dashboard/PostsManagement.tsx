@@ -240,60 +240,7 @@ export const PostsManagement: React.FC = () => {
           </Box>
         </Paper>
 
-        {/* Stats Cards */}
-        <Box sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: '1fr', sm: 'repeat(4, 1fr)' },
-          gap: 2
-        }}>
-          <Card sx={{ borderRadius: 2, height: '100%' }}>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <Typography variant="h3" sx={{ color: 'primary.main', fontWeight: 'bold', mb: 1 }}>
-                {totalElements}
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Total Posts
-              </Typography>
-            </CardContent>
-          </Card>
-          <Card sx={{ borderRadius: 2, height: '100%' }}>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <Typography variant="h3" sx={{ color: 'success.main', fontWeight: 'bold', mb: 1 }}>
-                {posts.filter(post => post.content && post.content.length > 100).length}
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Published (Current Page)
-              </Typography>
-            </CardContent>
-          </Card>
-          <Card sx={{ borderRadius: 2, height: '100%' }}>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <Typography variant="h3" sx={{ color: 'warning.main', fontWeight: 'bold', mb: 1 }}>
-                {(() => {
-                  try {
-                    const drafts = JSON.parse(localStorage.getItem('blog_drafts') || '[]');
-                    return drafts.length;
-                  } catch {
-                    return 0;
-                  }
-                })()}
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Draft Posts
-              </Typography>
-            </CardContent>
-          </Card>
-          <Card sx={{ borderRadius: 2, height: '100%' }}>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <Typography variant="h3" sx={{ color: 'info.main', fontWeight: 'bold', mb: 1 }}>
-                {posts.length}
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Current Page
-              </Typography>
-            </CardContent>
-          </Card>
-        </Box>
+
 
         {/* Posts List */}
         <Paper sx={{ p: 3, borderRadius: 2 }}>
@@ -502,49 +449,6 @@ export const PostsManagement: React.FC = () => {
         )}
 
         {/* Summary */}
-        <Paper sx={(theme) => ({ p: 3, borderRadius: 2, bgcolor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}` })}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: 'text.primary' }}>
-            📊 Quick Summary
-          </Typography>
-          <Box sx={{
-            display: 'grid',
-            gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
-            gap: 2
-          }}>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
-                {filteredPosts.length}
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Showing
-              </Typography>
-            </Box>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h4" sx={{ color: 'success.main', fontWeight: 'bold' }}>
-                {posts.filter(p => p.comments && p.comments.length > 0).length}
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                With Comments
-              </Typography>
-            </Box>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h4" sx={{ color: 'warning.main', fontWeight: 'bold' }}>
-                {posts.filter(p => !p.updatedAt || p.updatedAt === p.createdAt).length}
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Never Edited
-              </Typography>
-            </Box>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h4" sx={{ color: 'error.main', fontWeight: 'bold' }}>
-                {deleteMutation.isPending ? 0 : 0}
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Deleted Today
-              </Typography>
-            </Box>
-          </Box>
-        </Paper>
       </Box>
   );
 };

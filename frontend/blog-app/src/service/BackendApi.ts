@@ -7,6 +7,7 @@ export interface UserRegistration {
     email: string;
     password: string;
     name: string;
+    description?: string;
     role?: string;
 }
 
@@ -31,6 +32,7 @@ export interface  UserDto{
     id?: number;
     name: string;
     email: string;
+    description?: string;
     roles: Roles[];
     createdAt:string;
     updatedAt:string;
@@ -62,6 +64,7 @@ export interface UserProfile {
     id: number;
     name: string;
     email: string;
+    description?: string;
     role: string;
     createdAt: string;
     updatedAt: string;
