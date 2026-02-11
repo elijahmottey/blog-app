@@ -1,6 +1,7 @@
 package liv.codveda.blog.app.service.interfaces;
 
 import liv.codveda.blog.app.domain.entities.Post;
+import liv.codveda.blog.app.domain.enums.Category;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -14,6 +15,6 @@ public interface BlogService {
     Page<Post> getPostByTitle(String title, Pageable pageable);
     Post updatePost(Long id,Post post);
     Integer getTotalPosts();
-    Page<Post> getPostsByCategory(String category, Pageable pageable);
+    Page<Post> getPostsByCategory(Category category, Pageable pageable);
     List<String> getAllCategories();
 }

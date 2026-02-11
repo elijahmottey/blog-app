@@ -8,6 +8,7 @@ import liv.codveda.blog.app.domain.dto.response.PostDto;
 import liv.codveda.blog.app.domain.dto.response.UsersDto;
 import liv.codveda.blog.app.domain.entities.Post;
 import liv.codveda.blog.app.domain.entities.Users;
+import liv.codveda.blog.app.domain.enums.Category;
 import liv.codveda.blog.app.domain.mapper.interfaces.PostMapper;
 import liv.codveda.blog.app.service.interfaces.BlogService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,7 +123,7 @@ public class BlogPostController  {
     // New endpoint: get posts by category
     @GetMapping("/category/{category}")
     public ResponseEntity<ApiResponse<Paged<PostDto>>> getPostsByCategory(
-            @PathVariable String category,
+            @PathVariable Category category,
             @PageableDefault(page = 0, size = 10) Pageable pageable
     ) {
         Page<Post> posts = blogService.getPostsByCategory(category, pageable);
