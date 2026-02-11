@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import BackendApi, { type PostDto, type ApiResponse, type PagedResponse } from "../service/BackendApi.ts";
 import { useApi } from "../hooks/useApi";
-import { CalendarDays, User, ArrowRight, Sparkles, TrendingUp, Clock, ChevronRight, Mail } from "lucide-react";
+import { CalendarDays, User, ArrowRight, Sparkles, TrendingUp, Clock, ChevronRight, Mail, Filter, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import {Button, useTheme} from "@mui/material";
 import { alpha } from '@mui/material/styles';
@@ -18,6 +18,9 @@ export default function Home() {
     );
 
     const [isMobile, setIsMobile] = useState(false);
+    const [categories, setCategories] = useState<string[]>([]);
+    const [loadingCategories, setLoadingCategories] = useState(true);
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const location = useLocation();
     const params = new URLSearchParams(location.search);
     const qParam = params.get('q') || '';
@@ -29,8 +32,28 @@ export default function Home() {
         };
         checkMobile();
         window.addEventListener('resize', checkMobile);
+
+        // Fetch categories
+        fetchCategories();
+
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
+
+    const fetchCategories = async () => {
+        try {
+            setLoadingCategories(true);
+            const response = await BackendApi.getCategories();
+            const categoryList = response.data || [];
+            // Filter out null, undefined, and empty strings
+            const filteredCategories = categoryList.filter((cat: string) => cat && cat.trim());
+            setCategories(filteredCategories);
+        } catch (err) {
+            console.error('Error fetching categories:', err);
+            setCategories([]);
+        } finally {
+            setLoadingCategories(false);
+        }
+    };
 
     useEffect(() => {
         let mounted = true;
@@ -53,7 +76,11 @@ export default function Home() {
     }, [qParam]);
 
     const posts = data?.data?.content || [];
-    const latestPosts = [...posts]
+    const postsWithCategoryFilter = selectedCategory
+        ? posts.filter(post => post.category?.toLowerCase() === selectedCategory.toLowerCase())
+        : posts;
+
+    const latestPosts = [...postsWithCategoryFilter]
         .sort((a, b) => {
             const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
             const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
@@ -64,7 +91,7 @@ export default function Home() {
     const featuredPost = latestPosts[0];
     const gridPosts = latestPosts.slice(1);
 
-    const allPosts = posts.length > 0 ? posts : [];
+    const allPosts = postsWithCategoryFilter.length > 0 ? postsWithCategoryFilter : [];
 
     // Unified blog post image
     const unifiedImageUrl = '/blog-unified-image.svg';
@@ -213,6 +240,53 @@ export default function Home() {
                             </Link>
                         )}
                     </div>
+
+                    {/* Categories Filter */}
+                    {!loadingCategories && categories.length > 0 && (
+                        <div className="mb-6 flex flex-wrap items-center gap-2">
+                            <Filter size={20} style={{ color: theme.palette.text.secondary }} />
+                            <div className="flex flex-wrap gap-2">
+                                <button
+                                    onClick={() => setSelectedCategory(null)}
+                                    className={`px-3 py-1.5 rounded-lg font-medium transition-colors text-sm ${
+                                        selectedCategory === null
+                                            ? 'text-white'
+                                            : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
+                                    }`}
+                                    style={{
+                                        backgroundColor: selectedCategory === null ? theme.palette.primary.main : undefined,
+                                    }}
+                                >
+                                    All Categories
+                                </button>
+                                {categories.map((category) => (
+                                    <button
+                                        key={category}
+                                        onClick={() => setSelectedCategory(category)}
+                                        className={`px-3 py-1.5 rounded-lg font-medium transition-colors text-sm ${
+                                            selectedCategory === category
+                                                ? 'text-white'
+                                                : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
+                                        }`}
+                                        style={{
+                                            backgroundColor: selectedCategory === category ? theme.palette.primary.main : undefined,
+                                        }}
+                                    >
+                                        {category}
+                                    </button>
+                                ))}
+                                {selectedCategory && (
+                                    <button
+                                        onClick={() => setSelectedCategory(null)}
+                                        className="px-2 py-1.5 rounded-lg font-medium transition-colors text-sm text-red-600 bg-red-50 hover:bg-red-100 flex items-center gap-1"
+                                    >
+                                        <X size={16} />
+                                        Clear
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Loading State */}
                     {loading && (

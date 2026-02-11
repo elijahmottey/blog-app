@@ -28,8 +28,11 @@ public class Post {
     @Column(nullable = false, name = "title")
     private String title;
 
-    @NotBlank(message = "Categories is required")
-    @Column(nullable = false, length = 50)
+    // NOTE: made nullable=true to avoid DDL failures when existing rows contain nulls.
+    // If you want this column to be required at the DB level, follow the documented
+    // backfill steps (update existing rows, then alter column to NOT NULL).
+    //@NotBlank(message = "Categories is required")
+    @Column(nullable = true, length = 50)
     private String category;
 
     @NotBlank(message = "Content is required")

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, Typography, Container, Card, CardContent, CardMedia, Chip, Button, TextField, InputAdornment, Pagination } from '@mui/material';
-import { CalendarDays, User, Search, Filter, Download } from 'lucide-react';
+import { CalendarDays, User, Search, Filter, Download, X } from 'lucide-react';
 import BackendApi, { type PostDto } from '../service/BackendApi';
 import { excerpt, formatDate } from '../lib/utils';
 import { downloadPost, downloadPostPdf } from '../lib/download';
@@ -11,6 +11,9 @@ const Blog: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [highlightedPost, setHighlightedPost] = useState<PostDto | null>(null);
@@ -22,6 +25,7 @@ const Blog: React.FC = () => {
   const unifiedImageUrl = '/blog-unified-image.svg';
 
   useEffect(() => {
+    fetchCategories();
     fetchPosts();
     
     // Check for specific post/comment ID in URL params
@@ -32,6 +36,22 @@ const Blog: React.FC = () => {
       highlightSpecificContent(postId, commentId);
     }
   }, [currentPage, searchParams]);
+
+  const fetchCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      const response = await BackendApi.getCategories();
+      const categoryList = response.data || [];
+      // Filter out null, undefined, and empty strings
+      const filteredCategories = categoryList.filter((cat: string) => cat && cat.trim());
+      setCategories(filteredCategories);
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+      setCategories([]);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
 
   const highlightSpecificContent = async (postId: string | null, commentId: string | null) => {
     try {
@@ -67,10 +87,12 @@ const Blog: React.FC = () => {
     }
   };
 
-  const filteredPosts = posts.filter(post =>
-      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.content.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredPosts = posts.filter(post => {
+    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         post.content.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = !selectedCategory || post.category?.toLowerCase() === selectedCategory.toLowerCase();
+    return matchesSearch && matchesCategory;
+  });
 
   const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     setCurrentPage(value);
@@ -125,28 +147,79 @@ const Blog: React.FC = () => {
 
         <Container maxWidth="lg" sx={{ py: 6 }}>
           {/* Search and Filter */}
-          <Box sx={{ mb: 4, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-            <TextField
-                placeholder="Search posts..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                variant="outlined"
-                sx={{ flex: 1, minWidth: 250 }}
-                InputProps={{
-                  startAdornment: (
-                      <InputAdornment position="start">
-                        <Search />
-                      </InputAdornment>
-                  ),
-                }}
-            />
-            <Button
-                variant="contained"
-                startIcon={<Filter />}
-                sx={{ textTransform: 'none' }}
-            >
-              Filter
-            </Button>
+          <Box sx={{ mb: 4 }}>
+            <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+              <TextField
+                  placeholder="Search posts..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  variant="outlined"
+                  sx={{ flex: 1, minWidth: 250 }}
+                  InputProps={{
+                    startAdornment: (
+                        <InputAdornment position="start">
+                          <Search />
+                        </InputAdornment>
+                    ),
+                  }}
+              />
+            </Box>
+
+            {/* Categories Filter */}
+            {!loadingCategories && categories.length > 0 && (
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Filter size={20} />
+                  <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'text.secondary' }}>
+                    Categories:
+                  </Typography>
+                </Box>
+
+                {/* All Categories Chip */}
+                <Chip
+                  label="All Categories"
+                  onClick={() => {
+                    setSelectedCategory(null);
+                    setCurrentPage(1);
+                  }}
+                  variant={selectedCategory === null ? "filled" : "outlined"}
+                  color={selectedCategory === null ? "primary" : "default"}
+                  sx={{ cursor: 'pointer' }}
+                />
+
+                {/* Individual Category Chips */}
+                {categories.map((category) => (
+                  <Chip
+                    key={category}
+                    label={category}
+                    onClick={() => {
+                      setSelectedCategory(category);
+                      setCurrentPage(1);
+                    }}
+                    variant={selectedCategory === category ? "filled" : "outlined"}
+                    color={selectedCategory === category ? "primary" : "default"}
+                    sx={{ cursor: 'pointer' }}
+                  />
+                ))}
+
+                {/* Clear Filter Button */}
+                {selectedCategory && (
+                  <Button
+                    size="small"
+                    startIcon={<X size={16} />}
+                    onClick={() => {
+                      setSelectedCategory(null);
+                      setCurrentPage(1);
+                    }}
+                    variant="outlined"
+                    color="error"
+                  >
+                    Clear
+                  </Button>
+                )}
+              </Box>
+            )}
+
           </Box>
 
           {/* Highlighted Post (from search) */}
@@ -219,12 +292,19 @@ const Blog: React.FC = () => {
                           />
                           <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                             <Box sx={{ mb: 2 }}>
-                              <Chip
-                                  size="small"
-                                  color="primary"
-                                  variant="outlined"
-                                  sx={{ mb: 1 }}
-                              />
+                              {post.category && (
+                                <Chip
+                                    label={post.category}
+                                    size="small"
+                                    color="primary"
+                                    variant={selectedCategory === post.category ? "filled" : "outlined"}
+                                    onClick={() => {
+                                      setSelectedCategory(post.category || null);
+                                      setCurrentPage(1);
+                                    }}
+                                    sx={{ mb: 1, cursor: 'pointer' }}
+                                />
+                              )}
                             </Box>
 
                             <Typography
@@ -310,3 +390,4 @@ const Blog: React.FC = () => {
 };
 
 export default Blog;
+
