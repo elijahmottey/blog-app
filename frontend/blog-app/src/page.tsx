@@ -17,6 +17,7 @@ import { DraftsManagement } from "./components/dashboard/DraftsManagement";
 import { UserAnalytics } from "./components/dashboard/UserAnalytics";
 import About from "./components/About";
 import Blog from "./components/Blog";
+import CategoryView from "./components/CategoryView";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import TermsOfService from "./components/TermsOfService";
 import { AIChatPage } from "./components/dashboard/AIChatPage";
@@ -84,6 +85,16 @@ export const PagesRoute = () => {
                                 <>
                                     <Navbar />
                                     <Blog />
+                                    <Footer />
+                                </>
+                            }
+                        />
+                        <Route
+                            path="/blog/category/:category"
+                            element={
+                                <>
+                                    <Navbar />
+                                    <CategoryView />
                                     <Footer />
                                 </>
                             }

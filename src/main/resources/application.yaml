@@ -55,11 +55,18 @@ app:
     name: ${ADMIN_NAME}
     email: ${ADMIN_EMAIL}
     password: ${ADMIN_PASSWORD}
+  default-categories:
+    - General
+    - Spiritual Life
+    - Technology
+    - Lifestyle
+    - Business
+    - Health
+    - Education
 
 logging:
   level:
     org.springframework.web.client.RestClient: DEBUG
     org.springframework.web.client.DefaultRestClient: DEBUG
     org.springframework.ai.openai.api: DEBUG
-
 

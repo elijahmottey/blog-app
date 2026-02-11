@@ -9,6 +9,7 @@ import liv.codveda.blog.app.repository.PostRepository;
 import liv.codveda.blog.app.repository.UsersRepository;
 import liv.codveda.blog.app.service.interfaces.BlogService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -18,11 +19,20 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 @Service
 public class PostBlogServiceImpl implements BlogService {
 
     private final PostRepository postRepository;
     private final UsersRepository userRepository;
+
+    // Inject default categories from application.yaml
+    @Value("${app.default-categories:}")
+    private List<String> defaultCategories;
 
     @Autowired
     public PostBlogServiceImpl(PostRepository postRepository, UsersRepository userRepository) {
@@ -105,6 +115,9 @@ public class PostBlogServiceImpl implements BlogService {
         if (post.getContent() != null) {
             existingPost.setContent(post.getContent());
         }
+        if (post.getCategory() != null) {
+            existingPost.setCategory(post.getCategory());
+        }
 
         return postRepository.save(existingPost);
     }
@@ -112,5 +125,22 @@ public class PostBlogServiceImpl implements BlogService {
     @Override
     public Integer getTotalPosts() {
         return Math.toIntExact(postRepository.count());
+    }
+
+    @Override
+    public Page<Post> getPostsByCategory(String category, Pageable pageable) {
+        return postRepository.findByCategoryIgnoreCase(category, pageable);
+    }
+
+    @Override
+    public List<String> getAllCategories() {
+        List<String> dbCategories = postRepository.findDistinctCategories();
+
+        // Combine defaults and db categories preserving order and uniqueness
+        Set<String> combined = new LinkedHashSet<>();
+        if (defaultCategories != null) combined.addAll(defaultCategories);
+        if (dbCategories != null) combined.addAll(dbCategories);
+
+        return new ArrayList<>(combined);
     }
 }

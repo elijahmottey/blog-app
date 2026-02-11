@@ -473,6 +473,10 @@ export default class BackendApi {
         return this.get<ApiResponse<string[]>>('/post/categories');
     }
 
+    static async getPostsByCategory(category: string, page: number = 0, size: number = 10) {
+        // encode category to safely pass in URL
+        return this.get<ApiResponse<PagedResponse<PostDto>>>(`/post/category/${encodeURIComponent(category)}?page=${page}&size=${size}`);
+    }
 
 
 }

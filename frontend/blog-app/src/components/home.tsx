@@ -246,34 +246,26 @@ export default function Home() {
                         <div className="mb-6 flex flex-wrap items-center gap-2">
                             <Filter size={20} style={{ color: theme.palette.text.secondary }} />
                             <div className="flex flex-wrap gap-2">
-                                <button
-                                    onClick={() => setSelectedCategory(null)}
-                                    className={`px-3 py-1.5 rounded-lg font-medium transition-colors text-sm ${
-                                        selectedCategory === null
-                                            ? 'text-white'
-                                            : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
-                                    }`}
-                                    style={{
-                                        backgroundColor: selectedCategory === null ? theme.palette.primary.main : undefined,
-                                    }}
-                                >
+                                <Link to="/blog/category/All" className={`px-3 py-1.5 rounded-lg font-medium transition-colors text-sm ${
+                                    selectedCategory === null
+                                        ? 'text-white'
+                                        : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
+                                }`} style={{ backgroundColor: selectedCategory === null ? theme.palette.primary.main : undefined }}>
                                     All Categories
-                                </button>
+                                </Link>
                                 {categories.map((category) => (
-                                    <button
+                                    <Link
                                         key={category}
-                                        onClick={() => setSelectedCategory(category)}
+                                        to={`/blog/category/${encodeURIComponent(category)}`}
                                         className={`px-3 py-1.5 rounded-lg font-medium transition-colors text-sm ${
                                             selectedCategory === category
                                                 ? 'text-white'
                                                 : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
                                         }`}
-                                        style={{
-                                            backgroundColor: selectedCategory === category ? theme.palette.primary.main : undefined,
-                                        }}
+                                        style={{ backgroundColor: selectedCategory === category ? theme.palette.primary.main : undefined }}
                                     >
                                         {category}
-                                    </button>
+                                    </Link>
                                 ))}
                                 {selectedCategory && (
                                     <button

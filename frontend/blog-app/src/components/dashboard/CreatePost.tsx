@@ -82,7 +82,16 @@ export const CreatePost: React.FC = () => {
     queryFn: () => BackendApi.getCategories(),
   });
 
-  const categories = categoriesResponse?.data || ['General', 'Technology', 'Lifestyle', 'Business', 'Health', 'Education'];
+  const categories = categoriesResponse?.data || ['General','Spiritual Life', 'Technology', 'Lifestyle', 'Business', 'Health', 'Education'];
+
+  // Ensure selectedCategory defaults to the first available category when categories load
+  useEffect(() => {
+    if (categories && categories.length > 0) {
+      if (!selectedCategory || !categories.includes(selectedCategory)) {
+        setSelectedCategory(categories[0]);
+      }
+    }
+  }, [categories]);
 
   const {
     register,
@@ -540,7 +549,7 @@ export const CreatePost: React.FC = () => {
             <FormControl fullWidth variant="outlined">
               <Select
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
+                onChange={(e) => setSelectedCategory(e.target.value as string)}
                 sx={{ fontSize: '1rem' }}
               >
                 {categories.map((category) => (
@@ -996,3 +1005,4 @@ Add code snippets when needed
       </Box>
   );
 };
+

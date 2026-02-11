@@ -179,8 +179,8 @@ const Blog: React.FC = () => {
                 <Chip
                   label="All Categories"
                   onClick={() => {
-                    setSelectedCategory(null);
-                    setCurrentPage(1);
+                    // navigate to category page for All
+                    navigate('/blog/category/All');
                   }}
                   variant={selectedCategory === null ? "filled" : "outlined"}
                   color={selectedCategory === null ? "primary" : "default"}
@@ -193,8 +193,8 @@ const Blog: React.FC = () => {
                     key={category}
                     label={category}
                     onClick={() => {
-                      setSelectedCategory(category);
-                      setCurrentPage(1);
+                      // navigate to category page for deep linking
+                      navigate(`/blog/category/${encodeURIComponent(category)}`);
                     }}
                     variant={selectedCategory === category ? "filled" : "outlined"}
                     color={selectedCategory === category ? "primary" : "default"}
@@ -298,9 +298,9 @@ const Blog: React.FC = () => {
                                     size="small"
                                     color="primary"
                                     variant={selectedCategory === post.category ? "filled" : "outlined"}
-                                    onClick={() => {
-                                      setSelectedCategory(post.category || null);
-                                      setCurrentPage(1);
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigate(`/blog/category/${encodeURIComponent(post.category || '')}`);
                                     }}
                                     sx={{ mb: 1, cursor: 'pointer' }}
                                 />

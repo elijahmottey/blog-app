@@ -14,5 +14,6 @@ public interface BlogService {
     Page<Post> getPostByTitle(String title, Pageable pageable);
     Post updatePost(Long id,Post post);
     Integer getTotalPosts();
-
+    Page<Post> getPostsByCategory(String category, Pageable pageable);
+    List<String> getAllCategories();
 }

@@ -21,6 +21,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/v1/post")
 public class BlogPostController  {
@@ -97,7 +99,7 @@ public class BlogPostController  {
     }
 
 
-    @GetMapping("search-titles")
+    @GetMapping("/search-titles")
     public ResponseEntity<ApiResponse<Page<PostDto>>> searchPostByTitle(
             @RequestParam String title,
             @PageableDefault(page = 0, size = 10) Pageable pageable
@@ -108,5 +110,30 @@ public class BlogPostController  {
 
         return ResponseEntity.ok(new ApiResponse<>(postPage.map(postMapper::postToPostDto),
                 "posts title retrieved successfully"));
+    }
+
+    // New endpoint: get all categories
+    @GetMapping("/categories")
+    public ResponseEntity<ApiResponse<List<String>>> getCategories() {
+        List<String> categories = blogService.getAllCategories();
+        return ResponseEntity.ok(new ApiResponse<>(categories, "Categories retrieved successfully"));
+    }
+
+    // New endpoint: get posts by category
+    @GetMapping("/category/{category}")
+    public ResponseEntity<ApiResponse<Paged<PostDto>>> getPostsByCategory(
+            @PathVariable String category,
+            @PageableDefault(page = 0, size = 10) Pageable pageable
+    ) {
+        Page<Post> posts = blogService.getPostsByCategory(category, pageable);
+        Paged<PostDto> response = new Paged<>(
+                posts.getContent().stream().map(postMapper::postToPostDto).toList(),
+                posts.getNumber(),
+                posts.getSize(),
+                posts.getTotalElements(),
+                posts.getTotalPages(),
+                posts.isLast()
+        );
+        return ResponseEntity.ok(new ApiResponse<>(response, "Posts by category retrieved successfully"));
     }
 }
