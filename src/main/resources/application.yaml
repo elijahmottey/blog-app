@@ -1,6 +1,5 @@
 spring:
-  aot:
-    enabled: true
+
   ai:
     openai:
       api-key: ${OPENROUTER_API_KEY}
@@ -29,7 +28,7 @@ spring:
       - userBlogHistory
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: true
 
     properties:
@@ -55,14 +54,7 @@ app:
     name: ${ADMIN_NAME}
     email: ${ADMIN_EMAIL}
     password: ${ADMIN_PASSWORD}
-  default-categories:
-    - General
-    - Spiritual Life
-    - Technology
-    - Lifestyle
-    - Business
-    - Health
-    - Education
+
 
 logging:
   level:

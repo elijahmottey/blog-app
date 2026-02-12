@@ -5,9 +5,7 @@ import jakarta.validation.Valid;
 import liv.codveda.blog.app.domain.dto.response.ApiResponse;
 import liv.codveda.blog.app.domain.dto.response.Paged;
 import liv.codveda.blog.app.domain.dto.response.PostDto;
-import liv.codveda.blog.app.domain.dto.response.UsersDto;
 import liv.codveda.blog.app.domain.entities.Post;
-import liv.codveda.blog.app.domain.entities.Users;
 import liv.codveda.blog.app.domain.enums.Category;
 import liv.codveda.blog.app.domain.mapper.interfaces.PostMapper;
 import liv.codveda.blog.app.service.interfaces.BlogService;
@@ -19,10 +17,10 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.SequencedCollection;
 
 @RestController
 @RequestMapping("api/v1/post")
@@ -120,21 +118,21 @@ public class BlogPostController  {
         return ResponseEntity.ok(new ApiResponse<>(categories, "Categories retrieved successfully"));
     }
 
-    // New endpoint: get posts by category
-    @GetMapping("/category/{category}")
-    public ResponseEntity<ApiResponse<Paged<PostDto>>> getPostsByCategory(
-            @PathVariable Category category,
-            @PageableDefault(page = 0, size = 10) Pageable pageable
-    ) {
-        Page<Post> posts = blogService.getPostsByCategory(category, pageable);
-        Paged<PostDto> response = new Paged<>(
-                posts.getContent().stream().map(postMapper::postToPostDto).toList(),
-                posts.getNumber(),
-                posts.getSize(),
-                posts.getTotalElements(),
-                posts.getTotalPages(),
-                posts.isLast()
-        );
-        return ResponseEntity.ok(new ApiResponse<>(response, "Posts by category retrieved successfully"));
-    }
+//    // New endpoint: get posts by category
+//    @GetMapping("/category/{category}")
+//    public ResponseEntity<ApiResponse<Paged<PostDto>>> getPostsByCategory(
+//            @PathVariable Category category,
+//            Pageable pageable
+//    ) {
+//        Page<Post> posts = blogService.getPostsByCategory(category,pageable);
+//        Paged<PostDto> response = new Paged<>(
+//                posts.getContent().stream().map(postMapper::postToPostDto).toList(),
+//                posts.getNumber(),
+//                posts.getSize(),
+//                posts.getTotalElements(),
+//                posts.getTotalPages(),
+//                posts.isLast()
+//        );
+//        return ResponseEntity.ok(new ApiResponse<>(response, "Posts by category retrieved successfully"));
+//    }
 }

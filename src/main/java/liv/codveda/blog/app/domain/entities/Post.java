@@ -30,7 +30,6 @@ public class Post {
     private String title;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Category category;
 
     @NotBlank(message = "Content is required")

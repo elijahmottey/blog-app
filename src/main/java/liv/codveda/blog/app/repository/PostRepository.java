@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.SequencedCollection;
 
 
 @Repository
@@ -23,5 +24,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("select distinct p.category from Post p where p.category is not null")
     List<String> findDistinctCategories();
 
-   // List<String>findByCategoryIgnoreCase(Category category);
+//    List<Post> findByCategoryIgnoreCase(Category category);
 }

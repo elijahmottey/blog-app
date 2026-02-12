@@ -127,10 +127,7 @@ export const ProfileManagement: React.FC = () => {
         onSuccess: () => {
             toast.success('Profile updated successfully!');
             queryClient.invalidateQueries({ queryKey: ['user-profile'] });
-            queryClient.invalidateQueries({ queryKey: ['auth-user'] });
             setIsEditing(false);
-            // Force page reload to refresh auth context
-            window.location.reload();
         },
         onError: (error: any) => {
             toast.error(error.response?.data?.message || 'Failed to update profile');

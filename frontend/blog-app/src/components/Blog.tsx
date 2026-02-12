@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { Box, Typography, Container, Card, CardContent, CardMedia, Chip, Button, TextField, InputAdornment, Pagination } from '@mui/material';
 import { CalendarDays, User, Search, Filter, Download, X } from 'lucide-react';
 import BackendApi, { type PostDto } from '../service/BackendApi';
@@ -20,22 +20,25 @@ const Blog: React.FC = () => {
   const [searchParams] = useSearchParams();
   const postsPerPage = 9;
   const navigate = useNavigate();
+  const { category: routeCategory } = useParams<{ category?: string }>();
 
   // Unified blog post image
   const unifiedImageUrl = '/blog-unified-image.svg';
 
   useEffect(() => {
     fetchCategories();
+    // when routeCategory or page changes, fetch posts
     fetchPosts();
-    
+
     // Check for specific post/comment ID in URL params
     const postId = searchParams.get('postId');
     const commentId = searchParams.get('commentId');
-    
+
     if (postId || commentId) {
       highlightSpecificContent(postId, commentId);
     }
-  }, [currentPage, searchParams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, searchParams, routeCategory]);
 
   const fetchCategories = async () => {
     try {
@@ -76,9 +79,20 @@ const Blog: React.FC = () => {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const response = await BackendApi.getAllPost(currentPage - 1, postsPerPage);
-      setPosts(response.data?.content || []);
-      setTotalPages(response.data?.totalPages || 1);
+
+      // If routeCategory is present and not 'All', fetch by category; otherwise fetch all
+      if (routeCategory && routeCategory.toLowerCase() !== 'all') {
+        // routeCategory may be human-friendly; backend will normalize, so pass through
+        const response = await BackendApi.getPostsByCategory(routeCategory, currentPage - 1, postsPerPage);
+        setPosts(response.data?.content || []);
+        setTotalPages(response.data?.totalPages || 1);
+        setSelectedCategory(routeCategory);
+      } else {
+        const response = await BackendApi.getAllPost(currentPage - 1, postsPerPage);
+        setPosts(response.data?.content || []);
+        setTotalPages(response.data?.totalPages || 1);
+        setSelectedCategory(null);
+      }
     } catch (err) {
       setError('Failed to load posts');
       console.error('Error fetching posts:', err);
@@ -195,6 +209,7 @@ const Blog: React.FC = () => {
                     onClick={() => {
                       // navigate to category page for deep linking
                       navigate(`/blog/category/${encodeURIComponent(category)}`);
+                      // selectedCategory will be set via route effect
                     }}
                     variant={selectedCategory === category ? "filled" : "outlined"}
                     color={selectedCategory === category ? "primary" : "default"}
@@ -210,6 +225,7 @@ const Blog: React.FC = () => {
                     onClick={() => {
                       setSelectedCategory(null);
                       setCurrentPage(1);
+                      navigate('/blog');
                     }}
                     variant="outlined"
                     color="error"
