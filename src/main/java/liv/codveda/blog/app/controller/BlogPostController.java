@@ -118,21 +118,22 @@ public class BlogPostController  {
         return ResponseEntity.ok(new ApiResponse<>(categories, "Categories retrieved successfully"));
     }
 
-//    // New endpoint: get posts by category
-//    @GetMapping("/category/{category}")
-//    public ResponseEntity<ApiResponse<Paged<PostDto>>> getPostsByCategory(
-//            @PathVariable Category category,
-//            Pageable pageable
-//    ) {
-//        Page<Post> posts = blogService.getPostsByCategory(category,pageable);
-//        Paged<PostDto> response = new Paged<>(
-//                posts.getContent().stream().map(postMapper::postToPostDto).toList(),
-//                posts.getNumber(),
-//                posts.getSize(),
-//                posts.getTotalElements(),
-//                posts.getTotalPages(),
-//                posts.isLast()
-//        );
-//        return ResponseEntity.ok(new ApiResponse<>(response, "Posts by category retrieved successfully"));
-//    }
+    @GetMapping("/category/{category}")
+    public ResponseEntity<ApiResponse<Paged<PostDto>>> getPostsByCategory(
+            @PathVariable String category,
+            Pageable pageable
+    ) {
+        Category categoryEnum = Category.fromString(category);
+        Page<Post> posts = blogService.getPostsByCategory(categoryEnum, pageable);
+        Paged<PostDto> response = new Paged<>(
+                posts.getContent().stream().map(postMapper::postToPostDto).toList(),
+                posts.getNumber(),
+                posts.getSize(),
+                posts.getTotalElements(),
+                posts.getTotalPages(),
+                posts.isLast()
+        );
+        return ResponseEntity.ok(new ApiResponse<>(response, "Posts by category retrieved successfully"));
+    }
+
 }

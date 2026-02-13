@@ -126,12 +126,12 @@ public class PostBlogServiceImpl implements BlogService {
 
     @Override
     public Page<Post> getPostsByCategory(Category category, Pageable pageable) {
-        return postRepository.findByCategoryIgnoreCase(category, pageable);
+        return postRepository.findByCategory(category, pageable);
     }
 
     public List<String> getAllCategories() {
          return Stream.of(
-                "Spiritual Life",
+                "Spiritual",
                 "Technology",
                 "health",
                 "Leadership",

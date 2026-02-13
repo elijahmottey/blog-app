@@ -61,7 +61,7 @@ const passwordSchema = yup.object({
 });
 
 export const ProfileManagement: React.FC = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, refreshUser } = useAuth();
     const theme = useTheme();
     const queryClient = useQueryClient();
     const [activeTab, setActiveTab] = useState<'profile' | 'password' | 'stats' | 'account'>('profile');
@@ -124,8 +124,9 @@ export const ProfileManagement: React.FC = () => {
     const updateProfileMutation = useMutation({
         mutationFn: (data: ProfileFormData) =>
             BackendApi.updateUser(user?.id || 0, data),
-        onSuccess: () => {
+        onSuccess: async () => {
             toast.success('Profile updated successfully!');
+            await refreshUser();
             queryClient.invalidateQueries({ queryKey: ['user-profile'] });
             setIsEditing(false);
         },

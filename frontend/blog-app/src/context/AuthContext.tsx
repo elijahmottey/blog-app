@@ -12,6 +12,7 @@ interface AuthContextType {
   register: (data: { email: string; password: string; name: string }) => Promise<void>;
   logout: () => void;
   loading: boolean;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,22 +30,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const refreshUser = async () => {
+    if (BackendApi.isAuthenticated()) {
+      const profileResp = await BackendApi.getUserProfile();
+      const profile = profileResp.data;
+      setUserProfile(profile);
+      const userWithRoles: UserDto = {
+        id: profile.id,
+        name: profile.name,
+        email: profile.email,
+        description: profile.description,
+        roles: BackendApi.getRoles(),
+        createdAt: profile.createdAt,
+        updatedAt: profile.updatedAt,
+      };
+      setUser(userWithRoles);
+    }
+  };
+
   useEffect(() => {
     const initializeAuth = async () => {
       if (BackendApi.isAuthenticated()) {
         try {
-          const profileResp = await BackendApi.getUserProfile();
-          const profile = profileResp.data;
-          setUserProfile(profile);
-          const userWithRoles: UserDto = {
-            id: profile.id,
-            name: profile.name,
-            email: profile.email,
-            roles: BackendApi.getRoles(),
-            createdAt: profile.createdAt,
-            updatedAt: profile.updatedAt,
-          };
-          setUser(userWithRoles);
+          await refreshUser();
         } catch (error) {
           console.error('Failed to fetch user profile:', error);
           BackendApi.clearTokens();
@@ -58,35 +66,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (credentials: { email: string, password: string }) => {
     await BackendApi.loginUser(credentials);
-    const profileResp = await BackendApi.getUserProfile();
-    const profile = profileResp.data;
-    setUserProfile(profile);
-    const userWithRoles: UserDto = {
-      id: profile.id,
-      name: profile.name,
-      email: profile.email,
-      roles: BackendApi.getRoles(),
-      createdAt: profile.createdAt,
-      updatedAt: profile.updatedAt,
-    };
-    setUser(userWithRoles);
-    return userWithRoles;
+    await refreshUser();
+    return user;
   };
 
   const register = async (data: { email: string; password: string; name: string }) => {
     await BackendApi.registerUser(data);
-    const profileResp = await BackendApi.getUserProfile();
-    const profile = profileResp.data;
-    setUserProfile(profile);
-    const userWithRoles: UserDto = {
-      id: profile.id,
-      name: profile.name,
-      email: profile.email,
-      roles: BackendApi.getRoles(),
-      createdAt: profile.createdAt,
-      updatedAt: profile.updatedAt,
-    };
-    setUser(userWithRoles);
+    await refreshUser();
   };
 
   const logout = async () => {
@@ -114,6 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             register,
             logout,
             loading,
+            refreshUser,
           }}
       >
         {children}

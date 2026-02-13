@@ -18,11 +18,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByTitleContainingIgnoreCase(String title, Pageable pageable);
 
     // Find posts by exact category match (case-insensitive)
-    Page<Post> findByCategoryIgnoreCase(Category category, Pageable pageable);
+    Page<Post> findByCategory(Category category, Pageable pageable);
 
     // Return distinct non-null categories
     @Query("select distinct p.category from Post p where p.category is not null")
     List<String> findDistinctCategories();
 
-//    List<Post> findByCategoryIgnoreCase(Category category);
 }

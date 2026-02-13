@@ -6,16 +6,12 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum Category {
     TECHNOLOGY,
     SPIRITUAL,
-    LIFESTYLE,
-    TRAVEL,
     POLITICS,
     LEADERSHIP,
     CULTURE,
-    FASHION,
     HEALTH,
     BUSINESS,
     EDUCATION,
-    ENTERTAINMENT,
     SPORTS;
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)

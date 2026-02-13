@@ -24,6 +24,7 @@ import {useAuth} from "../../context/AuthContext.tsx";
 
 export const PostsManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(0);
   const queryClient = useQueryClient();
 
@@ -132,11 +133,13 @@ export const PostsManagement: React.FC = () => {
   const totalPages = postsData?.data?.totalPages || 0;
   const totalElements = postsData?.data?.totalElements || 0;
 
-  // Filter posts based on search term
-  const filteredPosts = posts.filter(post =>
-      post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.content?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter posts based on search term and category
+  const filteredPosts = posts.filter(post => {
+    const matchesSearch = post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.content?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || post.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   const handleDelete = (postId: number) => {
     if (window.confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
@@ -230,13 +233,26 @@ export const PostsManagement: React.FC = () => {
                   sx: { borderRadius: 2 }
                 }}
             />
-            <Button
+            <TextField
+                select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
                 variant="outlined"
-                startIcon={<Filter />}
-                sx={{ minWidth: '120px', textTransform: 'none' }}
+                size="small"
+                sx={{ minWidth: '200px' }}
+                SelectProps={{ native: true }}
             >
-              Filter
-            </Button>
+              <option value="all">All Categories</option>
+              <option value="TECHNOLOGY">Technology</option>
+              <option value="SPIRITUAL">Spiritual</option>
+              <option value="POLITICS">Politics</option>
+              <option value="LEADERSHIP">Leadership</option>
+              <option value="CULTURE">Culture</option>
+              <option value="HEALTH">Health</option>
+              <option value="BUSINESS">Business</option>
+              <option value="EDUCATION">Education</option>
+              <option value="SPORTS">Sports</option>
+            </TextField>
           </Box>
         </Paper>
 
