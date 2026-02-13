@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Edit, Trash2, Eye, Plus, Search, Filter, RefreshCw } from 'lucide-react';
+import { Edit, Trash2, Eye, Plus, Search, Filter, RefreshCw, User } from 'lucide-react';
 import {
   Button,
   TextField,
@@ -40,8 +40,7 @@ export const PostsManagement: React.FC = () => {
   // Listen for post creation events (triggered from CreatePost component)
   useEffect(() => {
     const handlePostCreated = () => {
-      console.log('Post created event received, invalidating posts cache...');
-      // Clear cache and refetch posts
+ // Clear cache and refetch posts
       setCachedPosts(null);
       setLastFetchTime(0);
       queryClient.invalidateQueries({ queryKey: ['user-posts-management'] });
@@ -324,6 +323,22 @@ export const PostsManagement: React.FC = () => {
                           </Typography>
 
                           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                            <Box 
+                              sx={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: 0.5,
+                                cursor: 'pointer',
+                                '&:hover': { color: 'primary.main' }
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(`/profile/${post.user?.name || post.users}`, '_blank');
+                              }}
+                            >
+                              <User style={{ width: 16, height: 16 }} />
+                              <Typography variant="caption">{post.user?.name || post.users || 'Anonymous'}</Typography>
+                            </Box>
                             <Chip
                                 label={`${post.comments?.length || 0} comments`}
                                 size="small"
@@ -365,7 +380,7 @@ export const PostsManagement: React.FC = () => {
                             <Eye size={18} />
                           </IconButton>
 
-                          {(isAdmin || ((typeof post.users === 'string' ? post.users.toLowerCase() : '').includes((user?.name||'').toLowerCase()) || (typeof post.users === 'string' ? post.users.toLowerCase() : '').includes((user?.email||'').toLowerCase()))) && (
+                          {(isAdmin || (post.user?.name === user?.name || post.user?.email === user?.email || (typeof post.users === 'string' && (post.users.toLowerCase().includes((user?.name||'').toLowerCase()) || post.users.toLowerCase().includes((user?.email||'').toLowerCase()))))) && (
                               <>
                                 <IconButton
                                     component={Link}

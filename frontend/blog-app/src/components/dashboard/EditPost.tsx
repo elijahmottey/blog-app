@@ -123,11 +123,13 @@ const StyledTextArea = styled(TextField)(({ theme }) => ({
 interface PostFormData {
   title: string;
   content: string;
+  category: string;
 }
 
 const schema = yup.object({
   title: yup.string().required('Title is required').min(3, 'Title must be at least 3 characters'),
   content: yup.string().required('Content is required').min(10, 'Content must be at least 10 characters'),
+  category: yup.string().required('Category is required'),
 });
 
 export const EditPost: React.FC = () => {
@@ -163,6 +165,7 @@ export const EditPost: React.FC = () => {
     if (postData?.data) {
       setValue('title', postData.data.title);
       setValue('content', postData.data.content);
+      setValue('category', postData.data.category || '');
     }
   }, [postData, setValue]);
 
@@ -171,6 +174,7 @@ export const EditPost: React.FC = () => {
       ...postData?.data,
       title: data.title,
       content: data.content,
+      category: data.category,
       updatedAt: new Date().toISOString(),
     } as PostDto, postId),
     onSuccess: () => {
@@ -399,6 +403,33 @@ export const EditPost: React.FC = () => {
                         sx: { fontSize: '1.125rem', fontWeight: 500 },
                       }}
                   />
+                </Box>
+
+                {/* Category Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom fontWeight="medium">
+                    Category
+                  </Typography>
+                  <StyledTextField
+                      {...register('category')}
+                      select
+                      fullWidth
+                      disabled={previewMode}
+                      error={!!errors.category}
+                      helperText={errors.category?.message}
+                      SelectProps={{ native: true }}
+                  >
+                    <option value="">Select a category</option>
+                    <option value="TECHNOLOGY">Technology</option>
+                    <option value="SPIRITUAL">Spiritual</option>
+                    <option value="POLITICS">Politics</option>
+                    <option value="LEADERSHIP">Leadership</option>
+                    <option value="CULTURE">Culture</option>
+                    <option value="HEALTH">Health</option>
+                    <option value="BUSINESS">Business</option>
+                    <option value="EDUCATION">Education</option>
+                    <option value="SPORTS">Sports</option>
+                  </StyledTextField>
                 </Box>
 
                 <Divider />

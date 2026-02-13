@@ -26,6 +26,7 @@ import { AdminUsers } from "./components/dashboard/AdminUsers.tsx";
 import { Unauthorized } from "./components/unauthorized.tsx";
 import {AnalyticsView} from "./components/dashboard/AnalyticsView.tsx";
 import {UserActivityPage} from "./components/dashboard/UserActivityPage.tsx";
+import { AuthorProfile } from "./components/AuthorProfile.tsx";
 
 export const PagesRoute = () => {
     return (
@@ -105,6 +106,16 @@ export const PagesRoute = () => {
                                 <>
                                     <Navbar />
                                     <PrivacyPolicy />
+                                    <Footer />
+                                </>
+                            }
+                        />
+                        <Route
+                            path="/profile/:username"
+                            element={
+                                <>
+                                    <Navbar />
+                                    <AuthorProfile />
                                     <Footer />
                                 </>
                             }

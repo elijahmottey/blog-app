@@ -296,8 +296,20 @@ export const PostDetail: React.FC = () => {
             )}
             
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', typography: 'body2', color: 'text.secondary' }}>
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <Box>By {postAuthorName}</Box>
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                <Box 
+                  sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 0.5,
+                    cursor: 'pointer',
+                    '&:hover': { color: 'primary.main' }
+                  }}
+                  onClick={() => navigate(`/profile/${postData.user?.name || postAuthorName}`)}
+                >
+                  <User size={16} />
+                  <span>By {postData.user?.name || postAuthorName}</span>
+                </Box>
                 <Box>Created: {postData.createdAt ? format(new Date(postData.createdAt), 'MMM dd, yyyy') : 'Unknown'}</Box>
                 {postData.updatedAt && postData.updatedAt !== postData.createdAt && (
                     <Box>Updated: {format(new Date(postData.updatedAt), 'MMM dd, yyyy')}</Box>

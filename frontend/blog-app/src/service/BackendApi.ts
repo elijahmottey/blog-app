@@ -77,6 +77,13 @@ export interface PostDto{
     title: string;
     content: string;
     category?: string;
+    user?: {
+        id: number;
+        name: string;
+        email: string;
+        description?: string;
+        role: string;
+    };
     users?: string;
     createdAt?:string;
     updatedAt?:string;

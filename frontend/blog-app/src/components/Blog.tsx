@@ -22,8 +22,20 @@ const Blog: React.FC = () => {
   const navigate = useNavigate();
   const { category: routeCategory } = useParams<{ category?: string }>();
 
-  // Unified blog post image
-  const unifiedImageUrl = '/blog-unified-image.svg';
+  const getCategoryImage = (category?: string) => {
+    const images: Record<string, string> = {
+      TECHNOLOGY: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop',
+      SPIRITUAL: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&auto=format&fit=crop',
+      POLITICS: 'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=800&auto=format&fit=crop',
+      LEADERSHIP: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&auto=format&fit=crop',
+      CULTURE: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&auto=format&fit=crop',
+      HEALTH: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800&auto=format&fit=crop',
+      BUSINESS: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&auto=format&fit=crop',
+      EDUCATION: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&auto=format&fit=crop',
+      SPORTS: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&auto=format&fit=crop',
+    };
+    return images[category?.toUpperCase() || ''] || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&auto=format&fit=crop';
+  };
 
   useEffect(() => {
     fetchCategories();
@@ -302,7 +314,7 @@ const Blog: React.FC = () => {
                           <CardMedia
                               component="img"
                               height="200"
-                              image={unifiedImageUrl}
+                              image={getCategoryImage(post.category)}
                               alt="Blog post illustration"
                               sx={{ objectFit: 'cover' }}
                           />
@@ -357,10 +369,23 @@ const Blog: React.FC = () => {
                             </Typography>
 
                             <Box sx={{ mt: 'auto', pt: 2 }}>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                              <Box 
+                                sx={{ 
+                                  display: 'flex', 
+                                  alignItems: 'center', 
+                                  gap: 1, 
+                                  mb: 1,
+                                  cursor: 'pointer',
+                                  '&:hover': { color: 'primary.main' }
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/profile/${post.user?.name || post.users}`);
+                                }}
+                              >
                                 <User size={16} />
                                 <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                  {post.users || 'Anonymous'}
+                                  {post.user?.name || post.users || 'Anonymous'}
                                 </Typography>
                               </Box>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'space-between' }}>
