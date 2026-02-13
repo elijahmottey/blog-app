@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Edit, Trash2, Eye, Plus, Search, Filter, RefreshCw, User } from 'lucide-react';
+import { Edit, Trash2, Eye, Plus, Search, Filter, RefreshCw, User, MessageSquare } from 'lucide-react';
 import {
   Button,
   TextField,
@@ -27,6 +27,7 @@ export const PostsManagement: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(0);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   // Use localStorage to cache posts
   const [cachedPosts, setCachedPosts] = useLocalStorage<any>('user-posts-cache', null);
@@ -138,6 +139,11 @@ export const PostsManagement: React.FC = () => {
         post.content?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || post.category === selectedCategory;
     return matchesSearch && matchesCategory;
+  }).sort((a, b) => {
+    // Sort by creation date, newest first
+    const dateA = new Date(a.createdAt || 0).getTime();
+    const dateB = new Date(b.createdAt || 0).getTime();
+    return dateB - dateA;
   });
 
   const handleDelete = (postId: number) => {
@@ -277,147 +283,155 @@ export const PostsManagement: React.FC = () => {
                 )}
               </Box>
           ) : (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {filteredPosts.map((post) => (
-                    <Paper
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                {filteredPosts.map((post, index) => {
+                  const isNew = post.createdAt && (new Date().getTime() - new Date(post.createdAt).getTime()) < 24 * 60 * 60 * 1000;
+                  return (
+                    <Box
                         key={post.id}
                         sx={{
                           p: 2,
-                          borderRadius: 2,
-                          border: 1,
+                          borderBottom: 1,
                           borderColor: 'divider',
+                          bgcolor: isNew ? 'primary.50' : 'background.paper',
                           '&:hover': {
-                            borderColor: 'primary.main',
-                            boxShadow: 1
+                            bgcolor: 'action.hover',
+                            cursor: 'pointer'
                           },
-                          transition: 'all 0.2s'
+                          transition: 'background-color 0.2s'
                         }}
+                        onClick={() => navigate(`/dashboard/posts/${post.id}`)}
                     >
-                      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', gap: 2 }}>
-                        <Box sx={{ flex: 1 }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                            {(!post.content || post.content.length <= 100) && (
-                                <Chip label="Draft" size="small" color="warning" variant="outlined" />
-                            )}
-                            <Typography variant="caption" color="text.secondary">
-                              {post.createdAt ? format(new Date(post.createdAt), 'MMM dd, yyyy') : 'Unknown date'}
-                            </Typography>
-                          </Box>
+                      <Box sx={{ display: 'flex', gap: 2 }}>
+                        {/* Avatar */}
+                        <Box
+                          sx={{
+                            width: 48,
+                            height: 48,
+                            borderRadius: '50%',
+                            bgcolor: 'primary.main',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontWeight: 'bold',
+                            fontSize: '1.2rem',
+                            flexShrink: 0
+                          }}
+                        >
+                          {(post.user?.name || post.users || 'A').charAt(0).toUpperCase()}
+                        </Box>
 
-                          <Link to={`/dashboard/posts/${post.id}`} style={{ textDecoration: 'none' }}>
-                            <Typography
-                                variant="h6"
-                                sx={{
-                                  color: 'text.primary',
-                                  '&:hover': { color: 'primary.main' },
-                                  mb: 1,
-                                  fontWeight: 600
-                                }}
-                            >
-                              {post.title || 'Untitled Post'}
-                            </Typography>
-                          </Link>
-
-                          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-                            {truncateContent(post.content || '')}
-                          </Typography>
-
-                          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-                            <Box 
-                              sx={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                gap: 0.5,
-                                cursor: 'pointer',
-                                '&:hover': { color: 'primary.main' }
-                              }}
+                        {/* Content */}
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          {/* Header */}
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
+                            <Typography 
+                              variant="body2" 
+                              sx={{ fontWeight: 'bold', color: 'text.primary' }}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 window.open(`/profile/${post.user?.name || post.users}`, '_blank');
                               }}
                             >
-                              <User style={{ width: 16, height: 16 }} />
-                              <Typography variant="caption">{post.user?.name || post.users || 'Anonymous'}</Typography>
-                            </Box>
-                            <Chip
-                                label={`${post.comments?.length || 0} comments`}
-                                size="small"
-                                variant="outlined"
-                                color="info"
-                            />
-                            {/*@ts-ignore*/}
-                            {post.likes > 0 && (
-                                <Chip
-                                    label={`${post.likes} likes`}
-                                    size="small"
-                                    variant="outlined"
-                                    color="error"
-                                />
+                              {post.user?.name || post.users || 'Anonymous'}
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                              · {post.createdAt ? format(new Date(post.createdAt), 'MMM dd') : 'Unknown'}
+                            </Typography>
+                            {isNew && (
+                                <Chip label="New" size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
                             )}
-                            {/*@ts-ignore*/}
-                            {post.views > 0 && (
-                                <Chip
-                                    label={`${post.views} views`}
-                                    size="small"
-                                    variant="outlined"
-                                    color="success"
-                                />
+                            {(!post.content || post.content.length <= 100) && (
+                                <Chip label="Draft" size="small" color="warning" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />
                             )}
                           </Box>
-                        </Box>
 
-                        <Box sx={{ display: 'flex', gap: 1, justifyContent: { xs: 'flex-start', md: 'flex-end' }, flexWrap: 'wrap' }}>
-                          <IconButton
-                              component={Link}
-                              to={`/dashboard/posts/${post.id}`}
-                              size="small"
+                          {/* Title */}
+                          <Typography
+                              variant="body1"
                               sx={{
-                                color: 'primary.main',
-                                '&:hover': { bgcolor: 'primary.50' }
+                                fontWeight: 600,
+                                mb: 0.5,
+                                color: 'text.primary'
                               }}
-                              title="View Post"
                           >
-                            <Eye size={18} />
-                          </IconButton>
+                            {post.title || 'Untitled Post'}
+                          </Typography>
 
-                          {(isAdmin || (post.user?.name === user?.name || post.user?.email === user?.email || (typeof post.users === 'string' && (post.users.toLowerCase().includes((user?.name||'').toLowerCase()) || post.users.toLowerCase().includes((user?.email||'').toLowerCase()))))) && (
-                              <>
-                                <IconButton
-                                    component={Link}
-                                    to={`/dashboard/posts/${post.id}/edit`}
-                                    size="small"
-                                    sx={{
-                                      color: 'success.main',
-                                      '&:hover': { bgcolor: 'success.50' }
-                                    }}
-                                    title="Edit Post"
-                                >
-                                  <Edit size={18} />
-                                </IconButton>
+                          {/* Content Preview */}
+                          <Typography 
+                            variant="body2" 
+                            sx={{ 
+                              color: 'text.secondary', 
+                              mb: 1,
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden'
+                            }}
+                          >
+                            {truncateContent(post.content || '', 150)}
+                          </Typography>
 
-                                <IconButton
-                                    onClick={() => handleDelete(post.id!)}
-                                    disabled={deleteMutation.isPending}
-                                    size="small"
-                                    sx={{
-                                      color: 'error.main',
-                                      '&:hover': { bgcolor: 'error.50' },
-                                      '&:disabled': { opacity: 0.5 }
-                                    }}
-                                    title="Delete Post"
-                                >
-                                  {deleteMutation.isPending ? (
-                                      <CircularProgress size={18} />
-                                  ) : (
-                                      <Trash2 size={18} />
-                                  )}
-                                </IconButton>
-                              </>
-                          )}
+                          {/* Actions */}
+                          <Box sx={{ display: 'flex', gap: 3, alignItems: 'center', color: 'text.secondary' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <MessageSquare size={16} />
+                              <Typography variant="caption">
+                                {Array.isArray(post.comments) ? post.comments.length : 0}
+                              </Typography>
+                            </Box>
+                            
+                            <Box sx={{ ml: 'auto', display: 'flex', gap: 0.5 }}>
+                              <IconButton
+                                  size="small"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/dashboard/posts/${post.id}`);
+                                  }}
+                                  sx={{ color: 'text.secondary' }}
+                              >
+                                <Eye size={16} />
+                              </IconButton>
+
+                              {(isAdmin || post.user?.id === user?.id) && (
+                                  <>
+                                    <IconButton
+                                        size="small"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          navigate(`/dashboard/posts/${post.id}/edit`);
+                                        }}
+                                        sx={{ color: 'text.secondary' }}
+                                    >
+                                      <Edit size={16} />
+                                    </IconButton>
+
+                                    <IconButton
+                                        size="small"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDelete(post.id!);
+                                        }}
+                                        disabled={deleteMutation.isPending}
+                                        sx={{ color: 'text.secondary' }}
+                                    >
+                                      {deleteMutation.isPending ? (
+                                          <CircularProgress size={16} />
+                                      ) : (
+                                          <Trash2 size={16} />
+                                      )}
+                                    </IconButton>
+                                  </>
+                              )}
+                            </Box>
+                          </Box>
                         </Box>
                       </Box>
-                    </Paper>
-                ))}
+                    </Box>
+                  );
+                })}
               </Box>
           )}
         </Paper>

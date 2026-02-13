@@ -219,10 +219,7 @@ export const PostDetail: React.FC = () => {
   const postAuthorName = getUserName(postData.users);
 
   // Determine if current user can edit/delete (author or admin)
-  const currentUserName = user?.name?.toLowerCase() || '';
-  const currentUserEmail = user?.email?.toLowerCase() || '';
-  const authorStr = (typeof postData.users === 'string' ? postData.users : getUserName(postData.users)).toLowerCase();
-  const canEditOrDelete = !!user && (authorStr.includes(currentUserName) || authorStr.includes(currentUserEmail) || (user?.roles?.includes('ADMIN' as any)));
+  const canEditOrDelete = !!user && (postData.user?.id === user.id || user.roles?.includes('ADMIN' as any));
 
   // Safely ensure post content is a string
   const safePostContent = typeof postData.content === 'string'
