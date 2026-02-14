@@ -73,7 +73,7 @@ export const CreatePost: React.FC = () => {
   const [formattingHistory, setFormattingHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string>('General');
+  const [selectedCategory, setSelectedCategory] = useState<string>('TECHNOLOGY');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Fetch categories

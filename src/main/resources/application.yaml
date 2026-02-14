@@ -1,4 +1,28 @@
 spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: ${REDIRECT_URL}/google
+            scope:
+              - openid
+              - profile
+              - email
+          github:
+            client-id: ${GITHUB_CLIENT_ID}
+            client-secret: ${GITHUB_CLIENT_SECRET}
+            redirect-uri: ${REDIRECT_URL}/github
+            scope:
+              - read:user
+              - user:email
+        provider:
+          google:
+            issuer-uri: https://accounts.google.com
+          github:
+            issuer-uri: https://api.github.com
 
   ai:
     openai:
@@ -61,4 +85,6 @@ logging:
     org.springframework.web.client.RestClient: DEBUG
     org.springframework.web.client.DefaultRestClient: DEBUG
     org.springframework.ai.openai.api: DEBUG
+    org.springframework.security: TRACE
+
 
