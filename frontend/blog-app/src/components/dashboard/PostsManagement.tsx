@@ -185,15 +185,15 @@ export const PostsManagement: React.FC = () => {
 
   // @ts-ignore
   return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: { xs: 2, md: 3 } }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: { xs: 1.5, md: 2 } }}>
         {/* Header */}
-        <Paper sx={{ p: 3, borderRadius: 2 }}>
-          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'center' }, gap: 2 }}>
+        <Paper sx={{ p: 2, borderRadius: 1 }}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'center' }, gap: 1.5 }}>
             <Box>
-              <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'text.primary', mb: 0.5 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary', mb: 0.25, fontSize: '1.125rem' }}>
                 View all Posts
               </Typography>
-              <Typography variant="body1" color="text.secondary">
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
                 Find your blog post
               </Typography>
             </Box>
@@ -201,8 +201,9 @@ export const PostsManagement: React.FC = () => {
               <Button
                   onClick={refreshPosts}
                   variant="outlined"
-                  startIcon={<RefreshCw />}
-                  sx={{ textTransform: 'none' }}
+                  startIcon={<RefreshCw size={16} />}
+                  size="small"
+                  sx={{ textTransform: 'none', fontSize: '0.875rem' }}
               >
                 Refresh
               </Button>
@@ -210,8 +211,9 @@ export const PostsManagement: React.FC = () => {
                   component={Link}
                   to="/dashboard/posts/create"
                   variant="contained"
-                  startIcon={<Plus />}
-                  sx={{ textTransform: 'none' }}
+                  startIcon={<Plus size={16} />}
+                  size="small"
+                  sx={{ textTransform: 'none', fontSize: '0.875rem' }}
               >
                 Create New Post
               </Button>
@@ -220,8 +222,8 @@ export const PostsManagement: React.FC = () => {
         </Paper>
 
         {/* Search and Filter */}
-        <Paper sx={{ p: 3, borderRadius: 2 }}>
-          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, alignItems: { xs: 'stretch', md: 'center' } }}>
+        <Paper sx={{ p: 2, borderRadius: 1 }}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 1.5, alignItems: { xs: 'stretch', md: 'center' } }}>
             <TextField
                 placeholder="Search posts by title or content..."
                 value={searchTerm}
@@ -232,10 +234,10 @@ export const PostsManagement: React.FC = () => {
                 InputProps={{
                   startAdornment: (
                       <InputAdornment position="start">
-                        <Search size={20} />
+                        <Search size={16} />
                       </InputAdornment>
                   ),
-                  sx: { borderRadius: 2 }
+                  sx: { borderRadius: 1, fontSize: '0.875rem' }
                 }}
             />
             <TextField
@@ -244,7 +246,7 @@ export const PostsManagement: React.FC = () => {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 variant="outlined"
                 size="small"
-                sx={{ minWidth: '200px' }}
+                sx={{ minWidth: '180px', '& .MuiInputBase-input': { fontSize: '0.875rem' } }}
                 SelectProps={{ native: true }}
             >
               <option value="all">All Categories</option>
@@ -264,10 +266,10 @@ export const PostsManagement: React.FC = () => {
 
 
         {/* Posts List */}
-        <Paper sx={{ p: 3, borderRadius: 2 }}>
+        <Paper sx={{ p: 0, borderRadius: 1 }}>
           {filteredPosts.length === 0 ? (
-              <Box sx={{ textAlign: 'center', py: 6 }}>
-                <Typography variant="body1" sx={{ color: 'text.secondary', mb: 2 }}>
+              <Box sx={{ textAlign: 'center', py: 4, px: 2 }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1.5, fontSize: '0.875rem' }}>
                   {searchTerm ? 'No posts found matching your search.' : 'No posts yet.'}
                 </Typography>
                 {!searchTerm && (
@@ -275,8 +277,9 @@ export const PostsManagement: React.FC = () => {
                         component={Link}
                         to="/dashboard/posts/create"
                         variant="contained"
-                        startIcon={<Plus />}
-                        sx={{ textTransform: 'none' }}
+                        startIcon={<Plus size={16} />}
+                        size="small"
+                        sx={{ textTransform: 'none', fontSize: '0.875rem' }}
                     >
                       Create Your First Post
                     </Button>
@@ -290,7 +293,7 @@ export const PostsManagement: React.FC = () => {
                     <Box
                         key={post.id}
                         sx={{
-                          p: 2,
+                          p: 1.5,
                           borderBottom: 1,
                           borderColor: 'divider',
                           bgcolor: isNew ? 'primary.50' : 'background.paper',
@@ -302,12 +305,12 @@ export const PostsManagement: React.FC = () => {
                         }}
                         onClick={() => navigate(`/dashboard/posts/${post.id}`)}
                     >
-                      <Box sx={{ display: 'flex', gap: 2 }}>
+                      <Box sx={{ display: 'flex', gap: 1.5 }}>
                         {/* Avatar */}
                         <Box
                           sx={{
-                            width: 48,
-                            height: 48,
+                            width: 36,
+                            height: 36,
                             borderRadius: '50%',
                             bgcolor: post.user?.avatar ? 'transparent' : 'primary.main',
                             display: 'flex',
@@ -315,7 +318,7 @@ export const PostsManagement: React.FC = () => {
                             justifyContent: 'center',
                             color: 'white',
                             fontWeight: 'bold',
-                            fontSize: '1.2rem',
+                            fontSize: '0.875rem',
                             flexShrink: 0,
                             overflow: 'hidden'
                           }}
@@ -338,10 +341,10 @@ export const PostsManagement: React.FC = () => {
                         {/* Content */}
                         <Box sx={{ flex: 1, minWidth: 0 }}>
                           {/* Header */}
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.25, flexWrap: 'wrap' }}>
                             <Typography 
                               variant="body2" 
-                              sx={{ fontWeight: 'bold', color: 'text.primary' }}
+                              sx={{ fontWeight: 600, color: 'text.primary', fontSize: '0.8125rem' }}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 window.open(`/profile/${post.user?.name || post.users}`, '_blank');
@@ -349,24 +352,25 @@ export const PostsManagement: React.FC = () => {
                             >
                               {post.user?.name || post.users || 'Anonymous'}
                             </Typography>
-                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                            <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>
                               · {post.createdAt ? format(new Date(post.createdAt), 'MMM dd') : 'Unknown'}
                             </Typography>
                             {isNew && (
-                                <Chip label="New" size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                <Chip label="New" size="small" color="primary" sx={{ height: 18, fontSize: '0.65rem' }} />
                             )}
                             {(!post.content || post.content.length <= 100) && (
-                                <Chip label="Draft" size="small" color="warning" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                <Chip label="Draft" size="small" color="warning" variant="outlined" sx={{ height: 18, fontSize: '0.65rem' }} />
                             )}
                           </Box>
 
                           {/* Title */}
                           <Typography
-                              variant="body1"
+                              variant="body2"
                               sx={{
                                 fontWeight: 600,
-                                mb: 0.5,
-                                color: 'text.primary'
+                                mb: 0.25,
+                                color: 'text.primary',
+                                fontSize: '0.875rem'
                               }}
                           >
                             {post.title || 'Untitled Post'}
@@ -374,38 +378,40 @@ export const PostsManagement: React.FC = () => {
 
                           {/* Content Preview */}
                           <Typography 
-                            variant="body2" 
+                            variant="caption" 
                             sx={{ 
                               color: 'text.secondary', 
-                              mb: 1,
+                              mb: 0.75,
                               display: '-webkit-box',
                               WebkitLineClamp: 2,
                               WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden'
+                              overflow: 'hidden',
+                              fontSize: '0.8125rem',
+                              lineHeight: 1.4
                             }}
                           >
                             {truncateContent(post.content || '', 150)}
                           </Typography>
 
                           {/* Actions */}
-                          <Box sx={{ display: 'flex', gap: 3, alignItems: 'center', color: 'text.secondary' }}>
+                          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', color: 'text.secondary' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                              <MessageSquare size={16} />
-                              <Typography variant="caption">
+                              <MessageSquare size={14} />
+                              <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
                                 {Array.isArray(post.comments) ? post.comments.length : 0}
                               </Typography>
                             </Box>
                             
-                            <Box sx={{ ml: 'auto', display: 'flex', gap: 0.5 }}>
+                            <Box sx={{ ml: 'auto', display: 'flex', gap: 0.25 }}>
                               <IconButton
                                   size="small"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     navigate(`/dashboard/posts/${post.id}`);
                                   }}
-                                  sx={{ color: 'text.secondary' }}
+                                  sx={{ color: 'text.secondary', p: 0.5 }}
                               >
-                                <Eye size={16} />
+                                <Eye size={14} />
                               </IconButton>
 
                               {(isAdmin || post.user?.id === user?.id) && (
@@ -416,9 +422,9 @@ export const PostsManagement: React.FC = () => {
                                           e.stopPropagation();
                                           navigate(`/dashboard/posts/${post.id}/edit`);
                                         }}
-                                        sx={{ color: 'text.secondary' }}
+                                        sx={{ color: 'text.secondary', p: 0.5 }}
                                     >
-                                      <Edit size={16} />
+                                      <Edit size={14} />
                                     </IconButton>
 
                                     <IconButton
@@ -428,12 +434,12 @@ export const PostsManagement: React.FC = () => {
                                           handleDelete(post.id!);
                                         }}
                                         disabled={deleteMutation.isPending}
-                                        sx={{ color: 'text.secondary' }}
+                                        sx={{ color: 'text.secondary', p: 0.5 }}
                                     >
                                       {deleteMutation.isPending ? (
-                                          <CircularProgress size={16} />
+                                          <CircularProgress size={14} />
                                       ) : (
-                                          <Trash2 size={16} />
+                                          <Trash2 size={14} />
                                       )}
                                     </IconButton>
                                   </>
@@ -451,19 +457,20 @@ export const PostsManagement: React.FC = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-            <Paper sx={{ p: 3, borderRadius: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+            <Paper sx={{ p: 2, borderRadius: 1 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
                 <Button
                     onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
                     disabled={currentPage === 0}
                     variant="outlined"
-                    startIcon={<RefreshCw style={{ transform: 'rotate(90deg)' }} />}
-                    sx={{ textTransform: 'none' }}
+                    size="small"
+                    startIcon={<RefreshCw size={14} style={{ transform: 'rotate(90deg)' }} />}
+                    sx={{ textTransform: 'none', fontSize: '0.8125rem' }}
                 >
                   Previous
                 </Button>
 
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                     let pageNumber;
                     if (totalPages <= 5) {
@@ -481,7 +488,8 @@ export const PostsManagement: React.FC = () => {
                             key={pageNumber}
                             onClick={() => setCurrentPage(pageNumber)}
                             variant={currentPage === pageNumber ? 'contained' : 'outlined'}
-                            sx={{ minWidth: '40px' }}
+                            size="small"
+                            sx={{ minWidth: '32px', fontSize: '0.8125rem' }}
                         >
                           {pageNumber + 1}
                         </Button>
@@ -493,14 +501,15 @@ export const PostsManagement: React.FC = () => {
                     onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
                     disabled={currentPage === totalPages - 1}
                     variant="outlined"
-                    endIcon={<RefreshCw style={{ transform: 'rotate(-90deg)' }} />}
-                    sx={{ textTransform: 'none' }}
+                    size="small"
+                    endIcon={<RefreshCw size={14} style={{ transform: 'rotate(-90deg)' }} />}
+                    sx={{ textTransform: 'none', fontSize: '0.8125rem' }}
                 >
                   Next
                 </Button>
               </Box>
 
-              <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 2 }}>
+              <Typography variant="caption" color="text.secondary" align="center" sx={{ mt: 1.5, display: 'block', fontSize: '0.75rem' }}>
                 Page {currentPage + 1} of {totalPages} • {totalElements} total posts
               </Typography>
             </Paper>

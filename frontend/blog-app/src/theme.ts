@@ -23,65 +23,72 @@ export const theme = createTheme({
       main: palette.success,
     },
     text: {
-      primary: palette.text,
-      secondary: '#6B7280', // A lighter gray for secondary text
+      primary: '#16191f',
+      secondary: '#5f6b7a',
     },
     background: {
-      default: palette.background,
+      default: '#f2f3f3',
       paper: '#ffffff',
     },
+    divider: '#e9ebed',
   },
   typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: '"Amazon Ember", "Helvetica Neue", Roboto, Arial, sans-serif',
+    fontSize: 14,
     h1: {
-      fontSize: '2.5rem',
+      fontSize: '1.75rem',
       fontWeight: 700,
       lineHeight: 1.2,
-      color: palette.text,
+      color: '#16191f',
     },
     h2: {
-      fontSize: '2rem',
-      fontWeight: 600,
+      fontSize: '1.5rem',
+      fontWeight: 700,
       lineHeight: 1.3,
-      color: palette.text,
+      color: '#16191f',
     },
     h3: {
-      fontSize: '1.5rem',
-      fontWeight: 600,
+      fontSize: '1.25rem',
+      fontWeight: 700,
       lineHeight: 1.4,
-      color: palette.text,
+      color: '#16191f',
     },
     h4: {
-      fontSize: '1.25rem',
-      fontWeight: 500,
+      fontSize: '1.125rem',
+      fontWeight: 700,
       lineHeight: 1.4,
-      color: palette.text,
+      color: '#16191f',
     },
     h5: {
-      fontSize: '1.125rem',
-      fontWeight: 500,
+      fontSize: '1rem',
+      fontWeight: 700,
       lineHeight: 1.5,
-      color: palette.text,
+      color: '#16191f',
     },
     h6: {
-      fontSize: '1rem',
-      fontWeight: 500,
+      fontSize: '0.875rem',
+      fontWeight: 700,
       lineHeight: 1.5,
-      color: palette.text,
+      color: '#16191f',
     },
     body1: {
-      fontSize: '1rem',
-      lineHeight: 1.6,
-      color: palette.text,
+      fontSize: '0.875rem',
+      lineHeight: 1.5,
+      color: '#16191f',
     },
     body2: {
-      fontSize: '0.875rem',
-      lineHeight: 1.6,
-      color: '#6B7280',
+      fontSize: '0.8125rem',
+      lineHeight: 1.5,
+      color: '#5f6b7a',
+    },
+    caption: {
+      fontSize: '0.75rem',
+      lineHeight: 1.4,
+      color: '#5f6b7a',
     },
     button: {
       fontSize: '0.875rem',
-      fontWeight: 500,
+      fontWeight: 600,
       textTransform: 'none',
       color: 'inherit',
     },
@@ -90,52 +97,66 @@ export const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: '8px',
-          padding: '8px 16px',
+          borderRadius: '2px',
+          padding: '6px 12px',
           fontSize: '0.875rem',
-          fontWeight: 500,
+          fontWeight: 600,
           textTransform: 'none',
+          minHeight: '32px',
         },
         contained: {
           backgroundColor: palette.primary,
           color: palette['primary-foreground'],
           boxShadow: 'none',
           '&:hover': {
-            backgroundColor: '#1D4ED8', // A slightly darker blue for hover
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+            backgroundColor: '#1D4ED8',
+            boxShadow: 'none',
           },
         },
         outlined: {
-          borderColor: palette.border,
-          color: palette.text,
+          borderColor: '#d5dbdb',
+          color: '#16191f',
+          backgroundColor: '#ffffff',
           '&:hover': {
-            borderColor: palette.primary,
-            backgroundColor: 'rgba(37, 99, 235, 0.04)',
+            borderColor: '#879596',
+            backgroundColor: '#fafafa',
           },
+        },
+        sizeSmall: {
+          padding: '4px 10px',
+          fontSize: '0.8125rem',
+          minHeight: '28px',
         },
       },
     },
     MuiTextField: {
       styleOverrides: {
         root: {
+          '& .MuiInputBase-root': {
+            fontSize: '0.875rem',
+            borderRadius: '2px',
+          },
           '& .MuiInputBase-input': {
-            color: palette.text,
+            color: '#16191f',
+            padding: '8px 12px',
           },
           '& .MuiInputLabel-root': {
-            color: '#6B7280',
+            color: '#5f6b7a',
+            fontSize: '0.875rem',
             '&.Mui-focused': {
               color: palette.primary,
             },
           },
           '& .MuiOutlinedInput-root': {
             '& fieldset': {
-              borderColor: palette.border,
+              borderColor: '#d5dbdb',
             },
             '&:hover fieldset': {
-              borderColor: palette.primary,
+              borderColor: '#879596',
             },
             '&.Mui-focused fieldset': {
               borderColor: palette.primary,
+              borderWidth: '2px',
             },
           },
         },
@@ -149,6 +170,75 @@ export const theme = createTheme({
           '&:hover': {
             textDecoration: 'underline',
           },
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          borderRadius: '2px',
+          border: '1px solid #e9ebed',
+          boxShadow: 'none',
+          backgroundColor: '#ffffff',
+          '&.MuiPaper-elevation1': {
+            boxShadow: 'none',
+          },
+          '&.MuiPaper-elevation2': {
+            boxShadow: 'none',
+          },
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: '2px',
+          border: '1px solid #e9ebed',
+          boxShadow: 'none',
+          '&:hover': {
+            borderColor: '#d5dbdb',
+          },
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: '2px',
+          fontSize: '0.75rem',
+          height: '20px',
+          fontWeight: 600,
+        },
+        sizeSmall: {
+          height: '18px',
+          fontSize: '0.6875rem',
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: '2px',
+          '&:hover': {
+            backgroundColor: '#f2f3f3',
+          },
+        },
+        sizeSmall: {
+          padding: '4px',
+        },
+      },
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        root: {
+          fontSize: '0.875rem',
+          borderBottom: '1px solid #e9ebed',
+          padding: '12px 16px',
+        },
+        head: {
+          fontWeight: 700,
+          color: '#16191f',
+          backgroundColor: '#fafafa',
         },
       },
     },

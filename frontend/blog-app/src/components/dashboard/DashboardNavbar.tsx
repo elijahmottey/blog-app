@@ -229,7 +229,7 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
               zIndex: theme.zIndex.drawer + 1,
             }}
          >
-           <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 1, sm: 2 }, minHeight: { xs: 56, sm: 64 } }}>
+           <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 1, sm: 2 }, minHeight: '48px !important', height: '48px' }}>
              {/* Left Section */}
              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                {isMobile && (
@@ -380,10 +380,10 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
                      <Box sx={{ position: 'relative' }}>
                        <Avatar
                            sx={{
-                             width: 36,
-                             height: 36,
+                             width: 32,
+                             height: 32,
                              bgcolor: 'primary.main',
-                             fontSize: '0.875rem',
+                             fontSize: '0.8125rem',
                              fontWeight: 'bold',
                            }}
                      >
