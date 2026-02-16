@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping(value = "/api/v1/auth")
 public class AuthenticationController {
@@ -42,6 +44,11 @@ public class AuthenticationController {
             @RequestBody @Valid Login request
     ) {
         return authenticationService.authenticate(request);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        return ResponseEntity.ok().body(Map.of("message", "Logged out successfully"));
     }
 
 }

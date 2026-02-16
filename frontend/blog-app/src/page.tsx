@@ -27,6 +27,7 @@ import { Unauthorized } from "./components/unauthorized.tsx";
 import {AnalyticsView} from "./components/dashboard/AnalyticsView.tsx";
 import {UserActivityPage} from "./components/dashboard/UserActivityPage.tsx";
 import { AuthorProfile } from "./components/AuthorProfile.tsx";
+import OAuth2RedirectHandler from "./components/OAuth2RedirectHandler.tsx";
 
 export const PagesRoute = () => {
     return (
@@ -36,6 +37,9 @@ export const PagesRoute = () => {
                     <Routes>
                         {/* Default redirect */}
                         <Route path="/" element={<Navigate to="/home" replace />} />
+
+                        {/* OAuth2 redirect handler */}
+                        <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
 
                         {/* Guest routes - only accessible when NOT logged in */}
                         <Route element={<GuestRoute />}>

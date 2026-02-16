@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import liv.codveda.blog.app.domain.enums.Roles;
+import liv.codveda.blog.app.domain.validation.ValidationGroups;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -33,14 +34,15 @@ public class Users implements UserDetails {
     @Column(nullable = false)
     private String name;
 
-    @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true, unique = true)
     private String email;
 
-    @NotBlank(message = "Password is required")
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String password;
+
+    private String provider;
+    private String providerId;
 
     @Column(length = 1000)
     private String description;
@@ -73,6 +75,11 @@ public class Users implements UserDetails {
     @Override
     public String getUsername() {
         return email;
+    }
+
+    @Override
+    public String getPassword() {
+        return password != null ? password : "";
     }
 
     @Override

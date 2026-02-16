@@ -17,6 +17,7 @@ import {
     LogIn,
 } from "lucide-react";
 import { toast } from "sonner";
+import OAuth2LoginButtons from "../OAuth2LoginButtons.tsx";
 
 // Material UI imports
 import {
@@ -502,7 +503,7 @@ export const Login: React.FC = () => {
 
                             {/* Social Login Section */}
                             <Box sx={{ mb: 4 }}>
-                                {renderGoogleButton()}
+                                <OAuth2LoginButtons />
 
                                 {/* Divider */}
                                 <Divider sx={{ my: 3 }}>
