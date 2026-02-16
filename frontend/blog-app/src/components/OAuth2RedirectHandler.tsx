@@ -1,13 +1,39 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import BackendApi from '../service/BackendApi';
 
 const OAuth2RedirectHandler = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Tokens are now in cookies, just redirect to dashboard
-    navigate('/dashboard', { replace: true });
+    const handleRedirect = async () => {
+      try {
+        // Fetch user profile to get role
+        const response = await BackendApi.getUserProfile();
+        const userRole = response.data.role;
+        
+        // Store role in localStorage
+        localStorage.setItem('roles1', JSON.stringify(userRole));
+        
+        // Redirect based on role
+        if (userRole === 'ADMIN') {
+          navigate('/admin/dashboard', { replace: true });
+        } else {
+          navigate('/dashboard', { replace: true });
+        }
+      } catch (error) {
+        console.error('OAuth2 redirect error:', error);
+        navigate('/auth/login?error=oauth2_failed', { replace: true });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    handleRedirect();
   }, [navigate]);
+
+  if (!loading) return null;
 
   return (
     <div className="flex items-center justify-center min-h-screen">
