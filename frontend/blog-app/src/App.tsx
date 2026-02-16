@@ -10,6 +10,7 @@ import { AuthProvider } from './context/AuthContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeModeProvider } from './context/ThemeModeContext';
+import CookieConsent from './components/CookieConsent';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,6 +32,7 @@ function App() {
       <ThemeModeProvider>
         <AuthProvider>
           <PagesRoute/>
+          <CookieConsent />
           <Toaster
               richColors
               closeButton

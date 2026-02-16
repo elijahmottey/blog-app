@@ -78,6 +78,7 @@ export interface PostDto{
     content: string;
     category?: string;
     user?: {
+        avatar:string;
         id: number;
         name: string;
         email: string;
@@ -147,53 +148,34 @@ const apiClient = axios.create({
 
 // ---- SERVICE CLASS ----
 export default class BackendApi {
+    private static refreshTokenPromise: Promise<string> | null = null;
+
     // ---- CSRF TOKEN HANDLING ----
     static getCsrfToken(): string | null {
-        const name = 'XSRF-TOKEN=';
-        const decodedCookie = decodeURIComponent(document.cookie);
-        const cookies = decodedCookie.split(';');
-        for (let cookie of cookies) {
-            cookie = cookie.trim();
-            if (cookie.indexOf(name) === 0) {
-                return cookie.substring(name.length);
+        const cookies = document.cookie.split(';');
+        for (const cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'XSRF-TOKEN') {
+                return decodeURIComponent(value);
             }
         }
         return null;
     }
 
-    static async fetchCsrfToken() {
+    static async fetchCsrfToken(): Promise<void> {
         try {
             await apiClient.get('/csrf');
+            // Verify cookie was set
+            if (!this.getCsrfToken()) {
+                console.warn('CSRF token not found after fetch');
+            }
         } catch (error) {
             console.error('Failed to fetch CSRF token:', error);
         }
     }
 
-    // ---- TOKEN HANDLING (Deprecated - kept for role storage only) ----
-    static getAccessToken() {
-        return null; // Tokens now in cookies
-    }
 
-    static getRefreshToken() {
-        return null; // Tokens now in cookies
-    }
 
-    static getAccessTokenExpiration(): Date | null {
-        return null; // Not needed with cookies
-    }
-
-    static getRefreshTokenExpiration(): Date | null {
-        return null; // Not needed with cookies
-    }
-
-    static setTokens(
-        accessToken: string,
-        refreshToken: string,
-        accessTokenExpiration: string,
-        refreshTokenExpiration: string
-    ) {
-        // Tokens set in cookies by backend, only store role
-    }
 
     static clearTokens() {
         localStorage.removeItem("roles1");
@@ -293,10 +275,24 @@ export default class BackendApi {
 
 
     static async refreshAccessToken() {
-        // Backend handles refresh via cookies
-        const response = await apiClient.post<AuthsResponse>("/auth/refresh-token", {});
-        localStorage.setItem("roles1", JSON.stringify(response.data.role));
-        return response.data.accessToken;
+        // Prevent multiple simultaneous refresh calls
+        if (this.refreshTokenPromise) {
+            return this.refreshTokenPromise;
+        }
+
+        this.refreshTokenPromise = (async () => {
+            try {
+                const response = await apiClient.post<AuthsResponse>("/auth/refresh-token", {}, {
+                    headers: { 'X-Skip-Interceptor': 'true' }
+                });
+                localStorage.setItem("roles1", JSON.stringify(response.data.role));
+                return response.data.accessToken;
+            } finally {
+                this.refreshTokenPromise = null;
+            }
+        })();
+
+        return this.refreshTokenPromise;
     }
 
     // ---- ROLE HELPERS ----
@@ -479,7 +475,12 @@ apiClient.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        // Only handle 401 errors
+        // Skip interceptor for refresh token requests
+        if (originalRequest.headers?.['X-Skip-Interceptor']) {
+            return Promise.reject(error);
+        }
+
+        // Only handle 401 errors and prevent infinite loops
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 

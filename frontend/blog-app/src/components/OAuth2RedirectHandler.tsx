@@ -16,12 +16,8 @@ const OAuth2RedirectHandler = () => {
         // Store role in localStorage
         localStorage.setItem('roles1', JSON.stringify(userRole));
         
-        // Redirect based on role
-        if (userRole === 'ADMIN') {
-          navigate('/admin/dashboard', { replace: true });
-        } else {
-          navigate('/dashboard', { replace: true });
-        }
+        // Always redirect to /dashboard for all users
+        navigate('/dashboard', { replace: true });
       } catch (error) {
         console.error('OAuth2 redirect error:', error);
         navigate('/auth/login?error=oauth2_failed', { replace: true });

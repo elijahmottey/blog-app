@@ -309,17 +309,30 @@ export const PostsManagement: React.FC = () => {
                             width: 48,
                             height: 48,
                             borderRadius: '50%',
-                            bgcolor: 'primary.main',
+                            bgcolor: post.user?.avatar ? 'transparent' : 'primary.main',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             color: 'white',
                             fontWeight: 'bold',
                             fontSize: '1.2rem',
-                            flexShrink: 0
+                            flexShrink: 0,
+                            overflow: 'hidden'
                           }}
                         >
-                          {(post.user?.name || post.users || 'A').charAt(0).toUpperCase()}
+                          {post.user?.avatar ? (
+                            <img
+                              src={post.user.avatar}
+                              alt={post.user.name || 'User'}
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover'
+                              }}
+                            />
+                          ) : (
+                            (post.user?.name || post.users || 'A').charAt(0).toUpperCase()
+                          )}
                         </Box>
 
                         {/* Content */}

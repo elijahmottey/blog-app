@@ -7,6 +7,7 @@ public record UsersReferenceDto(
         String name,
         String email,
         String description,
+        String avatar,
         Roles role
 
 ) {

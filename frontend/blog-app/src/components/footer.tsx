@@ -111,6 +111,17 @@ const Footer = () => {
                                     Terms of Service
                                 </Link>
                             </li>
+                            <li>
+                                <button
+                                    onClick={() => {
+                                        localStorage.removeItem('cookieConsent');
+                                        window.location.reload();
+                                    }}
+                                    className="text-gray-600 transition-all hover:text-primary hover:translate-x-1 inline-block cursor-pointer"
+                                >
+                                    Cookie Preferences
+                                </button>
+                            </li>
                         </ul>
                     </div>
 

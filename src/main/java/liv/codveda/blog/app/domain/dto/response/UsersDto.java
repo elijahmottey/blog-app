@@ -12,6 +12,7 @@ public record UsersDto(
         String name,
         String email,
         String description,
+        String avatar,
         Roles role,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
