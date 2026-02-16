@@ -22,31 +22,8 @@ const queryClient = new QueryClient({
 
 function App() {
   useEffect(() => {
-    const checkTokenExpiration = () => {
-      const expiration = BackendApi.getAccessTokenExpiration();
-      if (!expiration) return;
-
-      const now = new Date();
-      if (now >= expiration) {
-        handleTokenExpiration();
-        return null;
-      }
-
-      const remaining = expiration.getTime() - now.getTime();
-      return setTimeout(handleTokenExpiration, remaining);
-    };
-
-    const handleTokenExpiration = () => {
-      toast.error('Your session has expired. Please login again.');
-      BackendApi.clearTokens();
-      window.location.href = '/auth/login';
-    };
-
-    const timer = checkTokenExpiration();
-
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
+    // Fetch CSRF token on app load
+    BackendApi.fetchCsrfToken();
   }, []);
 
   return (

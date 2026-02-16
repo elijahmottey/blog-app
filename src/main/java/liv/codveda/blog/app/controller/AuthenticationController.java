@@ -1,8 +1,10 @@
 package liv.codveda.blog.app.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import liv.codveda.blog.app.domain.dto.request.Login;
 import liv.codveda.blog.app.domain.dto.request.Register;
+import liv.codveda.blog.app.security.util.CookieUtils;
 import liv.codveda.blog.app.service.interfaces.AuthenticationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,37 +19,44 @@ import java.util.Map;
 @RequestMapping(value = "/api/v1/auth")
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
+    private final CookieUtils cookieUtils;
 
-    public AuthenticationController(AuthenticationService authenticationService) {
+    public AuthenticationController(AuthenticationService authenticationService, CookieUtils cookieUtils) {
         this.authenticationService = authenticationService;
+        this.cookieUtils = cookieUtils;
     }
 
     @PostMapping("/signup")
     public ResponseEntity<?> register(
-            @RequestBody @Valid Register request
+            @RequestBody @Valid Register request,
+            HttpServletResponse response
     ) {
-        return authenticationService.register(request);
+        return authenticationService.register(request, response);
     }
 
     @PostMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> registerAdmin(
-            @RequestBody @Valid Register request
+            @RequestBody @Valid Register request,
+            HttpServletResponse response
     ) {
-        return authenticationService.registerAdmin(request);
+        return authenticationService.registerAdmin(request, response);
     }
 
 
 
     @PostMapping("login")
     public ResponseEntity<?> login(
-            @RequestBody @Valid Login request
+            @RequestBody @Valid Login request,
+            HttpServletResponse response
     ) {
-        return authenticationService.authenticate(request);
+        return authenticationService.authenticate(request, response);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        cookieUtils.deleteCookie(response, "accessToken");
+        cookieUtils.deleteCookie(response, "refreshToken");
         return ResponseEntity.ok().body(Map.of("message", "Logged out successfully"));
     }
 

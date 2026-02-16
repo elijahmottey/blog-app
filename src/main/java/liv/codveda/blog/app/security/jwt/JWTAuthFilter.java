@@ -2,8 +2,10 @@ package liv.codveda.blog.app.security.jwt;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import liv.codveda.blog.app.security.util.CookieUtils;
 import liv.codveda.blog.app.service.CustomUserDetailService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -23,11 +25,13 @@ import java.io.IOException;
 public class JWTAuthFilter extends OncePerRequestFilter {
     private final JWTUtils jwtUtils;
     private final CustomUserDetailService customUserDetailService;
+    private final CookieUtils cookieUtils;
 
     @Autowired
-    public JWTAuthFilter(JWTUtils jwtUtils, CustomUserDetailService customUserDetailService) {
+    public JWTAuthFilter(JWTUtils jwtUtils, CustomUserDetailService customUserDetailService, CookieUtils cookieUtils) {
         this.jwtUtils = jwtUtils;
         this.customUserDetailService = customUserDetailService;
+        this.cookieUtils = cookieUtils;
     }
 
     @Override
@@ -36,20 +40,29 @@ public class JWTAuthFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain)
             throws ServletException, IOException {
         try {
-            final String authorizationHeader = request.getHeader("Authorization");
+            String jwtToken = null;
+            
+            // Try to get token from cookie first
+            jwtToken = cookieUtils.getCookie(request, "accessToken").orElse(null);
+            
+            // Fallback to Authorization header
+            if (jwtToken == null) {
+                final String authorizationHeader = request.getHeader("Authorization");
+                if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+                    jwtToken = authorizationHeader.substring(7);
+                }
+            }
 
-            if (authorizationHeader == null || authorizationHeader.isBlank() || !authorizationHeader.startsWith("Bearer ")) {
+            if (jwtToken == null) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            final String jwtToken = authorizationHeader.substring(7);
             final String userEmail = jwtUtils.extractUsername(jwtToken);
 
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = customUserDetailService.loadUserByUsername(userEmail);
 
-                // Check if it's a valid access token
                 if (jwtUtils.isValidAccessToken(jwtToken, userDetails)) {
                     SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(

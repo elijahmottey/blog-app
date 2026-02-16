@@ -76,6 +76,11 @@ jwt:
 
 frontend:
   url: ${FRONTEND}
+
+cookie:
+  domain: localhost
+  secure: false
+
 app:
   admin:
     name: ${ADMIN_NAME}

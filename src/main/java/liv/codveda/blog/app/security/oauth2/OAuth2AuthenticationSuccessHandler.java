@@ -6,6 +6,7 @@ import liv.codveda.blog.app.domain.entities.Users;
 import liv.codveda.blog.app.domain.enums.Roles;
 import liv.codveda.blog.app.repository.UsersRepository;
 import liv.codveda.blog.app.security.jwt.JWTUtils;
+import liv.codveda.blog.app.security.util.CookieUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +24,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private final JWTUtils jwtUtils;
     private final UsersRepository usersRepository;
+    private final CookieUtils cookieUtils;
 
     @Value("${frontend.url}")
     private String frontendUrl;
@@ -37,11 +39,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         if (oAuth2User instanceof OAuth2UserPrincipal) {
             user = ((OAuth2UserPrincipal) oAuth2User).getUser();
         } else {
-            // Handle DefaultOidcUser case - create user if not exists
             String email = oAuth2User.getAttribute("email");
             user = usersRepository.findByEmail(email)
                     .orElseGet(() -> {
-                        // Create new user for DefaultOidcUser
                         Users newUser = Users.builder()
                                 .email(email)
                                 .name(oAuth2User.getAttribute("name"))
@@ -58,7 +58,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String accessToken = jwtUtils.generateAccessToken(user);
         String refreshToken = jwtUtils.generateRefreshToken(user);
 
-        String redirectUrl = frontendUrl + "/oauth2/redirect?token=" + accessToken + "&refresh=" + refreshToken;
+        // Set tokens in cookies
+        cookieUtils.addCookie(response, "accessToken", accessToken, 3600);
+        cookieUtils.addCookie(response, "refreshToken", refreshToken, 604800);
+
+        String redirectUrl = frontendUrl + "/oauth2/redirect";
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 }

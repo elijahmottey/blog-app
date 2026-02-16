@@ -140,29 +140,50 @@ const apiClient = axios.create({
     headers: {
         "Content-Type": "application/json",
     },
+    withCredentials: true,
 });
 
 
 
 // ---- SERVICE CLASS ----
 export default class BackendApi {
-    // ---- TOKEN HANDLING ----
+    // ---- CSRF TOKEN HANDLING ----
+    static getCsrfToken(): string | null {
+        const name = 'XSRF-TOKEN=';
+        const decodedCookie = decodeURIComponent(document.cookie);
+        const cookies = decodedCookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.indexOf(name) === 0) {
+                return cookie.substring(name.length);
+            }
+        }
+        return null;
+    }
+
+    static async fetchCsrfToken() {
+        try {
+            await apiClient.get('/csrf');
+        } catch (error) {
+            console.error('Failed to fetch CSRF token:', error);
+        }
+    }
+
+    // ---- TOKEN HANDLING (Deprecated - kept for role storage only) ----
     static getAccessToken() {
-        return localStorage.getItem("accessToken1");
+        return null; // Tokens now in cookies
     }
 
     static getRefreshToken() {
-        return localStorage.getItem("refreshToken1");
+        return null; // Tokens now in cookies
     }
 
     static getAccessTokenExpiration(): Date | null {
-        const expirationStr = localStorage.getItem("accessTokenExpiration1");
-        return expirationStr ? new Date(expirationStr) : null;
+        return null; // Not needed with cookies
     }
 
     static getRefreshTokenExpiration(): Date | null {
-        const expirationStr = localStorage.getItem("refreshTokenExpiration1");
-        return expirationStr ? new Date(expirationStr) : null;
+        return null; // Not needed with cookies
     }
 
     static setTokens(
@@ -171,43 +192,24 @@ export default class BackendApi {
         accessTokenExpiration: string,
         refreshTokenExpiration: string
     ) {
-        localStorage.setItem("accessToken1", accessToken);
-        localStorage.setItem("refreshToken1", refreshToken);
-        localStorage.setItem("accessTokenExpiration1", accessTokenExpiration);
-        localStorage.setItem("refreshTokenExpiration1", refreshTokenExpiration);
+        // Tokens set in cookies by backend, only store role
     }
 
     static clearTokens() {
-        localStorage.removeItem("accessToken1");
-        localStorage.removeItem("refreshToken1");
-        localStorage.removeItem("accessTokenExpiration1");
-        localStorage.removeItem("refreshTokenExpiration1");
         localStorage.removeItem("roles1");
     }
 
     // ---- TOKEN VALIDATION ----
     static isAccessTokenValid(): boolean {
-        const expiration = this.getAccessTokenExpiration();
-        if (!expiration) return false;
-
-        const now = new Date();
-        return now < expiration;
+        return true; // Backend validates cookie
     }
 
     static isRefreshTokenValid(): boolean {
-        const expiration = this.getRefreshTokenExpiration();
-        if (!expiration) return false;
-
-        const now = new Date();
-        return now < expiration;
+        return true; // Backend validates cookie
     }
 
     static getTimeUntilAccessTokenExpiration(): number {
-        const expiration = this.getAccessTokenExpiration();
-        if (!expiration) return 0;
-
-        const now = new Date();
-        return expiration.getTime() - now.getTime();
+        return 3600000; // 1 hour default
     }
 
     // ---- CENTRALIZED ERROR HANDLING ----
@@ -264,36 +266,18 @@ export default class BackendApi {
     // ---- AUTH ----
     static async registerUser(registrationData: UserRegistration) {
         const response = await this.post<AuthsResponse>("/auth/signup", registrationData);
-        this.setTokens(
-            response.accessToken,
-            response.refreshToken,
-            response.accessTokenExpiration,
-            response.refreshTokenExpiration
-        );
         localStorage.setItem("roles1", JSON.stringify(response.role));
         return response;
     }
 
     static async loginUser(loginData: UserLogin) {
         const response = await this.post<AuthsResponse>("/auth/login", loginData);
-        this.setTokens(
-            response.accessToken,
-            response.refreshToken,
-            response.accessTokenExpiration,
-            response.refreshTokenExpiration
-        );
         localStorage.setItem("roles1", JSON.stringify(response.role));
         return response;
     }
 
     static async registerAdmin(adminData: UserRegistration) {
         const response = await this.post<AuthsResponse>("/auth/admin", adminData);
-        this.setTokens(
-            response.accessToken,
-            response.refreshToken,
-            response.accessTokenExpiration,
-            response.refreshTokenExpiration
-        );
         localStorage.setItem("roles1", JSON.stringify(response.role));
         return response;
     }
@@ -309,21 +293,8 @@ export default class BackendApi {
 
 
     static async refreshAccessToken() {
-        const refreshToken = this.getRefreshToken();
-        if (!refreshToken) throw new Error("No refresh token available");
-
-        const response = await apiClient.post<AuthsResponse>(
-            "/auth/refresh-token",
-            { refreshToken }
-        );
-
-        // Update tokens with new expiration dates
-        this.setTokens(
-            response.data.accessToken,
-            response.data.refreshToken,
-            response.data.accessTokenExpiration,
-            response.data.refreshTokenExpiration
-        );
+        // Backend handles refresh via cookies
+        const response = await apiClient.post<AuthsResponse>("/auth/refresh-token", {});
         localStorage.setItem("roles1", JSON.stringify(response.data.role));
         return response.data.accessToken;
     }
@@ -369,7 +340,7 @@ export default class BackendApi {
     }
 
     static isAuthenticated() {
-        return !!this.getAccessToken() && this.isAccessTokenValid();
+        return this.getRoles().length > 0;
     }
 
     // ---- USER ----
@@ -491,9 +462,12 @@ export default class BackendApi {
 // ---- AXIOS INTERCEPTORS ----
 apiClient.interceptors.request.use(
     (config) => {
-        const token = BackendApi.getAccessToken();
-        if (token && BackendApi.isAccessTokenValid()) {
-            config.headers.Authorization = `Bearer ${token}`;
+        // Add CSRF token to non-GET requests
+        if (config.method && config.method.toUpperCase() !== 'GET') {
+            const csrfToken = BackendApi.getCsrfToken();
+            if (csrfToken) {
+                config.headers['X-XSRF-TOKEN'] = csrfToken;
+            }
         }
         return config;
     },
@@ -509,16 +483,8 @@ apiClient.interceptors.response.use(
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
-            // Check if refresh token is still valid
-            if (!BackendApi.isRefreshTokenValid()) {
-                BackendApi.clearTokens();
-                window.location.href = "/auth/login";
-                return Promise.reject(new Error("Refresh token expired"));
-            }
-
             try {
-                const newAccessToken = await BackendApi.refreshAccessToken();
-                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+                await BackendApi.refreshAccessToken();
                 return apiClient(originalRequest);
             } catch (refreshError) {
                 BackendApi.clearTokens();
