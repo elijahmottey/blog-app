@@ -140,7 +140,7 @@ export default function Navbar() {
         >
             <div className="container mx-auto px-4">
                 {/* Desktop Navigation */}
-                <div className="hidden md:flex items-center justify-between h-16">
+                <div className="hidden lg:flex items-center justify-between h-16">
                     {/* Logo and Navigation Links */}
                     <div className="flex items-center">
                         <Link to="/dashboard" style={{ textDecoration: 'none' }}>
@@ -303,8 +303,8 @@ export default function Navbar() {
                     </div>
                 </div>
 
-                {/* Mobile Navigation */}
-                <div className="flex md:hidden items-center justify-between h-16">
+                {/* Mobile/Tablet Navigation */}
+                <div className="flex lg:hidden items-center justify-between h-16">
                     {/* Mobile Logo */}
                     <Link to="/" className="flex items-center space-x-2">
                         <Box
@@ -361,9 +361,9 @@ export default function Navbar() {
                     </div>
                 </div>
 
-                {/* Mobile Search */}
+                {/* Mobile/Tablet Search */}
                 {isSearchOpen && (
-                    <div className="md:hidden px-4 pb-4">
+                    <div className="lg:hidden px-4 pb-4">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: theme.palette.text.secondary }} />
                             <input
@@ -412,9 +412,9 @@ export default function Navbar() {
                     </div>
                 )}
 
-                {/* Mobile Menu */}
+                {/* Mobile/Tablet Menu */}
                 {isOpen && (
-                    <div className="md:hidden" style={{ borderTop: `1px solid ${theme.palette.divider}` }}>
+                    <div className="lg:hidden" style={{ borderTop: `1px solid ${theme.palette.divider}` }}>
                         <div className="px-2 pt-2 pb-3 space-y-1">
                             {navigation.map((item) => {
                                 const Icon = item.icon;

@@ -11,7 +11,9 @@ import {
   ThumbsUp,
   User,
   Download,
-  Tag
+  Tag,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import { Button, IconButton, Typography, Box, Paper, TextField, Avatar, Chip, CircularProgress } from '@mui/material';
 import BackendApi, { type CommentDto, type PostDto } from '../../service/BackendApi';
@@ -30,6 +32,11 @@ export const PostDetail: React.FC = () => {
   const queryClient = useQueryClient();
   const [commentText, setCommentText] = useState('');
   const [showComments, setShowComments] = useState(true);
+  const [isReading, setIsReading] = useState(false);
+  const [voiceGender, setVoiceGender] = useState<'male' | 'female'>('female');
+  const [readingSpeed, setReadingSpeed] = useState(0.8);
+  const [alternateVoices, setAlternateVoices] = useState(false);
+  const [currentParagraph, setCurrentParagraph] = useState(-1);
   const theme = useTheme();
 
   const postId = parseInt(id || '0');
@@ -123,6 +130,68 @@ export const PostDetail: React.FC = () => {
     if (window.confirm('Are you sure you want to delete this post?')) {
       deleteMutation.mutate();
     }
+  };
+
+  const handleReadPost = () => {
+    if (isReading) {
+      speechSynthesis.cancel();
+      setIsReading(false);
+      setCurrentParagraph(-1);
+      return;
+    }
+
+    const voices = speechSynthesis.getVoices();
+    const femaleVoice = voices.find(voice => 
+      voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('zira') || voice.name.toLowerCase().includes('hazel')
+    ) || voices[0];
+    const maleVoice = voices.find(voice => 
+      voice.name.toLowerCase().includes('male') || voice.name.toLowerCase().includes('david') || voice.name.toLowerCase().includes('mark')
+    ) || voices[1] || voices[0];
+
+    const paragraphs = [
+      'Thank you for the opportunity to read to your hearing.',
+      `The title of this post is: ${postData.title || 'Untitled Post'}.`,
+      ...safePostContent.split('\n').filter(p => p.trim()),
+      'Thank you once again for the opportunity to read for you. LIV Blog is here to serve you.'
+    ];
+    let currentIndex = 0;
+
+    const readNextParagraph = () => {
+      if (currentIndex >= paragraphs.length) {
+        setIsReading(false);
+        setCurrentParagraph(-1);
+        return;
+      }
+
+      setCurrentParagraph(currentIndex - 2); // Adjust for intro and title messages
+      const text = paragraphs[currentIndex].replace(/[#*]/g, '');
+      const utterance = new SpeechSynthesisUtterance(text);
+      
+      if (alternateVoices && currentIndex > 1 && currentIndex < paragraphs.length - 1) {
+        utterance.voice = (currentIndex - 2) % 2 === 0 ? femaleVoice : maleVoice;
+      } else {
+        utterance.voice = voiceGender === 'female' ? femaleVoice : maleVoice;
+      }
+      
+      utterance.rate = readingSpeed;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+      
+      utterance.onend = () => {
+        currentIndex++;
+        setTimeout(readNextParagraph, 500);
+      };
+      
+      utterance.onerror = () => {
+        setIsReading(false);
+        setCurrentParagraph(-1);
+      };
+      
+      speechSynthesis.speak(utterance);
+    };
+
+    setIsReading(true);
+    readNextParagraph();
   };
 
   // Safe content formatting without dangerous HTML
@@ -427,6 +496,72 @@ export const PostDetail: React.FC = () => {
               </>
             )}
           </div>
+          
+          {/* Audio Controls */}
+          <div style={{ 
+            marginTop: '16px',
+            padding: '12px',
+            backgroundColor: alpha(theme.palette.background.paper, 0.5),
+            borderRadius: '8px',
+            border: `1px solid ${theme.palette.divider}`
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <Button
+                onClick={handleReadPost}
+                startIcon={isReading ? <VolumeX /> : <Volume2 />}
+                variant={isReading ? 'contained' : 'outlined'}
+                size="small"
+                style={{
+                  borderRadius: '6px',
+                  fontSize: '0.75rem'
+                }}
+              >
+                {isReading ? 'Stop' : 'Listen'}
+              </Button>
+              
+              <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem' }}>
+                <input
+                  type="checkbox"
+                  checked={alternateVoices}
+                  onChange={(e) => setAlternateVoices(e.target.checked)}
+                />
+                Alternate Voices
+              </label>
+              
+              {!alternateVoices && (
+                <select
+                  value={voiceGender}
+                  onChange={(e) => setVoiceGender(e.target.value as 'male' | 'female')}
+                  style={{
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    border: `1px solid ${theme.palette.divider}`,
+                    fontSize: '0.75rem',
+                    backgroundColor: theme.palette.background.paper
+                  }}
+                >
+                  <option value="female">Female Voice</option>
+                  <option value="male">Male Voice</option>
+                </select>
+              )}
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>Speed:</span>
+                <input
+                  type="range"
+                  min="0.5"
+                  max="2"
+                  step="0.1"
+                  value={readingSpeed}
+                  onChange={(e) => setReadingSpeed(parseFloat(e.target.value))}
+                  style={{ width: '60px' }}
+                />
+                <span style={{ fontSize: '0.75rem', color: theme.palette.text.secondary, minWidth: '30px' }}>
+                  {readingSpeed}x
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -443,7 +578,27 @@ export const PostDetail: React.FC = () => {
             lineHeight: 1.7,
             color: theme.palette.text.primary
           }}>
-            {renderContent(safePostContent) || (
+            {safePostContent.split('\n').filter(p => p.trim()).map((paragraph, index) => {
+              const isCurrentParagraph = index === currentParagraph && isReading;
+              return (
+                <Typography
+                  key={index}
+                  variant="body1"
+                  component="p"
+                  sx={{ 
+                    mb: 1, 
+                    lineHeight: 1.6,
+                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                    backgroundColor: isCurrentParagraph ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+                    padding: isCurrentParagraph ? '8px' : '0',
+                    borderRadius: isCurrentParagraph ? '4px' : '0',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  {paragraph}
+                </Typography>
+              );
+            }) || (
               <Typography 
                 variant="body1" 
                 sx={{ 
@@ -504,6 +659,21 @@ export const PostDetail: React.FC = () => {
             flexDirection: window.innerWidth < 768 ? 'column' : 'row',
             gap: window.innerWidth < 768 ? '8px' : '12px'
           }}>
+            <Button
+              onClick={handleReadPost}
+              startIcon={isReading ? <VolumeX /> : <Volume2 />}
+              variant="outlined"
+              size={window.innerWidth < 768 ? "small" : "medium"}
+              style={{
+                borderRadius: '10px',
+                borderColor: alpha(theme.palette.success.main, 0.3),
+                color: theme.palette.success.main,
+                backgroundColor: isReading ? alpha(theme.palette.success.main, 0.1) : 'transparent',
+                fontSize: window.innerWidth < 768 ? '0.75rem' : '0.875rem'
+              }}
+            >
+              {isReading ? 'Stop Reading' : 'Read Aloud'}
+            </Button>
             <Button
               onClick={() => downloadPost(postData)}
               startIcon={<Download />}

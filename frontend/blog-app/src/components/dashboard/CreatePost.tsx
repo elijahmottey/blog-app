@@ -23,7 +23,8 @@ import {
   Undo,
   Redo,
   Type,
-  FileText
+  FileText,
+  Image
 } from 'lucide-react';
 import {
   Button,
@@ -286,6 +287,14 @@ export const CreatePost: React.FC = () => {
     }
   };
 
+  const insertImage = () => {
+    const imageUrl = prompt('Enter image URL:', 'https://');
+    if (imageUrl) {
+      const altText = prompt('Enter image description (optional):', 'Image') || 'Image';
+      replaceSelectedText(`![${altText}](${imageUrl})`);
+    }
+  };
+
   const applyBlockquote = () => {
     const { text } = getSelectedText();
     if (text) {
@@ -390,6 +399,9 @@ export const CreatePost: React.FC = () => {
 
           // Handle inline code
           line = line.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+          // Handle images
+          line = line.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width: 100%; height: auto; margin: 1rem 0; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />');
 
           // Handle links
           line = line.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
@@ -563,6 +575,11 @@ export const CreatePost: React.FC = () => {
               <Tooltip title="Link">
                 <IconButton onClick={insertLink} size="small" className="aws-button">
                   <Link size={16} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Image">
+                <IconButton onClick={insertImage} size="small" className="aws-button">
+                  <Image size={16} />
                 </IconButton>
               </Tooltip>
               <Tooltip title="Quote">
