@@ -80,7 +80,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
           {hasChildren ? (
               <button
                   onClick={() => toggleExpanded(item.name)}
-                  className="aws-button w-full flex items-center aws-spacing-sm transition-colors"
+                  className="aws-button w-full flex items-center aws-spacing-sm transition-colors hover-subtle"
                   style={{
                     borderRadius: 8,
                     marginLeft: level > 0 ? 16 : 0,
@@ -100,7 +100,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
               <Link
                   to={item.href}
                   onClick={onClose}
-                  className="aws-button flex items-center aws-spacing-sm transition-colors"
+                  className="aws-button flex items-center aws-spacing-sm transition-colors hover-subtle"
                   style={{
                     borderRadius: 8,
                     marginLeft: level > 0 ? 16 : 0,
@@ -171,7 +171,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
             }}
         >
           <div className="flex flex-col h-full">
-            <Link to="/dashboard" className="aws-spacing-lg" style={{ textDecoration: 'none' }}>
+            <Link to="/dashboard" className="aws-spacing-lg hover-scale" style={{ textDecoration: 'none' }}>
               <div className="flex items-center gap-2">
                 <div
                     className="flex items-center justify-center"

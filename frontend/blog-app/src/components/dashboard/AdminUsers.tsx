@@ -51,6 +51,7 @@ import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import BackendApi, { type UserRegistration } from '../../service/BackendApi';
+import { LIVBlogHeader, LIVBlogCard, LIVBlogLayout } from '../ui';
 
 interface PagedResponse<T> {
   content: T[];
@@ -338,59 +339,52 @@ export const AdminUsers: React.FC = () => {
   }
 
   return (
-      <Box sx={{ p: { xs: 2, md: 3 } }}>
-        {/* Header */}
-        <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+    <LIVBlogLayout.Container>
+      <LIVBlogHeader
+        title="Users Management"
+        subtitle={`Manage users, roles, and permissions (${totalElements} total users)`}
+        size="large"
+        actions={
           <Box sx={{
             display: 'flex',
-            flexDirection: { xs: 'column', md: 'row' },
-            alignItems: { xs: 'flex-start', md: 'center' },
-            justifyContent: 'space-between',
-            gap: 2
+            gap: 2,
+            justifyContent: { xs: 'flex-start', md: 'flex-end' },
+            width: { xs: '100%', md: 'auto' }
           }}>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 0.5 }}>
-                Users Management
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Manage users, roles, and permissions ({totalElements} total users)
-              </Typography>
-            </Box>
-            <Box sx={{
-              display: 'flex',
-              gap: 2,
-              justifyContent: { xs: 'flex-start', md: 'flex-end' },
-              width: { xs: '100%', md: 'auto' }
-            }}>
-              <Button
-                  variant="outlined"
-                  startIcon={<Refresh />}
-                  onClick={() => refetch()}
-              >
-                Refresh
-              </Button>
-              <Button
-                  variant="contained"
-                  startIcon={<Add />}
-                  onClick={handleOpenCreateDialog}
-              >
-                Add New User
-              </Button>
-            </Box>
+            <Button
+              variant="outlined"
+              startIcon={<Refresh />}
+              onClick={() => refetch()}
+            >
+              Refresh
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={handleOpenCreateDialog}
+            >
+              Add New User
+            </Button>
           </Box>
-        </Paper>
+        }
+      />
 
         {/* Stats Cards */}
-        <Box sx={{
-          display: 'grid',
-          gridTemplateColumns: {
-            xs: '1fr',
-            sm: 'repeat(2, 1fr)',
-            md: 'repeat(4, 1fr)'
-          },
-          gap: 2,
-          mb: 3
-        }}>
+        <LIVBlogCard
+          title="User Statistics"
+          variant="elevated"
+          padding="large"
+          style={{ marginBottom: '24px' }}
+        >
+          <Box sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(4, 1fr)'
+            },
+            gap: 3
+          }}>
           <Card sx={{ height: '100%', borderRadius: 2 }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -462,10 +456,15 @@ export const AdminUsers: React.FC = () => {
               </Box>
             </CardContent>
           </Card>
-        </Box>
+          </Box>
+        </LIVBlogCard>
 
         {/* Search and Filter */}
-        <Paper sx={{ p: 2, mb: 3, borderRadius: 2 }}>
+        <LIVBlogCard
+          variant="outlined"
+          padding="medium"
+          style={{ marginBottom: '24px' }}
+        >
           <Box sx={{
             display: 'flex',
             flexDirection: { xs: 'column', md: 'row' },
@@ -505,10 +504,14 @@ export const AdminUsers: React.FC = () => {
                 No users found matching "{searchTerm}" on this page. Try clearing the search or checking other pages.
               </Alert>
           )}
-        </Paper>
+        </LIVBlogCard>
 
         {/* Users Table */}
-        <Paper sx={{ borderRadius: 2, overflow: 'hidden' }}>
+        <LIVBlogCard
+          title="Users List"
+          variant="elevated"
+          padding="none"
+        >
           <TableContainer>
             <Table>
               <TableHead>
@@ -655,11 +658,15 @@ export const AdminUsers: React.FC = () => {
               </TableBody>
             </Table>
           </TableContainer>
-        </Paper>
+        </LIVBlogCard>
 
         {/* Pagination */}
         {totalPages > 1 && (
-            <Paper sx={{ p: 2, mt: 3, borderRadius: 2 }}>
+          <LIVBlogCard
+            variant="outlined"
+            padding="medium"
+            style={{ marginTop: '24px' }}
+          >
               <Box sx={{
                 display: 'flex',
                 flexDirection: { xs: 'column', md: 'row' },
@@ -710,7 +717,7 @@ export const AdminUsers: React.FC = () => {
                   </Button>
                 </Box>
               </Box>
-            </Paper>
+          </LIVBlogCard>
         )}
 
         {/* Create/Edit User Dialog */}
@@ -832,6 +839,6 @@ export const AdminUsers: React.FC = () => {
             </Button>
           </DialogActions>
         </Dialog>
-      </Box>
+    </LIVBlogLayout.Container>
   );
 };

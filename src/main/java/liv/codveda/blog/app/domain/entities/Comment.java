@@ -9,6 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Data
+@ToString(exclude = {"users", "post"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity

@@ -236,6 +236,7 @@ export const Signup = () => {
                         <Box
                             component={Link}
                             to="/home"
+                            className="hover-scale"
                             sx={{
                                 display: 'block',
                                 textDecoration: 'none',
@@ -274,6 +275,7 @@ export const Signup = () => {
                         <LIVBlogCard
                             variant="elevated"
                             padding="large"
+                            className="hover-card"
                             style={{
                                 width: '100%',
                             }}
@@ -418,6 +420,7 @@ export const Signup = () => {
                                     type="submit"
                                     fullWidth
                                     variant="contained"
+                                    className="hover-button"
                                     disabled={loading}
                                     sx={{ mb: 2 }}
                                 >

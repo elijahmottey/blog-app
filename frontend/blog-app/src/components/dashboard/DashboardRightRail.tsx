@@ -57,7 +57,7 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
               component={Link} 
               to={a.to} 
               size="small" 
-              className="aws-button aws-button-icon"
+              className="aws-button aws-button-icon hover-subtle"
               sx={{ 
                 color: 'text.secondary',
                 '&:hover': {
@@ -79,7 +79,7 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
         <IconButton 
           size="small" 
           onClick={toggleMode} 
-          className="aws-button aws-button-icon"
+          className="aws-button aws-button-icon hover-subtle"
           sx={{ 
             color: 'text.secondary',
             '&:hover': {
@@ -103,7 +103,7 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
       <Tooltip title="Notifications" placement="left">
         <IconButton 
           size="small" 
-          className="aws-button aws-button-icon"
+          className="aws-button aws-button-icon hover-subtle"
           sx={{ 
             color: 'text.secondary',
             '&:hover': {
@@ -122,18 +122,33 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
 
       {/* Profile avatar */}
       <Box>
-        <IconButton onClick={handleOpen} sx={{ p: 0.5 }}>
-          <Avatar sx={{ 
-            width: 36, 
-            height: 36, 
-            bgcolor: 'primary.main', 
-            color: 'primary.contrastText',
-            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            fontSize: '0.875rem',
-            fontWeight: 600
-          }}>
-            {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-          </Avatar>
+        <IconButton onClick={handleOpen} sx={{ p: 0.5 }} className="hover-scale">
+          <div
+            style={{
+              width: 36,
+              height: 36,
+              backgroundColor: user?.avatar ? 'transparent' : theme.palette.primary.main,
+              color: 'white',
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
+              fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+            }}
+          >
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.name || 'User'}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            ) : (
+              user?.name?.charAt(0)?.toUpperCase() || 'U'
+            )}
+          </div>
         </IconButton>
         <MuiMenu 
           anchorEl={anchorEl} 
@@ -149,16 +164,32 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
         >
           <Box sx={{ p: 2, minWidth: 220 }}>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-              <Avatar sx={{ 
-                width: 48, 
-                height: 48, 
-                bgcolor: 'primary.main',
-                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                fontSize: '1.125rem',
-                fontWeight: 600
-              }}>
-                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-              </Avatar>
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  backgroundColor: user?.avatar ? 'transparent' : theme.palette.primary.main,
+                  color: 'white',
+                  fontWeight: 600,
+                  fontSize: '1.125rem',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden',
+                  fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                }}
+              >
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user.name || 'User'}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  user?.name?.charAt(0)?.toUpperCase() || 'U'
+                )}
+              </div>
               <Box>
                 <Typography 
                   variant="subtitle2" 

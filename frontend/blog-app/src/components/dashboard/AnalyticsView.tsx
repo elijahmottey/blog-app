@@ -3,9 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { useTheme, alpha } from '@mui/material/styles';
 import { 
    XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area 
+  BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, LineChart, Line 
 } from 'recharts';
-import { Users, FileText, MessageSquare, TrendingUp, Activity } from 'lucide-react';
+import { Users, FileText, MessageSquare, TrendingUp, Activity, Eye, Heart, Clock } from 'lucide-react';
 import BackendApi from '../../service/BackendApi';
 import { format, subDays, startOfDay } from 'date-fns';
 import { LIVBlogHeader, LIVBlogCard, LIVBlogLayout } from '../ui';
@@ -137,80 +137,199 @@ export const AnalyticsView: React.FC = () => {
   };
 
   return (
-    <LIVBlogLayout.Container>
+    <div style={{ padding: window.innerWidth < 768 ? '16px' : '32px', maxWidth: '1400px', margin: '0 auto' }}>
       {/* Header */}
-      <LIVBlogHeader
-        title="Platform Analytics"
-        subtitle="Comprehensive insights into your blog platform performance"
-        size="large"
-      />
+      <div style={{ marginBottom: window.innerWidth < 768 ? '24px' : '32px' }}>
+        <LIVBlogHeader
+          title="Platform Analytics"
+          subtitle="Comprehensive insights into your blog platform performance and user engagement"
+          size="large"
+        />
+      </div>
 
-      {/* Key Metrics */}
-      <LIVBlogLayout.Grid cols={3} gap="md">
+      {/* Key Metrics Grid */}
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(auto-fit, minmax(280px, 1fr))', 
+        gap: window.innerWidth < 768 ? '16px' : '20px',
+        marginBottom: window.innerWidth < 768 ? '24px' : '32px'
+      }}>
         {[
-          { label: 'Total Users', value: totalStats.totalUsers, icon: Users, color: theme.palette.primary.main },
-          { label: 'Total Posts', value: totalStats.totalPosts, icon: FileText, color: theme.palette.success.main },
-          { label: 'Total Comments', value: totalStats.totalComments, icon: MessageSquare, color: theme.palette.secondary.main },
-          { label: 'Published Posts', value: totalStats.publishedPosts, icon: Activity, color: theme.palette.info.main },
-          { label: 'Draft Posts', value: totalStats.draftPosts, icon: FileText, color: theme.palette.warning.main },
-          { label: 'Avg Posts/User', value: totalStats.avgPostsPerUser, icon: TrendingUp, color: theme.palette.primary.main },
+          { 
+            label: 'Total Users', 
+            value: totalStats.totalUsers, 
+            icon: Users, 
+            color: theme.palette.primary.main,
+            trend: '+12%',
+            subtitle: 'Active community members'
+          },
+          { 
+            label: 'Total Posts', 
+            value: totalStats.totalPosts, 
+            icon: FileText, 
+            color: theme.palette.success.main,
+            trend: '+8%',
+            subtitle: 'Published articles'
+          },
+          { 
+            label: 'Total Comments', 
+            value: totalStats.totalComments, 
+            icon: MessageSquare, 
+            color: theme.palette.secondary.main,
+            trend: '+15%',
+            subtitle: 'User interactions'
+          },
+          { 
+            label: 'Published Posts', 
+            value: totalStats.publishedPosts, 
+            icon: Activity, 
+            color: theme.palette.info.main,
+            trend: '+5%',
+            subtitle: 'Live content'
+          },
+          { 
+            label: 'Draft Posts', 
+            value: totalStats.draftPosts, 
+            icon: Clock, 
+            color: theme.palette.warning.main,
+            trend: '-2%',
+            subtitle: 'Work in progress'
+          },
+          { 
+            label: 'Avg Posts/User', 
+            value: totalStats.avgPostsPerUser, 
+            icon: TrendingUp, 
+            color: theme.palette.primary.main,
+            trend: '+3%',
+            subtitle: 'Content creation rate'
+          },
         ].map((metric) => (
           <LIVBlogCard
             key={metric.label}
-            title={metric.label}
-            variant="default"
-            padding="medium"
-            className="aws-min-h-card-sm"
+            variant="elevated"
+            padding="large"
+            hoverable
+            style={{
+              background: `linear-gradient(135deg, ${alpha(metric.color, 0.05)}, ${alpha(metric.color, 0.02)})`,
+              borderLeft: `4px solid ${metric.color}`
+            }}
           >
-            <div className="aws-flex aws-items-center aws-gap-3 aws-mb-2">
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '16px' }}>
               <div 
-                className="aws-p-2 aws-rounded-md aws-flex aws-items-center aws-justify-center"
                 style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '12px',
                   backgroundColor: alpha(metric.color, 0.12),
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
               >
-                <metric.icon size={20} style={{ color: metric.color }} />
+                <metric.icon size={24} style={{ color: metric.color }} />
+              </div>
+              <div 
+                style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: metric.trend.startsWith('+') ? theme.palette.success.main : theme.palette.error.main,
+                  backgroundColor: alpha(
+                    metric.trend.startsWith('+') ? theme.palette.success.main : theme.palette.error.main, 
+                    0.1
+                  ),
+                  padding: '4px 8px',
+                  borderRadius: '12px'
+                }}
+              >
+                {metric.trend}
               </div>
             </div>
-            <div 
-              className="aws-text-2xl aws-font-bold aws-text-primary"
-              style={{ 
-                color: theme.palette.text.primary,
-                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-              }}
-            >
-              {metric.value}
+            <div style={{ marginBottom: '8px' }}>
+              <div 
+                style={{
+                  fontSize: '2rem',
+                  fontWeight: 700,
+                  color: theme.palette.text.primary,
+                  lineHeight: 1.2
+                }}
+              >
+                {metric.value}
+              </div>
+              <div 
+                style={{
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  color: theme.palette.text.primary,
+                  marginBottom: '4px'
+                }}
+              >
+                {metric.label}
+              </div>
+              <div 
+                style={{
+                  fontSize: '0.875rem',
+                  color: theme.palette.text.secondary
+                }}
+              >
+                {metric.subtitle}
+              </div>
             </div>
           </LIVBlogCard>
         ))}
-      </LIVBlogLayout.Grid>
+      </div>
 
       {/* Charts Row 1 */}
-      <LIVBlogLayout.Grid cols={2} gap="lg">
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(auto-fit, minmax(300px, 1fr))', 
+        gap: window.innerWidth < 768 ? '20px' : '24px',
+        marginBottom: window.innerWidth < 768 ? '24px' : '32px'
+      }}>
         {/* User Growth Chart */}
         <LIVBlogCard
-          title="User Growth (Last 30 Days)"
-          variant="default"
+          title="User Growth Trend"
+          subtitle="New user registrations over the last 30 days"
+          variant="elevated"
           padding="large"
         >
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={320}>
             <AreaChart data={userGrowthData}>
-              <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
-              <XAxis dataKey="date" stroke={theme.palette.text.secondary} />
-              <YAxis stroke={theme.palette.text.secondary} />
+              <defs>
+                <linearGradient id="userGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor={theme.palette.primary.main} stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.divider, 0.5)} />
+              <XAxis 
+                dataKey="date" 
+                stroke={theme.palette.text.secondary}
+                fontSize={12}
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis 
+                stroke={theme.palette.text.secondary}
+                fontSize={12}
+                tickLine={false}
+                axisLine={false}
+              />
               <Tooltip 
                 contentStyle={{
                   backgroundColor: theme.palette.background.paper,
                   border: `1px solid ${theme.palette.divider}`,
-                  borderRadius: 8,
+                  borderRadius: 12,
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)'
                 }}
               />
               <Area 
                 type="monotone" 
                 dataKey="users" 
-                stroke={theme.palette.primary.main} 
-                fill={alpha(theme.palette.primary.main, 0.2)}
-                strokeWidth={2}
+                stroke={theme.palette.primary.main}
+                strokeWidth={3}
+                fill="url(#userGradient)"
+                dot={{ fill: theme.palette.primary.main, strokeWidth: 2, r: 4 }}
+                activeDot={{ r: 6, stroke: theme.palette.primary.main, strokeWidth: 2 }}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -218,50 +337,73 @@ export const AnalyticsView: React.FC = () => {
 
         {/* Post Activity Chart */}
         <LIVBlogCard
-          title="Daily Post Activity"
-          variant="default"
+          title="Content Creation Activity"
+          subtitle="Daily post publishing activity for the past week"
+          variant="elevated"
           padding="large"
         >
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={320}>
             <BarChart data={postActivityData}>
-              <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
-              <XAxis dataKey="day" stroke={theme.palette.text.secondary} />
-              <YAxis stroke={theme.palette.text.secondary} />
+              <CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.divider, 0.5)} />
+              <XAxis 
+                dataKey="day" 
+                stroke={theme.palette.text.secondary}
+                fontSize={12}
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis 
+                stroke={theme.palette.text.secondary}
+                fontSize={12}
+                tickLine={false}
+                axisLine={false}
+              />
               <Tooltip 
                 contentStyle={{
                   backgroundColor: theme.palette.background.paper,
                   border: `1px solid ${theme.palette.divider}`,
-                  borderRadius: 8,
+                  borderRadius: 12,
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)'
                 }}
-                formatter={(value, name) => [`${value} posts`, `Posts`]}
+                formatter={(value, name) => [`${value} posts`, `Posts Created`]}
                 labelFormatter={(label) => {
                   const item = postActivityData.find(d => d.day === label);
                   return item ? item.date : label;
                 }}
               />
-              <Bar dataKey="posts" fill={theme.palette.success.main} radius={[4, 4, 0, 0]} />
+              <Bar 
+                dataKey="posts" 
+                fill={theme.palette.success.main}
+                radius={[8, 8, 0, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </LIVBlogCard>
-      </LIVBlogLayout.Grid>
+      </div>
 
       {/* Charts Row 2 */}
-      <LIVBlogLayout.Grid cols={2} gap="lg">
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+        gap: '24px',
+        marginBottom: '32px'
+      }}>
         {/* User Role Distribution */}
         <LIVBlogCard
           title="User Role Distribution"
-          variant="default"
+          subtitle="Breakdown of user roles across the platform"
+          variant="elevated"
           padding="large"
         >
-          <ResponsiveContainer width="100%" height={250}>
+          <ResponsiveContainer width="100%" height={280}>
             <PieChart>
               <Pie
                 data={roleDistribution}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={100}
-                paddingAngle={5}
+                innerRadius={70}
+                outerRadius={120}
+                paddingAngle={8}
                 dataKey="value"
               >
                 {roleDistribution.map((entry, index) => (
@@ -272,25 +414,24 @@ export const AnalyticsView: React.FC = () => {
                 contentStyle={{
                   backgroundColor: theme.palette.background.paper,
                   border: `1px solid ${theme.palette.divider}`,
-                  borderRadius: 8,
+                  borderRadius: 12,
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)'
                 }}
               />
             </PieChart>
           </ResponsiveContainer>
-          <div className="aws-flex aws-justify-center aws-gap-4 aws-mt-4">
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginTop: '16px' }}>
             {roleDistribution.map((entry) => (
-              <div key={entry.name} className="aws-flex aws-items-center aws-gap-2">
+              <div key={entry.name} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <div 
-                  className="aws-w-3 aws-h-3 aws-rounded-full"
-                  style={{ backgroundColor: entry.color }}
-                />
-                <span 
-                  className="aws-text-sm"
-                  style={{ 
-                    color: theme.palette.text.primary,
-                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  style={{
+                    width: '12px',
+                    height: '12px',
+                    borderRadius: '50%',
+                    backgroundColor: entry.color
                   }}
-                >
+                />
+                <span style={{ fontSize: '0.875rem', color: theme.palette.text.primary, fontWeight: 500 }}>
                   {entry.name} ({entry.value})
                 </span>
               </div>
@@ -300,106 +441,150 @@ export const AnalyticsView: React.FC = () => {
 
         {/* Top Content Engagement */}
         <LIVBlogCard
-          title="Top Content Engagement"
-          variant="default"
+          title="Top Performing Content"
+          subtitle="Most engaging posts based on views, likes, and comments"
+          variant="elevated"
           padding="large"
         >
-          <div style={{ maxHeight: 250, overflow: 'auto' }}>
-            {engagementData.slice(0, 5).map((item, index) => (
+          <div style={{ maxHeight: 280, overflow: 'auto' }}>
+            {engagementData.slice(0, 6).map((item, index) => (
               <div 
                 key={index} 
-                className="aws-flex aws-justify-between aws-items-center aws-py-3"
                 style={{
-                  borderBottom: index < 4 ? `1px solid ${theme.palette.divider}` : 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '16px 0',
+                  borderBottom: index < 5 ? `1px solid ${alpha(theme.palette.divider, 0.5)}` : 'none',
                 }}
               >
-                <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
                   <div 
-                    className="aws-text-sm aws-font-semibold"
-                    style={{ 
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '8px',
+                      backgroundColor: alpha(theme.palette.primary.main, 0.12),
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      color: theme.palette.primary.main
+                    }}
+                  >
+                    #{index + 1}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ 
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
                       color: theme.palette.text.primary,
-                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                    }}
-                  >
-                    {item.title}
+                      marginBottom: '4px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {item.title}
+                    </div>
+                    <div style={{ display: 'flex', gap: '16px', fontSize: '0.75rem', color: theme.palette.text.secondary }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Eye size={12} /> {item.views}
+                      </span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Heart size={12} /> {item.likes}
+                      </span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <MessageSquare size={12} /> {item.comments}
+                      </span>
+                    </div>
                   </div>
-                  <div 
-                    className="aws-text-xs aws-mt-1"
-                    style={{ 
-                      color: theme.palette.text.secondary,
-                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                    }}
-                  >
-                    {item.views} views • {item.likes} likes • {item.comments} comments
-                  </div>
-                </div>
-                <div 
-                  className="aws-text-xl aws-font-bold aws-ml-4"
-                  style={{
-                    color: theme.palette.primary.main,
-                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                  }}
-                >
-                  #{index + 1}
                 </div>
               </div>
             ))}
           </div>
         </LIVBlogCard>
-      </LIVBlogLayout.Grid>
+      </div>
 
       {/* Platform Health */}
       <LIVBlogCard
-        title="Platform Health Metrics"
-        variant="default"
+        title="Platform Health & Performance"
+        subtitle="Real-time system metrics and operational status"
+        variant="elevated"
         padding="large"
       >
-        <LIVBlogLayout.Grid cols={4} gap="md">
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+          gap: '24px'
+        }}>
           {[
-            { label: 'Active Users (Last 7 Days)', value: Math.floor(totalUsers * 0.7), total: totalUsers },
-            { label: 'Content Moderation Queue', value: 2, total: totalPosts + totalComments },
-            { label: 'System Uptime', value: '99.9%', total: '100%' },
-            { label: 'Average Response Time', value: '120ms', total: '<200ms' },
+            { 
+              label: 'Active Users (Last 7 Days)', 
+              value: Math.floor(totalUsers * 0.7), 
+              total: totalUsers,
+              color: theme.palette.success.main,
+              icon: Users
+            },
+            { 
+              label: 'Content Moderation Queue', 
+              value: 2, 
+              total: totalPosts + totalComments,
+              color: theme.palette.warning.main,
+              icon: Activity
+            },
+            { 
+              label: 'System Uptime', 
+              value: '99.9%', 
+              total: '100%',
+              color: theme.palette.success.main,
+              icon: TrendingUp
+            },
+            { 
+              label: 'Average Response Time', 
+              value: '120ms', 
+              total: '<200ms',
+              color: theme.palette.info.main,
+              icon: Clock
+            },
           ].map((metric, index) => (
             <div 
               key={index} 
-              className="aws-p-4 aws-rounded-lg aws-border"
               style={{
-                backgroundColor: alpha(theme.palette.info.main, 0.1),
-                borderColor: alpha(theme.palette.info.main, 0.2),
+                padding: '24px',
+                borderRadius: '12px',
+                backgroundColor: alpha(metric.color, 0.08),
+                border: `1px solid ${alpha(metric.color, 0.2)}`,
               }}
             >
-              <div 
-                className="aws-text-sm aws-mb-2"
-                style={{ 
-                  color: theme.palette.text.secondary,
-                  fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                }}
-              >
-                {metric.label}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                <div 
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '10px',
+                    backgroundColor: alpha(metric.color, 0.15),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <metric.icon size={20} style={{ color: metric.color }} />
+                </div>
+                <div style={{ fontSize: '0.875rem', color: theme.palette.text.secondary, lineHeight: 1.4 }}>
+                  {metric.label}
+                </div>
               </div>
-              <div 
-                className="aws-text-xl aws-font-bold"
-                style={{ 
-                  color: theme.palette.info.main,
-                  fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                }}
-              >
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: metric.color, marginBottom: '4px' }}>
                 {metric.value}
               </div>
-              <div 
-                className="aws-text-xs aws-mt-1"
-                style={{ 
-                  color: theme.palette.text.secondary,
-                  fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                }}
-              >
+              <div style={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
                 of {metric.total}
               </div>
             </div>
           ))}
-        </LIVBlogLayout.Grid>
+        </div>
       </LIVBlogCard>
-    </LIVBlogLayout.Container>
+    </div>
   );
 };

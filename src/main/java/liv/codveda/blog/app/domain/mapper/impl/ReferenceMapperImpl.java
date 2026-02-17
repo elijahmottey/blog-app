@@ -21,6 +21,7 @@ public class ReferenceMapperImpl implements ReferenceMapper {
                 user.getName(),
                 user.getEmail(),
                 user.getDescription(),
+                user.getAvatar(),
                 user.getRole()
         );
     }

@@ -6,8 +6,8 @@ interface LIVBlogCardProps {
   title?: string;
   subtitle?: string;
   actions?: React.ReactNode;
-  variant?: 'default' | 'outlined' | 'elevated';
-  padding?: 'none' | 'small' | 'medium' | 'large';
+  variant?: 'default' | 'outlined' | 'elevated' | 'glass';
+  padding?: 'none' | 'small' | 'medium' | 'large' | 'xl';
   className?: string;
   onClick?: () => void;
   hoverable?: boolean;
@@ -31,64 +31,105 @@ export const LIVBlogCard: React.FC<LIVBlogCardProps> = ({
   const getPaddingStyles = () => {
     switch (padding) {
       case 'none':
-        return '';
+        return { padding: 0 };
       case 'small':
-        return 'p-3';
+        return { padding: '12px' };
       case 'large':
-        return 'p-6';
+        return { padding: '32px' };
+      case 'xl':
+        return { padding: '48px' };
       default:
-        return 'p-4';
+        return { padding: '24px' };
     }
   };
 
   const getVariantStyles = () => {
+    const baseStyles = {
+      borderRadius: '12px',
+      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    };
+
     switch (variant) {
       case 'outlined':
         return {
+          ...baseStyles,
           backgroundColor: 'transparent',
           border: `1px solid ${theme.palette.divider}`,
           boxShadow: 'none'
         };
       case 'elevated':
         return {
+          ...baseStyles,
           backgroundColor: theme.palette.background.paper,
-          border: `1px solid ${theme.palette.divider}`,
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+          border: 'none',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04)'
+        };
+      case 'glass':
+        return {
+          ...baseStyles,
+          backgroundColor: `${theme.palette.background.paper}95`,
+          border: `1px solid ${theme.palette.divider}40`,
+          backdropFilter: 'blur(12px)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)'
         };
       default:
         return {
+          ...baseStyles,
           backgroundColor: theme.palette.background.paper,
           border: `1px solid ${theme.palette.divider}`,
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)'
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04)'
         };
     }
   };
 
-  const baseStyles = getVariantStyles();
-  const paddingClass = getPaddingStyles();
+  const getHoverStyles = () => {
+    if (!hoverable && !onClick) return {};
+    
+    return {
+      cursor: 'pointer',
+      '&:hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: variant === 'elevated' 
+          ? '0 8px 25px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06)'
+          : '0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06)'
+      }
+    };
+  };
+
+  const cardStyles = {
+    ...getVariantStyles(),
+    ...getPaddingStyles(),
+    ...getHoverStyles(),
+    ...style
+  };
 
   return (
     <div
-      className={`rounded-lg transition-all duration-200 ${paddingClass} ${className} ${
-        hoverable || onClick ? 'cursor-pointer hover:shadow-md' : ''
-      }`}
-      style={{
-        ...baseStyles,
-        ...style,
-        fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-      }}
+      className={className}
+      style={cardStyles}
       onClick={onClick}
     >
       {(title || subtitle || actions) && (
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
+        <div 
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            marginBottom: title || subtitle ? '20px' : '0',
+            gap: '16px'
+          }}
+        >
+          <div style={{ flex: 1, minWidth: 0 }}>
             {title && (
               <h3
-                className="text-lg font-semibold"
                 style={{
                   color: theme.palette.text.primary,
                   margin: 0,
-                  lineHeight: 1.3
+                  fontSize: '1.125rem',
+                  fontWeight: 600,
+                  lineHeight: 1.4,
+                  fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
                 }}
               >
                 {title}
@@ -96,11 +137,12 @@ export const LIVBlogCard: React.FC<LIVBlogCardProps> = ({
             )}
             {subtitle && (
               <p
-                className="text-sm mt-1"
                 style={{
                   color: theme.palette.text.secondary,
-                  margin: 0,
-                  lineHeight: 1.4
+                  margin: title ? '4px 0 0 0' : '0',
+                  fontSize: '0.875rem',
+                  lineHeight: 1.5,
+                  fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
                 }}
               >
                 {subtitle}
@@ -108,7 +150,14 @@ export const LIVBlogCard: React.FC<LIVBlogCardProps> = ({
             )}
           </div>
           {actions && (
-            <div className="flex items-center gap-2 ml-4">
+            <div 
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                flexShrink: 0
+              }}
+            >
               {actions}
             </div>
           )}

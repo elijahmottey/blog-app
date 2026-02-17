@@ -81,7 +81,7 @@ export const Login: React.FC = () => {
     // Redirect if already authenticated
     useEffect(() => {
         if (isAuthenticated) {
-            const from = location.state?.from?.pathname || '/dashboard';
+            const from = location.state?.from?.pathname || '/dashboard/posts';
             navigate(from, { replace: true });
         }
     }, [isAuthenticated, navigate, location]);
@@ -141,7 +141,12 @@ export const Login: React.FC = () => {
         <>
             <AWSBackground />
             <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-                <Box sx={{ flex: 1, display: 'flex', justifyContent: 'space-around' }}>
+                <Box sx={{ 
+                    flex: 1, 
+                    display: 'flex', 
+                    flexDirection: { xs: 'column', md: 'row' },
+                    justifyContent: 'space-around' 
+                }}>
                 {/* Left Half - Logo */}
                 <Box
                     sx={{
@@ -149,7 +154,9 @@ export const Login: React.FC = () => {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        minHeight: { xs: '200px', md: 'auto' },
+                        order: { xs: 2, md: 1 }
                     }}
                 >
                     <motion.div
@@ -160,6 +167,7 @@ export const Login: React.FC = () => {
                         <Box
                             component={Link}
                             to="/home"
+                            className="hover-scale"
                             sx={{
                                 display: 'block',
                                 textDecoration: 'none',
@@ -170,7 +178,8 @@ export const Login: React.FC = () => {
                                 src="/LIV Blog logo design.png"
                                 alt="LIV Blog"
                                 style={{
-                                    maxWidth: '300px',
+                                    maxWidth: '250px',
+                                    width: '100%',
                                     height: 'auto',
                                     display: 'block'
                                 }}
@@ -186,18 +195,20 @@ export const Login: React.FC = () => {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        padding: 4
+                        padding: { xs: 2, md: 4 },
+                        order: { xs: 1, md: 2 }
                     }}
                 >
                     <motion.div
                         initial={{ x: 50, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ duration: 0.6, delay: 0.2 }}
-                        style={{ width: '100%', maxWidth: 400 }}
+                        style={{ width: '100%', maxWidth: { xs: '100%', sm: 400 } }}
                     >
                         <LIVBlogCard
                             variant="elevated"
                             padding="large"
+                            className="hover-card"
                             style={{
                                 width: '100%',
                             }}
@@ -301,6 +312,7 @@ export const Login: React.FC = () => {
                                     type="submit"
                                     fullWidth
                                     variant="contained"
+                                    className="hover-button"
                                     disabled={loading}
                                     sx={{ mb: 2 }}
                                 >
@@ -317,6 +329,7 @@ export const Login: React.FC = () => {
                                     component={Link}
                                     to="/auth/signup"
                                     variant="outlined"
+                                    className="hover-button"
                                     fullWidth
                                     disabled={loading}
                                 >

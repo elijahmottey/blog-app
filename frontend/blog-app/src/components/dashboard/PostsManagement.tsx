@@ -147,19 +147,19 @@ export const PostsManagement: React.FC = () => {
   }
 
   return (
-    <div className="aws-spacing-y-lg">
+    <div className="aws-spacing-y-sm">
       <LIVBlogHeader
-        title="Posts Management"
-        subtitle="Manage and organize your blog posts"
+        title=""
+        subtitle=""
         size="large"
         actions={
           <div className="flex gap-2">
             <Button onClick={refreshPosts} variant="outlined" className="aws-button aws-button-secondary">
-              <RefreshCw size={16} style={{ marginRight: '8px' }} />
+              <RefreshCw size={10} style={{ marginRight: '4px' }} />
               Refresh
             </Button>
             <Button component={Link} to="/dashboard/posts/create" variant="contained" className="aws-button aws-button-primary">
-              <Plus size={16} style={{ marginRight: '8px' }} />
+              <Plus size={10} style={{ marginRight: '4px' }} />
               Create Post
             </Button>
           </div>

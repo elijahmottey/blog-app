@@ -171,22 +171,33 @@ export const EditPost: React.FC = () => {
   }
 
   return (
-    <LIVBlogLayout.Container>
+    <div style={{ padding: '32px', maxWidth: '1200px', margin: '0 auto' }}>
       {/* Header */}
-      <LIVBlogHeader
-        title="Edit Post"
-        subtitle="Update your blog post content and title"
-        size="large"
-        actions={
-          <div className="aws-flex aws-gap-2">
+      <div style={{ marginBottom: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+          <div>
+            <h1 style={{
+              fontSize: '2rem',
+              fontWeight: 700,
+              color: theme.palette.text.primary,
+              margin: '0 0 8px 0'
+            }}>
+              Edit Post
+            </h1>
+            <p style={{
+              fontSize: '1rem',
+              color: theme.palette.text.secondary,
+              margin: 0
+            }}>
+              Update your blog post content and title
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '12px' }}>
             <Button
               variant="outlined"
               onClick={() => setPreviewMode(!previewMode)}
               startIcon={previewMode ? <EyeOff size={20} /> : <Eye size={20} />}
-              className="aws-button aws-button-secondary"
-              style={{
-                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-              }}
+              style={{ borderRadius: '10px' }}
             >
               {previewMode ? 'Edit' : 'Preview'}
             </Button>
@@ -194,38 +205,32 @@ export const EditPost: React.FC = () => {
               variant="outlined"
               onClick={() => navigate(`/dashboard/posts/${postId}`)}
               startIcon={<ArrowLeft size={20} />}
-              className="aws-button aws-button-secondary"
-              style={{
-                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-              }}
+              style={{ borderRadius: '10px' }}
             >
               Back
             </Button>
           </div>
-        }
-      />
+        </div>
+      </div>
 
       {/* Post Metadata */}
-      <LIVBlogLayout.Grid cols={4} gap="sm">
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+        gap: '16px',
+        marginBottom: '32px'
+      }}>
         <Chip
           icon={<User size={16} />}
           label="Author"
           variant="outlined"
           size="small"
-          className="aws-chip"
-          style={{
-            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-          }}
         />
         <Chip
           icon={<Calendar size={16} />}
           label={new Date(postData.data.createdAt || new Date()).toLocaleDateString()}
           variant="outlined"
           size="small"
-          className="aws-chip"
-          style={{
-            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-          }}
         />
         <Chip
           icon={<FileText size={16} />}
@@ -233,39 +238,31 @@ export const EditPost: React.FC = () => {
           variant="outlined"
           size="small"
           color={watchedContent.length < 10 ? 'error' : 'default'}
-          className="aws-chip"
-          style={{
-            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-          }}
         />
         <Chip
           label={previewMode ? "Preview Mode" : "Edit Mode"}
           variant="filled"
           size="small"
           color={previewMode ? "info" : "primary"}
-          className="aws-chip"
-          style={{
-            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-          }}
         />
-      </LIVBlogLayout.Grid>
+      </div>
 
       {/* Editor Card */}
       <LIVBlogCard
-        variant="default"
-        padding="large"
+        variant="elevated"
+        padding="xl"
+        style={{ marginBottom: '32px' }}
       >
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="aws-flex aws-flex-col aws-gap-6">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
             {/* Title Section */}
             <div>
-              <h3 
-                className="aws-text-lg aws-font-medium aws-mb-2"
-                style={{ 
-                  color: theme.palette.text.primary,
-                  fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                }}
-              >
+              <h3 style={{ 
+                fontSize: '1.125rem',
+                fontWeight: 600,
+                marginBottom: '12px',
+                color: theme.palette.text.primary
+              }}>
                 Post Title
               </h3>
               <TextField
@@ -276,25 +273,22 @@ export const EditPost: React.FC = () => {
                 disabled={previewMode}
                 error={!!errors.title}
                 helperText={errors.title?.message}
-                InputProps={{
-                  style: { 
-                    fontSize: '1.125rem', 
-                    fontWeight: 500,
-                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                  },
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '12px'
+                  }
                 }}
               />
             </div>
 
             {/* Category Section */}
             <div>
-              <h3 
-                className="aws-text-lg aws-font-medium aws-mb-2"
-                style={{ 
-                  color: theme.palette.text.primary,
-                  fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                }}
-              >
+              <h3 style={{ 
+                fontSize: '1.125rem',
+                fontWeight: 600,
+                marginBottom: '12px',
+                color: theme.palette.text.primary
+              }}>
                 Category
               </h3>
               <TextField
@@ -305,10 +299,10 @@ export const EditPost: React.FC = () => {
                 error={!!errors.category}
                 helperText={errors.category?.message}
                 SelectProps={{ native: true }}
-                InputProps={{
-                  style: { 
-                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                  },
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '12px'
+                  }
                 }}
               >
                 <option value="">Select a category</option>
@@ -326,44 +320,43 @@ export const EditPost: React.FC = () => {
 
             {/* Content Section */}
             <div>
-              <div className="aws-flex aws-justify-between aws-items-center aws-mb-2">
-                <h3 
-                  className="aws-text-lg aws-font-medium"
-                  style={{ 
-                    color: theme.palette.text.primary,
-                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                  }}
-                >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <h3 style={{ 
+                  fontSize: '1.125rem',
+                  fontWeight: 600,
+                  margin: 0,
+                  color: theme.palette.text.primary
+                }}>
                   Content
                 </h3>
-                <span 
-                  className="aws-text-sm"
-                  style={{ 
-                    color: theme.palette.text.secondary,
-                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                  }}
-                >
+                <span style={{ 
+                  fontSize: '0.875rem',
+                  color: theme.palette.text.secondary
+                }}>
                   {previewMode ? 'Preview' : 'Markdown supported'}
                 </span>
               </div>
 
               {previewMode ? (
                 <div 
-                  className="aws-min-h-96 aws-p-6 aws-border aws-rounded-lg aws-overflow-auto"
                   style={{
-                    backgroundColor: theme.palette.grey[50],
-                    borderColor: theme.palette.divider,
+                    minHeight: '400px',
+                    padding: '24px',
+                    borderRadius: '12px',
+                    overflow: 'auto',
+                    backgroundColor: alpha(theme.palette.background.paper, 0.5),
+                    border: `1px solid ${theme.palette.divider}`,
                   }}
                 >
                   {watchedContent ? (
                     <div dangerouslySetInnerHTML={{ __html: formatContent(watchedContent) }} />
                   ) : (
-                    <div 
-                      className="aws-text-gray-500 aws-italic"
-                      style={{ 
-                        fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                      }}
-                    >
+                    <div style={{ 
+                      color: theme.palette.text.secondary,
+                      fontStyle: 'italic',
+                      textAlign: 'center',
+                      paddingTop: '100px'
+                    }}>
                       No content to preview. Start typing in edit mode.
                     </div>
                   )}
@@ -387,31 +380,26 @@ Your content will be beautifully formatted!`}
                     variant="outlined"
                     error={!!errors.content}
                     helperText={errors.content?.message}
-                    InputProps={{
-                      style: { 
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '12px',
                         fontFamily: '"Roboto Mono", "Courier New", monospace',
                         fontSize: '0.875rem',
                         lineHeight: 1.6
-                      },
+                      }
                     }}
                   />
-                  <div className="aws-flex aws-justify-between aws-items-center aws-mt-1">
-                    <span 
-                      className="aws-text-sm"
-                      style={{ 
-                        color: errors.content ? theme.palette.error.main : theme.palette.text.secondary,
-                        fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                      }}
-                    >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+                    <span style={{ 
+                      fontSize: '0.875rem',
+                      color: errors.content ? theme.palette.error.main : theme.palette.text.secondary
+                    }}>
                       Minimum 10 characters required
                     </span>
-                    <span 
-                      className="aws-text-sm"
-                      style={{ 
-                        color: theme.palette.text.secondary,
-                        fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                      }}
-                    >
+                    <span style={{ 
+                      fontSize: '0.875rem',
+                      color: theme.palette.text.secondary
+                    }}>
                       {watchedContent.length} characters
                     </span>
                   </div>
@@ -420,29 +408,29 @@ Your content will be beautifully formatted!`}
             </div>
 
             {/* Action Buttons */}
-            <div className="aws-flex aws-justify-between aws-items-center aws-pt-4 aws-border-t" style={{ borderColor: theme.palette.divider }}>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              paddingTop: '24px', 
+              borderTop: `1px solid ${theme.palette.divider}`
+            }}>
               <Button
                 variant="outlined"
                 onClick={() => navigate('/dashboard/posts')}
                 size="large"
-                className="aws-button aws-button-secondary"
-                style={{
-                  fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                }}
+                style={{ borderRadius: '10px' }}
               >
                 Cancel
               </Button>
 
-              <div className="aws-flex aws-gap-2">
+              <div style={{ display: 'flex', gap: '12px' }}>
                 <Button
                   variant="outlined"
                   onClick={() => setPreviewMode(!previewMode)}
                   startIcon={previewMode ? <EyeOff /> : <Eye />}
                   size="large"
-                  className="aws-button aws-button-secondary"
-                  style={{
-                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                  }}
+                  style={{ borderRadius: '10px' }}
                 >
                   {previewMode ? 'Edit' : 'Preview'}
                 </Button>
@@ -453,10 +441,7 @@ Your content will be beautifully formatted!`}
                   disabled={updatePostMutation.isPending || isSubmitting}
                   startIcon={updatePostMutation.isPending ? <Loader className="animate-spin" /> : <Save />}
                   size="large"
-                  className="aws-button aws-button-primary"
-                  style={{
-                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                  }}
+                  style={{ borderRadius: '10px' }}
                 >
                   {updatePostMutation.isPending ? 'Saving...' : 'Save Changes'}
                 </Button>
@@ -467,17 +452,14 @@ Your content will be beautifully formatted!`}
       </LIVBlogCard>
 
       {/* Stats Footer */}
-      <div className="aws-text-center">
-        <span 
-          className="aws-text-sm"
-          style={{ 
-            color: theme.palette.text.secondary,
-            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-          }}
-        >
+      <div style={{ textAlign: 'center' }}>
+        <span style={{ 
+          fontSize: '0.875rem',
+          color: theme.palette.text.secondary
+        }}>
           Last updated: {new Date(postData.data.updatedAt || new Date()).toLocaleString()}
         </span>
       </div>
-    </LIVBlogLayout.Container>
+    </div>
   );
 };

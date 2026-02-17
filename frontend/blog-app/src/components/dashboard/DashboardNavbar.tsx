@@ -365,17 +365,31 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
                        }}
                    >
                      <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 1 }}>
-                       <Avatar
-                           sx={{
-                             width: 24,
-                             height: 24,
-                             bgcolor: 'primary.main',
-                             fontSize: '0.75rem',
-                             fontWeight: 'bold',
-                           }}
-                     >
-                       {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                     </Avatar>
+                       <div
+                         style={{
+                           width: 24,
+                           height: 24,
+                           backgroundColor: user?.avatar ? 'transparent' : theme.palette.primary.main,
+                           color: 'white',
+                           fontWeight: 'bold',
+                           fontSize: '0.75rem',
+                           borderRadius: '50%',
+                           display: 'flex',
+                           alignItems: 'center',
+                           justifyContent: 'center',
+                           overflow: 'hidden'
+                         }}
+                       >
+                         {user?.avatar ? (
+                           <img
+                             src={user.avatar}
+                             alt={user.name || 'User'}
+                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                           />
+                         ) : (
+                           user?.name?.charAt(0)?.toUpperCase() || 'U'
+                         )}
+                       </div>
                      {!isMobile && (
                        <Typography variant="body2" sx={{ color: 'text.primary', fontSize: '0.875rem' }}>
                          {user?.name || 'User'}
@@ -411,17 +425,31 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
            {/* User Info Section */}
            <Box sx={{ p: 2 }}>
              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-               <Avatar
-                   sx={{
-                     width: 48,
-                     height: 48,
-                     bgcolor: 'primary.main',
-                     fontSize: '1rem',
-                     fontWeight: 'bold',
-                   }}
+               <div
+                 style={{
+                   width: 48,
+                   height: 48,
+                   backgroundColor: user?.avatar ? 'transparent' : theme.palette.primary.main,
+                   color: 'white',
+                   fontWeight: 'bold',
+                   fontSize: '1rem',
+                   borderRadius: '50%',
+                   display: 'flex',
+                   alignItems: 'center',
+                   justifyContent: 'center',
+                   overflow: 'hidden'
+                 }}
                >
-                 {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-               </Avatar>
+                 {user?.avatar ? (
+                   <img
+                     src={user.avatar}
+                     alt={user.name || 'User'}
+                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                   />
+                 ) : (
+                   user?.name?.charAt(0)?.toUpperCase() || 'U'
+                 )}
+               </div>
                <Box>
                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                    {user?.name || 'User'}

@@ -20,6 +20,7 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Data
+@ToString(exclude = {"posts", "comments"})
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

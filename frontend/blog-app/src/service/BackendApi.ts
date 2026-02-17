@@ -33,6 +33,7 @@ export interface  UserDto{
     name: string;
     email: string;
     description?: string;
+    avatar?:string;
     roles: Roles[];
     createdAt:string;
     updatedAt:string;
@@ -48,6 +49,7 @@ export interface UserProfilePost {
     title: string;
     content: string;
     category?: string;
+    avatar?: string;
     likes?: number;
     views?: number;
     createdAt?: string;

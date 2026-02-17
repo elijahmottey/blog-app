@@ -97,10 +97,13 @@ export const ProfileManagement: React.FC = () => {
                                     width: 40,
                                     height: 40,
                                     backgroundColor: theme.palette.primary.main,
-                                    color: theme.palette.primary.contrastText
+                                    color: theme.palette.primary.contrastText,
+                                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                                    fontSize: '1rem',
+                                    fontWeight: 600
                                 }}
                             >
-                                <User size={20} />
+                                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                             </div>
                             <div>
                                 <div className="aws-text-body" style={{ fontWeight: 600, color: theme.palette.text.primary, margin: 0 }}>

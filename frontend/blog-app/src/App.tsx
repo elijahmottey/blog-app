@@ -2,6 +2,7 @@
 // @ts-ignore
 import './App.css'
 import './aria-fix.css'
+import './styles/hover-effects.css'
 import {PagesRoute} from "./page.tsx";
 import {toast, Toaster} from "sonner";
 import {useEffect} from "react";

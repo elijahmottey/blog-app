@@ -7,7 +7,9 @@ import {
   Plus,
   Clock,
   Edit,
-  Trash2
+  Trash2,
+  Eye,
+  BarChart3
 } from 'lucide-react';
 import {
   IconButton,
@@ -22,8 +24,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import BackendApi from '../../service/BackendApi';
 import { toast } from 'sonner';
-import {  LIVBlogCard, LIVBlogLayout } from '../ui';
-import { useTheme } from '@mui/material/styles';
+import { LIVBlogCard, LIVBlogLayout } from '../ui';
+import { useTheme, alpha } from '@mui/material/styles';
 
 export const UserDashboard: React.FC = () => {
   const { user, userProfile } = useAuth();
@@ -85,195 +87,444 @@ export const UserDashboard: React.FC = () => {
   }
 
   return (
-    <div className="aws-spacing-y-lg">
+    <div style={{ padding: window.innerWidth < 768 ? '16px' : '32px', maxWidth: '1400px', margin: '0 auto' }}>
+      {/* Welcome Header */}
       <LIVBlogCard 
-        variant="elevated" 
-        padding="medium" 
-        className="aws-margin-b-lg"
-        style={{ background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})` }}
+        variant="glass" 
+        padding="xl"
+        style={{ 
+          background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+          color: 'white',
+          marginBottom: '32px',
+          position: 'relative',
+          overflow: 'hidden'
+        }}
       >
-        <h1 className="aws-header-lg" style={{ color: 'white', margin: 0 }}>
-          Welcome back, {user?.name || 'User'}! 👋
-        </h1>
-        <p className="aws-text-body-lg" style={{ color: 'rgba(255,255,255,0.9)', margin: 0 }}>
-          Here's what's happening with your blog today.
-        </p>
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <h1 style={{ 
+            fontSize: '2.5rem', 
+            fontWeight: 700, 
+            margin: '0 0 12px 0',
+            background: 'linear-gradient(45deg, #ffffff, #f0f8ff)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>
+            Welcome back, {user?.name || 'User'}! 👋
+          </h1>
+          <p style={{ 
+            fontSize: '1.125rem', 
+            color: 'rgba(255,255,255,0.9)', 
+            margin: 0,
+            lineHeight: 1.6
+          }}>
+            Here's what's happening with your blog today. Keep creating amazing content!
+          </p>
+        </div>
+        <div style={{
+          position: 'absolute',
+          top: '-50%',
+          right: '-20%',
+          width: '300px',
+          height: '300px',
+          background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
+          borderRadius: '50%'
+        }} />
       </LIVBlogCard>
 
-      <LIVBlogLayout.Grid cols={4} gap="lg" className="aws-margin-b-lg">
-        <LIVBlogCard title="Total Posts" padding="medium" className="aws-min-h-card-sm">
-          <div className="text-center">
-            <div className="aws-header-lg" style={{ color: theme.palette.primary.main, margin: '0 0 8px 0' }}>
-              {totalPosts}
-            </div>
-            <Chip label={`${publishedPosts} published`} size="small" color="success" variant="outlined" />
-          </div>
-        </LIVBlogCard>
-
-        <LIVBlogCard title="Comments" padding="medium" className="aws-min-h-card-sm">
-          <div className="text-center">
-            <div className="aws-header-lg" style={{ color: theme.palette.success.main, margin: '0 0 8px 0' }}>
-              {totalComments}
-            </div>
-            <p className="aws-text-body" style={{ color: theme.palette.text.secondary, margin: 0 }}>
-              From your posts
-            </p>
-          </div>
-        </LIVBlogCard>
-
-        <LIVBlogCard title="Likes" padding="medium" className="aws-min-h-card-sm">
-          <div className="text-center">
-            <div className="aws-header-lg" style={{ color: theme.palette.error.main, margin: '0 0 8px 0' }}>
-              {totalLikes}
-            </div>
-            <p className="aws-text-body" style={{ color: theme.palette.text.secondary, margin: 0 }}>
-              Total engagement
-            </p>
-          </div>
-        </LIVBlogCard>
-
-        <LIVBlogCard title="Views" padding="medium" className="aws-min-h-card-sm">
-          <div className="text-center">
-            <div className="aws-header-lg" style={{ color: theme.palette.warning.main, margin: '0 0 8px 0' }}>
-              {totalViews}
-            </div>
-            <p className="aws-text-body" style={{ color: theme.palette.text.secondary, margin: 0 }}>
-              Post impressions
-            </p>
-          </div>
-        </LIVBlogCard>
-      </LIVBlogLayout.Grid>
-
-      <LIVBlogCard title="Quick Actions" padding="medium" className="aws-margin-b-lg">
-        <LIVBlogLayout.Grid cols={3} gap="md">
-          <Button
-            component={Link}
-            to="/dashboard/posts/create"
-            variant="outlined"
-            className="aws-button aws-button-secondary aws-min-h-card-sm"
+      {/* Stats Grid */}
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+        gap: '24px',
+        marginBottom: '32px'
+      }}>
+        {[
+          {
+            title: 'Total Posts',
+            value: totalPosts,
+            subtitle: `${publishedPosts} published`,
+            icon: FileText,
+            color: theme.palette.primary.main,
+            trend: '+12%'
+          },
+          {
+            title: 'Comments Received',
+            value: totalComments,
+            subtitle: 'From your posts',
+            icon: MessageSquare,
+            color: theme.palette.success.main,
+            trend: '+8%'
+          },
+          {
+            title: 'Total Likes',
+            value: totalLikes,
+            subtitle: 'Total engagement',
+            icon: Heart,
+            color: theme.palette.error.main,
+            trend: '+15%'
+          },
+          {
+            title: 'Total Views',
+            value: totalViews,
+            subtitle: 'Post impressions',
+            icon: Eye,
+            color: theme.palette.warning.main,
+            trend: '+5%'
+          },
+        ].map((stat) => (
+          <LIVBlogCard
+            key={stat.title}
+            variant="elevated"
+            padding="large"
+            hoverable
             style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              borderColor: theme.palette.primary.main,
-              color: theme.palette.primary.main
+              background: `linear-gradient(135deg, ${alpha(stat.color, 0.05)}, ${alpha(stat.color, 0.02)})`,
+              borderLeft: `4px solid ${stat.color}`
             }}
           >
-            <Plus size={32} />
-            <div>
-              <div className="aws-text-body" style={{ fontWeight: 600 }}>Create New Post</div>
-              <div className="aws-text-body" style={{ color: theme.palette.text.secondary, fontSize: '0.75rem' }}>
-                Write and publish a new article
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div 
+                style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '12px',
+                  backgroundColor: alpha(stat.color, 0.12),
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <stat.icon size={24} style={{ color: stat.color }} />
+              </div>
+              <div 
+                style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: theme.palette.success.main,
+                  backgroundColor: alpha(theme.palette.success.main, 0.1),
+                  padding: '4px 8px',
+                  borderRadius: '12px'
+                }}
+              >
+                {stat.trend}
               </div>
             </div>
-          </Button>
+            <div style={{ marginBottom: '8px' }}>
+              <div style={{
+                fontSize: '2rem',
+                fontWeight: 700,
+                color: theme.palette.text.primary,
+                lineHeight: 1.2,
+                marginBottom: '4px'
+              }}>
+                {stat.value}
+              </div>
+              <div style={{
+                fontSize: '1rem',
+                fontWeight: 600,
+                color: theme.palette.text.primary,
+                marginBottom: '4px'
+              }}>
+                {stat.title}
+              </div>
+              <div style={{
+                fontSize: '0.875rem',
+                color: theme.palette.text.secondary
+              }}>
+                {stat.subtitle}
+              </div>
+            </div>
+          </LIVBlogCard>
+        ))}
+      </div>
 
-          <Button
-            component={Link}
-            to="/dashboard/posts"
-            variant="outlined"
-            className="aws-button aws-button-secondary aws-min-h-card-sm"
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              borderColor: theme.palette.success.main,
-              color: theme.palette.success.main
-            }}
-          >
-            <FileText size={32} />
-            <div>
-              <div className="aws-text-body" style={{ fontWeight: 600 }}>Manage Posts</div>
-              <div className="aws-text-body" style={{ color: theme.palette.text.secondary, fontSize: '0.75rem' }}>
-                Edit or delete your posts
+      {/* Quick Actions */}
+      <LIVBlogCard 
+        title="Quick Actions" 
+        subtitle="Get started with these common tasks"
+        variant="elevated" 
+        padding="large"
+        style={{ marginBottom: '32px' }}
+      >
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(auto-fit, minmax(250px, 1fr))', 
+          gap: window.innerWidth < 768 ? '16px' : '20px',
+          marginBottom: window.innerWidth < 768 ? '24px' : '32px'
+        }}>
+          {[
+            {
+              title: 'Create New Post',
+              subtitle: 'Write and publish a new article',
+              icon: Plus,
+              color: theme.palette.primary.main,
+              link: '/dashboard/posts/create'
+            },
+            {
+              title: 'Manage Posts',
+              subtitle: 'Edit or delete your existing posts',
+              icon: FileText,
+              color: theme.palette.success.main,
+              link: '/dashboard/posts'
+            },
+            {
+              title: 'View Analytics',
+              subtitle: 'Check your content performance',
+              icon: BarChart3,
+              color: theme.palette.info.main,
+              link: '/dashboard/analytics'
+            },
+            {
+              title: 'Manage Comments',
+              subtitle: 'Respond to reader comments',
+              icon: MessageSquare,
+              color: theme.palette.secondary.main,
+              link: '/dashboard/comments'
+            },
+          ].map((action) => (
+            <Button
+              key={action.title}
+              component={Link}
+              to={action.link}
+              variant="outlined"
+              style={{
+                padding: '24px',
+                height: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                justifyContent: 'flex-start',
+                gap: '16px',
+                borderColor: alpha(action.color, 0.3),
+                backgroundColor: alpha(action.color, 0.05),
+                borderRadius: '12px',
+                textTransform: 'none',
+                transition: 'all 0.2s ease'
+              }}
+              sx={{
+                '&:hover': {
+                  borderColor: action.color,
+                  backgroundColor: alpha(action.color, 0.1),
+                  transform: 'translateY(-2px)',
+                  boxShadow: `0 8px 25px ${alpha(action.color, 0.15)}`
+                }
+              }}
+            >
+              <div 
+                style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '12px',
+                  backgroundColor: alpha(action.color, 0.15),
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <action.icon size={24} style={{ color: action.color }} />
               </div>
-            </div>
-          </Button>
-
-          <Button
-            component={Link}
-            to="/dashboard/comments"
-            variant="outlined"
-            className="aws-button aws-button-secondary aws-min-h-card-sm"
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              borderColor: theme.palette.secondary.main,
-              color: theme.palette.secondary.main
-            }}
-          >
-            <MessageSquare size={32} />
-            <div>
-              <div className="aws-text-body" style={{ fontWeight: 600 }}>View Comments</div>
-              <div className="aws-text-body" style={{ color: theme.palette.text.secondary, fontSize: '0.75rem' }}>
-                Respond to reader comments
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ 
+                  fontSize: '1rem', 
+                  fontWeight: 600, 
+                  color: theme.palette.text.primary,
+                  marginBottom: '4px'
+                }}>
+                  {action.title}
+                </div>
+                <div style={{ 
+                  fontSize: '0.875rem', 
+                  color: theme.palette.text.secondary,
+                  lineHeight: 1.4
+                }}>
+                  {action.subtitle}
+                </div>
               </div>
-            </div>
-          </Button>
-        </LIVBlogLayout.Grid>
+            </Button>
+          ))}
+        </div>
       </LIVBlogCard>
 
+      {/* Recent Posts */}
       <LIVBlogCard 
         title="Your Recent Posts" 
-        padding="medium" 
-        className="aws-margin-b-lg"
+        subtitle={`Manage your ${totalPosts} posts`}
+        variant="elevated" 
+        padding="large"
+        style={{ marginBottom: '32px' }}
         actions={
-          <Button component={Link} to="/dashboard/posts" variant="text" size="small" className="aws-button">
-            View All
+          <Button 
+            component={Link} 
+            to="/dashboard/posts" 
+            variant="outlined" 
+            size="small"
+            startIcon={<Eye size={16} />}
+          >
+            View All Posts
           </Button>
         }
       >
         {userProfile?.posts.length === 0 ? (
-          <div className="text-center aws-spacing-y-xl">
-            <FileText size={48} style={{ color: theme.palette.text.secondary, margin: '0 auto 16px' }} />
-            <p className="aws-text-body" style={{ color: theme.palette.text.secondary, margin: '0 0 16px 0' }}>
-              No posts yet. Create your first post!
+          <div style={{ textAlign: 'center', padding: '48px 24px' }}>
+            <div 
+              style={{
+                width: '80px',
+                height: '80px',
+                borderRadius: '20px',
+                backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 24px'
+              }}
+            >
+              <FileText size={40} style={{ color: theme.palette.primary.main }} />
+            </div>
+            <h3 style={{ 
+              fontSize: '1.25rem', 
+              fontWeight: 600, 
+              color: theme.palette.text.primary, 
+              margin: '0 0 8px 0' 
+            }}>
+              No posts yet
+            </h3>
+            <p style={{ 
+              color: theme.palette.text.secondary, 
+              margin: '0 0 24px 0',
+              fontSize: '0.875rem'
+            }}>
+              Start your blogging journey by creating your first post!
             </p>
-            <Button component={Link} to="/dashboard/posts/create" variant="contained" className="aws-button aws-button-primary">
+            <Button 
+              component={Link} 
+              to="/dashboard/posts/create" 
+              variant="contained" 
+              size="large"
+              startIcon={<Plus size={20} />}
+              style={{
+                borderRadius: '12px',
+                padding: '12px 24px',
+                fontSize: '0.875rem',
+                fontWeight: 600
+              }}
+            >
               Create First Post
             </Button>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {userProfile?.posts.slice(0, 5).map((post) => (
-              <LIVBlogCard key={post.id} variant="outlined" padding="small" hoverable>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <FileText size={20} style={{ color: theme.palette.text.secondary }} />
-                    <div>
-                      <h4 className="aws-text-body" style={{ fontWeight: 600, margin: 0 }}>
+              <LIVBlogCard 
+                key={post.id} 
+                variant="outlined" 
+                padding="medium" 
+                hoverable
+                style={{
+                  transition: 'all 0.2s ease',
+                  border: `1px solid ${alpha(theme.palette.divider, 0.5)}`
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1, minWidth: 0 }}>
+                    <div 
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '10px',
+                        backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}
+                    >
+                      <FileText size={20} style={{ color: theme.palette.primary.main }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <h4 style={{ 
+                        fontSize: '1rem', 
+                        fontWeight: 600, 
+                        margin: '0 0 4px 0',
+                        color: theme.palette.text.primary,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
                         {post.title || 'Untitled Post'}
                       </h4>
-                      <p className="aws-text-body" style={{ color: theme.palette.text.secondary, margin: 0 }}>
+                      <p style={{ 
+                        fontSize: '0.875rem',
+                        color: theme.palette.text.secondary, 
+                        margin: '0 0 8px 0',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
                         {post.content ? `${post.content.substring(0, 80)}...` : 'No content yet'}
                       </p>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <Chip
+                          label={post.createdAt ? new Date(post.createdAt).toLocaleDateString() : 'No date'}
+                          size="small"
+                          variant="outlined"
+                          style={{ fontSize: '0.75rem' }}
+                        />
+                        {post.content && post.content.trim().length > 0 ? (
+                          <Chip
+                            label="Published"
+                            size="small"
+                            color="success"
+                            variant="outlined"
+                            style={{ fontSize: '0.75rem' }}
+                          />
+                        ) : (
+                          <Chip
+                            label="Draft"
+                            size="small"
+                            color="warning"
+                            variant="outlined"
+                            style={{ fontSize: '0.75rem' }}
+                          />
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <div className="flex gap-1">
-                    <IconButton component={Link} to={`/dashboard/posts/${post.id}`} size="small">
-                      <FileText size={18} />
+                  <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                    <IconButton 
+                      component={Link} 
+                      to={`/dashboard/posts/${post.id}`} 
+                      size="small"
+                      style={{
+                        backgroundColor: alpha(theme.palette.info.main, 0.1),
+                        color: theme.palette.info.main
+                      }}
+                    >
+                      <Eye size={16} />
                     </IconButton>
-                    <IconButton component={Link} to={`/dashboard/posts/${post.id}/edit`} size="small">
-                      <Edit size={18} />
+                    <IconButton 
+                      component={Link} 
+                      to={`/dashboard/posts/${post.id}/edit`} 
+                      size="small"
+                      style={{
+                        backgroundColor: alpha(theme.palette.warning.main, 0.1),
+                        color: theme.palette.warning.main
+                      }}
+                    >
+                      <Edit size={16} />
                     </IconButton>
-                    <IconButton onClick={() => handleDelete(post.id!)} disabled={deleteMutation.isPending} size="small">
-                      {deleteMutation.isPending ? <CircularProgress size={18} /> : <Trash2 size={18} />}
+                    <IconButton 
+                      onClick={() => handleDelete(post.id!)} 
+                      disabled={deleteMutation.isPending} 
+                      size="small"
+                      style={{
+                        backgroundColor: alpha(theme.palette.error.main, 0.1),
+                        color: theme.palette.error.main
+                      }}
+                    >
+                      {deleteMutation.isPending ? <CircularProgress size={16} /> : <Trash2 size={16} />}
                     </IconButton>
                   </div>
-                </div>
-                <div className="flex gap-2 mt-2 pl-8">
-                  <Chip
-                    label={post.createdAt ? new Date(post.createdAt).toLocaleDateString() : 'No date'}
-                    size="small"
-                    variant="outlined"
-                  />
                 </div>
               </LIVBlogCard>
             ))}
@@ -281,32 +532,77 @@ export const UserDashboard: React.FC = () => {
         )}
       </LIVBlogCard>
 
+      {/* Draft Posts Section */}
       {draftPosts > 0 && (
         <LIVBlogCard 
-          title={`Draft Posts (${draftPosts})`} 
-          padding="medium"
+          title={`Draft Posts (${draftPosts})`}
+          subtitle="Continue working on your unfinished posts"
           variant="outlined"
-          style={{ backgroundColor: theme.palette.warning.light + '20' }}
+          padding="large"
+          style={{ 
+            backgroundColor: alpha(theme.palette.warning.main, 0.05),
+            borderColor: alpha(theme.palette.warning.main, 0.3),
+            borderLeft: `4px solid ${theme.palette.warning.main}`
+          }}
           actions={
-            <Button component={Link} to="/dashboard/posts?filter=drafts" variant="text" size="small" className="aws-button">
+            <Button 
+              component={Link} 
+              to="/dashboard/posts?filter=drafts" 
+              variant="outlined" 
+              size="small"
+              style={{
+                borderColor: theme.palette.warning.main,
+                color: theme.palette.warning.main
+              }}
+            >
               View All Drafts
             </Button>
           }
         >
-          <div className="space-y-3">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {posts
               .filter(post => !post.content || post.content.trim().length === 0)
               .slice(0, 3)
               .map((post) => (
-                <LIVBlogCard key={post.id} variant="outlined" padding="small" hoverable>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Clock size={20} style={{ color: theme.palette.warning.main }} />
-                      <div>
-                        <h4 className="aws-text-body" style={{ fontWeight: 600, margin: 0 }}>
+                <LIVBlogCard 
+                  key={post.id} 
+                  variant="outlined" 
+                  padding="medium" 
+                  hoverable
+                  style={{
+                    backgroundColor: alpha(theme.palette.warning.main, 0.02),
+                    borderColor: alpha(theme.palette.warning.main, 0.2)
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
+                      <div 
+                        style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '10px',
+                          backgroundColor: alpha(theme.palette.warning.main, 0.15),
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        <Clock size={20} style={{ color: theme.palette.warning.main }} />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <h4 style={{ 
+                          fontSize: '1rem', 
+                          fontWeight: 600, 
+                          margin: '0 0 4px 0',
+                          color: theme.palette.text.primary
+                        }}>
                           {post.title || 'Untitled Draft'}
                         </h4>
-                        <p className="aws-text-body" style={{ color: theme.palette.text.secondary, margin: 0 }}>
+                        <p style={{ 
+                          fontSize: '0.875rem',
+                          color: theme.palette.text.secondary, 
+                          margin: 0
+                        }}>
                           Last modified: {post.updatedAt ? new Date(post.updatedAt).toLocaleDateString() : 'Unknown'}
                         </p>
                       </div>
@@ -316,9 +612,14 @@ export const UserDashboard: React.FC = () => {
                       to={`/dashboard/posts/${post.id}/edit`}
                       variant="contained"
                       size="small"
-                      className="aws-button aws-button-primary"
+                      startIcon={<Edit size={16} />}
+                      style={{
+                        backgroundColor: theme.palette.warning.main,
+                        color: 'white',
+                        borderRadius: '8px'
+                      }}
                     >
-                      Continue editing
+                      Continue Editing
                     </Button>
                   </div>
                 </LIVBlogCard>

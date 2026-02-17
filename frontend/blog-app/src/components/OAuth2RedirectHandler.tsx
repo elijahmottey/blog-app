@@ -17,7 +17,7 @@ const OAuth2RedirectHandler = () => {
         localStorage.setItem('roles1', JSON.stringify(userRole));
         
         // Always redirect to /dashboard for all users
-        navigate('/dashboard', { replace: true });
+        navigate('/dashboard/posts', { replace: true });
       } catch (error) {
         console.error('OAuth2 redirect error:', error);
         navigate('/auth/login?error=oauth2_failed', { replace: true });

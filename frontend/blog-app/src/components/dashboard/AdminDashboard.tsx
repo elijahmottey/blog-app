@@ -99,10 +99,13 @@ export const AdminDashboard: React.FC = () => {
       case 'users':
         return (
           <LIVBlogLayout.Container>
-            <LIVBlogCard
+            <LIVBlogHeader
               title="User Management"
               subtitle="Manage user accounts and view their activities"
-              variant="default"
+              size="large"
+            />
+            <LIVBlogCard
+              variant="elevated"
               padding="large"
             >
               <div style={{ overflowX: 'auto' }}>
@@ -236,7 +239,7 @@ export const AdminDashboard: React.FC = () => {
                             <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
                               <Button
                                 onClick={() => navigate(`/dashboard/admin/user/${user.id}/view`)}
-                                className="aws-button aws-button-secondary"
+                                className="aws-button aws-button-secondary hover-button"
                                 size="small"
                                 startIcon={<Eye size={12} />}
                                 style={{
@@ -248,7 +251,7 @@ export const AdminDashboard: React.FC = () => {
                               {!user.roles?.includes(Roles.ADMIN) && (
                                 <Button
                                   onClick={() => handleDeleteUser(user.id!)}
-                                  className="aws-button"
+                                  className="aws-button hover-button"
                                   size="small"
                                   startIcon={<Trash2 size={12} />}
                                   style={{
@@ -277,8 +280,18 @@ export const AdminDashboard: React.FC = () => {
       default:
         return (
           <LIVBlogLayout.Container>
+            <LIVBlogHeader
+              title="Dashboard Overview"
+              subtitle="Monitor your platform's key metrics and performance"
+              size="large"
+            />
             {/* Stats Cards */}
-            <LIVBlogLayout.Grid cols={4} gap="md">
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+              gap: '24px',
+              marginBottom: '40px'
+            }}>
               {[
                 { label: 'Total Users', value: totalUsers, icon: <Users />, accent: theme.palette.primary.main, note: '+12% from last month' },
                 { label: 'Total Posts', value: totalPosts, icon: <FileText />, accent: theme.palette.success.main, note: '+8% from last month' },
@@ -288,46 +301,62 @@ export const AdminDashboard: React.FC = () => {
                 <LIVBlogCard
                   key={c.label}
                   title={c.label}
-                  variant="default"
-                  padding="medium"
-                  className="aws-min-h-card-sm"
+                  variant="elevated"
+                  padding="large"
+                  hoverable
+                  style={{
+                    background: `linear-gradient(135deg, ${alpha(c.accent, 0.05)}, ${alpha(c.accent, 0.02)})`,
+                    borderLeft: `4px solid ${c.accent}`
+                  }}
                 >
-                  <div className="aws-flex aws-items-center aws-mb-3">
+                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
                     <div 
-                      className="aws-p-2 aws-rounded-md aws-flex aws-items-center aws-justify-center"
-                      style={{ backgroundColor: alpha(c.accent, 0.12) }}
+                      style={{
+                        padding: '12px',
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: alpha(c.accent, 0.12)
+                      }}
                     >
                       {React.cloneElement(c.icon as any, { style: { width: 24, height: 24, color: c.accent } })}
                     </div>
                   </div>
                   <div 
-                    className="aws-text-xl aws-font-bold aws-mb-1"
-                    style={{ 
-                      color: theme.palette.text.primary,
-                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    style={{
+                      fontSize: '2rem',
+                      fontWeight: 700,
+                      marginBottom: '8px',
+                      color: theme.palette.text.primary
                     }}
                   >
                     {c.value}
                   </div>
                   <div 
-                    className="aws-text-sm"
-                    style={{ 
-                      color: c.accent,
-                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    style={{
+                      fontSize: '0.875rem',
+                      color: c.accent
                     }}
                   >
                     {c.note}
                   </div>
                 </LIVBlogCard>
               ))}
-            </LIVBlogLayout.Grid>
+            </div>
 
             {/* Charts */}
-            <LIVBlogLayout.Grid cols={2} gap="lg">
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+              gap: '24px',
+              marginBottom: '32px'
+            }}>
               <LIVBlogCard
                 title="User Growth"
-                variant="default"
+                variant="elevated"
                 padding="large"
+                hoverable
               >
                 <ResponsiveContainer width="100%" height={250}>
                   <LineChart data={userGrowthData}>
@@ -342,8 +371,9 @@ export const AdminDashboard: React.FC = () => {
 
               <LIVBlogCard
                 title="Weekly Post Activity"
-                variant="default"
+                variant="elevated"
                 padding="large"
+                hoverable
               >
                 <ResponsiveContainer width="100%" height={250}>
                   <BarChart data={postActivityData}>
@@ -355,97 +385,82 @@ export const AdminDashboard: React.FC = () => {
                   </BarChart>
                 </ResponsiveContainer>
               </LIVBlogCard>
-            </LIVBlogLayout.Grid>
+            </div>
 
             {/* System Health & Recent Activity */}
-            <LIVBlogLayout.Grid cols={2} gap="lg">
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+              gap: '24px'
+            }}>
               <LIVBlogCard
                 title="System Health"
-                variant="default"
+                variant="elevated"
                 padding="large"
+                hoverable
               >
-                <div className="aws-flex aws-flex-col aws-gap-3">
-                  <div className="aws-flex aws-justify-between">
-                    <div style={{ 
-                      color: theme.palette.text.secondary,
-                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                    }}>Server Status</div>
-                    <div className="aws-flex aws-items-center aws-gap-2">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div style={{ color: theme.palette.text.secondary }}>Server Status</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <Activity style={{ width: 16, height: 16, color: theme.palette.success.main }} />
-                      <div style={{ 
-                        color: theme.palette.success.main,
-                        fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                      }}>Healthy</div>
+                      <div style={{ color: theme.palette.success.main }}>Healthy</div>
                     </div>
                   </div>
-                  <div className="aws-flex aws-justify-between">
-                    <div style={{ 
-                      color: theme.palette.text.secondary,
-                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                    }}>Uptime</div>
-                    <div style={{ 
-                      color: theme.palette.text.primary,
-                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                    }}>{systemHealth}%</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div style={{ color: theme.palette.text.secondary }}>Uptime</div>
+                    <div style={{ color: theme.palette.text.primary }}>{systemHealth}%</div>
                   </div>
-                  <div className="aws-flex aws-justify-between">
-                    <div style={{ 
-                      color: theme.palette.text.secondary,
-                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                    }}>Database</div>
-                    <div style={{ 
-                      color: theme.palette.success.main,
-                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                    }}>Connected</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div style={{ color: theme.palette.text.secondary }}>Database</div>
+                    <div style={{ color: theme.palette.success.main }}>Connected</div>
                   </div>
-                  <div className="aws-flex aws-justify-between">
-                    <div style={{ 
-                      color: theme.palette.text.secondary,
-                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                    }}>API Response</div>
-                    <div style={{ 
-                      color: theme.palette.success.main,
-                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                    }}>Fast</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div style={{ color: theme.palette.text.secondary }}>API Response</div>
+                    <div style={{ color: theme.palette.success.main }}>Fast</div>
                   </div>
                 </div>
               </LIVBlogCard>
 
               <LIVBlogCard
                 title="Recent Activity"
-                variant="default"
+                variant="elevated"
                 padding="large"
+                hoverable
               >
-                <div className="aws-flex aws-flex-col aws-gap-3">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   {[
                     { color: theme.palette.primary.main, title: 'New user registered', subtitle: 'john.doe@example.com - 2 minutes ago' },
                     { color: theme.palette.success.main, title: 'Post published', subtitle: '"React Best Practices" - 15 minutes ago' },
                     { color: '#f59e0b', title: 'Comment flagged', subtitle: 'Spam content detected - 1 hour ago' },
                     { color: theme.palette.error.main, title: 'User suspended', subtitle: 'Violation of terms - 2 hours ago' },
                   ].map((a, i) => (
-                    <div key={i} className="aws-flex aws-gap-3 aws-items-start">
+                    <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                       <div 
-                        className="aws-w-2 aws-h-2 aws-rounded-full aws-mt-1.5"
-                        style={{ backgroundColor: a.color }}
+                        style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          marginTop: '6px',
+                          backgroundColor: a.color
+                        }}
                       />
                       <div>
                         <div style={{ 
                           fontSize: 14, 
                           fontWeight: 600, 
-                          color: theme.palette.text.primary,
-                          fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                          color: theme.palette.text.primary
                         }}>{a.title}</div>
                         <div style={{ 
                           fontSize: 12, 
-                          color: theme.palette.text.secondary,
-                          fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                          color: theme.palette.text.secondary
                         }}>{a.subtitle}</div>
                       </div>
                     </div>
                   ))}
                 </div>
               </LIVBlogCard>
-            </LIVBlogLayout.Grid>
+            </div>
           </LIVBlogLayout.Container>
         );
     }
@@ -463,21 +478,39 @@ export const AdminDashboard: React.FC = () => {
       {/* Quick Actions */}
       <LIVBlogCard
         title="Quick Actions"
-        variant="default"
+        variant="elevated"
         padding="large"
+        style={{ marginBottom: '32px' }}
       >
-        <LIVBlogLayout.Grid cols={3} gap="md">
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+          gap: '16px'
+        }}>
           <div 
             onClick={() => setCurrentView('users')} 
-            className="aws-p-4 aws-rounded-xl aws-border aws-cursor-pointer aws-flex aws-gap-3 aws-items-start aws-hover-bg-gray-50"
-            style={{ 
-              borderColor: theme.palette.divider,
-              backgroundColor: 'transparent'
+            style={{
+              padding: '24px',
+              borderRadius: '12px',
+              border: `1px solid ${theme.palette.divider}`,
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+              display: 'flex',
+              gap: '16px',
+              alignItems: 'flex-start',
+              transition: 'all 0.2s ease'
             }}
           >
             <div 
-              className="aws-w-10 aws-h-10 aws-flex aws-items-center aws-justify-center aws-rounded-lg"
-              style={{ backgroundColor: alpha(theme.palette.primary.main, 0.12) }}
+              style={{
+                width: '48px',
+                height: '48px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '12px',
+                backgroundColor: alpha(theme.palette.primary.main, 0.12)
+              }}
             >
               <Users style={{ width: 24, height: 24, color: theme.palette.primary.main }} />
             </div>
@@ -485,23 +518,39 @@ export const AdminDashboard: React.FC = () => {
               <p style={{ 
                 fontWeight: 600, 
                 color: theme.palette.text.primary,
-                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                margin: '0 0 4px 0'
               }}>Manage Users</p>
               <p style={{ 
                 color: theme.palette.text.secondary, 
                 fontSize: '0.875rem',
-                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                margin: 0
               }}>View and moderate user accounts</p>
             </div>
           </div>
           <div 
             onClick={() => setCurrentView('posts')} 
-            className="aws-p-4 aws-rounded-xl aws-border aws-cursor-pointer aws-flex aws-gap-3 aws-items-start"
-            style={{ borderColor: theme.palette.divider }}
+            style={{
+              padding: '24px',
+              borderRadius: '12px',
+              border: `1px solid ${theme.palette.divider}`,
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+              display: 'flex',
+              gap: '16px',
+              alignItems: 'flex-start',
+              transition: 'all 0.2s ease'
+            }}
           >
             <div 
-              className="aws-w-10 aws-h-10 aws-flex aws-items-center aws-justify-center aws-rounded-lg"
-              style={{ backgroundColor: alpha(theme.palette.success.main, 0.12) }}
+              style={{
+                width: '48px',
+                height: '48px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '12px',
+                backgroundColor: alpha(theme.palette.success.main, 0.12)
+              }}
             >
               <FileText style={{ width: 24, height: 24, color: theme.palette.success.main }} />
             </div>
@@ -509,23 +558,39 @@ export const AdminDashboard: React.FC = () => {
               <p style={{ 
                 fontWeight: 600, 
                 color: theme.palette.text.primary,
-                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                margin: '0 0 4px 0'
               }}>Content Moderation</p>
               <p style={{ 
                 color: theme.palette.text.secondary, 
                 fontSize: '0.875rem',
-                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                margin: 0
               }}>Review flagged posts and comments</p>
             </div>
           </div>
           <div 
             onClick={() => setCurrentView('analytics')} 
-            className="aws-p-4 aws-rounded-xl aws-border aws-cursor-pointer aws-flex aws-gap-3 aws-items-start"
-            style={{ borderColor: theme.palette.divider }}
+            style={{
+              padding: '24px',
+              borderRadius: '12px',
+              border: `1px solid ${theme.palette.divider}`,
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+              display: 'flex',
+              gap: '16px',
+              alignItems: 'flex-start',
+              transition: 'all 0.2s ease'
+            }}
           >
             <div 
-              className="aws-w-10 aws-h-10 aws-flex aws-items-center aws-justify-center aws-rounded-lg"
-              style={{ backgroundColor: alpha(theme.palette.secondary.main, 0.12) }}
+              style={{
+                width: '48px',
+                height: '48px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '12px',
+                backgroundColor: alpha(theme.palette.secondary.main, 0.12)
+              }}
             >
               <TrendingUp style={{ width: 24, height: 24, color: theme.palette.secondary.main }} />
             </div>
@@ -533,19 +598,19 @@ export const AdminDashboard: React.FC = () => {
               <p style={{ 
                 fontWeight: 600, 
                 color: theme.palette.text.primary,
-                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                margin: '0 0 4px 0'
               }}>View Analytics</p>
               <p style={{ 
                 color: theme.palette.text.secondary, 
                 fontSize: '0.875rem',
-                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                margin: 0
               }}>Detailed platform statistics</p>
             </div>
           </div>
-        </LIVBlogLayout.Grid>
+        </div>
       </LIVBlogCard>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
         {renderContent()}
       </div>
     </LIVBlogLayout.Container>
