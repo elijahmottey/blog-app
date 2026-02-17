@@ -1,91 +1,79 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { MessageSquare } from 'lucide-react';
-import {
-  Box,
-  Paper,
-  Typography,
-  CircularProgress,
-  Avatar,
-  Divider
-} from '@mui/material';
+import { CircularProgress, Avatar, Divider } from '@mui/material';
+import { LIVBlogHeader, LIVBlogCard } from '../ui';
+import { useTheme } from '@mui/material/styles';
 
 export const CommentsManagement: React.FC = () => {
   const { userProfile, loading } = useAuth();
+  const theme = useTheme();
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '200px' }}>
+      <div className="flex items-center justify-center" style={{ minHeight: '200px' }}>
         <CircularProgress size={48} />
-      </Box>
+      </div>
     );
   }
 
   const comments = userProfile?.comments ?? [];
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: { xs: 2, md: 3 } }}>
-      <Paper sx={{ p: 3, borderRadius: 2 }}>
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2 }}>
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'text.primary', mb: 0.5 }}>
-              Your Comments
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Manage and review the comments you have made across posts.
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'primary.main' }}>
+    <div className="aws-spacing-y-lg">
+      <LIVBlogHeader
+        title="Comments Management"
+        subtitle="Manage and review the comments you have made across posts"
+        size="large"
+        actions={
+          <div className="flex items-center gap-2" style={{ color: theme.palette.primary.main }}>
             <MessageSquare size={24} />
-            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-              {comments.length}
-            </Typography>
-          </Box>
-        </Box>
-      </Paper>
+            <span className="aws-header-md" style={{ margin: 0 }}>{comments.length}</span>
+          </div>
+        }
+      />
 
-      <Paper sx={{ borderRadius: 2 }}>
-        <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider' }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
-            All Comments
-          </Typography>
-        </Box>
-        
+      <LIVBlogCard title="All Comments" padding="none">
         {comments.length === 0 ? (
-          <Box sx={{ p: 6, textAlign: 'center' }}>
-            <Box sx={{ color: 'text.secondary', display: 'inline-flex', mb: 2 }}>
-              <MessageSquare size={48} />
-            </Box>
-            <Typography color="text.secondary">
+          <div className="text-center aws-spacing-y-xl">
+            <MessageSquare size={48} style={{ color: theme.palette.text.secondary, margin: '0 auto 16px' }} />
+            <p className="aws-text-body" style={{ color: theme.palette.text.secondary, margin: 0 }}>
               You haven't made any comments yet.
-            </Typography>
-          </Box>
+            </p>
+          </div>
         ) : (
-          <Box>
+          <div>
             {comments.map((c, index) => (
-              <Box key={c.id}>
-                <Box sx={{ p: 3 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-                    <Avatar sx={{ bgcolor: 'primary.light', color: 'primary.main', width: 40, height: 40 }}>
+              <div key={c.id}>
+                <div className="aws-spacing-md">
+                  <div className="flex items-start gap-3">
+                    <Avatar 
+                      style={{ 
+                        backgroundColor: theme.palette.primary.light, 
+                        color: theme.palette.primary.main, 
+                        width: 40, 
+                        height: 40 
+                      }}
+                    >
                       <MessageSquare size={20} />
                     </Avatar>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="body1" sx={{ color: 'text.primary', mb: 1 }}>
+                    <div className="flex-1">
+                      <p className="aws-text-body-lg" style={{ color: theme.palette.text.primary, margin: '0 0 8px 0' }}>
                         {c.content}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
+                      </p>
+                      <p className="aws-text-body" style={{ color: theme.palette.text.secondary, margin: 0, fontSize: '0.75rem' }}>
                         Comment ID: {c.id}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Box>
+                      </p>
+                    </div>
+                  </div>
+                </div>
                 {index < comments.length - 1 && <Divider />}
-              </Box>
+              </div>
             ))}
-          </Box>
+          </div>
         )}
-      </Paper>
-    </Box>
+      </LIVBlogCard>
+    </div>
   );
 };
 

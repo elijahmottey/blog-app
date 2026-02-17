@@ -7,119 +7,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Save, ArrowLeft, Eye, EyeOff, Loader, Calendar, User, FileText } from 'lucide-react';
 import BackendApi, { type PostDto } from '../../service/BackendApi';
 import { toast } from 'sonner';
+import { LIVBlogCard, LIVBlogHeader, LIVBlogLayout } from '../ui';
+import { Button, TextField, Chip, useTheme } from '@mui/material';
 
-// Material UI Components
-import {
-  Box,
-  Container,
-  Paper,
-  TextField,
-  Button,
-  Typography,
-  Alert,
-  CircularProgress,
-  Chip,
-  Divider,
-  useTheme,
-  useMediaQuery,
-  Tooltip,
-  Breadcrumbs,
-  Link as MuiLink,
-  Stack,
-} from '@mui/material';
-import { styled } from '@mui/material/styles';
-
-// Styled Components
-const EditorContainer = styled(Container)(({ theme }) => ({
-  paddingTop: theme.spacing(4),
-  paddingBottom: theme.spacing(4),
-}));
-
-const EditorCard = styled(Paper)(({ theme }) => ({
-  borderRadius: theme.spacing(2),
-  overflow: 'hidden',
-  boxShadow: theme.shadows[3],
-  border: `1px solid ${theme.palette.divider}`,
-}));
-
-const EditorHeader = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(3),
-  backgroundColor: theme.palette.background.default,
-  borderBottom: `1px solid ${theme.palette.divider}`,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing(2),
-}));
-
-const EditorBody = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(3),
-  [theme.breakpoints.down('sm')]: {
-    padding: theme.spacing(2),
-  },
-}));
-
-const PreviewContainer = styled(Box)(({ theme }) => ({
-  minHeight: '400px',
-  padding: theme.spacing(3),
-  border: `1px solid ${theme.palette.divider}`,
-  borderRadius: theme.spacing(1),
-  backgroundColor: theme.palette.grey[50],
-  overflow: 'auto',
-  '& h1': {
-    fontSize: '2rem',
-    fontWeight: 700,
-    margin: `${theme.spacing(2)} 0 ${theme.spacing(1)}`,
-  },
-  '& h2': {
-    fontSize: '1.5rem',
-    fontWeight: 600,
-    margin: `${theme.spacing(2)} 0 ${theme.spacing(1)}`,
-  },
-  '& h3': {
-    fontSize: '1.25rem',
-    fontWeight: 600,
-    margin: `${theme.spacing(1.5)} 0 ${theme.spacing(1)}`,
-  },
-  '& p': {
-    marginBottom: theme.spacing(2),
-    lineHeight: 1.6,
-  },
-  '& strong': {
-    fontWeight: 600,
-  },
-  '& em': {
-    fontStyle: 'italic',
-  },
-  '& a': {
-    color: theme.palette.primary.main,
-    textDecoration: 'none',
-    '&:hover': {
-      textDecoration: 'underline',
-    },
-  },
-}));
-
-const StyledTextField = styled(TextField)(({ theme }) => ({
-  '& .MuiOutlinedInput-root': {
-    borderRadius: theme.spacing(1),
-    '&:hover .MuiOutlinedInput-notchedOutline': {
-      borderColor: theme.palette.primary.main,
-    },
-  },
-}));
-
-const StyledTextArea = styled(TextField)(({ theme }) => ({
-  '& .MuiOutlinedInput-root': {
-    borderRadius: theme.spacing(1),
-    fontFamily: '"Roboto Mono", "Courier New", monospace',
-    fontSize: '0.875rem',
-    '& textarea': {
-      lineHeight: 1.6,
-    },
-  },
-}));
-
-// Types
 interface PostFormData {
   title: string;
   content: string;
@@ -137,10 +27,7 @@ export const EditPost: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [previewMode, setPreviewMode] = useState(false);
-
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const postId = parseInt(id || '0');
 
   // Fetch post data
@@ -228,241 +115,267 @@ export const EditPost: React.FC = () => {
   };
 
   const watchedContent = watch('content') || '';
-  watch('title') || '';
-// Loading state
+  const watchedTitle = watch('title') || '';
+
+  // Loading state
   if (postLoading) {
     return (
-        <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              minHeight: 'calc(100vh - 200px)',
-            }}
-        >
-          <CircularProgress size={60} />
-        </Box>
+      <LIVBlogLayout.Container>
+        <div className="aws-flex aws-items-center aws-justify-center" style={{ minHeight: '400px' }}>
+          <div className="aws-spinner" style={{
+            width: '32px',
+            height: '32px',
+            border: '3px solid #e5e7eb',
+            borderTop: '3px solid #2563eb',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }}></div>
+        </div>
+      </LIVBlogLayout.Container>
     );
   }
 
   // Error state - post not found
   if (!postData?.data) {
     return (
-        <EditorContainer>
-          <Box sx={{ textAlign: 'center', py: 8 }}>
-            <Alert severity="error" sx={{ mb: 3, maxWidth: 400, mx: 'auto' }}>
+      <LIVBlogLayout.Container>
+        <LIVBlogCard
+          title="Post Not Found"
+          variant="default"
+          padding="large"
+        >
+          <div className="aws-text-center aws-py-8">
+            <div 
+              className="aws-text-red-600 aws-mb-3"
+              style={{ 
+                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}
+            >
               Post not found
-            </Alert>
+            </div>
             <Button
-                variant="contained"
-                onClick={() => navigate('/dashboard/posts')}
-                startIcon={<ArrowLeft />}
+              variant="contained"
+              onClick={() => navigate('/dashboard/posts')}
+              startIcon={<ArrowLeft />}
+              className="aws-button aws-button-primary"
+              style={{
+                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}
             >
               Back to Posts
             </Button>
-          </Box>
-        </EditorContainer>
+          </div>
+        </LIVBlogCard>
+      </LIVBlogLayout.Container>
     );
   }
 
   return (
-      <EditorContainer maxWidth="lg">
-        {/* Breadcrumbs */}
-        <Breadcrumbs sx={{ mb: 3 }}>
-          <MuiLink
-              component="button"
-              onClick={() => navigate('/dashboard')}
-              color="inherit"
-              sx={{ cursor: 'pointer' }}
-          >
-            Dashboard
-          </MuiLink>
-          <MuiLink
-              component="button"
-              onClick={() => navigate('/dashboard/posts')}
-              color="inherit"
-              sx={{ cursor: 'pointer' }}
-          >
-            Posts
-          </MuiLink>
-          <Typography color="text.primary">Edit Post</Typography>
-        </Breadcrumbs>
+    <LIVBlogLayout.Container>
+      {/* Header */}
+      <LIVBlogHeader
+        title="Edit Post"
+        subtitle="Update your blog post content and title"
+        size="large"
+        actions={
+          <div className="aws-flex aws-gap-2">
+            <Button
+              variant="outlined"
+              onClick={() => setPreviewMode(!previewMode)}
+              startIcon={previewMode ? <EyeOff size={20} /> : <Eye size={20} />}
+              className="aws-button aws-button-secondary"
+              style={{
+                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}
+            >
+              {previewMode ? 'Edit' : 'Preview'}
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => navigate(`/dashboard/posts/${postId}`)}
+              startIcon={<ArrowLeft size={20} />}
+              className="aws-button aws-button-secondary"
+              style={{
+                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}
+            >
+              Back
+            </Button>
+          </div>
+        }
+      />
 
-        <EditorCard>
-          <EditorHeader>
-            <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', gap: 2 }}>
-              <Box>
-                <Typography variant="h4" component="h1" fontWeight="bold">
-                  Edit Post
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                  Update your blog post content and title
-                </Typography>
-              </Box>
+      {/* Post Metadata */}
+      <LIVBlogLayout.Grid cols={4} gap="sm">
+        <Chip
+          icon={<User size={16} />}
+          label="Author"
+          variant="outlined"
+          size="small"
+          className="aws-chip"
+          style={{
+            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+          }}
+        />
+        <Chip
+          icon={<Calendar size={16} />}
+          label={new Date(postData.data.createdAt || new Date()).toLocaleDateString()}
+          variant="outlined"
+          size="small"
+          className="aws-chip"
+          style={{
+            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+          }}
+        />
+        <Chip
+          icon={<FileText size={16} />}
+          label={`${watchedContent.length} chars`}
+          variant="outlined"
+          size="small"
+          color={watchedContent.length < 10 ? 'error' : 'default'}
+          className="aws-chip"
+          style={{
+            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+          }}
+        />
+        <Chip
+          label={previewMode ? "Preview Mode" : "Edit Mode"}
+          variant="filled"
+          size="small"
+          color={previewMode ? "info" : "primary"}
+          className="aws-chip"
+          style={{
+            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+          }}
+        />
+      </LIVBlogLayout.Grid>
 
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Tooltip title={previewMode ? "Switch to edit mode" : "Preview your post"}>
-                  <Button
-                      variant="outlined"
-                      onClick={() => setPreviewMode(!previewMode)}
-                      startIcon={previewMode ? <EyeOff size={20} /> : <Eye size={20} />}
-                      size={isMobile ? "small" : "medium"}
-                  >
-                    {previewMode ? 'Edit' : 'Preview'}
-                  </Button>
-                </Tooltip>
-
-                <Button
-                    variant="outlined"
-                    onClick={() => navigate(`/dashboard/posts/${postId}`)}
-                    startIcon={<ArrowLeft size={20} />}
-                    size={isMobile ? "small" : "medium"}
-                >
-                  Back
-                </Button>
-              </Box>
-            </Box>
-
-            {/* Post Metadata - Replaced Grid with div */}
-            <div style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '16px',
-              marginTop: '8px',
-              width: '100%'
-            }}>
-              <div style={{
-                flex: '1 1 calc(25% - 16px)',
-                minWidth: isMobile ? '100%' : '200px'
-              }}>
-                <Chip
-                    icon={<User size={16} />}
-                    label="Author"
-                    variant="outlined"
-                    size="small"
-                    sx={{ width: '100%', justifyContent: 'flex-start' }}
-                />
-              </div>
-              <div style={{
-                flex: '1 1 calc(25% - 16px)',
-                minWidth: isMobile ? '100%' : '200px'
-              }}>
-                <Chip
-                    icon={<Calendar size={16} />}
-                    label={new Date(postData.data.createdAt || new Date()).toLocaleDateString()}
-                    variant="outlined"
-                    size="small"
-                    sx={{ width: '100%', justifyContent: 'flex-start' }}
-                />
-              </div>
-              <div style={{
-                flex: '1 1 calc(25% - 16px)',
-                minWidth: isMobile ? '100%' : '200px'
-              }}>
-                <Chip
-                    icon={<FileText size={16} />}
-                    label={`${watchedContent.length} chars`}
-                    variant="outlined"
-                    size="small"
-                    color={watchedContent.length < 10 ? 'error' : 'default'}
-                    sx={{ width: '100%', justifyContent: 'flex-start' }}
-                />
-              </div>
-              <div style={{
-                flex: '1 1 calc(25% - 16px)',
-                minWidth: isMobile ? '100%' : '200px'
-              }}>
-                <Chip
-                    label={previewMode ? "Preview Mode" : "Edit Mode"}
-                    variant="filled"
-                    size="small"
-                    color={previewMode ? "info" : "primary"}
-                    sx={{ width: '100%', justifyContent: 'flex-start' }}
-                />
-              </div>
+      {/* Editor Card */}
+      <LIVBlogCard
+        variant="default"
+        padding="large"
+      >
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="aws-flex aws-flex-col aws-gap-6">
+            {/* Title Section */}
+            <div>
+              <h3 
+                className="aws-text-lg aws-font-medium aws-mb-2"
+                style={{ 
+                  color: theme.palette.text.primary,
+                  fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                }}
+              >
+                Post Title
+              </h3>
+              <TextField
+                {...register('title')}
+                fullWidth
+                placeholder="Enter a compelling title for your post..."
+                variant="outlined"
+                disabled={previewMode}
+                error={!!errors.title}
+                helperText={errors.title?.message}
+                InputProps={{
+                  style: { 
+                    fontSize: '1.125rem', 
+                    fontWeight: 500,
+                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  },
+                }}
+              />
             </div>
-          </EditorHeader>
 
-          <EditorBody>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <Stack spacing={4}>
-                {/* Title Section */}
-                <Box>
-                  <Typography variant="h6" gutterBottom fontWeight="medium">
-                    Post Title
-                  </Typography>
-                  <StyledTextField
-                      {...register('title')}
-                      fullWidth
-                      placeholder="Enter a compelling title for your post..."
-                      variant="outlined"
-                      disabled={previewMode}
-                      error={!!errors.title}
-                      helperText={errors.title?.message}
-                      InputProps={{
-                        sx: { fontSize: '1.125rem', fontWeight: 500 },
-                      }}
-                  />
-                </Box>
+            {/* Category Section */}
+            <div>
+              <h3 
+                className="aws-text-lg aws-font-medium aws-mb-2"
+                style={{ 
+                  color: theme.palette.text.primary,
+                  fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                }}
+              >
+                Category
+              </h3>
+              <TextField
+                {...register('category')}
+                select
+                fullWidth
+                disabled={previewMode}
+                error={!!errors.category}
+                helperText={errors.category?.message}
+                SelectProps={{ native: true }}
+                InputProps={{
+                  style: { 
+                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  },
+                }}
+              >
+                <option value="">Select a category</option>
+                <option value="TECHNOLOGY">Technology</option>
+                <option value="SPIRITUAL">Spiritual</option>
+                <option value="POLITICS">Politics</option>
+                <option value="LEADERSHIP">Leadership</option>
+                <option value="CULTURE">Culture</option>
+                <option value="HEALTH">Health</option>
+                <option value="BUSINESS">Business</option>
+                <option value="EDUCATION">Education</option>
+                <option value="SPORTS">Sports</option>
+              </TextField>
+            </div>
 
-                {/* Category Section */}
-                <Box>
-                  <Typography variant="h6" gutterBottom fontWeight="medium">
-                    Category
-                  </Typography>
-                  <StyledTextField
-                      {...register('category')}
-                      select
-                      fullWidth
-                      disabled={previewMode}
-                      error={!!errors.category}
-                      helperText={errors.category?.message}
-                      SelectProps={{ native: true }}
-                  >
-                    <option value="">Select a category</option>
-                    <option value="TECHNOLOGY">Technology</option>
-                    <option value="SPIRITUAL">Spiritual</option>
-                    <option value="POLITICS">Politics</option>
-                    <option value="LEADERSHIP">Leadership</option>
-                    <option value="CULTURE">Culture</option>
-                    <option value="HEALTH">Health</option>
-                    <option value="BUSINESS">Business</option>
-                    <option value="EDUCATION">Education</option>
-                    <option value="SPORTS">Sports</option>
-                  </StyledTextField>
-                </Box>
+            {/* Content Section */}
+            <div>
+              <div className="aws-flex aws-justify-between aws-items-center aws-mb-2">
+                <h3 
+                  className="aws-text-lg aws-font-medium"
+                  style={{ 
+                    color: theme.palette.text.primary,
+                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  }}
+                >
+                  Content
+                </h3>
+                <span 
+                  className="aws-text-sm"
+                  style={{ 
+                    color: theme.palette.text.secondary,
+                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  }}
+                >
+                  {previewMode ? 'Preview' : 'Markdown supported'}
+                </span>
+              </div>
 
-                <Divider />
-
-                {/* Content Section */}
-                <Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                    <Typography variant="h6" fontWeight="medium">
-                      Content
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {previewMode ? 'Preview' : 'Markdown supported'}
-                    </Typography>
-                  </Box>
-
-                  {previewMode ? (
-                      <PreviewContainer>
-                        {watchedContent ? (
-                            <div dangerouslySetInnerHTML={{ __html: formatContent(watchedContent) }} />
-                        ) : (
-                            <Typography color="text.secondary" fontStyle="italic">
-                              No content to preview. Start typing in edit mode.
-                            </Typography>
-                        )}
-                      </PreviewContainer>
+              {previewMode ? (
+                <div 
+                  className="aws-min-h-96 aws-p-6 aws-border aws-rounded-lg aws-overflow-auto"
+                  style={{
+                    backgroundColor: theme.palette.grey[50],
+                    borderColor: theme.palette.divider,
+                  }}
+                >
+                  {watchedContent ? (
+                    <div dangerouslySetInnerHTML={{ __html: formatContent(watchedContent) }} />
                   ) : (
-                      <>
-                        <StyledTextArea
-                            {...register('content')}
-                            fullWidth
-                            multiline
-                            rows={isMobile ? 12 : 18}
-                            placeholder={`Write your post content here...
+                    <div 
+                      className="aws-text-gray-500 aws-italic"
+                      style={{ 
+                        fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                      }}
+                    >
+                      No content to preview. Start typing in edit mode.
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <TextField
+                    {...register('content')}
+                    fullWidth
+                    multiline
+                    rows={18}
+                    placeholder={`Write your post content here...
 
 # Markdown Tips:
 ## Use headers
@@ -471,82 +384,100 @@ export const EditPost: React.FC = () => {
 [Links](https://example.com)
 
 Your content will be beautifully formatted!`}
-                            variant="outlined"
-                            error={!!errors.content}
-                            helperText={errors.content?.message}
-                        />
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
-                          <Typography variant="caption" color={errors.content ? 'error' : 'text.secondary'}>
-                            Minimum 10 characters required
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {watchedContent.length} characters
-                          </Typography>
-                        </Box>
-                      </>
-                  )}
-                </Box>
-
-                <Divider />
-
-                {/* Action Buttons */}
-                <Box sx={{
-                  display: 'flex',
-                  flexDirection: isMobile ? 'column' : 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: 2
-                }}>
-                  <Button
-                      variant="outlined"
-                      onClick={() => navigate('/dashboard/posts')}
-                      size="large"
-                      sx={{ minWidth: isMobile ? '100%' : 150 }}
-                  >
-                    Cancel
-                  </Button>
-
-                  <Box sx={{
-                    display: 'flex',
-                    gap: 2,
-                    width: isMobile ? '100%' : 'auto'
-                  }}>
-                    <Button
-                        variant="outlined"
-                        onClick={() => setPreviewMode(!previewMode)}
-                        startIcon={previewMode ? <EyeOff /> : <Eye />}
-                        size="large"
-                        sx={{ flex: isMobile ? 1 : 'none' }}
+                    variant="outlined"
+                    error={!!errors.content}
+                    helperText={errors.content?.message}
+                    InputProps={{
+                      style: { 
+                        fontFamily: '"Roboto Mono", "Courier New", monospace',
+                        fontSize: '0.875rem',
+                        lineHeight: 1.6
+                      },
+                    }}
+                  />
+                  <div className="aws-flex aws-justify-between aws-items-center aws-mt-1">
+                    <span 
+                      className="aws-text-sm"
+                      style={{ 
+                        color: errors.content ? theme.palette.error.main : theme.palette.text.secondary,
+                        fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                      }}
                     >
-                      {previewMode ? 'Edit' : 'Preview'}
-                    </Button>
-
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        disabled={updatePostMutation.isPending || isSubmitting}
-                        startIcon={updatePostMutation.isPending ? <Loader className="animate-spin" /> : <Save />}
-                        size="large"
-                        sx={{
-                          flex: isMobile ? 1 : 'none',
-                          minWidth: 150
-                        }}
+                      Minimum 10 characters required
+                    </span>
+                    <span 
+                      className="aws-text-sm"
+                      style={{ 
+                        color: theme.palette.text.secondary,
+                        fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                      }}
                     >
-                      {updatePostMutation.isPending ? 'Saving...' : 'Save Changes'}
-                    </Button>
-                  </Box>
-                </Box>
-              </Stack>
-            </form>
-          </EditorBody>
-        </EditorCard>
+                      {watchedContent.length} characters
+                    </span>
+                  </div>
+                </>
+              )}
+            </div>
 
-        {/* Stats Footer */}
-        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
-          <Typography variant="caption" color="text.secondary" align="center">
-            Last updated: {new Date(postData.data.updatedAt || new Date()).toLocaleString()}
-          </Typography>
-        </Box>
-      </EditorContainer>
+            {/* Action Buttons */}
+            <div className="aws-flex aws-justify-between aws-items-center aws-pt-4 aws-border-t" style={{ borderColor: theme.palette.divider }}>
+              <Button
+                variant="outlined"
+                onClick={() => navigate('/dashboard/posts')}
+                size="large"
+                className="aws-button aws-button-secondary"
+                style={{
+                  fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                }}
+              >
+                Cancel
+              </Button>
+
+              <div className="aws-flex aws-gap-2">
+                <Button
+                  variant="outlined"
+                  onClick={() => setPreviewMode(!previewMode)}
+                  startIcon={previewMode ? <EyeOff /> : <Eye />}
+                  size="large"
+                  className="aws-button aws-button-secondary"
+                  style={{
+                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  }}
+                >
+                  {previewMode ? 'Edit' : 'Preview'}
+                </Button>
+
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={updatePostMutation.isPending || isSubmitting}
+                  startIcon={updatePostMutation.isPending ? <Loader className="animate-spin" /> : <Save />}
+                  size="large"
+                  className="aws-button aws-button-primary"
+                  style={{
+                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  }}
+                >
+                  {updatePostMutation.isPending ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </LIVBlogCard>
+
+      {/* Stats Footer */}
+      <div className="aws-text-center">
+        <span 
+          className="aws-text-sm"
+          style={{ 
+            color: theme.palette.text.secondary,
+            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+          }}
+        >
+          Last updated: {new Date(postData.data.updatedAt || new Date()).toLocaleString()}
+        </span>
+      </div>
+    </LIVBlogLayout.Container>
   );
 };

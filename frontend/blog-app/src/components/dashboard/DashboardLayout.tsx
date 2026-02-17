@@ -5,14 +5,14 @@ import { Outlet } from 'react-router-dom';
 import { DashboardNavbar } from './DashboardNavbar';
 import { DashboardSidebar } from './DashboardSidebar';
 import { DashboardRightRail } from './DashboardRightRail';
+import { LIVBlogLayout } from '../ui';
 
 export const DashboardLayout: React.FC = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // Changed from 'sm' to 'md'
-  const isPersistent = useMediaQuery(theme.breakpoints.up('lg')); // Changed from 'md' to 'lg'
-  const isWide = useMediaQuery(theme.breakpoints.up('lg')); // lg and up use wider sidebar
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isPersistent = useMediaQuery(theme.breakpoints.up('lg'));
+  const isWide = useMediaQuery(theme.breakpoints.up('lg'));
 
-  // Sidebar open by default on persistent layouts, closed on overlay layouts
   const [isSidebarOpen, setIsSidebarOpen] = useState(isPersistent);
 
   useEffect(() => {
@@ -24,40 +24,41 @@ export const DashboardLayout: React.FC = () => {
   };
 
   const closeSidebar = () => {
-    if (!isPersistent) { // Changed from isMobile to !isPersistent
+    if (!isPersistent) {
       setIsSidebarOpen(false);
     }
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: theme.palette.background.default, display: 'flex' }}>
-      {/* Left Sidebar - render as a column only on desktop; on tablet/mobile render overlay (no reserved width) */}
+    <div 
+      className="aws-font" 
+      style={{ 
+        minHeight: '100vh', 
+        backgroundColor: theme.palette.background.default, 
+        display: 'flex',
+        fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      }}
+    >
       {isPersistent ? (
-        // Persistent left column on md+ (narrower on md, wider on lg)
         <div style={{ flex: '0 0 ' + (isWide ? '256px' : '220px') }}>
           <DashboardSidebar isOpen={isSidebarOpen} onClose={closeSidebar} isMobile={false} />
         </div>
       ) : (
-        // Overlay sidebar on small tablets and mobile (no reserved layout space)
         <DashboardSidebar isOpen={isSidebarOpen} onClose={closeSidebar} isMobile={true} />
       )}
 
-      {/* Main area */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        {/* Navbar (top) */}
         <DashboardNavbar onMenuClick={toggleSidebar} isSidebarOpen={isSidebarOpen} isMobile={!isPersistent} isDesktop={isWide} />
 
-        {/* Page content */}
         <main style={{ flex: 1, overflowX: 'hidden' }}>
-          <div style={{ paddingTop: 16, paddingBottom: 24 }}>
-            <div style={{ maxWidth: 1280, margin: '0 auto', paddingLeft: 12, paddingRight: 12 }}>
+          <div className="aws-spacing-y-lg">
+            <LIVBlogLayout.Container>
               <Outlet />
-            </div>
+            </LIVBlogLayout.Container>
           </div>
         </main>
       </div>
 
-      {/* Right rail - visible only on desktop */}
       <div style={{ flex: isWide ? '0 0 72px' : '0 0 0', display: isWide ? 'block' : 'none' }}>
         <DashboardRightRail isDesktop={isWide} />
       </div>

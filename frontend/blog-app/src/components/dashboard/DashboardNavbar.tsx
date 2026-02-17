@@ -15,7 +15,8 @@ import {
   HelpCircle,
   Moon,
   Sun,
-  Shield
+  Shield,
+  MessageCircle
 } from 'lucide-react';
 import {
   AppBar,
@@ -52,48 +53,49 @@ interface DashboardNavbarProps {
   onMenuClick: () => void;
   isSidebarOpen: boolean;
   isMobile: boolean;
-  isDesktop: boolean;
+  isDesktop?: boolean;
 }
 
 const SearchWrapper = styled('div')(({ theme }) => ({
   position: 'relative',
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
+  borderRadius: '2px',
+  backgroundColor: '#ffffff',
   marginRight: theme.spacing(2),
   marginLeft: 0,
   width: '100%',
+  border: `1px solid ${theme.palette.divider}`,
   [theme.breakpoints.up('sm')]: {
     marginLeft: theme.spacing(3),
     width: 'auto',
+    minWidth: '400px',
+  },
+  '&:focus-within': {
+    border: `1px solid ${theme.palette.primary.main}`,
+    boxShadow: `0 0 0 1px ${theme.palette.primary.main}`,
   },
 }));
 
 const SearchIconWrapper = styled('div')(({ theme }) => ({
-  padding: theme.spacing(0, 2),
+  padding: theme.spacing(0, 1.5),
   height: '100%',
   position: 'absolute',
   pointerEvents: 'none',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  color: theme.palette.text.secondary,
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
+  color: theme.palette.text.primary,
+  width: '100%',
   '& .MuiInputBase-input': {
-    padding: theme.spacing(1, 1, 1, 0),
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+    padding: '8px 8px 8px 0',
+    paddingLeft: `calc(1em + ${theme.spacing(3)})`,
     transition: theme.transitions.create('width'),
     width: '100%',
-    [theme.breakpoints.up('md')]: {
-      width: '20ch',
-      '&:focus': {
-        width: '30ch',
-      },
-    },
+    fontSize: '0.875rem',
+    height: '16px',
   },
 }));
 
@@ -220,16 +222,17 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
        <>
          <AppBar
             position="sticky"
-            elevation={1}
+            elevation={0}
             sx={{
               bgcolor: 'background.paper',
               color: 'text.primary',
               borderBottom: 1,
               borderColor: 'divider',
               zIndex: theme.zIndex.drawer + 1,
+              height: '50px',
             }}
          >
-           <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 1, sm: 2 }, minHeight: '48px !important', height: '48px' }}>
+           <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 1, sm: 2 }, minHeight: '50px !important', height: '50px' }}>
              {/* Left Section */}
              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                {isMobile && (
@@ -243,49 +246,20 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
                      {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
                    </IconButton>
                )}
-
-
-
-               {/* Quick Actions Menu: show in top bar only on mobile (desktop moved to right rail) */}
-               { (isMobile || (!isDesktop && !isMobile)) && (
-                   <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 0.5, ml: { xs: 1, sm: 2 }, flexWrap: 'wrap' }}>
-                     {quickActions.map((action) => (
-                         <Tooltip key={action.label} title={action.label}>
-                           <IconButton
-                               component={Link}
-                               to={action.path}
-                               size="small"
-                               sx={{
-                                 color: 'text.secondary',
-                                 minWidth: 40,
-                                 minHeight: 40,
-                                 '&:hover': {
-                                   color: 'primary.main',
-                                   bgcolor: 'primary.light',
-                                 },
-                               }}
-                           >
-                             {action.icon}
-                           </IconButton>
-                         </Tooltip>
-                     ))}
-                   </Box>
-               )}
              </Box>
 
              {/* Center Section - Search (desktop & tablet) */}
              {(!isMobile) && (
                  <SearchWrapper>
                    <SearchIconWrapper>
-                     <Search size={20} />
+                     <Search size={16} />
                    </SearchIconWrapper>
                    <div style={{ position: 'relative' }} ref={searchRef}>
                      <StyledInputBase
                          value={searchTerm}
                          onChange={(e) => setSearchTerm(e.target.value)}
-                         placeholder="Search posts, users, comments..."
+                         placeholder="Search"
                          inputProps={{ 'aria-label': 'search' }}
-                         sx={{ color: 'text.primary' }}
                          onKeyDown={(e) => {
                            if (e.key === 'Enter') {
                              // navigate to home with query
@@ -298,18 +272,18 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
 
                      {/* Dropdown results */}
                      {searchResults.length > 0 && (
-                       <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, boxShadow: theme.shadows[8], zIndex: 1600, maxHeight: 360, overflow: 'auto', borderRadius: 8 }}>
+                       <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, boxShadow: theme.shadows[8], zIndex: 1600, maxHeight: 360, overflow: 'auto', borderRadius: 4, marginTop: 4 }}>
                          {searchResults.map((r) => (
-                           <div key={`${r.type}-${r.id}`} style={{ padding: 8, cursor: 'pointer', borderBottom: `1px solid ${theme.palette.divider}` }} onClick={() => { navigate(r.url); setSearchTerm(''); setSearchResults([]); }}>
+                           <div key={`${r.type}-${r.id}`} style={{ padding: '8px 12px', cursor: 'pointer', borderBottom: `1px solid ${theme.palette.divider}` }} onClick={() => { navigate(r.url); setSearchTerm(''); setSearchResults([]); }}>
                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                                <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, backgroundColor: theme.palette.primary.light, color: theme.palette.primary.contrastText, textTransform: 'uppercase' }}>{r.type}</span>
-                               <div style={{ fontWeight: 600, color: theme.palette.text.primary }}>{r.title}</div>
+                               <div style={{ fontWeight: 600, color: theme.palette.text.primary, fontSize: '0.875rem' }}>{r.title}</div>
                              </div>
-                             <div style={{ fontSize: 12, color: theme.palette.text.secondary }}>{r.content}</div>
+                             <div style={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>{r.content}</div>
                            </div>
                          ))}
                          <div style={{ padding: 8, textAlign: 'center' }}>
-                           <button onClick={() => { navigate(`/?q=${encodeURIComponent(searchTerm)}`); setSearchResults([]); }} style={{ background: 'transparent', border: 'none', color: theme.palette.primary.main, cursor: 'pointer' }}>See all results</button>
+                           <button onClick={() => { navigate(`/?q=${encodeURIComponent(searchTerm)}`); setSearchResults([]); }} style={{ background: 'transparent', border: 'none', color: theme.palette.primary.main, cursor: 'pointer', fontSize: '0.875rem' }}>See all results</button>
                          </div>
                        </div>
                      )}
@@ -331,6 +305,20 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
                      </IconButton>
                    </Tooltip>
                )}
+
+               {/* AI Chat Icon */}
+               <Tooltip title="AI Chat">
+                 <IconButton
+                     component={Link}
+                     to="/dashboard/ai-chat"
+                     color="inherit"
+                     sx={{ 
+                       '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' } 
+                     }}
+                 >
+                   <MessageCircle size={20} />
+                 </IconButton>
+               </Tooltip>
 
                {/* Theme Mode Toggle (top bar) - show on mobile and tablet; desktop uses right rail */}
                { (isMobile || (!isDesktop && !isMobile)) && (
@@ -366,60 +354,37 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
 
 
                {/* Profile Section - show on mobile & tablet; desktop profile moved to right rail */}
-               {(isMobile || (!isDesktop && !isMobile)) && (
-                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                    <IconButton
                        onClick={handleProfileClick}
                        sx={{
                          p: 0.5,
                          '&:hover': {
-                           bgcolor: 'action.hover',
+                           bgcolor: 'rgba(0,0,0,0.04)',
                          },
                        }}
                    >
-                     <Box sx={{ position: 'relative' }}>
+                     <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 1 }}>
                        <Avatar
                            sx={{
-                             width: 32,
-                             height: 32,
+                             width: 24,
+                             height: 24,
                              bgcolor: 'primary.main',
-                             fontSize: '0.8125rem',
+                             fontSize: '0.75rem',
                              fontWeight: 'bold',
                            }}
                      >
                        {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                      </Avatar>
-                     {isAdmin && (
-                         <Box
-                             sx={{
-                               position: 'absolute',
-                               bottom: -2,
-                               right: -2,
-                               bgcolor: 'error.main',
-                               borderRadius: '50%',
-                               width: 16,
-                               height: 16,
-                               display: 'flex',
-                               alignItems: 'center',
-                               justifyContent: 'center',
-                               border: '2px solid white',
-                             }}
-                         >
-                           <Shield size={8} color="white" />
-                         </Box>
+                     {!isMobile && (
+                       <Typography variant="body2" sx={{ color: 'text.primary', fontSize: '0.875rem' }}>
+                         {user?.name || 'User'}
+                       </Typography>
                      )}
+                     <ChevronDown size={14} color={theme.palette.text.secondary} />
                    </Box>
                  </IconButton>
-
-                 <IconButton
-                     size="small"
-                     onClick={handleProfileClick}
-                     sx={{ display: { xs: 'flex', sm: 'flex' } }}
-                 >
-                   <ChevronDown size={16} />
-                 </IconButton>
                </Box>
-               )}
              </Box>
            </Toolbar>
          </AppBar>
@@ -433,23 +398,11 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
              PaperProps={{
                elevation: 3,
                sx: {
-                 mt: 1.5,
-                 minWidth: 280,
-                 borderRadius: 2,
+                 mt: 0.5,
+                 minWidth: 200,
+                 borderRadius: 0,
                  overflow: 'visible',
                  filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.1))',
-                 '&:before': {
-                   content: '""',
-                   display: 'block',
-                   position: 'absolute',
-                   top: 0,
-                   right: 14,
-                   width: 10,
-                   height: 10,
-                   bgcolor: 'background.paper',
-                   transform: 'translateY(-50%) rotate(45deg)',
-                   zIndex: 0,
-                 },
                },
              }}
              transformOrigin={{ horizontal: 'right', vertical: 'top' }}

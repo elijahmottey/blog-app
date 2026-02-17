@@ -8,6 +8,7 @@ import {
 import { Users, FileText, MessageSquare, TrendingUp, Activity } from 'lucide-react';
 import BackendApi from '../../service/BackendApi';
 import { format, subDays, startOfDay } from 'date-fns';
+import { LIVBlogHeader, LIVBlogCard, LIVBlogLayout } from '../ui';
 
 export const AnalyticsView: React.FC = () => {
   const theme = useTheme();
@@ -125,8 +126,6 @@ export const AnalyticsView: React.FC = () => {
     }));
   }, [posts, comments]);
 
-  console.log(totalUsers)
-
   const totalStats = {
     totalUsers: totalUsers,
     totalPosts: totalPosts,
@@ -138,29 +137,16 @@ export const AnalyticsView: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <LIVBlogLayout.Container>
       {/* Header */}
-      <div style={{
-        backgroundColor: theme.palette.background.paper,
-        border: `1px solid ${theme.palette.divider}`,
-        borderRadius: 12,
-        padding: 24,
-        boxShadow: theme.shadows[1],
-      }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.text.primary, margin: 0 }}>
-          Platform Analytics
-        </h2>
-        <p style={{ color: theme.palette.text.secondary, margin: '8px 0 0 0' }}>
-          Comprehensive insights into your blog platform performance
-        </p>
-      </div>
+      <LIVBlogHeader
+        title="Platform Analytics"
+        subtitle="Comprehensive insights into your blog platform performance"
+        size="large"
+      />
 
       {/* Key Metrics */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: 16,
-      }}>
+      <LIVBlogLayout.Grid cols={3} gap="md">
         {[
           { label: 'Total Users', value: totalStats.totalUsers, icon: Users, color: theme.palette.primary.main },
           { label: 'Total Posts', value: totalStats.totalPosts, icon: FileText, color: theme.palette.success.main },
@@ -169,50 +155,44 @@ export const AnalyticsView: React.FC = () => {
           { label: 'Draft Posts', value: totalStats.draftPosts, icon: FileText, color: theme.palette.warning.main },
           { label: 'Avg Posts/User', value: totalStats.avgPostsPerUser, icon: TrendingUp, color: theme.palette.primary.main },
         ].map((metric) => (
-          <div key={metric.label} style={{
-            backgroundColor: theme.palette.background.paper,
-            border: `1px solid ${theme.palette.divider}`,
-            borderRadius: 12,
-            padding: 20,
-            boxShadow: theme.shadows[1],
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-              <div style={{
-                padding: 8,
-                borderRadius: 8,
-                backgroundColor: alpha(metric.color, 0.12),
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
+          <LIVBlogCard
+            key={metric.label}
+            title={metric.label}
+            variant="default"
+            padding="medium"
+            className="aws-min-h-card-sm"
+          >
+            <div className="aws-flex aws-items-center aws-gap-3 aws-mb-2">
+              <div 
+                className="aws-p-2 aws-rounded-md aws-flex aws-items-center aws-justify-center"
+                style={{
+                  backgroundColor: alpha(metric.color, 0.12),
+                }}
+              >
                 <metric.icon size={20} style={{ color: metric.color }} />
               </div>
-              <span style={{ fontSize: '0.875rem', color: theme.palette.text.secondary }}>{metric.label}</span>
             </div>
-            <div style={{ fontSize: '1.75rem', fontWeight: 700, color: theme.palette.text.primary }}>
+            <div 
+              className="aws-text-2xl aws-font-bold aws-text-primary"
+              style={{ 
+                color: theme.palette.text.primary,
+                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}
+            >
               {metric.value}
             </div>
-          </div>
+          </LIVBlogCard>
         ))}
-      </div>
+      </LIVBlogLayout.Grid>
 
       {/* Charts Row 1 */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-        gap: 24,
-      }}>
+      <LIVBlogLayout.Grid cols={2} gap="lg">
         {/* User Growth Chart */}
-        <div style={{
-          backgroundColor: theme.palette.background.paper,
-          border: `1px solid ${theme.palette.divider}`,
-          borderRadius: 12,
-          padding: 24,
-          boxShadow: theme.shadows[1],
-        }}>
-          <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: theme.palette.text.primary, marginBottom: 16 }}>
-            User Growth (Last 30 Days)
-          </h3>
+        <LIVBlogCard
+          title="User Growth (Last 30 Days)"
+          variant="default"
+          padding="large"
+        >
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={userGrowthData}>
               <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
@@ -234,19 +214,14 @@ export const AnalyticsView: React.FC = () => {
               />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
+        </LIVBlogCard>
 
         {/* Post Activity Chart */}
-        <div style={{
-          backgroundColor: theme.palette.background.paper,
-          border: `1px solid ${theme.palette.divider}`,
-          borderRadius: 12,
-          padding: 24,
-          boxShadow: theme.shadows[1],
-        }}>
-          <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: theme.palette.text.primary, marginBottom: 16 }}>
-            Daily Post Activity
-          </h3>
+        <LIVBlogCard
+          title="Daily Post Activity"
+          variant="default"
+          padding="large"
+        >
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={postActivityData}>
               <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
@@ -267,26 +242,17 @@ export const AnalyticsView: React.FC = () => {
               <Bar dataKey="posts" fill={theme.palette.success.main} radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
-      </div>
+        </LIVBlogCard>
+      </LIVBlogLayout.Grid>
 
       {/* Charts Row 2 */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-        gap: 24,
-      }}>
+      <LIVBlogLayout.Grid cols={2} gap="lg">
         {/* User Role Distribution */}
-        <div style={{
-          backgroundColor: theme.palette.background.paper,
-          border: `1px solid ${theme.palette.divider}`,
-          borderRadius: 12,
-          padding: 24,
-          boxShadow: theme.shadows[1],
-        }}>
-          <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: theme.palette.text.primary, marginBottom: 16 }}>
-            User Role Distribution
-          </h3>
+        <LIVBlogCard
+          title="User Role Distribution"
+          variant="default"
+          padding="large"
+        >
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
@@ -311,106 +277,129 @@ export const AnalyticsView: React.FC = () => {
               />
             </PieChart>
           </ResponsiveContainer>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 16 }}>
+          <div className="aws-flex aws-justify-center aws-gap-4 aws-mt-4">
             {roleDistribution.map((entry) => (
-              <div key={entry.name} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{
-                  width: 12,
-                  height: 12,
-                  borderRadius: '50%',
-                  backgroundColor: entry.color,
-                }} />
-                <span style={{ fontSize: '0.875rem', color: theme.palette.text.primary }}>
+              <div key={entry.name} className="aws-flex aws-items-center aws-gap-2">
+                <div 
+                  className="aws-w-3 aws-h-3 aws-rounded-full"
+                  style={{ backgroundColor: entry.color }}
+                />
+                <span 
+                  className="aws-text-sm"
+                  style={{ 
+                    color: theme.palette.text.primary,
+                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  }}
+                >
                   {entry.name} ({entry.value})
                 </span>
               </div>
             ))}
           </div>
-        </div>
+        </LIVBlogCard>
 
         {/* Top Content Engagement */}
-        <div style={{
-          backgroundColor: theme.palette.background.paper,
-          border: `1px solid ${theme.palette.divider}`,
-          borderRadius: 12,
-          padding: 24,
-          boxShadow: theme.shadows[1],
-        }}>
-          <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: theme.palette.text.primary, marginBottom: 16 }}>
-            Top Content Engagement
-          </h3>
+        <LIVBlogCard
+          title="Top Content Engagement"
+          variant="default"
+          padding="large"
+        >
           <div style={{ maxHeight: 250, overflow: 'auto' }}>
             {engagementData.slice(0, 5).map((item, index) => (
-              <div key={index} style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '12px 0',
-                borderBottom: index < 4 ? `1px solid ${theme.palette.divider}` : 'none',
-              }}>
+              <div 
+                key={index} 
+                className="aws-flex aws-justify-between aws-items-center aws-py-3"
+                style={{
+                  borderBottom: index < 4 ? `1px solid ${theme.palette.divider}` : 'none',
+                }}
+              >
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '0.875rem', fontWeight: 600, color: theme.palette.text.primary }}>
+                  <div 
+                    className="aws-text-sm aws-font-semibold"
+                    style={{ 
+                      color: theme.palette.text.primary,
+                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    }}
+                  >
                     {item.title}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: theme.palette.text.secondary, marginTop: 4 }}>
+                  <div 
+                    className="aws-text-xs aws-mt-1"
+                    style={{ 
+                      color: theme.palette.text.secondary,
+                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    }}
+                  >
                     {item.views} views • {item.likes} likes • {item.comments} comments
                   </div>
                 </div>
-                <div style={{
-                  fontSize: '1.25rem',
-                  fontWeight: 700,
-                  color: theme.palette.primary.main,
-                  marginLeft: 16,
-                }}>
+                <div 
+                  className="aws-text-xl aws-font-bold aws-ml-4"
+                  style={{
+                    color: theme.palette.primary.main,
+                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  }}
+                >
                   #{index + 1}
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      </div>
+        </LIVBlogCard>
+      </LIVBlogLayout.Grid>
 
       {/* Platform Health */}
-      <div style={{
-        backgroundColor: theme.palette.background.paper,
-        border: `1px solid ${theme.palette.divider}`,
-        borderRadius: 12,
-        padding: 24,
-        boxShadow: theme.shadows[1],
-      }}>
-        <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: theme.palette.text.primary, marginBottom: 16 }}>
-          Platform Health Metrics
-        </h3>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-          gap: 16,
-        }}>
+      <LIVBlogCard
+        title="Platform Health Metrics"
+        variant="default"
+        padding="large"
+      >
+        <LIVBlogLayout.Grid cols={4} gap="md">
           {[
             { label: 'Active Users (Last 7 Days)', value: Math.floor(totalUsers * 0.7), total: totalUsers },
             { label: 'Content Moderation Queue', value: 2, total: totalPosts + totalComments },
             { label: 'System Uptime', value: '99.9%', total: '100%' },
             { label: 'Average Response Time', value: '120ms', total: '<200ms' },
           ].map((metric, index) => (
-            <div key={index} style={{
-              padding: 16,
-              borderRadius: 8,
-              backgroundColor: alpha(theme.palette.info.main, 0.1),
-              border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
-            }}>
-              <div style={{ fontSize: '0.875rem', color: theme.palette.text.secondary, marginBottom: 8 }}>
+            <div 
+              key={index} 
+              className="aws-p-4 aws-rounded-lg aws-border"
+              style={{
+                backgroundColor: alpha(theme.palette.info.main, 0.1),
+                borderColor: alpha(theme.palette.info.main, 0.2),
+              }}
+            >
+              <div 
+                className="aws-text-sm aws-mb-2"
+                style={{ 
+                  color: theme.palette.text.secondary,
+                  fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                }}
+              >
                 {metric.label}
               </div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.info.main }}>
+              <div 
+                className="aws-text-xl aws-font-bold"
+                style={{ 
+                  color: theme.palette.info.main,
+                  fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                }}
+              >
                 {metric.value}
               </div>
-              <div style={{ fontSize: '0.75rem', color: theme.palette.text.secondary, marginTop: 4 }}>
+              <div 
+                className="aws-text-xs aws-mt-1"
+                style={{ 
+                  color: theme.palette.text.secondary,
+                  fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                }}
+              >
                 of {metric.total}
               </div>
             </div>
           ))}
-        </div>
-      </div>
-    </div>
+        </LIVBlogLayout.Grid>
+      </LIVBlogCard>
+    </LIVBlogLayout.Container>
   );
 };

@@ -8,10 +8,11 @@ import {
   BarChart3,
   Users,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Bot
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import {Box, Typography} from "@mui/material";
+import { Typography } from "@mui/material";
 import { useTheme, alpha } from '@mui/material/styles';
 
 interface SidebarItem {
@@ -44,11 +45,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
   };
 
   const userMenuItems: SidebarItem[] = [
-    {
-      name: 'Dashboard',
-      href: '/dashboard',
-      icon: Home,
-    },
+    { name: 'Dashboard', href: '/dashboard', icon: Home },
     {
       name: 'Posts',
       href: '/dashboard/posts',
@@ -59,41 +56,15 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
         { name: 'Drafts', href: '/dashboard/drafts', icon: FileText },
       ],
     },
-    {
-      name: 'Analytics',
-      href: '/dashboard/analytics',
-      icon: BarChart3,
-    },
-    {
-      name: 'Comments',
-      href: '/dashboard/comments',
-      icon: MessageSquare,
-    },
-    {
-      name: 'Profile',
-      href: '/dashboard/profile',
-      icon: User,
-    },
-    {
-      name: 'AI Chat',
-      href: '/dashboard/ai-chat',
-      icon: MessageSquare,
-    },
+    { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
+    { name: 'Comments', href: '/dashboard/comments', icon: MessageSquare },
+    { name: 'Profile', href: '/dashboard/profile', icon: User },
+    { name: 'AI Assistant', href: '/dashboard/ai-chat', icon: Bot },
   ];
 
   const adminMenuItems: SidebarItem[] = [
-    {
-      name: 'User Management',
-      href: '/dashboard/admin/users',
-      icon: Users,
-    },
-
-    {
-      name: 'Admin Analytics',
-      href: '/dashboard/admin/analytics',
-      icon: BarChart3,
-    },
-
+    { name: 'User Management', href: '/dashboard/admin/users', icon: Users },
+    { name: 'Admin Analytics', href: '/dashboard/admin/analytics', icon: BarChart3 },
   ];
 
   const menuItems = isAdmin ? [...userMenuItems, ...adminMenuItems] : userMenuItems;
@@ -102,7 +73,6 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
     const isActive = location.pathname === item.href;
     const hasChildren = item.children && item.children.length > 0;
     const isExpanded = expandedItems.has(item.name);
-
     const Icon = item.icon as React.ElementType;
 
     return (
@@ -110,53 +80,45 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
           {hasChildren ? (
               <button
                   onClick={() => toggleExpanded(item.name)}
+                  className="aws-button w-full flex items-center aws-spacing-sm transition-colors"
                   style={{
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: '0.75rem',
-                    fontSize: '0.875rem',
                     borderRadius: 8,
-                    transition: 'background-color 150ms',
                     marginLeft: level > 0 ? 16 : 0,
                     minHeight: 44,
-                    backgroundColor: isActive ? (theme.palette.mode === 'dark' ? alpha(theme.palette.primary.main, 0.12) : alpha(theme.palette.primary.main, 0.12)) : 'transparent',
+                    backgroundColor: isActive ? alpha(theme.palette.primary.main, 0.12) : 'transparent',
                     color: isActive ? theme.palette.primary.main : theme.palette.text.secondary,
+                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                    fontSize: '0.875rem',
+                    border: 'none'
                   }}
               >
-                <Icon style={{ marginRight: 12, width: 20, height: 20, flexShrink: 0, color: isActive ? theme.palette.primary.main : theme.palette.text.secondary }} />
+                <Icon size={20} style={{ marginRight: 12, flexShrink: 0, color: isActive ? theme.palette.primary.main : theme.palette.text.secondary }} />
                 <span style={{ flex: 1, textAlign: 'left' }}>{item.name}</span>
-                {isExpanded ? (
-                    <ChevronDown style={{ width: 16, height: 16 }} />
-                ) : (
-                    <ChevronRight style={{ width: 16, height: 16 }} />
-                )}
+                {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
               </button>
           ) : (
               <Link
                   to={item.href}
                   onClick={onClose}
+                  className="aws-button flex items-center aws-spacing-sm transition-colors"
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: '0.75rem',
-                    fontSize: '0.875rem',
                     borderRadius: 8,
-                    transition: 'background-color 150ms',
                     marginLeft: level > 0 ? 16 : 0,
                     minHeight: 44,
-                    backgroundColor: isActive ? (theme.palette.mode === 'dark' ? alpha(theme.palette.primary.main, 0.12) : alpha(theme.palette.primary.main, 0.12)) : 'transparent',
+                    backgroundColor: isActive ? alpha(theme.palette.primary.main, 0.12) : 'transparent',
                     color: isActive ? theme.palette.primary.main : theme.palette.text.secondary,
                     textDecoration: 'none',
+                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                    fontSize: '0.875rem'
                   }}
               >
-                <Icon style={{ marginRight: 12, width: 20, height: 20, flexShrink: 0, color: isActive ? theme.palette.primary.main : theme.palette.text.secondary }} />
+                <Icon size={20} style={{ marginRight: 12, flexShrink: 0, color: isActive ? theme.palette.primary.main : theme.palette.text.secondary }} />
                 {item.name}
               </Link>
           )}
 
           {hasChildren && isExpanded && (
-              <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div className="aws-spacing-y-xs" style={{ marginTop: 8 }}>
                 {item.children!.map((child) => renderMenuItem(child, level + 1, onClose))}
               </div>
           )}
@@ -164,7 +126,6 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
     );
   };
 
-  // Prevent body scroll when overlay sidebar is open on mobile
   React.useEffect(() => {
     if (isMobile && isOpen) {
       document.body.style.overflow = 'hidden';
@@ -176,72 +137,78 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
 
   return (
       <>
-        {/* Mobile overlay - only show when sidebar is open on mobile */}
         {isMobile && isOpen && (
             <div
-                style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1300, backgroundColor: theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)' }}
+                style={{ 
+                  position: 'fixed', 
+                  top: 0, 
+                  left: 0, 
+                  right: 0, 
+                  bottom: 0, 
+                  zIndex: 1300, 
+                  backgroundColor: theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)' 
+                }}
                 onClick={onClose}
             />
         )}
 
-        {/* Sidebar */}
         <div
+            className="aws-font"
             style={{
                 position: isMobile ? 'fixed' : 'sticky',
                 top: 0,
                 height: '100vh',
                 zIndex: isMobile ? 1400 : undefined,
                 width: isMobile ? 'min(80vw, 320px)' : 256,
-                boxSizing: 'border-box',
                 backgroundColor: theme.palette.background.paper,
                 boxShadow: isMobile ? '0 10px 30px rgba(0,0,0,0.25)' : 'none',
                 transform: isMobile ? (isOpen ? 'translateX(0)' : 'translateX(-110%)') : undefined,
                 transition: isMobile ? 'transform 300ms ease-in-out' : undefined,
                 overflow: 'auto',
                 left: isMobile ? 0 : undefined,
+                borderRight: `1px solid ${theme.palette.divider}`,
+                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
             }}
         >
           <div className="flex flex-col h-full">
-            {/* Logo */}
-            <Link to="/dashboard" style={{ textDecoration: 'none',paddingLeft:"2rem" }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0 ,paddingTop:'1.5rem' ,paddingLeft:"2rem"}}>
-                <Box
-                    sx={{
+            <Link to="/dashboard" className="aws-spacing-lg" style={{ textDecoration: 'none' }}>
+              <div className="flex items-center gap-2">
+                <div
+                    className="flex items-center justify-center"
+                    style={{
                       width: 32,
                       height: 32,
-                      borderRadius: 1,
-                      bgcolor: 'primary.main',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      borderRadius: 4,
+                      backgroundColor: theme.palette.primary.main,
+                      color: theme.palette.primary.contrastText
                     }}
                 >
-                  <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
+                  <Typography className="aws-font" style={{ fontWeight: 'bold', fontSize: '1rem' }}>
                     LIV
                   </Typography>
-                </Box>
+                </div>
                 <Typography
-                    variant="h6"
-                    sx={{
+                    className="aws-font aws-header-sm"
+                    style={{
                       fontWeight: 'bold',
-                      color: 'primary.main',
-                      display: { xs: 'none', sm: 'block' },
+                      color: theme.palette.primary.main,
+                      margin: 0
                     }}
                 >
                   Blog
                 </Typography>
-              </Box>
+              </div>
             </Link>
 
-            {/* Navigation */}
-            <nav style={{ flex: 1, padding: '1.5rem 1rem', gap: 8, overflowY: 'auto' }}>
-              {menuItems.map((item) => renderMenuItem(item, 0, onClose))}
+            <nav className="flex-1 aws-spacing-md" style={{ overflowY: 'auto' }}>
+              <div className="space-y-1">
+                {menuItems.map((item) => renderMenuItem(item, 0, onClose))}
+              </div>
             </nav>
 
-            {/* Footer */}
-            <div style={{ padding: 16, borderTop: `1px solid ${theme.palette.divider}` }}>
-              <div style={{ fontSize: '0.75rem', color: theme.palette.text.secondary, textAlign: 'center' }}>
-                © {new Date().getFullYear()} LIVBlog. All rights reserved.
+            <div className="aws-spacing-md" style={{ borderTop: `1px solid ${theme.palette.divider}` }}>
+              <div className="aws-text-body text-center" style={{ color: theme.palette.text.secondary, fontSize: '0.75rem' }}>
+                © {new Date().getFullYear()} LIVBlog
               </div>
             </div>
           </div>

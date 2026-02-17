@@ -1,0 +1,262 @@
+/* AWS Console Style Utilities */
+
+/* Typography - Amazon Ember Font */
+.aws-font {
+  font-family: 'Amazon Ember', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Headers */
+.aws-header-xl {
+  font-family: 'Amazon Ember', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0 0 2rem 0;
+}
+
+.aws-header-lg {
+  font-family: 'Amazon Ember', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0 0 1.5rem 0;
+}
+
+.aws-header-md {
+  font-family: 'Amazon Ember', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0 0 1rem 0;
+}
+
+.aws-header-sm {
+  font-family: 'Amazon Ember', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0 0 0.75rem 0;
+}
+
+/* Body Text */
+.aws-text-body {
+  font-family: 'Amazon Ember', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.aws-text-body-lg {
+  font-family: 'Amazon Ember', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 1rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Cards */
+.aws-card {
+  background-color: var(--aws-card-bg, #ffffff);
+  border: 1px solid var(--aws-border-color, #d5dbdb);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.aws-card-outlined {
+  background-color: transparent;
+  border: 1px solid var(--aws-border-color, #d5dbdb);
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+.aws-card-elevated {
+  background-color: var(--aws-card-bg, #ffffff);
+  border: 1px solid var(--aws-border-color, #d5dbdb);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.aws-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.aws-card-clickable {
+  cursor: pointer;
+}
+
+.aws-card-clickable:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+/* Spacing - AWS Console Standard */
+.aws-spacing-xs { padding: 8px; }
+.aws-spacing-sm { padding: 12px; }
+.aws-spacing-md { padding: 16px; }
+.aws-spacing-lg { padding: 24px; }
+.aws-spacing-xl { padding: 32px; }
+.aws-spacing-2xl { padding: 48px; }
+
+.aws-spacing-x-xs { padding-left: 8px; padding-right: 8px; }
+.aws-spacing-x-sm { padding-left: 12px; padding-right: 12px; }
+.aws-spacing-x-md { padding-left: 16px; padding-right: 16px; }
+.aws-spacing-x-lg { padding-left: 24px; padding-right: 24px; }
+.aws-spacing-x-xl { padding-left: 32px; padding-right: 32px; }
+.aws-spacing-x-2xl { padding-left: 48px; padding-right: 48px; }
+
+.aws-spacing-y-xs { padding-top: 8px; padding-bottom: 8px; }
+.aws-spacing-y-sm { padding-top: 12px; padding-bottom: 12px; }
+.aws-spacing-y-md { padding-top: 16px; padding-bottom: 16px; }
+.aws-spacing-y-lg { padding-top: 24px; padding-bottom: 24px; }
+.aws-spacing-y-xl { padding-top: 32px; padding-bottom: 32px; }
+.aws-spacing-y-2xl { padding-top: 48px; padding-bottom: 48px; }
+
+/* Margins */
+.aws-margin-xs { margin: 8px; }
+.aws-margin-sm { margin: 12px; }
+.aws-margin-md { margin: 16px; }
+.aws-margin-lg { margin: 24px; }
+.aws-margin-xl { margin: 32px; }
+.aws-margin-2xl { margin: 48px; }
+
+.aws-margin-b-xs { margin-bottom: 8px; }
+.aws-margin-b-sm { margin-bottom: 12px; }
+.aws-margin-b-md { margin-bottom: 16px; }
+.aws-margin-b-lg { margin-bottom: 24px; }
+.aws-margin-b-xl { margin-bottom: 32px; }
+.aws-margin-b-2xl { margin-bottom: 48px; }
+
+.aws-margin-t-xs { margin-top: 8px; }
+.aws-margin-t-sm { margin-top: 12px; }
+.aws-margin-t-md { margin-top: 16px; }
+.aws-margin-t-lg { margin-top: 24px; }
+.aws-margin-t-xl { margin-top: 32px; }
+.aws-margin-t-2xl { margin-top: 48px; }
+
+/* Buttons - AWS Console Style */
+.aws-button {
+  font-family: 'Amazon Ember', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  line-height: 1.4;
+}
+
+.aws-button-primary {
+  background-color: var(--aws-primary-color, #0073bb);
+  color: white;
+  border-color: var(--aws-primary-color, #0073bb);
+}
+
+.aws-button-primary:hover {
+  background-color: var(--aws-primary-hover, #005a94);
+  border-color: var(--aws-primary-hover, #005a94);
+}
+
+.aws-button-secondary {
+  background-color: transparent;
+  color: var(--aws-text-primary, #16191f);
+  border-color: var(--aws-border-color, #d5dbdb);
+}
+
+.aws-button-secondary:hover {
+  background-color: var(--aws-hover-bg, #f2f3f3);
+}
+
+/* Layout */
+.aws-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.aws-section {
+  padding: 24px 0;
+}
+
+.aws-grid {
+  display: grid;
+  gap: 24px;
+}
+
+.aws-grid-gap-sm {
+  gap: 16px;
+}
+
+.aws-grid-gap-md {
+  gap: 24px;
+}
+
+.aws-grid-gap-lg {
+  gap: 32px;
+}
+
+.aws-grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
+.aws-grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.aws-grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.aws-grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+@media (max-width: 768px) {
+  .aws-grid-cols-2,
+  .aws-grid-cols-3,
+  .aws-grid-cols-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .aws-grid-cols-3,
+  .aws-grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --aws-card-bg: #232f3e;
+    --aws-border-color: #414d5c;
+    --aws-text-primary: #ffffff;
+    --aws-text-secondary: #d5dbdb;
+    --aws-hover-bg: #414d5c;
+  }
+}
+
+/* Light mode (default) */
+:root {
+  --aws-card-bg: #ffffff;
+  --aws-border-color: #d5dbdb;
+  --aws-text-primary: #16191f;
+  --aws-text-secondary: #687078;
+  --aws-hover-bg: #f2f3f3;
+  --aws-primary-color: #0073bb;
+  --aws-primary-hover: #005a94;
+}
+
+/* Utility classes for consistent heights */
+.aws-min-h-card { min-height: 200px; }
+.aws-min-h-card-sm { min-height: 150px; }
+.aws-min-h-card-lg { min-height: 300px; }
+
+/* Focus states for accessibility */
+.aws-button:focus,
+.aws-card-clickable:focus {
+  outline: 2px solid var(--aws-primary-color, #0073bb);
+  outline-offset: 2px;
+}
+
+/* Responsive text */
+@media (max-width: 768px) {
+  .aws-header-xl { font-size: 1.75rem; }
+  .aws-header-lg { font-size: 1.375rem; }
+  .aws-header-md { font-size: 1.125rem; }
+}

@@ -30,7 +30,7 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
     ...(isAdmin ? [{ label: 'Users', icon: <Users size={16} />, to: '/dashboard/admin/users' }] : []),
   ];
 
-  if (!isDesktop) return null; // show only on desktop
+  if (!isDesktop) return null;
 
   return (
     <Box
@@ -46,13 +46,26 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
         height: '100vh',
         position: 'sticky',
         top: 0,
+        fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       }}
     >
-      {/* quick actions */}
+      {/* Quick actions */}
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'center' }}>
         {quickActions.map((a) => (
           <Tooltip key={a.label} title={a.label} placement="left">
-            <IconButton component={Link} to={a.to} size="small" sx={{ color: 'text.secondary' }}>
+            <IconButton 
+              component={Link} 
+              to={a.to} 
+              size="small" 
+              className="aws-button aws-button-icon"
+              sx={{ 
+                color: 'text.secondary',
+                '&:hover': {
+                  backgroundColor: theme.palette.action.hover,
+                  color: theme.palette.primary.main
+                }
+              }}
+            >
               {a.icon}
             </IconButton>
           </Tooltip>
@@ -63,14 +76,42 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
 
       {/* Theme toggle */}
       <Tooltip title={mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} placement="left">
-        <IconButton size="small" onClick={toggleMode} sx={{ color: 'text.secondary' }}>
-          {mode === 'dark' ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" fill="currentColor"/></svg> : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+        <IconButton 
+          size="small" 
+          onClick={toggleMode} 
+          className="aws-button aws-button-icon"
+          sx={{ 
+            color: 'text.secondary',
+            '&:hover': {
+              backgroundColor: theme.palette.action.hover,
+              color: theme.palette.primary.main
+            }
+          }}
+        >
+          {mode === 'dark' ? 
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" fill="currentColor"/>
+            </svg> : 
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          }
         </IconButton>
       </Tooltip>
 
-      {/* notifications */}
+      {/* Notifications */}
       <Tooltip title="Notifications" placement="left">
-        <IconButton size="small" sx={{ color: 'text.secondary' }}>
+        <IconButton 
+          size="small" 
+          className="aws-button aws-button-icon"
+          sx={{ 
+            color: 'text.secondary',
+            '&:hover': {
+              backgroundColor: theme.palette.action.hover,
+              color: theme.palette.primary.main
+            }
+          }}
+        >
           <Badge badgeContent={3} color="error" variant="dot">
             <Bell size={16} />
           </Badge>
@@ -79,36 +120,115 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
 
       <Box sx={{ flex: 1 }} />
 
-      {/* profile avatar */}
+      {/* Profile avatar */}
       <Box>
         <IconButton onClick={handleOpen} sx={{ p: 0.5 }}>
-          <Avatar sx={{ width: 36, height: 36, bgcolor: 'primary.main', color: 'primary.contrastText' }}>
+          <Avatar sx={{ 
+            width: 36, 
+            height: 36, 
+            bgcolor: 'primary.main', 
+            color: 'primary.contrastText',
+            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            fontSize: '0.875rem',
+            fontWeight: 600
+          }}>
             {user?.name?.charAt(0)?.toUpperCase() || 'U'}
           </Avatar>
         </IconButton>
-        <MuiMenu anchorEl={anchorEl} open={open} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'left' }} transformOrigin={{ vertical: 'top', horizontal: 'right' }}>
+        <MuiMenu 
+          anchorEl={anchorEl} 
+          open={open} 
+          onClose={handleClose} 
+          anchorOrigin={{ vertical: 'top', horizontal: 'left' }} 
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          PaperProps={{
+            sx: {
+              fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            }
+          }}
+        >
           <Box sx={{ p: 2, minWidth: 220 }}>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-              <Avatar sx={{ width: 48, height: 48, bgcolor: 'primary.main' }}>{user?.name?.charAt(0)?.toUpperCase() || 'U'}</Avatar>
+              <Avatar sx={{ 
+                width: 48, 
+                height: 48, 
+                bgcolor: 'primary.main',
+                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                fontSize: '1.125rem',
+                fontWeight: 600
+              }}>
+                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+              </Avatar>
               <Box>
-                <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>{user?.name || 'User'}</Typography>
-                <Typography variant="caption" color="text.secondary">{user?.email}</Typography>
-                {isAdmin && <Chip label="Admin" size="small" color="error" sx={{ mt: 0.5 }} icon={<Shield size={12} />} />}
+                <Typography 
+                  variant="subtitle2" 
+                  sx={{ 
+                    fontWeight: 'bold',
+                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  }}
+                >
+                  {user?.name || 'User'}
+                </Typography>
+                <Typography 
+                  variant="caption" 
+                  color="text.secondary"
+                  sx={{ fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
+                >
+                  {user?.email}
+                </Typography>
+                {isAdmin && (
+                  <Chip 
+                    label="Admin" 
+                    size="small" 
+                    color="error" 
+                    sx={{ 
+                      mt: 0.5,
+                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                      fontSize: '0.75rem'
+                    }} 
+                    icon={<Shield size={12} />} 
+                  />
+                )}
               </Box>
             </Box>
           </Box>
           <Divider />
-          <MenuItem component={Link} to="/dashboard/profile">Profile</MenuItem>
-          <MenuItem component={Link} to="/dashboard/help">Help & Support</MenuItem>
-          {isAdmin && <MenuItem component={Link} to="/dashboard/admin/users">Manage Users</MenuItem>}
+          <MenuItem 
+            component={Link} 
+            to="/dashboard/profile"
+            sx={{ fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
+          >
+            Profile
+          </MenuItem>
+          <MenuItem 
+            component={Link} 
+            to="/dashboard/help"
+            sx={{ fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
+          >
+            Help & Support
+          </MenuItem>
+          {isAdmin && (
+            <MenuItem 
+              component={Link} 
+              to="/dashboard/admin/users"
+              sx={{ fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
+            >
+              Manage Users
+            </MenuItem>
+          )}
           <Divider />
-          <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
+          <MenuItem 
+            onClick={handleLogout} 
+            sx={{ 
+              color: 'error.main',
+              fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+            }}
+          >
             <ListItemIcon><LogOut size={16} /></ListItemIcon>
             Logout
           </MenuItem>
         </MuiMenu>
       </Box>
-
     </Box>
   );
 };

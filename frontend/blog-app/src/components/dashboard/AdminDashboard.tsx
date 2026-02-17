@@ -9,6 +9,8 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { AnalyticsView } from './AnalyticsView';
 import { Roles } from '../../enums/Roles';
+import { LIVBlogHeader, LIVBlogCard, LIVBlogLayout } from '../ui';
+import { Button } from '@mui/material';
 
 // Mock data for charts
 const userGrowthData = [
@@ -83,8 +85,6 @@ export const AdminDashboard: React.FC = () => {
   const totalUsers = totalUsersData?.data || 0;
   const totalPosts = totalPostsData?.data || 0;
   const totalComments = totalCommentsData?.data || 0;
-
-  // Mock additional stats
   const flaggedContent = 3;
   const systemHealth = 98;
 
@@ -98,27 +98,65 @@ export const AdminDashboard: React.FC = () => {
     switch (currentView) {
       case 'users':
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            <div style={{
-              backgroundColor: theme.palette.background.paper,
-              border: `1px solid ${theme.palette.divider}`,
-              borderRadius: 12,
-              padding: 24,
-              boxShadow: theme.shadows[1],
-            }}>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.text.primary, marginBottom: 16 }}>User Management</h2>
-              <p style={{ color: theme.palette.text.secondary, marginBottom: 24 }}>Manage user accounts and view their activities</p>
-              
+          <LIVBlogLayout.Container>
+            <LIVBlogCard
+              title="User Management"
+              subtitle="Manage user accounts and view their activities"
+              variant="default"
+              padding="large"
+            >
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr style={{ borderBottom: `2px solid ${theme.palette.divider}` }}>
-                      <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.875rem', fontWeight: 600, color: theme.palette.text.primary }}>User</th>
-                      <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.875rem', fontWeight: 600, color: theme.palette.text.primary }}>Role</th>
-                      <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.875rem', fontWeight: 600, color: theme.palette.text.primary }}>Joined</th>
-                      <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.875rem', fontWeight: 600, color: theme.palette.text.primary }}>Posts</th>
-                      <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.875rem', fontWeight: 600, color: theme.palette.text.primary }}>Comments</th>
-                      <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: '0.875rem', fontWeight: 600, color: theme.palette.text.primary }}>Actions</th>
+                      <th style={{ 
+                        padding: '12px 16px', 
+                        textAlign: 'left', 
+                        fontSize: '0.875rem', 
+                        fontWeight: 600, 
+                        color: theme.palette.text.primary,
+                        fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                      }}>User</th>
+                      <th style={{ 
+                        padding: '12px 16px', 
+                        textAlign: 'left', 
+                        fontSize: '0.875rem', 
+                        fontWeight: 600, 
+                        color: theme.palette.text.primary,
+                        fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                      }}>Role</th>
+                      <th style={{ 
+                        padding: '12px 16px', 
+                        textAlign: 'left', 
+                        fontSize: '0.875rem', 
+                        fontWeight: 600, 
+                        color: theme.palette.text.primary,
+                        fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                      }}>Joined</th>
+                      <th style={{ 
+                        padding: '12px 16px', 
+                        textAlign: 'left', 
+                        fontSize: '0.875rem', 
+                        fontWeight: 600, 
+                        color: theme.palette.text.primary,
+                        fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                      }}>Posts</th>
+                      <th style={{ 
+                        padding: '12px 16px', 
+                        textAlign: 'left', 
+                        fontSize: '0.875rem', 
+                        fontWeight: 600, 
+                        color: theme.palette.text.primary,
+                        fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                      }}>Comments</th>
+                      <th style={{ 
+                        padding: '12px 16px', 
+                        textAlign: 'center', 
+                        fontSize: '0.875rem', 
+                        fontWeight: 600, 
+                        color: theme.palette.text.primary,
+                        fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                      }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -134,8 +172,17 @@ export const AdminDashboard: React.FC = () => {
                         <tr key={user.id} style={{ borderBottom: `1px solid ${theme.palette.divider}` }}>
                           <td style={{ padding: '16px' }}>
                             <div>
-                              <div style={{ fontSize: '0.875rem', fontWeight: 600, color: theme.palette.text.primary }}>{user.name}</div>
-                              <div style={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>{user.email}</div>
+                              <div style={{ 
+                                fontSize: '0.875rem', 
+                                fontWeight: 600, 
+                                color: theme.palette.text.primary,
+                                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                              }}>{user.name}</div>
+                              <div style={{ 
+                                fontSize: '0.75rem', 
+                                color: theme.palette.text.secondary,
+                                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                              }}>{user.email}</div>
                             </div>
                           </td>
                           <td style={{ padding: '16px' }}>
@@ -153,61 +200,65 @@ export const AdminDashboard: React.FC = () => {
                               color: user.roles?.includes(Roles.ADMIN) 
                                 ? theme.palette.error.main
                                 : theme.palette.primary.main,
+                              fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
                             }}>
                               {user.roles?.includes(Roles.ADMIN) && <Shield size={12} />}
                               {user.roles?.includes(Roles.ADMIN) ? 'Admin' : 'User'}
                             </div>
                           </td>
-                          <td style={{ padding: '16px', fontSize: '0.875rem', color: theme.palette.text.secondary }}>
+                          <td style={{ 
+                            padding: '16px', 
+                            fontSize: '0.875rem', 
+                            color: theme.palette.text.secondary,
+                            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                          }}>
                             {user.createdAt ? format(new Date(user.createdAt), 'MMM dd, yyyy') : 'Unknown'}
                           </td>
-                          <td style={{ padding: '16px', fontSize: '0.875rem', color: theme.palette.text.primary, fontWeight: 600 }}>
+                          <td style={{ 
+                            padding: '16px', 
+                            fontSize: '0.875rem', 
+                            color: theme.palette.text.primary, 
+                            fontWeight: 600,
+                            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                          }}>
                             {userPosts.length}
                           </td>
-                          <td style={{ padding: '16px', fontSize: '0.875rem', color: theme.palette.text.primary, fontWeight: 600 }}>
+                          <td style={{ 
+                            padding: '16px', 
+                            fontSize: '0.875rem', 
+                            color: theme.palette.text.primary, 
+                            fontWeight: 600,
+                            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                          }}>
                             {userComments.length}
                           </td>
                           <td style={{ padding: '16px' }}>
                             <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
-                              <button
+                              <Button
                                 onClick={() => navigate(`/dashboard/admin/user/${user.id}/view`)}
+                                className="aws-button aws-button-secondary"
+                                size="small"
+                                startIcon={<Eye size={12} />}
                                 style={{
-                                  padding: '6px 12px',
-                                  borderRadius: 6,
-                                  border: 'none',
-                                  backgroundColor: alpha(theme.palette.primary.main, 0.12),
-                                  color: theme.palette.primary.main,
-                                  fontSize: '0.75rem',
-                                  fontWeight: 500,
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: 4,
+                                  fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
                                 }}
                               >
-                                <Eye size={12} />
                                 View Activity
-                              </button>
+                              </Button>
                               {!user.roles?.includes(Roles.ADMIN) && (
-                                <button
+                                <Button
                                   onClick={() => handleDeleteUser(user.id!)}
+                                  className="aws-button"
+                                  size="small"
+                                  startIcon={<Trash2 size={12} />}
                                   style={{
-                                    padding: '6px 12px',
-                                    borderRadius: 6,
-                                    border: 'none',
                                     backgroundColor: alpha(theme.palette.error.main, 0.12),
                                     color: theme.palette.error.main,
-                                    fontSize: '0.75rem',
-                                    fontWeight: 500,
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 4,
+                                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
                                   }}
                                 >
-                                  <Trash2 size={12} />
                                   Delete
-                                </button>
+                                </Button>
                               )}
                             </div>
                           </td>
@@ -217,50 +268,67 @@ export const AdminDashboard: React.FC = () => {
                   </tbody>
                 </table>
               </div>
-            </div>
-          </div>
+            </LIVBlogCard>
+          </LIVBlogLayout.Container>
         );
       case 'analytics':
         return <AnalyticsView />;
       case 'overview':
       default:
         return (
-          <>
-            {/* Stats Cards (theme-aware) */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: 24
-            }}>
+          <LIVBlogLayout.Container>
+            {/* Stats Cards */}
+            <LIVBlogLayout.Grid cols={4} gap="md">
               {[
                 { label: 'Total Users', value: totalUsers, icon: <Users />, accent: theme.palette.primary.main, note: '+12% from last month' },
                 { label: 'Total Posts', value: totalPosts, icon: <FileText />, accent: theme.palette.success.main, note: '+8% from last month' },
                 { label: 'Total Comments', value: totalComments, icon: <MessageSquare />, accent: theme.palette.secondary.main, note: '+15% from last month' },
                 { label: 'Flagged Content', value: flaggedContent, icon: <AlertTriangle />, accent: theme.palette.error.main, note: 'Requires attention' },
               ].map((c) => (
-                <div key={c.label} style={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 12, padding: 24, boxShadow: theme.shadows[1] }}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <div style={{ padding: 8, borderRadius: 8, backgroundColor: alpha(c.accent, 0.12), display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <LIVBlogCard
+                  key={c.label}
+                  title={c.label}
+                  variant="default"
+                  padding="medium"
+                  className="aws-min-h-card-sm"
+                >
+                  <div className="aws-flex aws-items-center aws-mb-3">
+                    <div 
+                      className="aws-p-2 aws-rounded-md aws-flex aws-items-center aws-justify-center"
+                      style={{ backgroundColor: alpha(c.accent, 0.12) }}
+                    >
                       {React.cloneElement(c.icon as any, { style: { width: 24, height: 24, color: c.accent } })}
                     </div>
-                    <div style={{ marginLeft: 16 }}>
-                      <div style={{ fontSize: 14, fontWeight: 500, color: theme.palette.text.secondary }}>{c.label}</div>
-                      <div style={{ fontSize: 20, fontWeight: 700, color: theme.palette.text.primary }}>{c.value}</div>
-                      <div style={{ fontSize: 13, color: c.accent }}>{c.note}</div>
-                    </div>
                   </div>
-                </div>
+                  <div 
+                    className="aws-text-xl aws-font-bold aws-mb-1"
+                    style={{ 
+                      color: theme.palette.text.primary,
+                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    }}
+                  >
+                    {c.value}
+                  </div>
+                  <div 
+                    className="aws-text-sm"
+                    style={{ 
+                      color: c.accent,
+                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    }}
+                  >
+                    {c.note}
+                  </div>
+                </LIVBlogCard>
               ))}
-            </div>
+            </LIVBlogLayout.Grid>
 
             {/* Charts */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-              gap: 24
-            }}>
-              <div style={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 12, padding: 24, boxShadow: theme.shadows[1] }}>
-                <h3 style={{ fontSize: 18, fontWeight: 600, color: theme.palette.text.primary, marginBottom: 12 }}>User Growth</h3>
+            <LIVBlogLayout.Grid cols={2} gap="lg">
+              <LIVBlogCard
+                title="User Growth"
+                variant="default"
+                padding="large"
+              >
                 <ResponsiveContainer width="100%" height={250}>
                   <LineChart data={userGrowthData}>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -270,10 +338,13 @@ export const AdminDashboard: React.FC = () => {
                     <Line type="monotone" dataKey="users" stroke={theme.palette.primary.main} strokeWidth={2} dot={{ fill: theme.palette.primary.main }} />
                   </LineChart>
                 </ResponsiveContainer>
-              </div>
+              </LIVBlogCard>
 
-              <div style={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 12, padding: 24, boxShadow: theme.shadows[1] }}>
-                <h3 style={{ fontSize: 18, fontWeight: 600, color: theme.palette.text.primary, marginBottom: 12 }}>Weekly Post Activity</h3>
+              <LIVBlogCard
+                title="Weekly Post Activity"
+                variant="default"
+                padding="large"
+              >
                 <ResponsiveContainer width="100%" height={250}>
                   <BarChart data={postActivityData}>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -283,114 +354,200 @@ export const AdminDashboard: React.FC = () => {
                     <Bar dataKey="posts" fill={theme.palette.success.main} />
                   </BarChart>
                 </ResponsiveContainer>
-              </div>
-            </div>
+              </LIVBlogCard>
+            </LIVBlogLayout.Grid>
 
             {/* System Health & Recent Activity */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-              gap: 24
-            }}>
-              <div style={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 12, padding: 24, boxShadow: theme.shadows[1] }}>
-                <h3 style={{ fontSize: 18, fontWeight: 600, color: theme.palette.text.primary, marginBottom: 12 }}>System Health</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <div style={{ color: theme.palette.text.secondary }}>Server Status</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <LIVBlogLayout.Grid cols={2} gap="lg">
+              <LIVBlogCard
+                title="System Health"
+                variant="default"
+                padding="large"
+              >
+                <div className="aws-flex aws-flex-col aws-gap-3">
+                  <div className="aws-flex aws-justify-between">
+                    <div style={{ 
+                      color: theme.palette.text.secondary,
+                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    }}>Server Status</div>
+                    <div className="aws-flex aws-items-center aws-gap-2">
                       <Activity style={{ width: 16, height: 16, color: theme.palette.success.main }} />
-                      <div style={{ color: theme.palette.success.main }}>Healthy</div>
+                      <div style={{ 
+                        color: theme.palette.success.main,
+                        fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                      }}>Healthy</div>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <div style={{ color: theme.palette.text.secondary }}>Uptime</div>
-                    <div style={{ color: theme.palette.text.primary }}>{systemHealth}%</div>
+                  <div className="aws-flex aws-justify-between">
+                    <div style={{ 
+                      color: theme.palette.text.secondary,
+                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    }}>Uptime</div>
+                    <div style={{ 
+                      color: theme.palette.text.primary,
+                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    }}>{systemHealth}%</div>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <div style={{ color: theme.palette.text.secondary }}>Database</div>
-                    <div style={{ color: theme.palette.success.main }}>Connected</div>
+                  <div className="aws-flex aws-justify-between">
+                    <div style={{ 
+                      color: theme.palette.text.secondary,
+                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    }}>Database</div>
+                    <div style={{ 
+                      color: theme.palette.success.main,
+                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    }}>Connected</div>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <div style={{ color: theme.palette.text.secondary }}>API Response</div>
-                    <div style={{ color: theme.palette.success.main }}>Fast</div>
+                  <div className="aws-flex aws-justify-between">
+                    <div style={{ 
+                      color: theme.palette.text.secondary,
+                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    }}>API Response</div>
+                    <div style={{ 
+                      color: theme.palette.success.main,
+                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    }}>Fast</div>
                   </div>
                 </div>
-              </div>
+              </LIVBlogCard>
 
-              <div style={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 12, padding: 24, boxShadow: theme.shadows[1] }}>
-                <h3 style={{ fontSize: 18, fontWeight: 600, color: theme.palette.text.primary, marginBottom: 12 }}>Recent Activity</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <LIVBlogCard
+                title="Recent Activity"
+                variant="default"
+                padding="large"
+              >
+                <div className="aws-flex aws-flex-col aws-gap-3">
                   {[
                     { color: theme.palette.primary.main, title: 'New user registered', subtitle: 'john.doe@example.com - 2 minutes ago' },
                     { color: theme.palette.success.main, title: 'Post published', subtitle: '"React Best Practices" - 15 minutes ago' },
                     { color: '#f59e0b', title: 'Comment flagged', subtitle: 'Spam content detected - 1 hour ago' },
                     { color: theme.palette.error.main, title: 'User suspended', subtitle: 'Violation of terms - 2 hours ago' },
                   ].map((a, i) => (
-                    <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                      <div style={{ width: 8, height: 8, borderRadius: 999, marginTop: 6, backgroundColor: a.color }} />
+                    <div key={i} className="aws-flex aws-gap-3 aws-items-start">
+                      <div 
+                        className="aws-w-2 aws-h-2 aws-rounded-full aws-mt-1.5"
+                        style={{ backgroundColor: a.color }}
+                      />
                       <div>
-                        <div style={{ fontSize: 14, fontWeight: 600, color: theme.palette.text.primary }}>{a.title}</div>
-                        <div style={{ fontSize: 12, color: theme.palette.text.secondary }}>{a.subtitle}</div>
+                        <div style={{ 
+                          fontSize: 14, 
+                          fontWeight: 600, 
+                          color: theme.palette.text.primary,
+                          fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                        }}>{a.title}</div>
+                        <div style={{ 
+                          fontSize: 12, 
+                          color: theme.palette.text.secondary,
+                          fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                        }}>{a.subtitle}</div>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
-            </div>
-          </>
+              </LIVBlogCard>
+            </LIVBlogLayout.Grid>
+          </LIVBlogLayout.Container>
         );
     }
   };
 
   return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-        {/* Header */}
-        <div style={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 12, padding: 24, boxShadow: theme.shadows[1] }}>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.text.primary }}>Welcome to the Admin Dashboard</h1>
-          <p style={{ color: theme.palette.text.secondary, marginTop: 8 }}>
-            Monitor and manage your blog platform.
-          </p>
-        </div>
+    <LIVBlogLayout.Container>
+      {/* Header */}
+      <LIVBlogHeader
+        title="Welcome to the Admin Dashboard"
+        subtitle="Monitor and manage your blog platform."
+        size="large"
+      />
 
-        {/* Quick Actions */}
-        <div style={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 12, padding: 24, boxShadow: theme.shadows[1] }}>
-          <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: theme.palette.text.primary, marginBottom: 16 }}>Quick Actions</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
-            <div onClick={() => setCurrentView('users')} style={{ padding: 16, borderRadius: 12, border: `1px solid ${theme.palette.divider}`, cursor: 'pointer', display: 'flex', gap: 12, alignItems: 'flex-start', backgroundColor: 'transparent' }}>
-              <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: alpha(theme.palette.primary.main, 0.12) }}>
-                <Users style={{ width: 24, height: 24, color: theme.palette.primary.main }} />
-              </div>
-              <div>
-                <p style={{ fontWeight: 600, color: theme.palette.text.primary }}>Manage Users</p>
-                <p style={{ color: theme.palette.text.secondary, fontSize: '0.875rem' }}>View and moderate user accounts</p>
-              </div>
+      {/* Quick Actions */}
+      <LIVBlogCard
+        title="Quick Actions"
+        variant="default"
+        padding="large"
+      >
+        <LIVBlogLayout.Grid cols={3} gap="md">
+          <div 
+            onClick={() => setCurrentView('users')} 
+            className="aws-p-4 aws-rounded-xl aws-border aws-cursor-pointer aws-flex aws-gap-3 aws-items-start aws-hover-bg-gray-50"
+            style={{ 
+              borderColor: theme.palette.divider,
+              backgroundColor: 'transparent'
+            }}
+          >
+            <div 
+              className="aws-w-10 aws-h-10 aws-flex aws-items-center aws-justify-center aws-rounded-lg"
+              style={{ backgroundColor: alpha(theme.palette.primary.main, 0.12) }}
+            >
+              <Users style={{ width: 24, height: 24, color: theme.palette.primary.main }} />
             </div>
-            <div onClick={() => setCurrentView('posts')} style={{ padding: 16, borderRadius: 12, border: `1px solid ${theme.palette.divider}`, cursor: 'pointer', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-              <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: alpha(theme.palette.success.main, 0.12) }}>
-                <FileText style={{ width: 24, height: 24, color: theme.palette.success.main }} />
-              </div>
-              <div>
-                <p style={{ fontWeight: 600, color: theme.palette.text.primary }}>Content Moderation</p>
-                <p style={{ color: theme.palette.text.secondary, fontSize: '0.875rem' }}>Review flagged posts and comments</p>
-              </div>
-            </div>
-            <div onClick={() => setCurrentView('analytics')} style={{ padding: 16, borderRadius: 12, border: `1px solid ${theme.palette.divider}`, cursor: 'pointer', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-              <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: alpha(theme.palette.secondary.main, 0.12) }}>
-                <TrendingUp style={{ width: 24, height: 24, color: theme.palette.secondary.main }} />
-              </div>
-              <div>
-                <p style={{ fontWeight: 600, color: theme.palette.text.primary }}>View Analytics</p>
-                <p style={{ color: theme.palette.text.secondary, fontSize: '0.875rem' }}>Detailed platform statistics</p>
-              </div>
+            <div>
+              <p style={{ 
+                fontWeight: 600, 
+                color: theme.palette.text.primary,
+                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}>Manage Users</p>
+              <p style={{ 
+                color: theme.palette.text.secondary, 
+                fontSize: '0.875rem',
+                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}>View and moderate user accounts</p>
             </div>
           </div>
-        </div>
+          <div 
+            onClick={() => setCurrentView('posts')} 
+            className="aws-p-4 aws-rounded-xl aws-border aws-cursor-pointer aws-flex aws-gap-3 aws-items-start"
+            style={{ borderColor: theme.palette.divider }}
+          >
+            <div 
+              className="aws-w-10 aws-h-10 aws-flex aws-items-center aws-justify-center aws-rounded-lg"
+              style={{ backgroundColor: alpha(theme.palette.success.main, 0.12) }}
+            >
+              <FileText style={{ width: 24, height: 24, color: theme.palette.success.main }} />
+            </div>
+            <div>
+              <p style={{ 
+                fontWeight: 600, 
+                color: theme.palette.text.primary,
+                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}>Content Moderation</p>
+              <p style={{ 
+                color: theme.palette.text.secondary, 
+                fontSize: '0.875rem',
+                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}>Review flagged posts and comments</p>
+            </div>
+          </div>
+          <div 
+            onClick={() => setCurrentView('analytics')} 
+            className="aws-p-4 aws-rounded-xl aws-border aws-cursor-pointer aws-flex aws-gap-3 aws-items-start"
+            style={{ borderColor: theme.palette.divider }}
+          >
+            <div 
+              className="aws-w-10 aws-h-10 aws-flex aws-items-center aws-justify-center aws-rounded-lg"
+              style={{ backgroundColor: alpha(theme.palette.secondary.main, 0.12) }}
+            >
+              <TrendingUp style={{ width: 24, height: 24, color: theme.palette.secondary.main }} />
+            </div>
+            <div>
+              <p style={{ 
+                fontWeight: 600, 
+                color: theme.palette.text.primary,
+                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}>View Analytics</p>
+              <p style={{ 
+                color: theme.palette.text.secondary, 
+                fontSize: '0.875rem',
+                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}>Detailed platform statistics</p>
+            </div>
+          </div>
+        </LIVBlogLayout.Grid>
+      </LIVBlogCard>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-          {renderContent()}
-        </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        {renderContent()}
       </div>
+    </LIVBlogLayout.Container>
   );
 };
-
-

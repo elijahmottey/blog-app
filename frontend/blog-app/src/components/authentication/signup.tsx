@@ -1,77 +1,67 @@
-import { useState, useRef, useEffect, type JSX } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-    Eye,
-    EyeOff,
-    CheckCircle,
-    XCircle,
-    ArrowRight,
-    ArrowLeft,
-    Check,
-    Smartphone,
-    Monitor,
-    Tablet,
-} from "lucide-react";
+import { motion } from "framer-motion";
+import { Eye, EyeOff, CheckCircle, XCircle } from "lucide-react";
 import BackendApi, { type UserRegistration } from '../../service/BackendApi';
 import { toast } from 'sonner';
-
-// Material UI imports
+import OAuth2LoginButtons from "../OAuth2LoginButtons";
 import {
     Button,
     TextField,
     Box,
-    Container,
     Typography,
-    Paper,
-    Stepper,
-    Step,
-    StepLabel,
-    LinearProgress,
     Checkbox,
     FormControlLabel,
     IconButton,
     InputAdornment,
     Alert,
-    Card,
-    CardContent,
     useTheme,
-    useMediaQuery,
-    Chip,
-    Divider,
     Link as MuiLink,
     CircularProgress,
+    LinearProgress,
+    Chip,
+    Divider,
 } from '@mui/material';
+import { LIVBlogCard, LIVBlogHeader, LIVBlogLayout } from '../ui';
 import { styled } from '@mui/material/styles';
 
-// Custom styled components
-const GradientPaper = styled(Paper)(({ theme }) => ({
-    background: `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.grey[50]} 100%)`,
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: theme.spacing(2),
-}));
-
-const StepIconContainer = styled('div')<{ completed: boolean; active: boolean }>(
-    ({ theme, completed, active }) => ({
-        width: 32,
-        height: 32,
-        borderRadius: '50%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: completed
-            ? theme.palette.success.main
-            : active
-                ? theme.palette.primary.main
-                : theme.palette.grey[300],
-        color: completed || active ? theme.palette.common.white : theme.palette.grey[600],
-        fontWeight: 600,
-        fontSize: '0.875rem',
-        transition: 'all 0.3s ease',
-    })
+const AWSBackground = () => (
+    <Box
+        sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            zIndex: -1,
+            background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+            '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                backgroundImage: `
+                    radial-gradient(circle at 20% 80%, rgba(255, 153, 0, 0.08) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(255, 153, 0, 0.06) 0%, transparent 50%),
+                    radial-gradient(circle at 40% 40%, rgba(255, 153, 0, 0.04) 0%, transparent 50%)
+                `,
+            },
+            '&::after': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                backgroundImage: `
+                    linear-gradient(90deg, transparent 0%, rgba(255, 153, 0, 0.03) 50%, transparent 100%),
+                    linear-gradient(0deg, transparent 0%, rgba(255, 153, 0, 0.03) 50%, transparent 100%)
+                `,
+            }
+        }}
+    />
 );
 
 const StrengthMeter = styled(LinearProgress)(({ theme, value }) => ({
@@ -103,7 +93,6 @@ const RequirementChip = styled(Chip)<{ met: boolean }>(({ theme, met }) => ({
     },
 }));
 
-// Type definitions (unchanged)
 interface PasswordStrength {
     hasMinLength: boolean;
     hasUpperCase: boolean;
@@ -112,21 +101,12 @@ interface PasswordStrength {
     hasSpecialChar: boolean;
 }
 
-interface StepConfig {
-    title: string;
-    description: string;
-    field: keyof UserRegistration | 'policy';
-    placeholder: string;
-    type: 'text' | 'tel' | 'email' | 'password' | 'policy';
-}
-
 export const Signup = () => {
     const [registrationData, setRegistrationData] = useState<UserRegistration>({
         name: "",
         email: "",
         password: ""
     });
-
     const [error, setError] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -138,78 +118,15 @@ export const Signup = () => {
         hasNumber: false,
         hasSpecialChar: false,
     });
-    const [currentStep, setCurrentStep] = useState<number>(0);
-    const [completedSteps, setCompletedSteps] = useState<number[]>([]);
 
     const navigate = useNavigate();
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
-
-    // Refs for each input field
-    const nameInputRef = useRef<HTMLInputElement>(null);
-    const emailInputRef = useRef<HTMLInputElement>(null);
-    const passwordInputRef = useRef<HTMLInputElement>(null);
-    const policyInputRef = useRef<HTMLInputElement>(null);
-
-    const inputRefs = [
-        nameInputRef,
-        emailInputRef,
-        passwordInputRef,
-        policyInputRef
-    ];
-
-    const steps: StepConfig[] = [
-        {
-            title: "Username",
-            description: "Choose your username",
-            field: "name",
-            placeholder: "e.g., kofi or Elijah_Mottey",
-            type: "text"
-        },
-        {
-            title: "Email Address",
-            description: "Enter your email address",
-            field: "email",
-            placeholder: "Email address",
-            type: "email"
-        },
-        {
-            title: "Password",
-            description: "Create a secure password",
-            field: "password",
-            placeholder: "Create password",
-            type: "password"
-        },
-        {
-            title: "Terms & Conditions",
-            description: "Review and accept our policies",
-            field: "policy",
-            placeholder: "",
-            type: "policy"
-        }
-    ];
-
-    useEffect(() => {
-        const currentRef = inputRefs[currentStep]?.current;
-        if (currentRef) {
-            setTimeout(() => currentRef.focus(), 100);
-        }
-    }, [currentStep]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         const { name, value } = e.target;
-
-        if (name === 'policy') {
-            setAcceptedPolicy((e.target as HTMLInputElement).checked);
-            setError("");
-            return;
-        }
-
         if (name === 'name' || name === 'email' || name === 'password') {
             setRegistrationData((prev: UserRegistration) => ({ ...prev, [name]: value }));
         }
-
         if (name === "password") {
             checkPasswordStrength(value);
         }
@@ -224,100 +141,6 @@ export const Signup = () => {
             hasNumber: /[0-9]/.test(password),
             hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password),
         });
-    };
-
-    const validateCurrentStep = (): boolean => {
-        switch (currentStep) {
-            case 0: // Username
-                if (!registrationData.name.trim()) {
-                    setError("Please enter a username");
-                    return false;
-                }
-                if (registrationData.name.includes(' ')) {
-                    setError("Username should not contain spaces");
-                    return false;
-                }
-                break;
-
-            case 1: // Email
-                if (!registrationData.email.trim()) {
-                    setError("Please enter an email address");
-                    return false;
-                }
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(registrationData.email)) {
-                    setError("Enter a valid email address");
-                    return false;
-                }
-                break;
-
-            case 2: // Password
-                if (!registrationData.password) {
-                    setError("Please create a password");
-                    return false;
-                }
-                const isStrongPassword = Object.values(passwordStrength).every(Boolean);
-                if (!isStrongPassword) {
-                    setError("Password must meet all requirements");
-                    return false;
-                }
-                break;
-
-            case 3: // Policy
-                if (!acceptedPolicy) {
-                    setError("Please accept Terms & Privacy Policy");
-                    return false;
-                }
-                break;
-
-            default:
-                return false;
-        }
-
-        setError("");
-        return true;
-    };
-
-    const handleNext = (): void => {
-        if (validateCurrentStep()) {
-            if (!completedSteps.includes(currentStep)) {
-                setCompletedSteps(prev => [...prev, currentStep]);
-            }
-            if (currentStep < steps.length - 1) {
-                setCurrentStep(currentStep + 1);
-            }
-        }
-    };
-
-    const handleBack = (): void => {
-        if (currentStep > 0) {
-            setCurrentStep(currentStep - 1);
-        }
-    };
-
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
-        e.preventDefault();
-        if (!validateCurrentStep()) {
-            setTimeout(() => setError(""), 5000);
-            return;
-        }
-
-        try {
-            setLoading(true);
-            const payload: UserRegistration = {
-                ...registrationData
-            };
-            const response = await BackendApi.registerUser(payload);
-            toast.success(response.message || "Account created successfully! 🎉");
-            setTimeout(() => navigate("/auth/login"), 1500);
-        } catch (err: any) {
-            const errorMessage = err.response?.data?.message || "Signup failed";
-            toast.error(errorMessage);
-            setError(errorMessage);
-            setTimeout(() => setError(""), 5000);
-        } finally {
-            setLoading(false);
-        }
     };
 
     const getPasswordStrengthScore = (): number => {
@@ -342,332 +165,297 @@ export const Signup = () => {
         />
     );
 
-    const CustomStepIcon = (props: any) => {
-        const { active, completed, icon } = props;
-        return (
-            <StepIconContainer completed={completed} active={active}>
-                {completed ? <Check fontSize="small" /> : icon}
-            </StepIconContainer>
-        );
+    const validateForm = (): boolean => {
+        if (!registrationData.name.trim()) {
+            setError("Username is required");
+            return false;
+        }
+        if (!registrationData.email.trim()) {
+            setError("Email is required");
+            return false;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registrationData.email)) {
+            setError("Enter a valid email address");
+            return false;
+        }
+        if (!registrationData.password) {
+            setError("Password is required");
+            return false;
+        }
+        const isStrongPassword = Object.values(passwordStrength).every(Boolean);
+        if (!isStrongPassword) {
+            setError("Password must meet all requirements");
+            return false;
+        }
+        if (!acceptedPolicy) {
+            setError("You must accept the terms and conditions");
+            return false;
+        }
+        setError("");
+        return true;
     };
 
-    const renderCurrentStep = (): JSX.Element | null => {
-        const currentStepConfig = steps[currentStep];
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+        e.preventDefault();
+        if (!validateForm()) return;
 
-        switch (currentStep) {
-            case 0: // Username
-                return (
-                    <Box sx={{ mt: 3 }}>
-                        <TextField
-                            inputRef={nameInputRef}
-                            fullWidth
-                            label="Username"
-                            name="name"
-                            value={registrationData.name}
-                            onChange={handleInputChange}
-                            placeholder={currentStepConfig.placeholder}
-                            variant="outlined"
-                            error={!!error && currentStep === 0}
-                            helperText="Don't use spaces in your username"
-                            InputProps={{
-                                sx: { borderRadius: 2 }
-                            }}
-                        />
-                    </Box>
-                );
-
-            case 1: // Email
-                return (
-                    <Box sx={{ mt: 3 }}>
-                        <TextField
-                            inputRef={emailInputRef}
-                            fullWidth
-                            label="Email Address"
-                            name="email"
-                            type="email"
-                            value={registrationData.email}
-                            onChange={handleInputChange}
-                            placeholder={currentStepConfig.placeholder}
-                            variant="outlined"
-                            error={!!error && currentStep === 1}
-                            InputProps={{
-                                sx: { borderRadius: 2 }
-                            }}
-                        />
-                    </Box>
-                );
-
-            case 2: // Password
-                return (
-                    <Box sx={{ mt: 3 }}>
-                        <TextField
-                            inputRef={passwordInputRef}
-                            fullWidth
-                            label="Password"
-                            name="password"
-                            type={showPassword ? "text" : "password"}
-                            value={registrationData.password}
-                            onChange={handleInputChange}
-                            placeholder={currentStepConfig.placeholder}
-                            variant="outlined"
-                            error={!!error && currentStep === 2}
-                            InputProps={{
-                                sx: { borderRadius: 2 },
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            edge="end"
-                                        >
-                                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-
-                        {registrationData.password && (
-                            <Card variant="outlined" sx={{ mt: 3, borderRadius: 2 }}>
-                                <CardContent sx={{ p: 2 }}>
-                                    <Box sx={{ mb: 2 }}>
-                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                                            <Typography variant="caption" color="text.secondary">
-                                                Password Strength
-                                            </Typography>
-                                            <Typography variant="caption" fontWeight="medium">
-                                                {getPasswordStrengthText()}
-                                            </Typography>
-                                        </Box>
-                                        <StrengthMeter variant="determinate" value={getPasswordStrengthScore()} />
-                                    </Box>
-                                    <div style={{
-                                        display: 'flex',
-                                        flexWrap: 'wrap',
-                                        gap: '8px',
-                                        marginTop: '8px'
-                                    }}>
-                                        <PasswordRequirement met={passwordStrength.hasMinLength} text="8+ characters" />
-                                        <PasswordRequirement met={passwordStrength.hasUpperCase} text="Uppercase letter" />
-                                        <PasswordRequirement met={passwordStrength.hasLowerCase} text="Lowercase letter" />
-                                        <PasswordRequirement met={passwordStrength.hasNumber} text="Number" />
-                                        <PasswordRequirement met={passwordStrength.hasSpecialChar} text="Special character" />
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )}
-                    </Box>
-                );
-
-            case 3: // Policy
-                return (
-                    <Box sx={{ mt: 3 }}>
-                        <Card variant="outlined" sx={{ borderRadius: 2 }}>
-                            <CardContent>
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            inputRef={policyInputRef}
-                                            checked={acceptedPolicy}
-                                            onChange={(e) => setAcceptedPolicy(e.target.checked)}
-                                            color="primary"
-                                        />
-                                    }
-                                    label={
-                                        <Typography variant="body2">
-                                            I agree to the{' '}
-                                            <MuiLink component={Link} to="/terms" color="primary">
-                                                Terms of Service
-                                            </MuiLink>{' '}
-                                            and{' '}
-                                            <MuiLink component={Link} to="/privacy" color="primary">
-                                                Privacy Policy
-                                            </MuiLink>
-                                        </Typography>
-                                    }
-                                />
-                            </CardContent>
-                        </Card>
-                    </Box>
-                );
-
-            default:
-                return null;
+        try {
+            setLoading(true);
+            const response = await BackendApi.registerUser(registrationData);
+            toast.success(response.message || "Account created successfully!");
+            setTimeout(() => navigate("/auth/login"), 1500);
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || "Signup failed";
+            toast.error(errorMessage);
+            setError(errorMessage);
+        } finally {
+            setLoading(false);
         }
     };
 
-    return (
-        <GradientPaper>
-            <Container maxWidth="sm">
-                <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 0.5 }}
+      return (
+        <>
+            <AWSBackground />
+            <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+                <Box sx={{ flex: 1, display: 'flex', justifyContent: 'space-around' }}>
+                {/* Left Half - Logo */}
+                <Box
+                    sx={{
+                        flex: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                    }}
                 >
-                    <Card
-                        elevation={3}
-                        sx={{
-                            borderRadius: 3,
-                            overflow: 'hidden',
-                            position: 'relative',
-                        }}
+                    <motion.div
+                        initial={{ x: -50, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ duration: 0.6 }}
                     >
                         <Box
+                            component={Link}
+                            to="/home"
                             sx={{
-                                height: 4,
-                                background: theme.palette.mode === 'light'
-                                    ? `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`
-                                    : `linear-gradient(90deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.dark})`,
+                                display: 'block',
+                                textDecoration: 'none',
+                                cursor: 'pointer'
                             }}
-                        />
+                        >
+                            <img
+                                src="/LIV Blog logo design.png"
+                                alt="LIV Blog"
+                                style={{
+                                    maxWidth: '300px',
+                                    height: 'auto',
+                                    display: 'block'
+                                }}
+                            />
+                        </Box>
+                    </motion.div>
+                </Box>
 
-                        <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
-                            {/* Header */}
-                            <Box sx={{ textAlign: 'center', mb: 4 }}>
-                                <Typography variant="h4" component="h1" gutterBottom fontWeight="bold">
-                                    Create Account
-                                </Typography>
-                                <Typography variant="body1" color="text.secondary">
-                                    Join LIV Blog today
-                                </Typography>
+                {/* Right Half - Form */}
+                <Box
+                    sx={{
+                        flex: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: 4
+                    }}
+                >
+                    <motion.div
+                        initial={{ x: 50, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                        style={{ width: '100%', maxWidth: 400 }}
+                    >
+                        <LIVBlogCard
+                            variant="elevated"
+                            padding="large"
+                            style={{
+                                width: '100%',
+                            }}
+                        >
+                            <LIVBlogHeader
+                                title="Create Account"
+                                subtitle="Join LIV Blog today"
+                                size="medium"
+                            />
+
+                            {/* OAuth2 Login */}
+                            <Box sx={{ mb: 3 }}>
+                                <OAuth2LoginButtons />
+                                <Divider sx={{ my: 2 }}>
+                                    <Typography variant="caption" color="text.secondary">
+                                        OR
+                                    </Typography>
+                                </Divider>
                             </Box>
-
-                            {/* Stepper */}
-                            <Stepper
-                                activeStep={currentStep}
-                                alternativeLabel={isMobile}
-                                sx={{ mb: 4 }}
-                            >
-                                {steps.map((step, index) => (
-                                    <Step key={index} completed={completedSteps.includes(index)}>
-                                        <StepLabel
-                                            StepIconComponent={CustomStepIcon}
-                                            sx={{
-                                                '& .MuiStepLabel-label': {
-                                                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                                                },
-                                            }}
-                                        >
-                                            {isMobile ? `Step ${index + 1}` : step.title}
-                                        </StepLabel>
-                                    </Step>
-                                ))}
-                            </Stepper>
 
                             {/* Error Alert */}
-                            <AnimatePresence>
-                                {error && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: -10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                    >
-                                        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError('')}>
-                                            {error}
-                                        </Alert>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+                            {error && (
+                                <Alert severity="error" sx={{ mb: 2 }}>
+                                    {error}
+                                </Alert>
+                            )}
 
                             {/* Form */}
-                            <Box component="form" onSubmit={currentStep === steps.length - 1 ? handleSubmit : (e) => { e.preventDefault(); handleNext(); }}>
-                                <Box sx={{ mb: 4 }}>
-                                    <Typography variant="h6" gutterBottom>
-                                        {steps[currentStep].title}
+                            <Box component="form" onSubmit={handleSubmit}>
+                                <Box sx={{ mb: 2 }}>
+                                    <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600 }}>
+                                        Username
                                     </Typography>
-                                    <Typography variant="body2" color="text.secondary" paragraph>
-                                        {steps[currentStep].description}
-                                    </Typography>
-                                    {renderCurrentStep()}
+                                    <TextField
+                                        fullWidth
+                                        name="name"
+                                        value={registrationData.name}
+                                        onChange={handleInputChange}
+                                        placeholder="Enter your username"
+                                        variant="outlined"
+                                        size="small"
+                                        disabled={loading}
+                                    />
                                 </Box>
 
-                                {/* Navigation Buttons */}
-                                <div style={{
-                                    display: 'flex',
-                                    gap: '16px',
-                                    width: '100%'
-                                }}>
-                                    <div style={{ flex: 1 }}>
-                                        <Button
-                                            fullWidth
-                                            variant="outlined"
-                                            onClick={handleBack}
-                                            disabled={currentStep === 0}
-                                            startIcon={<ArrowLeft />}
-                                            size="large"
-                                        >
-                                            Back
-                                        </Button>
-                                    </div>
-                                    <div style={{ flex: 1 }}>
-                                        {currentStep === steps.length - 1 ? (
-                                            <Button
-                                                fullWidth
-                                                variant="contained"
-                                                type="submit"
-                                                disabled={loading || !acceptedPolicy}
-                                                endIcon={loading ? <CircularProgress size={20} /> : <Check />}
-                                                size="large"
-                                            >
-                                                {loading ? "Creating..." : "Create Account"}
-                                            </Button>
-                                        ) : (
-                                            <Button
-                                                fullWidth
-                                                variant="contained"
-                                                type="submit"
-                                                endIcon={<ArrowRight />}
-                                                size="large"
-                                            >
-                                                Next
-                                            </Button>
-                                        )}
-                                    </div>
-                                </div>
+                                <Box sx={{ mb: 2 }}>
+                                    <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600 }}>
+                                        Email
+                                    </Typography>
+                                    <TextField
+                                        fullWidth
+                                        name="email"
+                                        type="email"
+                                        value={registrationData.email}
+                                        onChange={handleInputChange}
+                                        placeholder="Enter your email"
+                                        variant="outlined"
+                                        size="small"
+                                        disabled={loading}
+                                    />
+                                </Box>
+
+                                <Box sx={{ mb: 2 }}>
+                                    <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600 }}>
+                                        Password
+                                    </Typography>
+                                    <TextField
+                                        fullWidth
+                                        name="password"
+                                        type={showPassword ? "text" : "password"}
+                                        value={registrationData.password}
+                                        onChange={handleInputChange}
+                                        placeholder="Create a secure password"
+                                        variant="outlined"
+                                        size="small"
+                                        disabled={loading}
+                                        InputProps={{
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <IconButton
+                                                        onClick={() => setShowPassword(!showPassword)}
+                                                        edge="end"
+                                                        size="small"
+                                                    >
+                                                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    />
+
+                                    {/* Password Strength Indicator */}
+                                    {registrationData.password && (
+                                        <LIVBlogCard variant="outlined" padding="small" style={{ marginTop: '12px' }}>
+                                            <Box sx={{ mb: 1 }}>
+                                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                                    <Typography variant="caption" color="text.secondary">
+                                                        Password Strength
+                                                    </Typography>
+                                                    <Typography variant="caption" fontWeight="medium">
+                                                        {getPasswordStrengthText()}
+                                                    </Typography>
+                                                </Box>
+                                                <StrengthMeter variant="determinate" value={getPasswordStrengthScore()} />
+                                            </Box>
+                                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                                <PasswordRequirement met={passwordStrength.hasMinLength} text="8+ chars" />
+                                                <PasswordRequirement met={passwordStrength.hasUpperCase} text="Uppercase" />
+                                                <PasswordRequirement met={passwordStrength.hasLowerCase} text="Lowercase" />
+                                                <PasswordRequirement met={passwordStrength.hasNumber} text="Number" />
+                                                <PasswordRequirement met={passwordStrength.hasSpecialChar} text="Special" />
+                                            </Box>
+                                        </LIVBlogCard>
+                                    )}
+                                </Box>
+
+                                <Box sx={{ mb: 3 }}>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={acceptedPolicy}
+                                                onChange={(e) => setAcceptedPolicy(e.target.checked)}
+                                                size="small"
+                                            />
+                                        }
+                                        label={
+                                            <Typography variant="body2" sx={{ fontSize: '13px' }}>
+                                                I agree to the{' '}
+                                                <MuiLink component={Link} to="/terms-of-service" color="primary">
+                                                    Terms of Service
+                                                </MuiLink>{' '}
+                                                and{' '}
+                                                <MuiLink component={Link} to="/privacy-policy" color="primary">
+                                                    Privacy Policy
+                                                </MuiLink>
+                                            </Typography>
+                                        }
+                                    />
+                                </Box>
+
+                                <Button
+                                    type="submit"
+                                    fullWidth
+                                    variant="contained"
+                                    disabled={loading}
+                                    sx={{ mb: 2 }}
+                                >
+                                    {loading ? <CircularProgress size={20} /> : 'Create Account'}
+                                </Button>
                             </Box>
 
-                            {/* Login Link */}
-                            <Divider sx={{ my: 3 }}>
-                                <Typography variant="caption" color="text.secondary">
-                                    OR
-                                </Typography>
-                            </Divider>
-
+                            {/* Sign In Link */}
                             <Box sx={{ textAlign: 'center' }}>
-                                <Typography variant="body2" color="text.secondary">
+                                <Typography variant="body2">
                                     Already have an account?{' '}
-                                    <MuiLink component={Link} to="/auth/login" fontWeight="medium">
-                                        Login
+                                    <MuiLink component={Link} to="/auth/login" color="primary">
+                                        Sign in
                                     </MuiLink>
                                 </Typography>
                             </Box>
-                        </CardContent>
-                    </Card>
-                </motion.div>
+                        </LIVBlogCard>
+                    </motion.div>
+                </Box>
+                </Box>
 
-                {/* Responsive Indicator */}
+                {/* Footer */}
                 <Box
                     sx={{
-                        position: 'fixed',
-                        bottom: 16,
-                        right: 16,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        bgcolor: 'background.paper',
-                        px: 2,
-                        py: 1,
-                        borderRadius: 20,
-                        boxShadow: 1,
+                        textAlign: 'center',
+                        padding: 2,
+                        fontSize:9
                     }}
                 >
-                    {isMobile && <Smartphone size={16} />}
-                    {isTablet && <Tablet size={16} />}
-                    {!isMobile && !isTablet && <Monitor size={16} />}
-                    <Typography variant="caption" color="text.secondary">
-                        {isMobile ? 'Mobile' : isTablet ? 'Tablet' : 'Desktop'}
-                    </Typography>
+                    <p   >
+                        By continuing, you agree to LIVBlog Customer Agreement or other agreement for LIVBlog services, and the Privacy Notice. This site uses essential cookies. See our Cookie Notice for more information.
+                        <br />
+                        LIVBlog Marketing
+                        <br />
+                        © 2026 LIVBlog, Inc. or its affiliates. All rights reserved.
+                    </p>
                 </Box>
-            </Container>
-        </GradientPaper>
+            </Box>
+        </>
     );
 };

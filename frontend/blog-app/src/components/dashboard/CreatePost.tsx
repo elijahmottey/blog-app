@@ -29,21 +29,20 @@ import {
   Button,
   IconButton,
   Typography,
-  Box,
-  Paper,
   TextField,
   Tooltip,
   Chip,
   Alert,
   MenuItem,
   Select,
-  FormControl,
-  InputLabel
+  FormControl
 } from '@mui/material';
 import BackendApi from '../../service/BackendApi';
 import { toast } from 'sonner';
 import { useAuth } from '../../context/AuthContext';
 import { AIChat } from './AIChat';
+import { LIVBlogHeader, LIVBlogCard, LIVBlogLayout } from '../ui';
+import { useTheme } from '@mui/material/styles';
 
 const schema = yup.object({
   title: yup.string().required('Title is required').min(3, 'Title must be at least 3 characters'),
@@ -69,6 +68,7 @@ export const CreatePost: React.FC = () => {
   const location = useLocation();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const theme = useTheme();
   const [isPreview, setIsPreview] = useState(false);
   const [formattingHistory, setFormattingHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -429,580 +429,272 @@ export const CreatePost: React.FC = () => {
   const readingTime = Math.ceil(wordCount / 200);
 
   return (
-      <Box sx={{ maxWidth: 1000, mx: 'auto', p: { xs: 2, md: 3 } }}>
-        {/* Header */}
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', mb: 4, gap: { xs: 2, sm: 0 } }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Tooltip title="Go back">
-              <IconButton
-                  onClick={() => navigate('/dashboard')}
-                  sx={{
-                    color: 'primary.main',
-                    bgcolor: 'primary.50',
-                    '&:hover': {
-                      bgcolor: 'primary.100',
-                      transform: 'translateX(-2px)',
-                      transition: 'all 0.2s'
-                    }
-                  }}
-              >
-                <ArrowLeft />
-              </IconButton>
-            </Tooltip>
-            <Box>
-              <Typography
-                  variant="h4"
-                  component="h1"
-                  sx={{
-                    fontWeight: 'bold',
-                    color: 'primary.main',
-                    mb: 0.5
-                  }}
-              >
-                Create New Post
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Craft your story with our enhanced editor
-              </Typography>
-            </Box>
-          </Box>
-          <Button
-              variant="outlined"
-              startIcon={isPreview ? <EyeOff /> : <Eye />}
+    <div className="aws-spacing-y-lg">
+      <LIVBlogHeader
+        title="Create New Post"
+        subtitle="Craft your story with our enhanced editor"
+        size="large"
+        actions={
+          <div className="flex gap-2">
+            <Button onClick={() => navigate('/dashboard')} variant="outlined" className="aws-button aws-button-secondary">
+              <ArrowLeft size={16} style={{ marginRight: '8px' }} />
+              Back
+            </Button>
+            <Button
               onClick={() => setIsPreview(!isPreview)}
-              sx={{
-                borderRadius: 2,
-                textTransform: 'none',
+              variant="outlined"
+              className="aws-button aws-button-secondary"
+            >
+              {isPreview ? <EyeOff size={16} /> : <Eye size={16} />}
+              <span style={{ marginLeft: '8px' }}>{isPreview ? 'Editor' : 'Preview'}</span>
+            </Button>
+          </div>
+        }
+      />
+
+      <LIVBlogLayout.Grid cols={4} gap="md" className="aws-margin-b-lg">
+        <LIVBlogCard title="Words" padding="small" className="text-center">
+          <div className="aws-header-md" style={{ color: theme.palette.primary.main, margin: 0 }}>
+            {wordCount}
+          </div>
+        </LIVBlogCard>
+        <LIVBlogCard title="Characters" padding="small" className="text-center">
+          <div className="aws-header-md" style={{ color: theme.palette.secondary.main, margin: 0 }}>
+            {watchedContent.length}
+          </div>
+        </LIVBlogCard>
+        <LIVBlogCard title="Paragraphs" padding="small" className="text-center">
+          <div className="aws-header-md" style={{ color: theme.palette.success.main, margin: 0 }}>
+            {paragraphCount}
+          </div>
+        </LIVBlogCard>
+        <LIVBlogCard title="Reading Time" padding="small" className="text-center">
+          <div className="aws-header-md" style={{ color: theme.palette.warning.main, margin: 0 }}>
+            {readingTime} min
+          </div>
+        </LIVBlogCard>
+      </LIVBlogLayout.Grid>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <LIVBlogCard title="Post Title" padding="medium">
+          <TextField
+            {...register('title')}
+            placeholder="Catchy title that grabs attention..."
+            variant="outlined"
+            fullWidth
+            error={!!errors.title}
+            helperText={errors.title?.message}
+            className="aws-font"
+            InputProps={{
+              style: {
+                fontSize: '1.25rem',
                 fontWeight: 600,
-                borderWidth: 2,
-                '&:hover': {
-                  borderWidth: 2,
-                }
-              }}
-          >
-            {isPreview ? 'Switch to Editor' : 'Live Preview'}
-          </Button>
-        </Box>
+                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }
+            }}
+          />
+          <p className="aws-text-body" style={{ color: theme.palette.text.secondary, margin: '8px 0 0 0', fontSize: '0.75rem' }}>
+            Keep it concise and engaging (3-10 words)
+          </p>
+        </LIVBlogCard>
 
-        {/* Stats Bar */}
-        <Box sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
-          gap: 2,
-          mb: 3
-        }}>
-          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'primary.50', borderRadius: 2 }}>
-            <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600 }}>Words</Typography>
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>{wordCount}</Typography>
-          </Paper>
+        <LIVBlogCard title="Category" padding="medium">
+          <FormControl fullWidth>
+            <Select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value as string)}
+              className="aws-font"
+            >
+              {categories.map((category) => (
+                <MenuItem key={category} value={category}>
+                  {category}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <p className="aws-text-body" style={{ color: theme.palette.text.secondary, margin: '8px 0 0 0', fontSize: '0.75rem' }}>
+            Choose the most relevant category for your post
+          </p>
+        </LIVBlogCard>
 
-          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'secondary.50', borderRadius: 2 }}>
-            <Typography variant="body2" color="secondary.main" sx={{ fontWeight: 600 }}>Characters</Typography>
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>{watchedContent.length}</Typography>
-          </Paper>
+        <LIVBlogCard padding="none">
+          <div className="aws-spacing-md" style={{ backgroundColor: theme.palette.action.hover, borderBottom: `1px solid ${theme.palette.divider}` }}>
+            <div className="flex flex-wrap gap-1 items-center">
+              <span className="aws-text-body" style={{ fontWeight: 600, color: theme.palette.text.secondary, marginRight: '16px', fontSize: '0.75rem' }}>
+                Formatting:
+              </span>
+              <Tooltip title="Bold">
+                <IconButton onClick={applyBold} size="small" className="aws-button">
+                  <Bold size={16} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Italic">
+                <IconButton onClick={applyItalic} size="small" className="aws-button">
+                  <Italic size={16} />
+                </IconButton>
+              </Tooltip>
+              <div style={{ width: '1px', height: '20px', backgroundColor: theme.palette.divider, margin: '0 8px' }} />
+              <Tooltip title="Heading 1">
+                <IconButton onClick={() => applyHeading(1)} size="small" className="aws-button">
+                  <Heading1 size={16} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Heading 2">
+                <IconButton onClick={() => applyHeading(2)} size="small" className="aws-button">
+                  <Heading2 size={16} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Heading 3">
+                <IconButton onClick={() => applyHeading(3)} size="small" className="aws-button">
+                  <Heading3 size={16} />
+                </IconButton>
+              </Tooltip>
+              <div style={{ width: '1px', height: '20px', backgroundColor: theme.palette.divider, margin: '0 8px' }} />
+              <Tooltip title="List">
+                <IconButton onClick={() => applyList(false)} size="small" className="aws-button">
+                  <List size={16} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Numbered List">
+                <IconButton onClick={() => applyList(true)} size="small" className="aws-button">
+                  <ListOrdered size={16} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Link">
+                <IconButton onClick={insertLink} size="small" className="aws-button">
+                  <Link size={16} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Quote">
+                <IconButton onClick={applyBlockquote} size="small" className="aws-button">
+                  <Quote size={16} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Code">
+                <IconButton onClick={applyCode} size="small" className="aws-button">
+                  <Code size={16} />
+                </IconButton>
+              </Tooltip>
+              <div style={{ flexGrow: 1 }} />
+              <Tooltip title="Undo">
+                <IconButton onClick={undo} disabled={historyIndex <= 0} size="small" className="aws-button">
+                  <Undo size={16} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Redo">
+                <IconButton onClick={redo} disabled={historyIndex >= formattingHistory.length - 1} size="small" className="aws-button">
+                  <Redo size={16} />
+                </IconButton>
+              </Tooltip>
+            </div>
+          </div>
 
-          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'success.50', borderRadius: 2 }}>
-            <Typography variant="body2" color="success.main" sx={{ fontWeight: 600 }}>Paragraphs</Typography>
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>{paragraphCount}</Typography>
-          </Paper>
-
-          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'warning.50', borderRadius: 2 }}>
-            <Typography variant="body2" color="warning.main" sx={{ fontWeight: 600 }}>Reading Time</Typography>
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>{readingTime} min</Typography>
-          </Paper>
-        </Box>
-
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {/* Title Input */}
-          <Paper sx={{ p: 2, borderRadius: 2, border: 1, borderColor: 'divider' }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>
-              Post Title
-            </Typography>
-            <TextField
-                {...register('title')}
-                placeholder="Catchy title that grabs attention..."
-                variant="standard"
+          <div style={{ minHeight: '500px' }}>
+            {isPreview ? (
+              <div className="aws-spacing-lg">
+                {watchedTitle && (
+                  <h1 className="aws-header-xl" style={{ color: theme.palette.text.primary }}>
+                    {watchedTitle}
+                  </h1>
+                )}
+                <div
+                  dangerouslySetInnerHTML={{ __html: formatContent(watchedContent) }}
+                  className="aws-font"
+                  style={{ color: theme.palette.text.primary }}
+                />
+              </div>
+            ) : (
+              <TextField
+                {...register('content')}
+                inputRef={textareaRef}
+                multiline
+                rows={20}
+                placeholder="Start writing your masterpiece here..."
+                variant="outlined"
                 fullWidth
-                error={!!errors.title}
-                helperText={errors.title?.message}
+                error={!!errors.content}
+                helperText={errors.content?.message}
+                className="aws-font"
                 InputProps={{
-                  disableUnderline: true,
-                  sx: {
-                    fontSize: '1.5rem',
-                    fontWeight: 700,
-                    '& input': {
-                      padding: 0,
-                    }
+                  style: {
+                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                    fontSize: '1rem',
+                    lineHeight: 1.6,
+                    padding: '16px'
                   }
                 }}
-            />
-            <Typography variant="caption" sx={{ color: 'text.secondary', mt: 1, display: 'block' }}>
-              Keep it concise and engaging (3-10 words)
-            </Typography>
-          </Paper>
-
-          {/* Category Selection */}
-          <Paper sx={{ p: 2, borderRadius: 2, border: 1, borderColor: 'divider' }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>
-              Category
-            </Typography>
-            <FormControl fullWidth variant="outlined">
-              <Select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value as string)}
-                sx={{ fontSize: '1rem' }}
-              >
-                {categories.map((category) => (
-                  <MenuItem key={category} value={category}>
-                    {category}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <Typography variant="caption" sx={{ color: 'text.secondary', mt: 1, display: 'block' }}>
-              Choose the most relevant category for your post
-            </Typography>
-          </Paper>
-
-          {/* Content Section */}
-          <Paper sx={{ borderRadius: 2, overflow: 'hidden', border: 1, borderColor: 'divider' }}>
-            {/* Toolbar */}
-            <Box sx={(theme) => ({
-              bgcolor: theme.palette.action.hover,
-              p: 1.5,
-              borderBottom: 1,
-              borderColor: 'divider',
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 0.5,
-              alignItems: 'center'
-            })}>
-              <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', mr: 2 }}>
-                Formatting Tools:
-              </Typography>
-
-              <Tooltip title="Bold (Ctrl+B)">
-                <IconButton onClick={applyBold} size="small" sx={{ borderRadius: 1 }}>
-                  <Bold size={18} />
-                </IconButton>
-              </Tooltip>
-
-              <Tooltip title="Italic (Ctrl+I)">
-                <IconButton onClick={applyItalic} size="small" sx={{ borderRadius: 1 }}>
-                  <Italic size={18} />
-                </IconButton>
-              </Tooltip>
-
-              <Box sx={{ width: 1, borderLeft: 1, borderColor: 'divider', mx: 1, height: 24 }} />
-
-              <Tooltip title="Heading 1">
-                <IconButton onClick={() => applyHeading(1)} size="small" sx={{ borderRadius: 1 }}>
-                  <Heading1 size={18} />
-                </IconButton>
-              </Tooltip>
-
-              <Tooltip title="Heading 2">
-                <IconButton onClick={() => applyHeading(2)} size="small" sx={{ borderRadius: 1 }}>
-                  <Heading2 size={18} />
-                </IconButton>
-              </Tooltip>
-
-              <Tooltip title="Heading 3">
-                <IconButton onClick={() => applyHeading(3)} size="small" sx={{ borderRadius: 1 }}>
-                  <Heading3 size={18} />
-                </IconButton>
-              </Tooltip>
-
-              <Box sx={{ width: 1, borderLeft: 1, borderColor: 'divider', mx: 1, height: 24 }} />
-
-              <Tooltip title="Bulleted List">
-                <IconButton onClick={() => applyList(false)} size="small" sx={{ borderRadius: 1 }}>
-                  <List size={18} />
-                </IconButton>
-              </Tooltip>
-
-              <Tooltip title="Numbered List">
-                <IconButton onClick={() => applyList(true)} size="small" sx={{ borderRadius: 1 }}>
-                  <ListOrdered size={18} />
-                </IconButton>
-              </Tooltip>
-
-              <Box sx={{ width: 1, borderLeft: 1, borderColor: 'divider', mx: 1, height: 24 }} />
-
-              <Tooltip title="Insert Link">
-                <IconButton onClick={insertLink} size="small" sx={{ borderRadius: 1 }}>
-                  <Link size={18} />
-                </IconButton>
-              </Tooltip>
-
-              <Tooltip title="Blockquote">
-                <IconButton onClick={applyBlockquote} size="small" sx={{ borderRadius: 1 }}>
-                  <Quote size={18} />
-                </IconButton>
-              </Tooltip>
-
-              <Tooltip title="Code Block">
-                <IconButton onClick={applyCode} size="small" sx={{ borderRadius: 1 }}>
-                  <Code size={18} />
-                </IconButton>
-              </Tooltip>
-
-              <Box sx={{ flexGrow: 1 }} />
-
-              <Tooltip title={historyIndex <= 0 ? "No more actions to undo" : "Undo (Ctrl+Z)"}>
-                <span>
-                  <IconButton
-                      onClick={undo}
-                      disabled={historyIndex <= 0}
-                      size="small"
-                      sx={{ borderRadius: 1 }}
-                  >
-                    <Undo size={18} />
-                  </IconButton>
-                </span>
-              </Tooltip>
-
-              <Tooltip title={historyIndex >= formattingHistory.length - 1 ? "No more actions to redo" : "Redo (Ctrl+Y)"}>
-                <span>
-                  <IconButton
-                      onClick={redo}
-                      disabled={historyIndex >= formattingHistory.length - 1}
-                      size="small"
-                      sx={{ borderRadius: 1 }}
-                  >
-                    <Redo size={18} />
-                  </IconButton>
-                </span>
-              </Tooltip>
-            </Box>
-
-            {/* Content Input/Preview */}
-            <Box sx={{ minHeight: 500 }}>
-              {isPreview ? (
-                  <Box sx={{ p: 3 }}>
-                    {watchedTitle && (
-                        <Typography
-                            variant="h1"
-                            sx={{
-                              fontSize: '2.5rem',
-                              fontWeight: 800,
-                              mb: 4,
-                              color: 'text.primary',
-                              lineHeight: 1.2
-                            }}
-                        >
-                          {watchedTitle}
-                        </Typography>
-                    )}
-                    <Box
-                        dangerouslySetInnerHTML={{ __html: formatContent(watchedContent) }}
-                        sx={{
-                          '& h1': {
-                            fontSize: '2rem !important',
-                            fontWeight: 700,
-                            mb: 3,
-                            color: 'text.primary'
-                          },
-                          '& h2': {
-                            fontSize: '1.75rem !important',
-                            fontWeight: 600,
-                            mb: 2,
-                            color: 'text.primary'
-                          },
-                          '& h3': {
-                            fontSize: '1.5rem !important',
-                            fontWeight: 600,
-                            mb: 1.5,
-                            color: 'text.primary'
-                          },
-                          '& p': {
-                            fontSize: '1.125rem',
-                            lineHeight: 1.8,
-                            mb: 2
-                          },
-                          '& a': {
-                            color: 'primary.main',
-                            textDecoration: 'none',
-                            borderBottom: '1px dashed',
-                            borderColor: 'primary.main',
-                            '&:hover': { textDecoration: 'underline' }
-                          },
-                          '& code': {
-                            bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
-                            borderRadius: 1,
-                            px: 0.5,
-                            py: 0.25,
-                            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-                            fontSize: '0.875rem'
-                          },
-                          '& blockquote': {
-                            borderLeft: '4px solid',
-                            borderColor: 'primary.main',
-                            pl: 2,
-                            ml: 0,
-                            my: 2,
-                            color: 'text.secondary',
-                            fontStyle: 'italic'
-                          },
-                          '& pre': {
-                            bgcolor: 'grey.900',
-                            color: 'common.white',
-                            p: 2,
-                            borderRadius: 1,
-                            overflow: 'auto',
-                            my: 2
-                          },
-                          '& ul, & ol': {
-                            pl: 3,
-                            mb: 2
-                          },
-                          '& li': {
-                            mb: 0.5
-                          }
-                        }}
-                    />
-                  </Box>
-              ) : (
-                  <TextField
-                      {...register('content')}
-                      inputRef={textareaRef}
-                      multiline
-                      rows={20}
-                      placeholder={`Start writing your masterpiece here...
-
-# Main Heading
-Start with a compelling headline
-
-## Subheading
-Organize your content with headings
-
-**Highlight important points** with bold text
-*Add emphasis* with italic text
-
-- Create bullet lists
-- For easy reading
-
-1. Or numbered lists
-2. For step-by-step instructions
-
-> Use blockquotes for important insights
-
-\`\`\`
-Add code snippets when needed
-\`\`\`
-
-[Add links](https://example.com) to reference sources`}
-                      variant="outlined"
-                      fullWidth
-                      error={!!errors.content}
-                      helperText={errors.content?.message}
-                      InputProps={{
-                        sx: {
-                          fontFamily: "'JetBrains Mono', monospace",
-                          fontSize: '1rem',
-                          lineHeight: 1.7,
-                          p: 2,
-                          '& textarea': {
-                            resize: 'vertical',
-                            minHeight: '40px'
-                          }
-                        }
-                      }}
-                  />
-              )}
-            </Box>
-          </Paper>
-
-          {/* Validation Alert */}
-          {watchedContent.length > 0 && watchedContent.length < 10 && (
-              <Alert severity="warning" sx={{ borderRadius: 2 }}>
-                Content must be at least 10 characters. You need {10 - watchedContent.length} more characters.
-              </Alert>
-          )}
-
-          {/* Keyboard Shortcuts Guide */}
-          <Paper sx={(theme) => ({ p: 2, bgcolor: theme.palette.background.paper, borderRadius: 2, border: `1px solid ${theme.palette.divider}` })}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
-              🎯 Quick Formatting Tips
-            </Typography>
-            <Box sx={{
-              display: 'grid',
-              gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
-              gap: 1
-            }}>
-              <Chip
-                  label="Ctrl+B → Bold"
-                  size="small"
-                  variant="outlined"
-                  sx={{ fontSize: '0.75rem' }}
               />
+            )}
+          </div>
+        </LIVBlogCard>
 
-              <Chip
-                  label="Ctrl+I → Italic"
-                  size="small"
-                  variant="outlined"
-                  sx={{ fontSize: '0.75rem' }}
-              />
+        {watchedContent.length > 0 && watchedContent.length < 10 && (
+          <Alert severity="warning" className="aws-font">
+            Content must be at least 10 characters. You need {10 - watchedContent.length} more characters.
+          </Alert>
+        )}
 
-              <Chip
-                  label="Select text first"
-                  size="small"
-                  variant="outlined"
-                  sx={{ fontSize: '0.75rem' }}
-              />
-
-              <Chip
-                  label="Click icons to format"
-                  size="small"
-                  variant="outlined"
-                  sx={{ fontSize: '0.75rem' }}
-              />
-            </Box>
-          </Paper>
-
-          {/* Action Buttons */}
-          <Box sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' },
-            justifyContent: 'space-between',
-            alignItems: { xs: 'stretch', sm: 'center' },
-            pt: 3,
-            mt: 2,
-            borderTop: 1,
-            borderColor: 'divider',
-            gap: { xs: 2, sm: 0 }
-          }}>
-            <Button
-                variant="outlined"
-                onClick={saveDraft}
-                startIcon={<FileText />}
-                sx={{
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  px: 3
-                }}
-            >
-              Save as Draft
-            </Button>
-
-            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, width: { xs: '100%', sm: 'auto' } }}>
-              <Button
-                  variant="outlined"
-                  onClick={() => setIsPreview(!isPreview)}
-                  sx={{
-                    borderRadius: 2,
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    px: 3
-                  }}
-              >
-                {isPreview ? 'Back to Editor' : 'Preview'}
-              </Button>
-              <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={isSubmitting || createPostMutation.isPending || watchedContent.length < 10}
-                  startIcon={createPostMutation.isPending ? <Loader className="animate-spin" /> : <Save />}
-                  sx={(theme) => ({
-                    borderRadius: 2,
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    px: 4,
-                    py: 1,
-                    background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
-                    '&:hover': {
-                      background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
-                      transform: 'translateY(-1px)',
-                      boxShadow: 3
-                    },
-                    '&:disabled': {
-                      background: theme.palette.action.disabledBackground
-                    }
-                  })}
-              >
-                {createPostMutation.isPending ? 'Publishing...' : 'Publish Post'}
-              </Button>
-            </Box>
-          </Box>
-        </Box>
-
-        {/* Tips Section */}
-        <Paper sx={{
-          p: 3,
-          mt: 4,
-          bgcolor: 'primary.50',
-          border: 2,
-          borderColor: 'primary.100',
-          borderRadius: 3
-        }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-            <Box sx={{ color: 'primary.main', display: 'inline-flex' }}>
-              <Type />
-            </Box>
-            <Typography variant="h6" sx={{ fontWeight: 800, color: 'primary.dark' }}>
-              ✨ Pro Writing Tips
-            </Typography>
-          </Box>
-
-          <Box sx={{
-            display: 'grid',
-            gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
-            gap: 2
-          }}>
-            <Box sx={(theme) => ({
-              bgcolor: theme.palette.background.paper,
-              p: 2,
-              borderRadius: 2,
-              height: '100%',
-              boxShadow: 1,
-              border: `1px solid ${theme.palette.divider}`
-            })}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main', mb: 1 }}>
+        <LIVBlogCard title="Quick Tips" padding="medium">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h4 className="aws-text-body" style={{ fontWeight: 600, margin: '0 0 8px 0', color: theme.palette.primary.main }}>
                 Structure & Formatting
-              </Typography>
-              <Box component="ul" sx={{ m: 0, p: 0, pl: 2 }}>
-                <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
-                  Use <strong>headings</strong> to create a clear hierarchy
-                </Typography>
-                <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
-                  <strong>Bold key phrases</strong> for skimmers
-                </Typography>
-                <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
-                  Keep paragraphs under 4 lines
-                </Typography>
-              </Box>
-            </Box>
-
-            <Box sx={(theme) => ({
-              bgcolor: theme.palette.background.paper,
-              p: 2,
-              borderRadius: 2,
-              height: '100%',
-              boxShadow: 1,
-              border: `1px solid ${theme.palette.divider}`
-            })}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'success.main', mb: 1 }}>
+              </h4>
+              <ul className="aws-text-body" style={{ margin: 0, paddingLeft: '16px', color: theme.palette.text.primary }}>
+                <li style={{ marginBottom: '4px' }}>Use headings to create hierarchy</li>
+                <li style={{ marginBottom: '4px' }}>Bold key phrases for emphasis</li>
+                <li style={{ marginBottom: '4px' }}>Keep paragraphs under 4 lines</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="aws-text-body" style={{ fontWeight: 600, margin: '0 0 8px 0', color: theme.palette.success.main }}>
                 Engagement Boosters
-              </Typography>
-              <Box component="ul" sx={{ m: 0, p: 0, pl: 2 }}>
-                <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
-                  Start with a question or surprising fact
-                </Typography>
-                <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
-                  Include <em>personal stories</em> or examples
-                </Typography>
-                <Typography component="li" variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
-                  End with a call-to-action
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-        </Paper>
-        
-        {/* AI Chat Assistant */}
-        <AIChat isExpanded={false} />
-      </Box>
+              </h4>
+              <ul className="aws-text-body" style={{ margin: 0, paddingLeft: '16px', color: theme.palette.text.primary }}>
+                <li style={{ marginBottom: '4px' }}>Start with a question or fact</li>
+                <li style={{ marginBottom: '4px' }}>Include personal stories</li>
+                <li style={{ marginBottom: '4px' }}>End with a call-to-action</li>
+              </ul>
+            </div>
+          </div>
+        </LIVBlogCard>
+
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t" style={{ borderColor: theme.palette.divider }}>
+          <Button
+            onClick={saveDraft}
+            variant="outlined"
+            className="aws-button aws-button-secondary"
+          >
+            <FileText size={16} style={{ marginRight: '8px' }} />
+            Save Draft
+          </Button>
+
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setIsPreview(!isPreview)}
+              variant="outlined"
+              className="aws-button aws-button-secondary"
+            >
+              {isPreview ? 'Editor' : 'Preview'}
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isSubmitting || createPostMutation.isPending || watchedContent.length < 10}
+              className="aws-button aws-button-primary"
+            >
+              {createPostMutation.isPending ? (
+                <Loader size={16} style={{ marginRight: '8px' }} className="animate-spin" />
+              ) : (
+                <Save size={16} style={{ marginRight: '8px' }} />
+              )}
+              {createPostMutation.isPending ? 'Publishing...' : 'Publish Post'}
+            </Button>
+          </div>
+        </div>
+      </form>
+
+      <AIChat isExpanded={false} />
+    </div>
   );
 };
-

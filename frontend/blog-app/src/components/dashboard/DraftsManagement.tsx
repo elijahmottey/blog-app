@@ -26,6 +26,8 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { LIVBlogLayout, LIVBlogHeader, LIVBlogCard} from '../ui';
+import { useTheme } from '@mui/material/styles';
 
 interface DraftPost {
   id: string;
@@ -37,6 +39,7 @@ interface DraftPost {
 
 export const DraftsManagement: React.FC = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
   const [drafts, setDrafts] = useState<DraftPost[]>([]);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; draft: DraftPost | null }>({
     open: false,
@@ -74,112 +77,164 @@ export const DraftsManagement: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: { xs: 2, md: 3 } }}>
+    <LIVBlogLayout.Container>
       {/* Header */}
-      <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-        <Box sx={{
-          display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
-          alignItems: { xs: 'flex-start', sm: 'center' },
-          justifyContent: 'space-between',
-          gap: 2
-        }}>
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 0.5 }}>
-              My Drafts
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Continue working on your saved drafts ({drafts.length} drafts)
-            </Typography>
-          </Box>
+      <LIVBlogHeader
+        title="My Drafts"
+        subtitle={`Continue working on your saved drafts (${drafts.length} drafts)`}
+        size="large"
+        actions={
           <Button
             variant="contained"
             startIcon={<Plus />}
             onClick={() => navigate('/dashboard/posts/create')}
-            sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
+            className="aws-button aws-button-primary"
+            style={{
+              fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+            }}
           >
             New Post
           </Button>
-        </Box>
-      </Paper>
+        }
+      />
 
       {/* Drafts Grid */}
       {drafts.length === 0 ? (
-        <Paper sx={{ p: 6, textAlign: 'center', borderRadius: 2 }}>
-          <FileText size={48} style={{ color: '#9e9e9e', marginBottom: 16 }} />
-          <Typography variant="h6" sx={{ mb: 2, color: 'text.secondary' }}>
-            No drafts yet
-          </Typography>
-          <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
-            Start writing and save your work as drafts to continue later
-          </Typography>
-          <Button
-            variant="contained"
-            startIcon={<Plus />}
-            onClick={() => navigate('/dashboard/posts/create')}
-            sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
-          >
-            Create Your First Post
-          </Button>
-        </Paper>
+        <LIVBlogCard
+          variant="default"
+          padding="large"
+        >
+          <div className="aws-text-center aws-py-12">
+            <FileText size={48} style={{ color: '#9e9e9e', marginBottom: 16 }} />
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                mb: 2, 
+                color: 'text.secondary',
+                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}
+            >
+              No drafts yet
+            </Typography>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                mb: 3, 
+                color: 'text.secondary',
+                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}
+            >
+              Start writing and save your work as drafts to continue later
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<Plus />}
+              onClick={() => navigate('/dashboard/posts/create')}
+              className="aws-button aws-button-primary"
+              style={{
+                fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}
+            >
+              Create Your First Post
+            </Button>
+          </div>
+        </LIVBlogCard>
       ) : (
-        <Box sx={{
-          display: 'grid',
-          gridTemplateColumns: {
-            xs: '1fr',
-            sm: 'repeat(2, 1fr)',
-            lg: 'repeat(3, 1fr)'
-          },
-          gap: 3
-        }}>
+        <LIVBlogLayout.Grid cols={3} gap="lg">
           {drafts.map((draft) => (
-            <Card key={draft.id} sx={{ borderRadius: 2, height: 'fit-content' }}>
-              <CardContent sx={{ pb: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600, flex: 1, mr: 1 }}>
-                    {draft.title || 'Untitled Draft'}
-                  </Typography>
-                  <Chip
-                    label="Draft"
-                    size="small"
-                    color="warning"
-                    variant="outlined"
-                  />
-                </Box>
+            <LIVBlogCard
+              key={draft.id}
+              variant="default"
+              padding="medium"
+              className="aws-min-h-card"
+            >
+              <div className="aws-flex aws-items-start aws-justify-between aws-mb-3">
+                <h3 
+                  className="aws-text-lg aws-font-semibold aws-flex-1 aws-mr-2"
+                  style={{ 
+                    color: theme.palette.text.primary,
+                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  }}
+                >
+                  {draft.title || 'Untitled Draft'}
+                </h3>
+                <Chip
+                  label="Draft"
+                  size="small"
+                  color="warning"
+                  variant="outlined"
+                  className="aws-chip"
+                  style={{
+                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  }}
+                />
+              </div>
 
-                {draft.content && (
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, lineHeight: 1.6 }}>
-                    {getPreview(draft.content)}
-                  </Typography>
-                )}
-
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <FileText size={14} />
-                    <Typography variant="caption" color="text.secondary">
-                      {getWordCount(draft.content)} words
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Clock size={14} />
-                    <Typography variant="caption" color="text.secondary">
-                      {format(new Date(draft.updatedAt), 'MMM dd, HH:mm')}
-                    </Typography>
-                  </Box>
-                </Box>
-
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Calendar size={12} />
-                  Created {format(new Date(draft.createdAt), 'MMM dd, yyyy')}
+              {draft.content && (
+                <Typography 
+                  variant="body2" 
+                  color="text.secondary" 
+                  sx={{ 
+                    mb: 2, 
+                    lineHeight: 1.6,
+                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  }}
+                >
+                  {getPreview(draft.content)}
                 </Typography>
-              </CardContent>
+              )}
 
-              <CardActions sx={{ px: 2, pb: 2 }}>
+              <div className="aws-flex aws-items-center aws-gap-4 aws-mb-3">
+                <div className="aws-flex aws-items-center aws-gap-1">
+                  <FileText size={14} />
+                  <Typography 
+                    variant="caption" 
+                    color="text.secondary"
+                    style={{
+                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    }}
+                  >
+                    {getWordCount(draft.content)} words
+                  </Typography>
+                </div>
+                <div className="aws-flex aws-items-center aws-gap-1">
+                  <Clock size={14} />
+                  <Typography 
+                    variant="caption" 
+                    color="text.secondary"
+                    style={{
+                      fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    }}
+                  >
+                    {format(new Date(draft.updatedAt), 'MMM dd, HH:mm')}
+                  </Typography>
+                </div>
+              </div>
+
+              <Typography 
+                variant="caption" 
+                color="text.secondary" 
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 0.5,
+                  mb: 3,
+                  fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                }}
+              >
+                <Calendar size={12} />
+                Created {format(new Date(draft.createdAt), 'MMM dd, yyyy')}
+              </Typography>
+
+              <div className="aws-flex aws-justify-between aws-items-center">
                 <Button
                   size="small"
                   startIcon={<Edit />}
                   onClick={() => editDraft(draft)}
-                  sx={{ textTransform: 'none', fontWeight: 600 }}
+                  className="aws-button aws-button-primary"
+                  style={{
+                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  }}
                 >
                   Continue Writing
                 </Button>
@@ -190,39 +245,63 @@ export const DraftsManagement: React.FC = () => {
                 >
                   <Trash2 size={16} />
                 </IconButton>
-              </CardActions>
-            </Card>
+              </div>
+            </LIVBlogCard>
           ))}
-        </Box>
+        </LIVBlogLayout.Grid>
       )}
 
       {/* Delete Confirmation Dialog */}
       <Dialog
         open={deleteDialog.open}
         onClose={() => setDeleteDialog({ open: false, draft: null })}
+        PaperProps={{
+          sx: {
+            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+          }
+        }}
       >
-        <DialogTitle>Delete Draft</DialogTitle>
+        <DialogTitle
+          style={{
+            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+          }}
+        >
+          Delete Draft
+        </DialogTitle>
         <DialogContent>
           <Alert severity="warning" sx={{ mb: 2 }}>
             This action cannot be undone.
           </Alert>
-          <Typography>
+          <Typography
+            style={{
+              fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+            }}
+          >
             Are you sure you want to delete the draft "{deleteDialog.draft?.title || 'Untitled Draft'}"?
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialog({ open: false, draft: null })}>
+          <Button 
+            onClick={() => setDeleteDialog({ open: false, draft: null })}
+            className="aws-button aws-button-secondary"
+            style={{
+              fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+            }}
+          >
             Cancel
           </Button>
           <Button
             color="error"
             variant="contained"
             onClick={() => deleteDialog.draft && deleteDraft(deleteDialog.draft.id)}
+            style={{
+              fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+            }}
           >
             Delete
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </LIVBlogLayout.Container>
   );
 };

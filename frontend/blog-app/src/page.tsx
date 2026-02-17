@@ -58,7 +58,7 @@ export const PagesRoute = () => {
                                 element={
                                     <>
                                         <Login />
-                                        <Footer />
+
                                     </>
                                 }
                             />
@@ -67,7 +67,7 @@ export const PagesRoute = () => {
                                 element={
                                     <>
                                         <Signup />
-                                        <Footer />
+
                                     </>
                                 }
                             />
