@@ -124,6 +124,12 @@ export const PostsManagement: React.FC = () => {
     return content.substring(0, maxLength) + '...';
   };
 
+  const extractFirstImage = (content: string) => {
+    if (!content) return null;
+    const imageMatch = content.match(/!\[([^\]]*)\]\(([^)]+)\)/);
+    return imageMatch ? { alt: imageMatch[1] || 'Image', url: imageMatch[2] } : null;
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center" style={{ minHeight: '400px' }}>
@@ -284,9 +290,29 @@ export const PostsManagement: React.FC = () => {
                         {post.title || 'Untitled Post'}
                       </h4>
 
-                      <p className="aws-text-body" style={{ color: theme.palette.text.secondary, margin: '0 0 12px 0', fontSize: '0.8125rem' }}>
-                        {truncateContent(post.content || '', 150)}
-                      </p>
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                        <div style={{ flex: 1 }}>
+                          <p className="aws-text-body" style={{ color: theme.palette.text.secondary, margin: '0 0 12px 0', fontSize: '0.8125rem' }}>
+                            {truncateContent(post.content || '', 150)}
+                          </p>
+                        </div>
+                        {extractFirstImage(post.content || '') && (
+                          <img
+                            src={extractFirstImage(post.content || '')!.url}
+                            alt={extractFirstImage(post.content || '')!.alt}
+                            style={{
+                              width: '60px',
+                              height: '60px',
+                              objectFit: 'cover',
+                              borderRadius: '6px',
+                              flexShrink: 0
+                            }}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        )}
+                      </div>
 
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">

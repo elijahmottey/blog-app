@@ -205,6 +205,26 @@ export const PostDetail: React.FC = () => {
         return <br key={index} />;
       }
 
+      // Handle images
+      const imageMatch = line.match(/!\[([^\]]*)\]\(([^)]+)\)/);
+      if (imageMatch) {
+        const [, altText, imageUrl] = imageMatch;
+        return (
+          <img 
+            key={index}
+            src={imageUrl} 
+            alt={altText || 'Image'} 
+            style={{
+              maxWidth: '100%', 
+              height: 'auto', 
+              margin: '1rem 0', 
+              borderRadius: '8px', 
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+            }} 
+          />
+        );
+      }
+
       // Handle headers
       if (line.startsWith('# ')) {
         return (
@@ -254,6 +274,81 @@ export const PostDetail: React.FC = () => {
             }}
           >
             {line.substring(4)}
+          </Typography>
+        );
+      }
+
+      // Handle bold text
+      const boldRegex = /\*\*(.*?)\*\*/g;
+      if (boldRegex.test(line)) {
+        const parts = line.split(boldRegex);
+        return (
+          <Typography
+            key={index}
+            variant="body1"
+            component="p"
+            sx={{ 
+              mb: 1, 
+              lineHeight: 1.6,
+              fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+            }}
+          >
+            {parts.map((part, partIndex) => 
+              partIndex % 2 === 1 ? <strong key={partIndex}>{part}</strong> : part
+            )}
+          </Typography>
+        );
+      }
+
+      // Handle italic text
+      const italicRegex = /\*(.*?)\*/g;
+      if (italicRegex.test(line)) {
+        const parts = line.split(italicRegex);
+        return (
+          <Typography
+            key={index}
+            variant="body1"
+            component="p"
+            sx={{ 
+              mb: 1, 
+              lineHeight: 1.6,
+              fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+            }}
+          >
+            {parts.map((part, partIndex) => 
+              partIndex % 2 === 1 ? <em key={partIndex}>{part}</em> : part
+            )}
+          </Typography>
+        );
+      }
+
+      // Handle links
+      const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+      if (linkRegex.test(line)) {
+        const parts = line.split(linkRegex);
+        return (
+          <Typography
+            key={index}
+            variant="body1"
+            component="p"
+            sx={{ 
+              mb: 1, 
+              lineHeight: 1.6,
+              fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+            }}
+          >
+            {parts.map((part, partIndex) => {
+              if (partIndex % 3 === 1) {
+                const url = parts[partIndex + 1];
+                return (
+                  <a key={partIndex} href={url} target="_blank" rel="noopener noreferrer">
+                    {part}
+                  </a>
+                );
+              }
+              if (partIndex % 3 === 2) return null;
+              return part;
+            })}
           </Typography>
         );
       }
@@ -578,39 +673,7 @@ export const PostDetail: React.FC = () => {
             lineHeight: 1.7,
             color: theme.palette.text.primary
           }}>
-            {safePostContent.split('\n').filter(p => p.trim()).map((paragraph, index) => {
-              const isCurrentParagraph = index === currentParagraph && isReading;
-              return (
-                <Typography
-                  key={index}
-                  variant="body1"
-                  component="p"
-                  sx={{ 
-                    mb: 1, 
-                    lineHeight: 1.6,
-                    fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                    backgroundColor: isCurrentParagraph ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
-                    padding: isCurrentParagraph ? '8px' : '0',
-                    borderRadius: isCurrentParagraph ? '4px' : '0',
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  {paragraph}
-                </Typography>
-              );
-            }) || (
-              <Typography 
-                variant="body1" 
-                sx={{ 
-                  color: 'text.secondary', 
-                  fontStyle: 'italic',
-                  textAlign: 'center',
-                  padding: '48px 24px'
-                }}
-              >
-                No content available
-              </Typography>
-            )}
+            {renderContent(safePostContent)}
           </div>
         </div>
 
