@@ -235,17 +235,15 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
            <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 1, sm: 2 }, minHeight: '50px !important', height: '50px' }}>
              {/* Left Section */}
              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-               {isMobile && (
-                   <IconButton
-                       edge="start"
-                       color="inherit"
-                       aria-label="menu"
-                       onClick={onMenuClick}
-                       sx={{ mr: 1 }}
-                   >
-                     {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-                   </IconButton>
-               )}
+               <IconButton
+                   edge="start"
+                   color="inherit"
+                   aria-label="menu"
+                   onClick={onMenuClick}
+                   sx={{ mr: 1 }}
+               >
+                 {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+               </IconButton>
              </Box>
 
              {/* Center Section - Search (desktop & tablet) */}

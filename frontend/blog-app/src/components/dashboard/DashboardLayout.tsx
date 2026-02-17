@@ -13,10 +13,10 @@ export const DashboardLayout: React.FC = () => {
   const isPersistent = useMediaQuery(theme.breakpoints.up('lg'));
   const isWide = useMediaQuery(theme.breakpoints.up('lg'));
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(isPersistent);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    setIsSidebarOpen(isPersistent);
+    // Don't auto-open sidebar based on screen size
   }, [isPersistent]);
 
   const toggleSidebar = () => {
@@ -40,9 +40,11 @@ export const DashboardLayout: React.FC = () => {
       }}
     >
       {isPersistent ? (
-        <div style={{ flex: '0 0 ' + (isWide ? '256px' : '220px') }}>
-          <DashboardSidebar isOpen={isSidebarOpen} onClose={closeSidebar} isMobile={false} />
-        </div>
+        isSidebarOpen && (
+          <div style={{ flex: '0 0 ' + (isWide ? '256px' : '220px') }}>
+            <DashboardSidebar isOpen={isSidebarOpen} onClose={closeSidebar} isMobile={false} />
+          </div>
+        )
       ) : (
         <DashboardSidebar isOpen={isSidebarOpen} onClose={closeSidebar} isMobile={true} />
       )}

@@ -203,7 +203,7 @@ export const Login: React.FC = () => {
                         initial={{ x: 50, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ duration: 0.6, delay: 0.2 }}
-                        style={{ width: '100%', maxWidth: { xs: '100%', sm: 400 } }}
+                        style={{ width: '100%' }}
                     >
                         <LIVBlogCard
                             variant="elevated"
@@ -211,6 +211,7 @@ export const Login: React.FC = () => {
                             className="hover-card"
                             style={{
                                 width: '100%',
+                                maxWidth: '400px'
                             }}
                         >
                             <LIVBlogHeader
