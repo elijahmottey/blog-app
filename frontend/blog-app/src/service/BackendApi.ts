@@ -374,6 +374,10 @@ export default class BackendApi {
         return this.put<UserRegistration>(`/user/${userId}`, updateData);
     }
 
+    static async updateUserProfile(updateData: Partial<UserRegistration>) {
+        return this.put<ApiResponse<UserDto>>('/user/profile', updateData);
+    }
+
 
     // -----Post Blog------
     static async deletePostBlog(postId: number) {

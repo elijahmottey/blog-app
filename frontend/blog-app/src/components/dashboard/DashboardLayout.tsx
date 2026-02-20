@@ -41,7 +41,7 @@ export const DashboardLayout: React.FC = () => {
     >
       {isPersistent ? (
         isSidebarOpen && (
-          <div style={{ flex: '0 0 ' + (isWide ? '256px' : '220px') }}>
+          <div style={{ flex: '0 0 ' + (isWide ? '200px' : '176px') }}>
             <DashboardSidebar isOpen={isSidebarOpen} onClose={closeSidebar} isMobile={false} />
           </div>
         )

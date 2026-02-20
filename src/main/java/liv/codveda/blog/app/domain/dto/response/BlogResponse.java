@@ -1,5 +1,6 @@
 package liv.codveda.blog.app.domain.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import liv.codveda.blog.app.domain.enums.Roles;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,9 +13,15 @@ import java.util.UUID;
 @Builder
 public class BlogResponse {
     private final String message;
+
+    @JsonIgnore
     private final String accessToken;
+
+    @JsonIgnore
     private final String refreshToken;
+    @JsonIgnore
     private Instant accessTokenExpiration;
+    @JsonIgnore
     private Instant refreshTokenExpiration;
     private  final Roles role;
     private final String name;

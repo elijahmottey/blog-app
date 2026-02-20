@@ -24,7 +24,15 @@ import {
   Redo,
   Type,
   FileText,
-  Image
+  Image,
+  BookOpen,
+  ChevronDown,
+  ChevronUp,
+  ArrowRight,
+  X,
+  Play,
+  Pause,
+  SkipForward
 } from 'lucide-react';
 import {
   Button,
@@ -36,7 +44,11 @@ import {
   Alert,
   MenuItem,
   Select,
-  FormControl
+  FormControl,
+  Dialog,
+  DialogContent,
+  DialogActions,
+  Box
 } from '@mui/material';
 import BackendApi from '../../service/BackendApi';
 import { toast } from 'sonner';
@@ -75,6 +87,10 @@ export const CreatePost: React.FC = () => {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('TECHNOLOGY');
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [showTutorialPopup, setShowTutorialPopup] = useState(false);
+  const [currentTutorialStep, setCurrentTutorialStep] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Fetch categories
@@ -112,6 +128,12 @@ export const CreatePost: React.FC = () => {
       setValue('title', draft.title);
       setValue('content', draft.content);
       setCurrentDraftId(draft.id);
+    }
+    
+    // Show tutorial popup on first visit
+    const hasSeenTutorial = localStorage.getItem('livblog_tutorial_seen');
+    if (!hasSeenTutorial) {
+      setShowTutorialPopup(true);
     }
   }, [location.state, setValue]);
 
@@ -363,6 +385,95 @@ export const CreatePost: React.FC = () => {
     }
   }, [watchedContent]);
 
+  // Auto-play tutorial
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isAutoPlaying && showTutorialPopup) {
+      interval = setInterval(() => {
+        setCurrentTutorialStep(prev => {
+          if (prev >= tutorialSteps.length - 1) {
+            setIsAutoPlaying(false);
+            return prev;
+          }
+          return prev + 1;
+        });
+      }, 4000);
+    }
+    return () => clearInterval(interval);
+  }, [isAutoPlaying, showTutorialPopup]);
+
+  const tutorialSteps = [
+    {
+      title: "Welcome to LIVBlog!",
+      content: "Let's learn how to create amazing blog posts with our powerful editor.",
+      highlight: "title",
+      icon: <BookOpen size={24} />
+    },
+    {
+      title: "Start with a Great Title",
+      content: "Use # for your main title. Keep it under 60 characters and make it engaging!",
+      highlight: "title",
+      example: "# How to Build Amazing Web Applications",
+      icon: <Type size={24} />
+    },
+    {
+      title: "Add Beautiful Images",
+      content: "Click the image button or use ![description](image-url) to add images anywhere in your post.",
+      highlight: "image-button",
+      example: "![Beautiful sunset](https://example.com/sunset.jpg)",
+      icon: <Image size={24} />
+    },
+    {
+      title: "Structure Your Content",
+      content: "Use ## for sections and ### for subsections to organize your content clearly.",
+      highlight: "heading-buttons",
+      example: "## Introduction\n### What You'll Learn",
+      icon: <Heading1 size={24} />
+    },
+    {
+      title: "Format Your Text",
+      content: "Make text **bold** or *italic* using the toolbar buttons or markdown syntax.",
+      highlight: "format-buttons",
+      example: "**Important:** This is *really* useful!",
+      icon: <Bold size={24} />
+    },
+    {
+      title: "Preview Your Work",
+      content: "Click the Preview button to see exactly how your post will look to readers.",
+      highlight: "preview-button",
+      icon: <Eye size={24} />
+    }
+  ];
+
+  const handleTutorialNext = () => {
+    if (currentTutorialStep < tutorialSteps.length - 1) {
+      setCurrentTutorialStep(prev => prev + 1);
+    } else {
+      handleTutorialClose();
+    }
+  };
+
+  const handleTutorialClose = () => {
+    setShowTutorialPopup(false);
+    setIsAutoPlaying(false);
+    localStorage.setItem('livblog_tutorial_seen', 'true');
+  };
+
+  const handleTutorialSkip = () => {
+    handleTutorialClose();
+  };
+
+  const handleTutorialChoice = (choice: 'slideshow' | 'tutorial') => {
+    if (choice === 'slideshow') {
+      setCurrentTutorialStep(0);
+      setIsAutoPlaying(true);
+    } else {
+      setShowTutorialPopup(false);
+      setShowTutorial(true);
+      localStorage.setItem('livblog_tutorial_seen', 'true');
+    }
+  };
+
   const formatContent = (content: string) => {
     return content
         .split('\n')
@@ -488,6 +599,197 @@ export const CreatePost: React.FC = () => {
       </LIVBlogLayout.Grid>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Tutorial Choice Popup */}
+        <Dialog 
+          open={showTutorialPopup && currentTutorialStep === 0 && !isAutoPlaying} 
+          onClose={handleTutorialClose}
+          maxWidth="sm"
+          fullWidth
+          PaperProps={{
+            style: {
+              borderRadius: '16px',
+              overflow: 'hidden'
+            }
+          }}
+        >
+          <DialogContent style={{ padding: '32px', textAlign: 'center' }}>
+            <BookOpen size={48} style={{ color: theme.palette.primary.main, marginBottom: '16px' }} />
+            <Typography variant="h4" style={{ fontWeight: 700, marginBottom: '12px' }}>
+              Welcome to LIVBlog!
+            </Typography>
+            <Typography variant="body1" style={{ marginBottom: '32px', color: theme.palette.text.secondary }}>
+              How would you like to learn about creating amazing blog posts?
+            </Typography>
+            
+            <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
+              <Button
+                onClick={() => handleTutorialChoice('slideshow')}
+                variant="contained"
+                size="large"
+                startIcon={<Play />}
+                style={{ borderRadius: '12px', padding: '12px 24px' }}
+              >
+                Interactive Slideshow
+              </Button>
+              <Button
+                onClick={() => handleTutorialChoice('tutorial')}
+                variant="outlined"
+                size="large"
+                startIcon={<BookOpen />}
+                style={{ borderRadius: '12px', padding: '12px 24px' }}
+              >
+                Quick Guide
+              </Button>
+            </div>
+            
+            <Button
+              onClick={handleTutorialSkip}
+              variant="text"
+              size="small"
+              style={{ marginTop: '16px' }}
+            >
+              Skip for now
+            </Button>
+          </DialogContent>
+        </Dialog>
+
+        {/* Tutorial Slideshow Popup */}
+        <Dialog 
+          open={showTutorialPopup && (currentTutorialStep > 0 || isAutoPlaying)} 
+          onClose={handleTutorialClose}
+          maxWidth="md"
+          fullWidth
+          PaperProps={{
+            style: {
+              borderRadius: '16px',
+              overflow: 'hidden'
+            }
+          }}
+        >
+          <DialogContent style={{ padding: 0 }}>
+            <Box style={{
+              background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+              color: 'white',
+              padding: '32px',
+              textAlign: 'center',
+              position: 'relative'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '16px'
+              }}>
+                {tutorialSteps[currentTutorialStep].icon}
+              </div>
+              <Typography variant="h4" style={{ fontWeight: 700, marginBottom: '12px' }}>
+                {tutorialSteps[currentTutorialStep].title}
+              </Typography>
+              <Typography variant="body1" style={{ fontSize: '1.125rem', opacity: 0.9 }}>
+                {tutorialSteps[currentTutorialStep].content}
+              </Typography>
+              
+              {tutorialSteps[currentTutorialStep].example && (
+                <Box style={{
+                  marginTop: '24px',
+                  padding: '16px',
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  borderRadius: '8px',
+                  fontFamily: 'monospace',
+                  fontSize: '0.875rem',
+                  textAlign: 'left'
+                }}>
+                  {tutorialSteps[currentTutorialStep].example}
+                </Box>
+              )}
+              
+              {/* Curved Arrow */}
+              {currentTutorialStep < tutorialSteps.length - 1 && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-20px',
+                  right: '32px',
+                  animation: 'bounce 2s infinite'
+                }}>
+                  <ArrowRight 
+                    size={32} 
+                    style={{ 
+                      color: theme.palette.primary.main,
+                      transform: 'rotate(45deg)'
+                    }} 
+                  />
+                </div>
+              )}
+            </Box>
+            
+            {/* Progress Indicator */}
+            <Box style={{ padding: '16px 32px' }}>
+              <div style={{
+                display: 'flex',
+                gap: '8px',
+                justifyContent: 'center',
+                marginBottom: '16px'
+              }}>
+                {tutorialSteps.map((_, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: index <= currentTutorialStep 
+                        ? theme.palette.primary.main 
+                        : theme.palette.grey[300],
+                      transition: 'all 0.3s ease'
+                    }}
+                  />
+                ))}
+              </div>
+              <Typography variant="body2" style={{ textAlign: 'center', color: theme.palette.text.secondary }}>
+                Step {currentTutorialStep + 1} of {tutorialSteps.length}
+              </Typography>
+            </Box>
+          </DialogContent>
+          
+          <DialogActions style={{ padding: '16px 32px 32px', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <Button
+                onClick={() => setIsAutoPlaying(!isAutoPlaying)}
+                startIcon={isAutoPlaying ? <Pause /> : <Play />}
+                variant="outlined"
+                size="small"
+              >
+                {isAutoPlaying ? 'Pause' : 'Auto Play'}
+              </Button>
+              <Button
+                onClick={handleTutorialSkip}
+                startIcon={<SkipForward />}
+                variant="outlined"
+                size="small"
+              >
+                Skip Tutorial
+              </Button>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '12px' }}>
+              {currentTutorialStep > 0 && (
+                <Button
+                  onClick={() => setCurrentTutorialStep(prev => prev - 1)}
+                  variant="outlined"
+                >
+                  Previous
+                </Button>
+              )}
+              <Button
+                onClick={handleTutorialNext}
+                variant="contained"
+                endIcon={currentTutorialStep < tutorialSteps.length - 1 ? <ArrowRight /> : null}
+              >
+                {currentTutorialStep < tutorialSteps.length - 1 ? 'Next' : 'Start Writing!'}
+              </Button>
+            </div>
+          </DialogActions>
+        </Dialog>
         <LIVBlogCard title="Post Title" padding="medium">
           <TextField
             {...register('title')}
@@ -527,6 +829,163 @@ export const CreatePost: React.FC = () => {
           <p className="aws-text-body" style={{ color: theme.palette.text.secondary, margin: '8px 0 0 0', fontSize: '0.75rem' }}>
             Choose the most relevant category for your post
           </p>
+        </LIVBlogCard>
+
+        {/* Tutorial Section */}
+        <LIVBlogCard padding="none" style={{ marginBottom: '24px' }}>
+          <div 
+            onClick={() => setShowTutorial(!showTutorial)}
+            style={{
+              padding: '16px 24px',
+              backgroundColor: theme.palette.primary.light + '20',
+              borderBottom: showTutorial ? `1px solid ${theme.palette.divider}` : 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <BookOpen size={20} style={{ color: theme.palette.primary.main }} />
+              <span style={{ fontWeight: 600, color: theme.palette.primary.main }}>
+                Writing Guide - Learn to Create Amazing Posts
+              </span>
+            </div>
+            {showTutorial ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+          </div>
+          
+          {showTutorial && (
+            <div style={{ padding: '24px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                <div style={{ 
+                  padding: '16px', 
+                  backgroundColor: theme.palette.success.light + '10',
+                  borderRadius: '8px',
+                  border: `1px solid ${theme.palette.success.light}`
+                }}>
+                  <h4 style={{ color: theme.palette.success.main, margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Type size={16} /> 1. Compelling Titles
+                  </h4>
+                  <p style={{ margin: '0 0 8px 0', fontSize: '0.875rem' }}>Use # for your main title:</p>
+                  <code style={{ 
+                    backgroundColor: theme.palette.grey[100], 
+                    padding: '4px 8px', 
+                    borderRadius: '4px',
+                    fontSize: '0.8rem',
+                    display: 'block',
+                    marginBottom: '8px'
+                  }}>
+                    # How to Build Amazing Apps
+                  </code>
+                  <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.8rem' }}>
+                    <li>Keep under 60 characters</li>
+                    <li>Use action words</li>
+                    <li>Be specific and clear</li>
+                  </ul>
+                </div>
+
+                <div style={{ 
+                  padding: '16px', 
+                  backgroundColor: theme.palette.info.light + '10',
+                  borderRadius: '8px',
+                  border: `1px solid ${theme.palette.info.light}`
+                }}>
+                  <h4 style={{ color: theme.palette.info.main, margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Image size={16} /> 2. Add Images
+                  </h4>
+                  <p style={{ margin: '0 0 8px 0', fontSize: '0.875rem' }}>Insert images anywhere:</p>
+                  <code style={{ 
+                    backgroundColor: theme.palette.grey[100], 
+                    padding: '4px 8px', 
+                    borderRadius: '4px',
+                    fontSize: '0.8rem',
+                    display: 'block',
+                    marginBottom: '8px'
+                  }}>
+                    ![Description](image-url)
+                  </code>
+                  <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.8rem' }}>
+                    <li>Use descriptive alt text</li>
+                    <li>Choose high-quality images</li>
+                    <li>Images show in preview</li>
+                  </ul>
+                </div>
+
+                <div style={{ 
+                  padding: '16px', 
+                  backgroundColor: theme.palette.warning.light + '10',
+                  borderRadius: '8px',
+                  border: `1px solid ${theme.palette.warning.light}`
+                }}>
+                  <h4 style={{ color: theme.palette.warning.main, margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Heading1 size={16} /> 3. Structure Content
+                  </h4>
+                  <p style={{ margin: '0 0 8px 0', fontSize: '0.875rem' }}>Organize with headers:</p>
+                  <code style={{ 
+                    backgroundColor: theme.palette.grey[100], 
+                    padding: '4px 8px', 
+                    borderRadius: '4px',
+                    fontSize: '0.8rem',
+                    display: 'block',
+                    marginBottom: '8px'
+                  }}>
+                    ## Section Title{`<br/>`}
+                    ### Subsection
+                  </code>
+                  <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.8rem' }}>
+                    <li>## for main sections</li>
+                    <li>### for subsections</li>
+                    <li>Creates clear hierarchy</li>
+                  </ul>
+                </div>
+
+                <div style={{ 
+                  padding: '16px', 
+                  backgroundColor: theme.palette.secondary.light + '10',
+                  borderRadius: '8px',
+                  border: `1px solid ${theme.palette.secondary.light}`
+                }}>
+                  <h4 style={{ color: theme.palette.secondary.main, margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Bold size={16} /> 4. Format Text
+                  </h4>
+                  <p style={{ margin: '0 0 8px 0', fontSize: '0.875rem' }}>Emphasize important points:</p>
+                  <code style={{ 
+                    backgroundColor: theme.palette.grey[100], 
+                    padding: '4px 8px', 
+                    borderRadius: '4px',
+                    fontSize: '0.8rem',
+                    display: 'block',
+                    marginBottom: '8px'
+                  }}>
+                    **Bold text**{`<br/>`}
+                    *Italic text*{`<br/>`}
+                    {`> Important quote`}
+                  </code>
+                  <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.8rem' }}>
+                    <li>Use toolbar buttons</li>
+                    <li>Or type markdown directly</li>
+                    <li>Preview shows results</li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div style={{ 
+                marginTop: '20px', 
+                padding: '16px', 
+                backgroundColor: theme.palette.primary.light + '10',
+                borderRadius: '8px',
+                textAlign: 'center'
+              }}>
+                <p style={{ margin: '0 0 8px 0', fontWeight: 600, color: theme.palette.primary.main }}>
+                  💡 Pro Tip: Use the Preview button to see how your post will look!
+                </p>
+                <p style={{ margin: 0, fontSize: '0.875rem', color: theme.palette.text.secondary }}>
+                  Click the formatting buttons above or type markdown directly in the editor.
+                </p>
+              </div>
+            </div>
+          )}
         </LIVBlogCard>
 
         <LIVBlogCard padding="none">
@@ -710,6 +1169,20 @@ export const CreatePost: React.FC = () => {
           </div>
         </div>
       </form>
+
+      <style>{`
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0) rotate(45deg);
+          }
+          40% {
+            transform: translateY(-10px) rotate(45deg);
+          }
+          60% {
+            transform: translateY(-5px) rotate(45deg);
+          }
+        }
+      `}</style>
 
       <AIChat isExpanded={false} />
     </div>

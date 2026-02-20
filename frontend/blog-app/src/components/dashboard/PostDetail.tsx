@@ -151,8 +151,10 @@ export const PostDetail: React.FC = () => {
     const paragraphs = [
       'Thank you for the opportunity to read to your hearing.',
       `The title of this post is: ${postData.title || 'Untitled Post'}.`,
+      `Category: ${postData.category || 'Uncategorized'}.`,
+      `Author: ${postData.user?.name || postAuthorName}.`,
       ...safePostContent.split('\n').filter(p => p.trim()),
-      'Thank you once again for the opportunity to read for you. LIV Blog is here to serve you.'
+      'Thank you once again for the opportunity to read for you, God loves you. Stay blessed. LIV Blog is here to serve you.'
     ];
     let currentIndex = 0;
 
@@ -163,12 +165,12 @@ export const PostDetail: React.FC = () => {
         return;
       }
 
-      setCurrentParagraph(currentIndex - 2); // Adjust for intro and title messages
+      setCurrentParagraph(currentIndex >= 4 ? currentIndex - 4 : -1); // Adjust for intro, title, category, and author messages
       const text = paragraphs[currentIndex].replace(/[#*]/g, '');
       const utterance = new SpeechSynthesisUtterance(text);
       
-      if (alternateVoices && currentIndex > 1 && currentIndex < paragraphs.length - 1) {
-        utterance.voice = (currentIndex - 2) % 2 === 0 ? femaleVoice : maleVoice;
+      if (alternateVoices && currentIndex > 3 && currentIndex < paragraphs.length - 1) {
+        utterance.voice = (currentIndex - 4) % 2 === 0 ? femaleVoice : maleVoice;
       } else {
         utterance.voice = voiceGender === 'female' ? femaleVoice : maleVoice;
       }
@@ -362,7 +364,11 @@ export const PostDetail: React.FC = () => {
           sx={{ 
             mb: 1, 
             lineHeight: 1.6,
-            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            backgroundColor: currentParagraph === index ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+            padding: currentParagraph === index ? '8px' : '0',
+            borderRadius: currentParagraph === index ? '4px' : '0',
+            transition: 'all 0.3s ease'
           }}
         >
           {line}

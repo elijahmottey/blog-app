@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import {
   FileText,
   MessageSquare,
@@ -9,7 +10,8 @@ import {
   Edit,
   Trash2,
   Eye,
-  BarChart3
+  BarChart3,
+  User
 } from 'lucide-react';
 import {
   IconButton,
@@ -17,7 +19,11 @@ import {
   Typography,
   Button,
   Chip,
-  CircularProgress
+  CircularProgress,
+  Dialog,
+  DialogContent,
+  TextField,
+  Avatar
 } from '@mui/material';
 
 import { useAuth } from '../../context/AuthContext';
@@ -31,6 +37,16 @@ export const UserDashboard: React.FC = () => {
   const { user, userProfile } = useAuth();
   const queryClient = useQueryClient();
   const theme = useTheme();
+  const [showProfilePopup, setShowProfilePopup] = useState(false);
+  const [profileDescription, setProfileDescription] = useState('');
+
+  // Check if profile needs completion on component mount
+  useEffect(() => {
+    const profileCompleted = localStorage.getItem('user_profile_completed');
+    if (user && !profileCompleted && (!user.description || user.description.trim() === '' || user.description === 'No description provided')) {
+      setShowProfilePopup(true);
+    }
+  }, [user]);
 
   const { data: postsData, isLoading: postsLoading, error: postsError } = useQuery({
     queryKey: ['all-posts'],
@@ -54,6 +70,32 @@ export const UserDashboard: React.FC = () => {
     if (window.confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
       deleteMutation.mutate(postId);
     }
+  };
+
+  const updateProfileMutation = useMutation({
+    mutationFn: (description: string) => {
+      if (!user?.id) throw new Error('User ID not found');
+      return BackendApi.updateUser(user.id, { description });
+    },
+    onSuccess: () => {
+      localStorage.setItem('user_profile_completed', 'true');
+      setShowProfilePopup(false);
+      toast.success('Profile updated successfully!');
+      queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+    },
+    onError: (error: any) => {
+      console.error('Failed to update profile:', error);
+      toast.error('Failed to update profile. Please try again.');
+    },
+  });
+
+  const handleProfileSave = () => {
+    if (!profileDescription.trim()) return;
+    updateProfileMutation.mutate(profileDescription);
+  };
+
+  const handleProfileSkip = () => {
+    setShowProfilePopup(false);
   };
 
   const userPosts = userProfile?.posts || [];
@@ -88,6 +130,74 @@ export const UserDashboard: React.FC = () => {
 
   return (
     <div style={{ padding: window.innerWidth < 768 ? '16px' : '32px', maxWidth: '1400px', margin: '0 auto' }}>
+      {/* Profile Completion Popup */}
+      <Dialog 
+        open={showProfilePopup}
+        onClose={handleProfileSkip}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          style: {
+            borderRadius: '16px',
+            overflow: 'hidden'
+          }
+        }}
+      >
+        <DialogContent style={{ padding: '32px', textAlign: 'center' }}>
+          <Avatar 
+            sx={{ 
+              width: 80, 
+              height: 80, 
+              margin: '0 auto 16px',
+              bgcolor: theme.palette.primary.main,
+              fontSize: '2rem'
+            }}
+          >
+            {user?.name ? user.name.charAt(0).toUpperCase() : <User />}
+          </Avatar>
+          
+          <Typography variant="h4" style={{ fontWeight: 700, marginBottom: '8px' }}>
+            Complete Your Profile
+          </Typography>
+          
+          <Typography variant="body1" style={{ marginBottom: '24px', color: theme.palette.text.secondary }}>
+            Help readers get to know you better by adding a description to your profile.
+          </Typography>
+          
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            placeholder="Tell us about yourself, your interests, and what you love to write about..."
+            value={profileDescription}
+            onChange={(e) => setProfileDescription(e.target.value)}
+            variant="outlined"
+            style={{ marginBottom: '24px' }}
+          />
+          
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+            <Button
+              onClick={handleProfileSave}
+              variant="contained"
+              disabled={!profileDescription.trim() || updateProfileMutation.isPending}
+              style={{ borderRadius: '8px' }}
+            >
+              {updateProfileMutation.isPending ? 'Saving...' : 'Save Profile'}
+            </Button>
+            <Button
+              onClick={handleProfileSkip}
+              variant="outlined"
+              style={{ borderRadius: '8px' }}
+            >
+              Skip for now
+            </Button>
+          </div>
+          
+          <Typography variant="caption" style={{ display: 'block', marginTop: '16px', color: theme.palette.text.disabled }}>
+            You can always update this later in your profile settings
+          </Typography>
+        </DialogContent>
+      </Dialog>
       {/* Welcome Header */}
       <LIVBlogCard 
         variant="glass" 

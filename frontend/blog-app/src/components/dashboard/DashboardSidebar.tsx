@@ -159,7 +159,8 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
                 top: 0,
                 height: '100vh',
                 zIndex: isMobile ? 1400 : undefined,
-                width: isMobile ? 'min(80vw, 320px)' : 256,
+                // Increased widths: desktop => 220px, mobile max => 320px
+                width: isMobile ? 'min(80vw, 320px)' : 200,
                 backgroundColor: theme.palette.background.paper,
                 boxShadow: isMobile ? '0 10px 30px rgba(0,0,0,0.25)' : 'none',
                 transform: isMobile ? (isOpen ? 'translateX(0)' : 'translateX(-110%)') : undefined,
@@ -176,14 +177,14 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
                 <div
                     className="flex items-center justify-center"
                     style={{
-                      width: 32,
-                      height: 32,
+                      width: 28,
+                      height: 28,
                       borderRadius: 4,
                       backgroundColor: theme.palette.primary.main,
                       color: theme.palette.primary.contrastText
                     }}
                 >
-                  <Typography className="aws-font" style={{ fontWeight: 'bold', fontSize: '1rem' }}>
+                  <Typography className="aws-font" style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>
                     LIV
                   </Typography>
                 </div>
