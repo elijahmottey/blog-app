@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowLeft,
-  Heart,
   MessageCircle,
   Edit,
   Trash2,
@@ -15,14 +14,14 @@ import {
   Volume2,
   VolumeX
 } from 'lucide-react';
-import { Button, IconButton, Typography, Box, Paper, TextField, Avatar, Chip, CircularProgress } from '@mui/material';
+import { Button, Typography, TextField, Avatar, Chip, CircularProgress } from '@mui/material';
 import BackendApi, { type CommentDto, type PostDto } from '../../service/BackendApi';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { downloadPost, downloadPostPdf } from '../../lib/download';
 import { LikeButton } from './LikeButton';
-import { LIVBlogCard, LIVBlogHeader, LIVBlogLayout } from '../ui';
+import { LIVBlogCard, LIVBlogLayout } from '../ui';
 import { useTheme, alpha } from '@mui/material/styles';
 
 export const PostDetail: React.FC = () => {
@@ -33,6 +32,7 @@ export const PostDetail: React.FC = () => {
   const [commentText, setCommentText] = useState('');
   const [showComments, setShowComments] = useState(true);
   const [isReading, setIsReading] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [voiceGender, setVoiceGender] = useState<'male' | 'female'>('female');
   const [readingSpeed, setReadingSpeed] = useState(0.8);
   const [alternateVoices, setAlternateVoices] = useState(false);
@@ -40,6 +40,8 @@ export const PostDetail: React.FC = () => {
   const theme = useTheme();
 
   const postId = parseInt(id || '0');
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
 
   // Fetch post details
   const { data: post, isLoading: postLoading, error: postError } = useQuery({
@@ -57,16 +59,6 @@ export const PostDetail: React.FC = () => {
 
   // Comments for this post
   const postComments = (commentsData?.data as any)?.content || [];
-
-  // Like mutation
-  const likeMutation = useMutation({
-    mutationFn: () => {
-      return Promise.resolve({ success: true });
-    },
-    onSuccess: () => {
-      toast.success('Post liked!');
-    },
-  });
 
   // Comment mutation
   const commentMutation = useMutation({
@@ -104,14 +96,6 @@ export const PostDetail: React.FC = () => {
     },
   });
 
-  const handleLike = () => {
-    if (!user) {
-      toast.error('Please login to like posts');
-      return;
-    }
-    likeMutation.mutate();
-  };
-
   const handleComment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
@@ -133,68 +117,167 @@ export const PostDetail: React.FC = () => {
   };
 
   const handleReadPost = () => {
-    if (isReading) {
-      speechSynthesis.cancel();
+    // If already playing via audio element
+    if (isReading && audioRef.current) {
+      // if paused, resume; otherwise stop
+      if (isPaused) {
+        audioRef.current.play();
+        setIsPaused(false);
+        return;
+      }
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current.src = '';
+      if (audioUrlRef.current) {
+        URL.revokeObjectURL(audioUrlRef.current);
+        audioUrlRef.current = null;
+      }
+      audioRef.current = null;
       setIsReading(false);
       setCurrentParagraph(-1);
+      setIsPaused(false);
       return;
     }
 
-    const voices = speechSynthesis.getVoices();
-    const femaleVoice = voices.find(voice => 
-      voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('zira') || voice.name.toLowerCase().includes('hazel')
-    ) || voices[0];
-    const maleVoice = voices.find(voice => 
-      voice.name.toLowerCase().includes('male') || voice.name.toLowerCase().includes('david') || voice.name.toLowerCase().includes('mark')
-    ) || voices[1] || voices[0];
-
-    const paragraphs = [
-      'Thank you for the opportunity to read to your hearing.',
-      `The title of this post is: ${postData.title || 'Untitled Post'}.`,
-      `Category: ${postData.category || 'Uncategorized'}.`,
-      `Author: ${postData.user?.name || postAuthorName}.`,
-      ...safePostContent.split('\n').filter(p => p.trim()),
-      'Thank you once again for the opportunity to read for you, God loves you. Stay blessed. LIV Blog is here to serve you.'
-    ];
-    let currentIndex = 0;
-
-    const readNextParagraph = () => {
-      if (currentIndex >= paragraphs.length) {
-        setIsReading(false);
-        setCurrentParagraph(-1);
-        return;
+    // Try backend TTS first (not all environments support speechSynthesis reliably)
+    const doBackendTts = async () => {
+      try {
+        const textToRead = safePostContent || '';
+        if (!textToRead) {
+          toast.error('No content to read');
+          return;
+        }
+        const blob = await BackendApi.generateTts(textToRead);
+        const url = URL.createObjectURL(blob);
+        audioUrlRef.current = url;
+        const audio = new Audio(url);
+        audioRef.current = audio;
+        audio.playbackRate = readingSpeed;
+        audio.onended = () => {
+          setIsReading(false);
+          setCurrentParagraph(-1);
+          setIsPaused(false);
+          if (audioUrlRef.current) {
+            URL.revokeObjectURL(audioUrlRef.current);
+            audioUrlRef.current = null;
+          }
+          audioRef.current = null;
+        };
+        audio.onerror = () => {
+          // fallback to speechSynthesis
+          console.warn('Backend TTS failed, falling back to speechSynthesis');
+          setIsReading(false);
+          audioRef.current = null;
+          if (audioUrlRef.current) {
+            URL.revokeObjectURL(audioUrlRef.current);
+            audioUrlRef.current = null;
+          }
+          startSpeechSynthesis();
+        };
+        await audio.play();
+        setIsReading(true);
+      } catch (err) {
+        console.warn('Backend TTS error', err);
+        startSpeechSynthesis();
       }
-
-      setCurrentParagraph(currentIndex >= 4 ? currentIndex - 4 : -1); // Adjust for intro, title, category, and author messages
-      const text = paragraphs[currentIndex].replace(/[#*]/g, '');
-      const utterance = new SpeechSynthesisUtterance(text);
-      
-      if (alternateVoices && currentIndex > 3 && currentIndex < paragraphs.length - 1) {
-        utterance.voice = (currentIndex - 4) % 2 === 0 ? femaleVoice : maleVoice;
-      } else {
-        utterance.voice = voiceGender === 'female' ? femaleVoice : maleVoice;
-      }
-      
-      utterance.rate = readingSpeed;
-      utterance.pitch = 1;
-      utterance.volume = 1;
-      
-      utterance.onend = () => {
-        currentIndex++;
-        setTimeout(readNextParagraph, 500);
-      };
-      
-      utterance.onerror = () => {
-        setIsReading(false);
-        setCurrentParagraph(-1);
-      };
-      
-      speechSynthesis.speak(utterance);
     };
 
-    setIsReading(true);
-    readNextParagraph();
+    const startSpeechSynthesis = () => {
+      if (isReading) return;
+
+      const voices = speechSynthesis.getVoices();
+      const femaleVoice = voices.find(voice =>
+        voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('zira') || voice.name.toLowerCase().includes('hazel')
+      ) || voices[0];
+      const maleVoice = voices.find(voice =>
+        voice.name.toLowerCase().includes('male') || voice.name.toLowerCase().includes('david') || voice.name.toLowerCase().includes('mark')
+      ) || voices[1] || voices[0];
+
+      const paragraphs = [
+        'Thank you for the opportunity to read to your hearing.',
+        `The title of this post is: ${postData.title || 'Untitled Post'}.`,
+        `Category: ${postData.category || 'Uncategorized'}.`,
+        `Author: ${postData.user?.name || postAuthorName}.`,
+        ...safePostContent.split('\n').filter(p => p.trim()),
+        'Thank you once again for the opportunity to read for you, God loves you. Stay blessed. LIV Blog is here to serve you.'
+      ];
+      let currentIndex = 0;
+
+      const readNextParagraph = () => {
+        if (currentIndex >= paragraphs.length) {
+          setIsReading(false);
+          setCurrentParagraph(-1);
+          return;
+        }
+
+        setCurrentParagraph(currentIndex >= 4 ? currentIndex - 4 : -1);
+        const text = paragraphs[currentIndex].replace(/[#*]/g, '');
+        const utterance = new SpeechSynthesisUtterance(text);
+
+        if (alternateVoices && currentIndex > 3 && currentIndex < paragraphs.length - 1) {
+          utterance.voice = (currentIndex - 4) % 2 === 0 ? femaleVoice : maleVoice;
+        } else {
+          utterance.voice = voiceGender === 'female' ? femaleVoice : maleVoice;
+        }
+
+        utterance.rate = readingSpeed;
+        utterance.pitch = 1;
+        utterance.volume = 1;
+
+        utterance.onend = () => {
+          currentIndex++;
+          setTimeout(readNextParagraph, 500);
+        };
+
+        utterance.onerror = () => {
+          setIsReading(false);
+          setCurrentParagraph(-1);
+        };
+
+        speechSynthesis.speak(utterance);
+      };
+
+      setIsReading(true);
+      readNextParagraph();
+    };
+
+    // Kick off backend TTS; on failure, fallback to speechSynthesis
+    doBackendTts();
   };
+
+  const handlePauseResume = () => {
+    if (!audioRef.current) return;
+    if (isPaused) {
+      audioRef.current.play();
+      setIsPaused(false);
+    } else {
+      audioRef.current.pause();
+      setIsPaused(true);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      // cleanup audio on unmount
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+        audioRef.current = null;
+      }
+      if (audioUrlRef.current) {
+        URL.revokeObjectURL(audioUrlRef.current);
+        audioUrlRef.current = null;
+      }
+      speechSynthesis.cancel();
+    };
+  }, []);
+
+  // Sync playbackRate when readingSpeed changes
+  useEffect(() => {
+    if (audioRef.current) {
+      try { audioRef.current.playbackRate = readingSpeed; } catch (e) { /* ignore */ }
+    }
+  }, [readingSpeed]);
 
   // Safe content formatting without dangerous HTML
   const renderContent = (content: string) => {
@@ -208,7 +291,7 @@ export const PostDetail: React.FC = () => {
       }
 
       // Handle images
-      const imageMatch = line.match(/!\[([^\]]*)\]\(([^)]+)\)/);
+      const imageMatch = line.match(/!\[([^]]*)\]\(([^)]+)\)/);
       if (imageMatch) {
         const [, altText, imageUrl] = imageMatch;
         return (
@@ -325,7 +408,7 @@ export const PostDetail: React.FC = () => {
       }
 
       // Handle links
-      const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+      const linkRegex = /\[([^]]+)\]\(([^)]+)\)/g;
       if (linkRegex.test(line)) {
         const parts = line.split(linkRegex);
         return (
@@ -385,7 +468,7 @@ export const PostDetail: React.FC = () => {
     if (typeof userObject === 'string') return userObject;
 
     // If it's an object with a name property
-    if (typeof userObject === 'object' && userObject !== null) {
+    if (typeof userObject === 'object') {
       // Try different possible name fields
       return userObject.name || userObject.username || userObject.email || 'Anonymous';
     }
@@ -619,7 +702,18 @@ export const PostDetail: React.FC = () => {
               >
                 {isReading ? 'Stop' : 'Listen'}
               </Button>
-              
+              {isReading && (
+                <Button
+                  onClick={handlePauseResume}
+                  startIcon={isPaused ? <Volume2 /> : <VolumeX />}
+                  variant="outlined"
+                  size="small"
+                  style={{ marginLeft: 8, borderRadius: '6px', fontSize: '0.75rem' }}
+                >
+                  {isPaused ? 'Resume' : 'Pause'}
+                </Button>
+              )}
+
               <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem' }}>
                 <input
                   type="checkbox"
@@ -1008,3 +1102,4 @@ export const PostDetail: React.FC = () => {
     </div>
   );
 };
+

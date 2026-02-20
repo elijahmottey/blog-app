@@ -12,4 +12,5 @@ public interface AuthenticationService {
     ResponseEntity<?> authenticate(Login request, HttpServletResponse response);
     ResponseEntity<?> register(Register request, HttpServletResponse response);
     ResponseEntity<?> registerAdmin(Register request, HttpServletResponse response);
+    ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response);
 }

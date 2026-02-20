@@ -1,5 +1,6 @@
 package liv.codveda.blog.app.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import liv.codveda.blog.app.domain.dto.request.Login;
@@ -58,6 +59,11 @@ public class AuthenticationController {
         cookieUtils.deleteCookie(response, "accessToken");
         cookieUtils.deleteCookie(response, "refreshToken");
         return ResponseEntity.ok().body(Map.of("message", "Logged out successfully"));
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        return authenticationService.refreshToken(request, response);
     }
 
 }

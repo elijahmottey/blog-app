@@ -1,5 +1,6 @@
 package liv.codveda.blog.app.service.impl;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import liv.codveda.blog.app.domain.dto.request.Login;
 import liv.codveda.blog.app.domain.dto.request.Register;
@@ -8,6 +9,7 @@ import liv.codveda.blog.app.domain.entities.Users;
 import liv.codveda.blog.app.domain.enums.Roles;
 import liv.codveda.blog.app.exception.ConflictException;
 import liv.codveda.blog.app.exception.NotFoundException;
+import liv.codveda.blog.app.exception.UnauthorizedException;
 import liv.codveda.blog.app.repository.UsersRepository;
 import liv.codveda.blog.app.security.jwt.JWTUtils;
 import liv.codveda.blog.app.security.util.CookieUtils;
@@ -21,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Optional;
 
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
@@ -143,6 +146,42 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         .name(admin.getName())
                         .role(admin.getRole())
                         .build());
+    }
+
+    @Override
+    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        Optional<String> maybeRefresh = cookieUtils.getCookie(request, "refreshToken");
+        if (maybeRefresh.isEmpty()) {
+            throw new UnauthorizedException("Refresh token not present");
+        }
+
+        String refreshToken = maybeRefresh.get();
+        String username = jwtUtils.extractUsername(refreshToken);
+        var user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new NotFoundException("User for refresh token not found"));
+
+        if (!jwtUtils.isValidRefreshToken(refreshToken, user)) {
+            throw new UnauthorizedException("Invalid refresh token");
+        }
+
+        String newAccessToken = jwtUtils.generateAccessToken(user);
+        String newRefreshToken = jwtUtils.generateRefreshToken(user); // rotate refresh token
+
+        Instant accessTokenExpiration = jwtUtils.extractExpiration(newAccessToken);
+        Instant refreshTokenExpiration = jwtUtils.extractExpiration(newRefreshToken);
+
+        cookieUtils.addCookie(response, "accessToken", newAccessToken, 3600);
+        cookieUtils.addCookie(response, "refreshToken", newRefreshToken, 604800);
+
+        BlogResponse blogResponse = BlogResponse.builder()
+                .message("Token refreshed")
+                .accessTokenExpiration(accessTokenExpiration)
+                .refreshTokenExpiration(refreshTokenExpiration)
+                .name(user.getName())
+                .role(user.getRole())
+                .build();
+
+        return ResponseEntity.ok(blogResponse);
     }
 
 

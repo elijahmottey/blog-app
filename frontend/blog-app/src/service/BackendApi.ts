@@ -110,15 +110,13 @@ export interface CommentDto{
 
 
 export interface AuthsResponse {
-    accessToken: string;
-    refreshToken: string;
-    accessTokenExpiration: string;
-    refreshTokenExpiration: string;
-    role: Roles[];
-    name: string;
-    message: string;
-    timestamp: string;
-    requestId: string;
+    accessTokenExpiration?: string;
+    refreshTokenExpiration?: string;
+    role?: string[] | string;
+    name?: string;
+    message?: string;
+    timestamp?: string;
+    requestId?: string;
 }
 
 
@@ -250,19 +248,25 @@ export default class BackendApi {
     // ---- AUTH ----
     static async registerUser(registrationData: UserRegistration) {
         const response = await this.post<AuthsResponse>("/auth/signup", registrationData);
-        localStorage.setItem("roles1", JSON.stringify(response.role));
+        if (response?.role) {
+            localStorage.setItem("roles1", JSON.stringify(response.role));
+        }
         return response;
     }
 
     static async loginUser(loginData: UserLogin) {
-        const response = await this.post<AuthsResponse>("/auth/login", loginData);
-        localStorage.setItem("roles1", JSON.stringify(response.role));
+        const response = await this.post<AuthsResponse>('/auth/login', loginData);
+        if (response?.role) {
+            localStorage.setItem("roles1", JSON.stringify(response.role));
+        }
         return response;
     }
 
     static async registerAdmin(adminData: UserRegistration) {
         const response = await this.post<AuthsResponse>("/auth/admin", adminData);
-        localStorage.setItem("roles1", JSON.stringify(response.role));
+        if (response?.role) {
+            localStorage.setItem("roles1", JSON.stringify(response.role));
+        }
         return response;
     }
 
@@ -284,11 +288,14 @@ export default class BackendApi {
 
         this.refreshTokenPromise = (async () => {
             try {
-                const response = await apiClient.post<AuthsResponse>("/auth/refresh-token", {}, {
+                const response = await apiClient.post<any>("/auth/refresh-token", {}, {
                     headers: { 'X-Skip-Interceptor': 'true' }
                 });
-                localStorage.setItem("roles1", JSON.stringify(response.data.role));
-                return response.data.accessToken;
+                // Backend returns a safe BlogResponse with role and expirations (tokens are in cookies)
+                if (response?.data?.role) {
+                    localStorage.setItem("roles1", JSON.stringify(response.data.role));
+                }
+                return response.data;
             } finally {
                 this.refreshTokenPromise = null;
             }
@@ -458,7 +465,15 @@ export default class BackendApi {
         return this.get<ApiResponse<PagedResponse<PostDto>>>(`/post/category/${encodeURIComponent(category)}?page=${page}&size=${size}`);
     }
 
-
+    // ---- AI TTS ----
+    static async generateTts(text: string) {
+        try {
+            const response = await apiClient.post('/ai/tts', { text }, { responseType: 'blob' });
+            return response.data as Blob;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
 }
 
 // ---- AXIOS INTERCEPTORS ----
