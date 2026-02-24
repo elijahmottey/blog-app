@@ -5,8 +5,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import liv.codveda.blog.app.domain.dto.request.Login;
 import liv.codveda.blog.app.domain.dto.request.Register;
+import liv.codveda.blog.app.domain.dto.response.ApiResponse;
 import liv.codveda.blog.app.security.util.CookieUtils;
 import liv.codveda.blog.app.service.interfaces.AuthenticationService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,15 +58,36 @@ public class AuthenticationController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletResponse response) {
-        cookieUtils.deleteCookie(response, "accessToken");
-        cookieUtils.deleteCookie(response, "refreshToken");
-        return ResponseEntity.ok().body(Map.of("message", "Logged out successfully"));
+    public ResponseEntity<ApiResponse<String>> logout(HttpServletResponse response) {
+        clearTokenCookies(response);
+        return ResponseEntity.ok(new ApiResponse<>(null, "Logout successful"));
     }
 
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
         return authenticationService.refreshToken(request, response);
+    }
+
+
+    private void clearTokenCookies(HttpServletResponse response) {
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
     }
 
 }

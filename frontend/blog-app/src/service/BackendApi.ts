@@ -466,9 +466,12 @@ export default class BackendApi {
     }
 
     // ---- AI TTS ----
-    static async generateTts(text: string) {
+    // generateTts supports either a string (text) or an options object:
+    // { text, gender?, tone?, rate?, alternate? }
+    static async generateTts(payload: string | { text: string; gender?: string; tone?: string; rate?: number; alternate?: boolean; preset?: string }) {
         try {
-            const response = await apiClient.post('/ai/tts', { text }, { responseType: 'blob' });
+            const body = typeof payload === 'string' ? { text: payload } : payload;
+            const response = await apiClient.post('/ai/tts', body, { responseType: 'blob' });
             return response.data as Blob;
         } catch (error) {
             throw this.handleError(error);

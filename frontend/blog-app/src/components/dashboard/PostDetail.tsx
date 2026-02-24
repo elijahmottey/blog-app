@@ -34,6 +34,9 @@ export const PostDetail: React.FC = () => {
   const [isReading, setIsReading] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [voiceGender, setVoiceGender] = useState<'male' | 'female'>('female');
+  const [voiceTone, setVoiceTone] = useState<'clear' | 'power'>('power');
+  // Two podcast-style presets: A = warm/narrator (male-leaning), B = bright/narrator (female-leaning)
+  const [voicePreset, setVoicePreset] = useState<'podcastA' | 'podcastB'>('podcastA');
   const [readingSpeed, setReadingSpeed] = useState(0.8);
   const [alternateVoices, setAlternateVoices] = useState(false);
   const [currentParagraph, setCurrentParagraph] = useState(-1);
@@ -42,6 +45,8 @@ export const PostDetail: React.FC = () => {
   const postId = parseInt(id || '0');
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
+  const [generatingAudio, setGeneratingAudio] = useState(false);
+  const isUsingSpeechRef = useRef<boolean>(false);
 
   // Fetch post details
   const { data: post, isLoading: postLoading, error: postError } = useQuery({
@@ -117,27 +122,33 @@ export const PostDetail: React.FC = () => {
   };
 
   const handleReadPost = () => {
-    // If already playing via audio element
-    if (isReading && audioRef.current) {
-      // if paused, resume; otherwise stop
-      if (isPaused) {
-        audioRef.current.play();
-        setIsPaused(false);
-        return;
+    // If already reading, stop appropriately (audio element or speechSynthesis)
+    if (isReading) {
+      if (audioRef.current) {
+        // stop HTMLAudioElement playback
+        try { audioRef.current.pause(); } catch (e) { /* ignore */ }
+        audioRef.current.currentTime = 0;
+        audioRef.current.src = '';
+        if (audioUrlRef.current) {
+          URL.revokeObjectURL(audioUrlRef.current);
+          audioUrlRef.current = null;
+        }
+        audioRef.current = null;
       }
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current.src = '';
-      if (audioUrlRef.current) {
-        URL.revokeObjectURL(audioUrlRef.current);
-        audioUrlRef.current = null;
+
+      // If speechSynthesis is speaking/paused, cancel it
+      if (speechSynthesis.speaking || speechSynthesis.paused) {
+        try { speechSynthesis.cancel(); } catch (e) { /* ignore */ }
       }
-      audioRef.current = null;
+
       setIsReading(false);
       setCurrentParagraph(-1);
       setIsPaused(false);
       return;
     }
+
+    // Ensure any in-progress speechSynthesis is canceled to avoid overlapping audio
+    try { speechSynthesis.cancel(); } catch (e) { /* ignore */ }
 
     // Try backend TTS first (not all environments support speechSynthesis reliably)
     const doBackendTts = async () => {
@@ -147,16 +158,20 @@ export const PostDetail: React.FC = () => {
           toast.error('No content to read');
           return;
         }
-        const blob = await BackendApi.generateTts(textToRead);
+        setGeneratingAudio(true);
+        isUsingSpeechRef.current = false;
+        const blob = await BackendApi.generateTts({ text: textToRead, gender: voiceGender, tone: voiceTone, rate: readingSpeed, alternate: alternateVoices, preset: voicePreset });
         const url = URL.createObjectURL(blob);
         audioUrlRef.current = url;
         const audio = new Audio(url);
         audioRef.current = audio;
         audio.playbackRate = readingSpeed;
+        audio.onplay = () => { setIsPaused(false); setIsReading(true); };
+        audio.onpause = () => { setIsPaused(true); };
         audio.onended = () => {
           setIsReading(false);
-          setCurrentParagraph(-1);
           setIsPaused(false);
+          setCurrentParagraph(-1);
           if (audioUrlRef.current) {
             URL.revokeObjectURL(audioUrlRef.current);
             audioUrlRef.current = null;
@@ -172,12 +187,18 @@ export const PostDetail: React.FC = () => {
             URL.revokeObjectURL(audioUrlRef.current);
             audioUrlRef.current = null;
           }
+          setGeneratingAudio(false);
+          isUsingSpeechRef.current = true;
           startSpeechSynthesis();
         };
         await audio.play();
         setIsReading(true);
+        setIsPaused(false);
+        setGeneratingAudio(false);
       } catch (err) {
         console.warn('Backend TTS error', err);
+        setGeneratingAudio(false);
+        isUsingSpeechRef.current = true;
         startSpeechSynthesis();
       }
     };
@@ -186,12 +207,43 @@ export const PostDetail: React.FC = () => {
       if (isReading) return;
 
       const voices = speechSynthesis.getVoices();
-      const femaleVoice = voices.find(voice =>
-        voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('zira') || voice.name.toLowerCase().includes('hazel')
-      ) || voices[0];
-      const maleVoice = voices.find(voice =>
-        voice.name.toLowerCase().includes('male') || voice.name.toLowerCase().includes('david') || voice.name.toLowerCase().includes('mark')
-      ) || voices[1] || voices[0];
+
+      const choosePreferred = (gender: 'male' | 'female') => {
+        // Preset-aware preference lists tuned for podcast-style voices
+        const podcastAPrefer = gender === 'male'
+          ? ['matthew', 'david', 'mark', 'alloy', 'brian']
+          : ['zira', 'amy', 'samantha', 'joanna'];
+
+        const podcastBPrefer = gender === 'male'
+          ? ['david', 'mark', 'alloy']
+          : ['samantha', 'joanna', 'kendra', 'zira', 'amy'];
+
+        const tonePrefer = voiceTone === 'power'
+          ? ['david','matthew','mark','alloy','google','neural']
+          : ['samantha','joanna','zira','amy','alloy','google','neural'];
+
+        const basePrefer = voicePreset === 'podcastA' ? podcastAPrefer : podcastBPrefer;
+
+        // Try preset list first
+        for (const p of basePrefer) {
+          const found = voices.find(v => v.name.toLowerCase().includes(p));
+          if (found) return found;
+        }
+
+        // Then try tone-preferred list
+        for (const p of tonePrefer) {
+          const found = voices.find(v => v.name.toLowerCase().includes(p));
+          if (found) return found;
+        }
+
+        // fallback by simple gender keyword in name
+        const byGender = voices.find(v => (gender === 'female' ? /female|female voice|samantha|joanna|zira|amy/.test(v.name.toLowerCase()) : /male|male voice|david|mark|matthew|brian/.test(v.name.toLowerCase())));
+        if (byGender) return byGender;
+        return voices[0];
+      };
+
+      const femaleVoice = choosePreferred('female');
+      const maleVoice = choosePreferred('male');
 
       const paragraphs = [
         'Thank you for the opportunity to read to your hearing.',
@@ -220,8 +272,13 @@ export const PostDetail: React.FC = () => {
           utterance.voice = voiceGender === 'female' ? femaleVoice : maleVoice;
         }
 
-        utterance.rate = readingSpeed;
-        utterance.pitch = 1;
+        // Tone + preset adjustments (tune rate/pitch for podcast-like delivery)
+        const presetRateMultiplier = voicePreset === 'podcastA' ? 0.94 : 1.02;
+        const presetPitch = voicePreset === 'podcastA' ? 0.95 : 1.03;
+        const toneRateMultiplier = voiceTone === 'power' ? 0.92 : 1.02;
+
+        utterance.rate = Math.max(0.5, Math.min(2, readingSpeed * toneRateMultiplier * presetRateMultiplier));
+        utterance.pitch = Math.max(0.5, Math.min(2, presetPitch));
         utterance.volume = 1;
 
         utterance.onend = () => {
@@ -246,14 +303,49 @@ export const PostDetail: React.FC = () => {
   };
 
   const handlePauseResume = () => {
-    if (!audioRef.current) return;
-    if (isPaused) {
-      audioRef.current.play();
-      setIsPaused(false);
-    } else {
-      audioRef.current.pause();
-      setIsPaused(true);
+    // If using backend audio element
+    if (!isUsingSpeechRef.current && audioRef.current) {
+      try {
+        if (audioRef.current.paused) {
+          audioRef.current.play();
+          // set states; verify shortly
+          setIsPaused(false);
+          setIsReading(true);
+          setTimeout(() => {
+            setIsPaused(audioRef.current ? audioRef.current.paused : false);
+            setIsReading(!!audioRef.current && !audioRef.current.paused);
+          }, 150);
+        } else {
+          audioRef.current.pause();
+          setIsPaused(true);
+          setIsReading(true);
+          setTimeout(() => {
+            setIsPaused(audioRef.current ? audioRef.current.paused : true);
+          }, 150);
+        }
+      } catch (e) {
+        console.warn('Audio pause/resume failed', e);
+        // fallback: toggle state
+        setIsPaused((p) => !p);
+      }
+      return;
     }
+
+    // Otherwise control speechSynthesis
+    if (speechSynthesis.speaking && !speechSynthesis.paused) {
+      try { speechSynthesis.pause(); } catch (e) { /* ignore */ }
+      setIsPaused(true);
+      setIsReading(true);
+      return;
+    }
+
+    if (speechSynthesis.paused) {
+      try { speechSynthesis.resume(); } catch (e) { /* ignore */ }
+      setIsPaused(false);
+      setIsReading(true);
+      return;
+    }
+    // nothing to pause/resume
   };
 
   useEffect(() => {
@@ -291,21 +383,40 @@ export const PostDetail: React.FC = () => {
       }
 
       // Handle images
-      const imageMatch = line.match(/!\[([^]]*)\]\(([^)]+)\)/);
+      const imageMatch = line.match(/!\[([^]]*)]\(([^)]+)\)/);
       if (imageMatch) {
-        const [, altText, imageUrl] = imageMatch;
+        let [, altText, imageUrl] = imageMatch;
+        imageUrl = (imageUrl || '').trim();
+
+        // Support optional title after the url: ![alt](url "title")
+        const titleMatch = imageUrl.match(/^([^\s"]+)(?:\s+"([^"]+)")?$/);
+        if (titleMatch) {
+          imageUrl = titleMatch[1];
+        }
+
+        // If URL is relative (not starting with http(s) or data: or blob:), prefix with API base if available
+        let src = imageUrl;
+        if (!/^https?:\/\//i.test(src) && !/^data:|^blob:/i.test(src)) {
+          const base = (import.meta.env.VITE_API_BASE_URL || '').toString();
+          if (base) {
+            src = base.replace(/\/$/, '') + '/' + src.replace(/^\//, '');
+          }
+        }
+
         return (
-          <img 
+          <img
             key={index}
-            src={imageUrl} 
-            alt={altText || 'Image'} 
+            src={src}
+            alt={altText || 'Image'}
+            loading="lazy"
+            onError={(e) => { try { (e.currentTarget as HTMLImageElement).style.display = 'none'; } catch {} console.warn('Failed to load image', src); }}
             style={{
-              maxWidth: '100%', 
-              height: 'auto', 
-              margin: '1rem 0', 
-              borderRadius: '8px', 
+              maxWidth: '100%',
+              height: 'auto',
+              margin: '1rem 0',
+              borderRadius: '8px',
               boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-            }} 
+            }}
           />
         );
       }
@@ -408,7 +519,7 @@ export const PostDetail: React.FC = () => {
       }
 
       // Handle links
-      const linkRegex = /\[([^]]+)\]\(([^)]+)\)/g;
+      const linkRegex = /\[([^]]+)]\(([^)]+)\)/g;
       if (linkRegex.test(line)) {
         const parts = line.split(linkRegex);
         return (
@@ -695,12 +806,13 @@ export const PostDetail: React.FC = () => {
                 startIcon={isReading ? <VolumeX /> : <Volume2 />}
                 variant={isReading ? 'contained' : 'outlined'}
                 size="small"
+                disabled={generatingAudio}
                 style={{
                   borderRadius: '6px',
                   fontSize: '0.75rem'
                 }}
               >
-                {isReading ? 'Stop' : 'Listen'}
+                {generatingAudio ? 'Generating...' : (isReading ? 'Stop' : 'Listen')}
               </Button>
               {isReading && (
                 <Button
@@ -739,7 +851,40 @@ export const PostDetail: React.FC = () => {
                   <option value="male">Male Voice</option>
                 </select>
               )}
-              
+              {/* Voice tone selector */}
+              <select
+                value={voiceTone}
+                onChange={(e) => setVoiceTone(e.target.value as 'clear' | 'power')}
+                style={{
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  border: `1px solid ${theme.palette.divider}`,
+                  fontSize: '0.75rem',
+                  backgroundColor: theme.palette.background.paper,
+                  marginLeft: 8
+                }}
+              >
+                <option value="power">Power</option>
+                <option value="clear">Clear</option>
+              </select>
+
+              {/* Voice preset selector */}
+              <select
+                value={voicePreset}
+                onChange={(e) => setVoicePreset(e.target.value as 'podcastA' | 'podcastB')}
+                style={{
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  border: `1px solid ${theme.palette.divider}`,
+                  fontSize: '0.75rem',
+                  backgroundColor: theme.palette.background.paper,
+                  marginLeft: 8
+                }}
+              >
+                <option value="podcastA">Podcast Preset A</option>
+                <option value="podcastB">Podcast Preset B</option>
+              </select>
+
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>Speed:</span>
                 <input
