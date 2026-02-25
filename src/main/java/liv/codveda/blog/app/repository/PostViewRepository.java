@@ -12,4 +12,5 @@ import java.util.Optional;
 public interface PostViewRepository extends JpaRepository<PostView, Long> {
     Optional<PostView> findByUserAndPost(Users user, Post post);
     long countByPost(Post post);
+    long countByPost_Users_Id(Long userId);
 }

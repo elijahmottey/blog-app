@@ -21,6 +21,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     // Find all posts by a given user
     List<Post> findByUsers(Users users);
 
+    long countByUsers_Id(Long userId);
+
     // Return distinct non-null categories
     @Query("select distinct p.category from Post p where p.category is not null")
     List<String> findDistinctCategories();

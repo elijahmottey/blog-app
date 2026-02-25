@@ -10,6 +10,11 @@ public record CommentDto(
         String content,
         UsersReferenceDto users,
         PostReferenceDto posts,
+        Long parentId,
+        Long likes,
+        Long dislikes,
+        Boolean isLiked,
+        Boolean isDisliked,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

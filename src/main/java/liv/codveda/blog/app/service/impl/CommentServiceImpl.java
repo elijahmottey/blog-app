@@ -52,6 +52,22 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
+    public Comment createReply(Long postId, Long parentCommentId, Comment comment) {
+        Users user = getCurrentUser();
+        Post post = blogService.getPostById(postId);
+        Comment parent = getCommentById(parentCommentId);
+        if (parent.getPost() == null || !parent.getPost().getId().equals(postId)) {
+            // ensure parent belongs to the same post
+            throw new ResourceNotFoundException("Parent comment does not belong to the specified post");
+        }
+        comment.setPost(post);
+        comment.setUsers(user);
+        comment.setParent(parent);
+        return commentRepository.save(comment);
+    }
+
+    @Override
+    @Transactional
     public void deleteComment(Long id) {
         Comment comment = getCommentById(id);
         Users currentUser = getCurrentUser();

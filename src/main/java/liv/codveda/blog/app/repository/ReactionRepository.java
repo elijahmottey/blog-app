@@ -19,4 +19,8 @@ public interface ReactionRepository extends JpaRepository<Reaction, Long> {
 
     @Query("select r.type from Reaction r where r.user = :user and r.post = :post")
     Optional<ReactionType> findTypeByUserAndPost(@Param("user") Users user, @Param("post") Post post);
+
+    long countByType(ReactionType type);
+
+    long countByPost_Users_IdAndType(Long userId, ReactionType type);
 }

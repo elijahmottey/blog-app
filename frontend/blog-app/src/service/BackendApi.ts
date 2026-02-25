@@ -101,6 +101,11 @@ export interface CommentDto{
     content: string;
     users?: string;
     posts?: string;
+    parentId?: number | null;
+    likes?: number;
+    dislikes?: number;
+    isLiked?: boolean;
+    isDisliked?: boolean;
     createdAt: string;
     updatedAt: string;
 }
@@ -439,6 +444,28 @@ export default class BackendApi {
         return this.put<ApiResponse<CommentDto>>(`/comment/${commentId}`, CommentData);
     }
 
+    // --- Comment replies ---
+    static async replyToComment(postId: number, parentId: number, CommentData: CommentDto) {
+        return this.post<ApiResponse<CommentDto>>(`/comment/${postId}/reply/${parentId}`, CommentData);
+    }
+
+    // --- Comment reactions ---
+    static async likeComment(commentId: number) {
+        return this.post<ApiResponse<any>>(`/comment/${commentId}/like`, {});
+    }
+
+    static async unlikeComment(commentId: number) {
+        return this.delete<ApiResponse<any>>(`/comment/${commentId}/like`);
+    }
+
+    static async dislikeComment(commentId: number) {
+        return this.post<ApiResponse<any>>(`/comment/${commentId}/dislike`, {});
+    }
+
+    static async undislikeComment(commentId: number) {
+        return this.delete<ApiResponse<any>>(`/comment/${commentId}/dislike`);
+    }
+
     //-----AI chat -------
     static async askAi(prompt: string){
         return this.get<ApiResponse<string>>("/ai/chat", {
@@ -453,6 +480,15 @@ export default class BackendApi {
 
     static async unlikePost(postId: number) {
         return this.delete<ApiResponse<any>>(`/post/${postId}/like`);
+    }
+
+    // ---- ANALYTICS ----
+    static async getAdminOverviewAnalytics() {
+        return this.get<ApiResponse<{ totalPosts: number; totalComments: number; totalPostLikes: number; totalCommentLikes: number; totalCommentDislikes: number; totalPostViews: number }>>(`/analytics/admin/overview`);
+    }
+
+    static async getMyOverviewAnalytics() {
+        return this.get<ApiResponse<{ totalPosts: number; totalComments: number; totalPostLikes: number; totalCommentLikes: number; totalCommentDislikes: number; totalPostViews: number }>>(`/analytics/me`);
     }
 
     // ---- CATEGORIES ----

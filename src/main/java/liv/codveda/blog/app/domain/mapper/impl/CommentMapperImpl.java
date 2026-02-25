@@ -21,6 +21,7 @@ public class CommentMapperImpl implements CommentMapper {
         Comment comment = new Comment();
         comment.setId(commentDto.id());
         comment.setContent(commentDto.content());
+        // parent and reactions are set in service layer as needed
         comment.setCreatedAt(commentDto.createdAt());
         comment.setUpdatedAt(commentDto.updatedAt());
         return comment;
@@ -34,9 +35,13 @@ public class CommentMapperImpl implements CommentMapper {
                 comment.getContent(),
                 referenceMapper.toUsersReference(comment.getUsers()),
                 referenceMapper.toPostReference(comment.getPost()),
+                comment.getParent() != null ? comment.getParent().getId() : null,
+                null,
+                null,
+                null,
+                null,
                 comment.getCreatedAt(),
                 comment.getUpdatedAt()
-
         );
     }
 }
