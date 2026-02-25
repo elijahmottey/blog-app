@@ -11,7 +11,6 @@ const palette = {
   success: '#1d8102', // AWS Success Green
   info: '#0073bb', // AWS Info Blue
   warning: '#ff9900', // AWS Warning Orange
-  paper: '#ffffff',
 };
 
 export const theme = createTheme({
@@ -38,7 +37,7 @@ export const theme = createTheme({
     },
     background: {
       default: palette.background,
-      paper: palette.paper,
+      paper: '#ffffff',
     },
     divider: '#e9ebed',
   },
@@ -98,7 +97,7 @@ export const theme = createTheme({
     },
     button: {
       fontSize: '0.875rem',
-      fontWeight: 700,
+      fontWeight: 600,
       textTransform: 'none',
       color: 'inherit',
     },
@@ -112,7 +111,7 @@ export const theme = createTheme({
           fontSize: '0.875rem',
           fontWeight: 700,
           textTransform: 'none',
-          minHeight: '32px', // AWS compact button height
+          minHeight: '32px',
           boxShadow: 'none',
           '&:hover': {
             boxShadow: 'none',
@@ -148,23 +147,17 @@ export const theme = createTheme({
             fontSize: '0.875rem',
             borderRadius: '2px',
             backgroundColor: '#ffffff',
-            minHeight: '32px', // AWS input height
           },
           '& .MuiInputBase-input': {
             color: palette.text,
-            padding: '6px 10px', // Adjusted padding for 32px height
-            height: 'auto',
+            padding: '8px 12px',
+            height: '16px', // Adjust for AWS-like height
           },
           '& .MuiInputLabel-root': {
             color: '#5f6b7a',
             fontSize: '0.875rem',
-            transform: 'translate(14px, 9px) scale(1)',
             '&.Mui-focused': {
               color: palette.primary,
-              transform: 'translate(14px, -9px) scale(0.75)',
-            },
-            '&.MuiInputLabel-shrink': {
-              transform: 'translate(14px, -9px) scale(0.75)',
             },
           },
           '& .MuiOutlinedInput-root': {
@@ -198,12 +191,12 @@ export const theme = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          borderRadius: '0px',
-          border: '1px solid #e9ebed',
+          borderRadius: '0px', // AWS-like sharp corners
+          border: `1px solid ${palette.border}`,
           boxShadow: 'none',
           backgroundColor: '#ffffff',
           '&.MuiPaper-elevation1': {
-            boxShadow: '0 1px 1px 0 rgba(0,28,36,.3), 1px 1px 1px 0 rgba(0,28,36,.15), -1px 1px 1px 0 rgba(0,28,36,.15)',
+            boxShadow: '0 1px 1px 0 rgba(0,28,36,.3), 1px 1px 1px 0 rgba(0,28,36,.15), -1px 1px 1px 0 rgba(0,28,36,.15)', // AWS-like shadow
           },
           '&.MuiPaper-elevation2': {
             boxShadow: 'none',
@@ -214,39 +207,11 @@ export const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: '0px',
+          borderRadius: '0px', // AWS-like sharp corners
           border: `1px solid ${palette.border}`,
-          boxShadow: '0 1px 1px 0 rgba(0,28,36,.3), 1px 1px 1px 0 rgba(0,28,36,.15), -1px 1px 1px 0 rgba(0,28,36,.15)', // AWS Card Shadow
-          backgroundColor: '#ffffff',
+          boxShadow: 'none',
           '&:hover': {
-            borderColor: '#879596',
-          },
-        },
-      },
-    },
-    MuiCardHeader: {
-      styleOverrides: {
-        root: {
-          padding: '16px 20px',
-          borderBottom: `1px solid ${palette.border}`,
-        },
-        title: {
-          fontSize: '1.125rem', // h4 equivalent
-          fontWeight: 700,
-          color: palette.text,
-        },
-        subheader: {
-          fontSize: '0.875rem',
-          color: '#5f6b7a',
-        },
-      },
-    },
-    MuiCardContent: {
-      styleOverrides: {
-        root: {
-          padding: '20px',
-          '&:last-child': {
-            paddingBottom: '20px',
+            borderColor: '#d5dbdb',
           },
         },
       },
@@ -284,26 +249,27 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           fontSize: '0.875rem',
-          borderBottom: '1px solid #e9ebed',
+          borderBottom: `1px solid ${palette.border}`,
           padding: '12px 16px',
         },
         head: {
           fontWeight: 700,
           color: palette.text,
           backgroundColor: '#fafafa',
-          borderBottom: '1px solid #e9ebed',
+          borderBottom: `1px solid ${palette.border}`,
         },
       },
     },
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: '#ffffff', // Reverted to white as requested
-          color: palette.text,
-          boxShadow: '0 1px 1px 0 rgba(0,28,36,.3), 1px 1px 1px 0 rgba(0,28,36,.15), -1px 1px 1px 0 rgba(0,28,36,.15)',
+          // Revert to using theme.palette.background.paper for the AppBar background
+          backgroundColor: '#ffffff', // Default paper background
+          color: palette.text, // Text color should contrast with light background
+          boxShadow: 'none',
           height: '50px', // AWS Console Header Height
           minHeight: '50px',
-          borderBottom: `1px solid ${palette.border}`,
+          borderBottom: `1px solid ${palette.border}`, // Add a subtle border
         },
       },
     },
@@ -320,7 +286,7 @@ export const theme = createTheme({
       styleOverrides: {
         paper: {
           backgroundColor: '#ffffff',
-          borderRight: '1px solid #e9ebed',
+          borderRight: `1px solid ${palette.border}`,
         },
       },
     },

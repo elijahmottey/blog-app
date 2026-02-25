@@ -27,9 +27,8 @@ public class AnalyticsController {
         return ResponseEntity.ok(new ApiResponse<>(dto, "Admin analytics retrieved successfully"));
         
     }
-
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
-    @PreAuthorize("authenticated()")
     public ResponseEntity<ApiResponse<UserAnalyticsDto>> getMyOverview() {
         var dto = analyticsService.getMyOverview();
         return ResponseEntity.ok(new ApiResponse<>(dto, "User analytics retrieved successfully"));

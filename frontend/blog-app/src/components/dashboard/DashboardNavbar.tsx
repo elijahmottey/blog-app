@@ -16,7 +16,10 @@ import {
   Moon,
   Sun,
   Shield,
-  MessageCircle
+  Bot,
+  MessageCircle,
+  PenSquare,
+  Plus
 } from 'lucide-react';
 import {
   AppBar,
@@ -242,7 +245,7 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
                    onClick={onMenuClick}
                    sx={{ mr: 1 }}
                >
-                 {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+                 {isSidebarOpen ? <Menu size={20} /> : <Menu size={20} />}
                </IconButton>
              </Box>
 
@@ -304,6 +307,20 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
                    </Tooltip>
                )}
 
+               {/* Create Post Icon */}
+               <Tooltip title="Create Post">
+                 <IconButton
+                     component={Link}
+                     to="/dashboard/posts/create"
+                     color="inherit"
+                     sx={{ 
+                       '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' } 
+                     }}
+                 >
+                   <PenSquare size={20} />
+                 </IconButton>
+               </Tooltip>
+
                {/* AI Chat Icon */}
                <Tooltip title="AI Chat">
                  <IconButton
@@ -314,7 +331,7 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
                        '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' } 
                      }}
                  >
-                   <MessageCircle size={20} />
+                   <Bot size={20} />
                  </IconButton>
                </Tooltip>
 

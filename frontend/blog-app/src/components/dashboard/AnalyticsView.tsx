@@ -56,6 +56,8 @@ export const AnalyticsView: React.FC = () => {
   // Get admin analytics data
   const adminAnalytics = adminAnalyticsData?.data;
 
+  console.log(adminAnalytics)
+
   // Get total counts from new API endpoints
   const totalUsers = totalUsersData?.data || 0;
   const totalPosts = totalPostsData?.data || 0;
@@ -137,7 +139,7 @@ export const AnalyticsView: React.FC = () => {
 
       return {
         id: post.id,
-        title: post.title?.substring(0, 40) || 'Untitled',
+        title: post.title?.substring(0, 50) || 'Untitled',
         views,
         likes,
         comments: commentsCount,
