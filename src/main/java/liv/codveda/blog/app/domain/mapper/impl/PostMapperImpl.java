@@ -44,7 +44,10 @@ public class PostMapperImpl implements PostMapper {
                                 .stream()
                                 .map(referenceMapper::toCommentReference)
                                 .toList()
-                        ).orElse(null)
+                        ).orElse(null),
+                null,
+                null,
+                null
         );
     }
 }

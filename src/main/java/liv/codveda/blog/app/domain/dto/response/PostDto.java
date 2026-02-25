@@ -15,7 +15,9 @@ public record PostDto(
         UsersReferenceDto user,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        List<CommentReferenceDto> comments
-
+        List<CommentReferenceDto> comments,
+        Long likes,
+        Long views,
+        Boolean isLiked
 ) {
 }
