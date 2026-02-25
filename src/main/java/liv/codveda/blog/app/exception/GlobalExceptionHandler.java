@@ -84,7 +84,7 @@ public class GlobalExceptionHandler {
     }
 
     // 404 - Not Found
-    @ExceptionHandler({NotFoundException.class, NoHandlerFoundException.class})
+    @ExceptionHandler({NotFoundException.class, NoHandlerFoundException.class, jakarta.persistence.EntityNotFoundException.class})
     public ResponseEntity<ErrorResponse> handleNotFoundException(Exception ex, WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(),

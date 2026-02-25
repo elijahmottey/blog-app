@@ -13,6 +13,11 @@ import { LIVBlogHeader, LIVBlogCard, LIVBlogLayout } from '../ui';
 export const AnalyticsView: React.FC = () => {
   const theme = useTheme();
 
+  const { data: adminAnalyticsData } = useQuery({
+    queryKey: ['admin-analytics'],
+    queryFn: () => BackendApi.getAdminOverviewAnalytics(),
+  });
+
   const { data: totalUsersData } = useQuery({
     queryKey: ['total-users'],
     queryFn: () => BackendApi.getTotalUsers(),
@@ -48,6 +53,9 @@ export const AnalyticsView: React.FC = () => {
   const posts = postsData?.data?.content || [];
   const comments = commentsData?.data?.content || [];
   
+  // Get admin analytics data
+  const adminAnalytics = adminAnalyticsData?.data;
+
   // Get total counts from new API endpoints
   const totalUsers = totalUsersData?.data || 0;
   const totalPosts = totalPostsData?.data || 0;
@@ -118,18 +126,45 @@ export const AnalyticsView: React.FC = () => {
 
   // Content engagement data
   const engagementData = React.useMemo(() => {
-    return posts.slice(0, 10).map(post => ({
-      title: post.title?.substring(0, 20) + '...' || 'Untitled',
-      views: post.views || Math.floor(Math.random() * 100),
-      likes: post.likes || Math.floor(Math.random() * 50),
-      comments: comments.filter(comment => comment.posts === post.title).length,
+    // Compute a raw score and normalized rating for each post using real fields
+    const items = posts.map(post => {
+      const views = post.views || 0;
+      const likes = post.likes || 0;
+      const commentsCount = comments.filter(comment => comment.posts === post.title).length;
+
+      // Raw score: weight likes higher than views (assumption: 1 like ~ 10 views)
+      const rawScore = views + likes * 10;
+
+      return {
+        id: post.id,
+        title: post.title?.substring(0, 40) || 'Untitled',
+        views,
+        likes,
+        comments: commentsCount,
+        rawScore,
+      };
+    });
+
+    // Sort descending by rawScore (best performing first)
+    items.sort((a, b) => b.rawScore - a.rawScore);
+
+    // Normalize rawScore to a 0-5 rating
+    const maxRaw = items.length > 0 ? Math.max(...items.map(i => i.rawScore)) : 0;
+    return items.map(item => ({
+      ...item,
+      rating: maxRaw > 0 ? Math.round((item.rawScore / maxRaw) * 5 * 10) / 10 : 0, // one decimal
     }));
+
   }, [posts, comments]);
 
   const totalStats = {
     totalUsers: totalUsers,
-    totalPosts: totalPosts,
-    totalComments: totalComments,
+    totalPosts: adminAnalytics?.totalPosts ?? totalPosts,
+    totalComments: adminAnalytics?.totalComments ?? totalComments,
+    totalPostLikes: adminAnalytics?.totalPostLikes ?? 0,
+    totalCommentLikes: adminAnalytics?.totalCommentLikes ?? 0,
+    totalCommentDislikes: adminAnalytics?.totalCommentDislikes ?? 0,
+    totalPostViews: adminAnalytics?.totalPostViews ?? 0,
     publishedPosts: posts.filter(post => post.content && post.content.length > 0).length,
     draftPosts: totalDrafts,
     avgPostsPerUser: totalUsers > 0 ? (totalPosts / totalUsers).toFixed(1) : '0',
@@ -180,28 +215,28 @@ export const AnalyticsView: React.FC = () => {
             subtitle: 'User interactions'
           },
           { 
-            label: 'Published Posts', 
-            value: totalStats.publishedPosts, 
-            icon: Activity, 
-            color: theme.palette.info.main,
+            label: 'Total Post Likes',
+            value: totalStats.totalPostLikes,
+            icon: Heart,
+            color: theme.palette.error.main,
             trend: '+5%',
-            subtitle: 'Live content'
+            subtitle: 'Post engagement'
           },
           { 
-            label: 'Draft Posts', 
-            value: totalStats.draftPosts, 
-            icon: Clock, 
+            label: 'Total Post Views',
+            value: totalStats.totalPostViews,
+            icon: Eye,
             color: theme.palette.warning.main,
-            trend: '-2%',
-            subtitle: 'Work in progress'
+            trend: '+20%',
+            subtitle: 'Content visibility'
           },
           { 
-            label: 'Avg Posts/User', 
-            value: totalStats.avgPostsPerUser, 
-            icon: TrendingUp, 
-            color: theme.palette.primary.main,
+            label: 'Comment Engagement',
+            value: `${totalStats.totalCommentLikes} / ${totalStats.totalCommentDislikes}`,
+            icon: TrendingUp,
+            color: theme.palette.info.main,
             trend: '+3%',
-            subtitle: 'Content creation rate'
+            subtitle: 'Likes / Dislikes'
           },
         ].map((metric) => (
           <LIVBlogCard
@@ -449,7 +484,7 @@ export const AnalyticsView: React.FC = () => {
           <div style={{ maxHeight: 280, overflow: 'auto' }}>
             {engagementData.slice(0, 6).map((item, index) => (
               <div 
-                key={index} 
+                key={item.id || index}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -487,7 +522,7 @@ export const AnalyticsView: React.FC = () => {
                     }}>
                       {item.title}
                     </div>
-                    <div style={{ display: 'flex', gap: '16px', fontSize: '0.75rem', color: theme.palette.text.secondary }}>
+                    <div style={{ display: 'flex', gap: '12px', fontSize: '0.75rem', color: theme.palette.text.secondary, alignItems: 'center' }}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <Eye size={12} /> {item.views}
                       </span>
@@ -496,6 +531,17 @@ export const AnalyticsView: React.FC = () => {
                       </span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <MessageSquare size={12} /> {item.comments}
+                      </span>
+                      {/* Rating display: numeric + simple star visualization */}
+                      <span style={{ marginLeft: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <strong style={{ color: theme.palette.text.primary }}>{item.rating}</strong>
+                        <span style={{ color: theme.palette.warning.main, fontSize: 12 }}>
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <span key={i}>
+                              {i < Math.round(item.rating) ? '★' : '☆'}
+                            </span>
+                          ))}
+                        </span>
                       </span>
                     </div>
                   </div>

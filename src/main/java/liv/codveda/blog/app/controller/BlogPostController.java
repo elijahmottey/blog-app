@@ -20,6 +20,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,6 +43,7 @@ public class BlogPostController  {
         this.postViewService = postViewService;
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping
     public ResponseEntity<ApiResponse<PostDto>> createPost(
             @Valid @RequestBody PostDto postDto) {
@@ -58,6 +60,7 @@ public class BlogPostController  {
 
 
 
+    @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deletePost(@PathVariable Long id) {
         blogService.deletePost(id);
@@ -171,6 +174,7 @@ public class BlogPostController  {
     }
 
     // ---- Reactions (Like) ----
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/{id}/like")
     public ResponseEntity<ApiResponse<Void>> likePost(@PathVariable Long id) {
         reactionService.setReaction(id, ReactionType.LIKE);

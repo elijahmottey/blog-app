@@ -5,6 +5,7 @@ import liv.codveda.blog.app.domain.dto.response.ApiResponse;
 import liv.codveda.blog.app.domain.dto.response.UserAnalyticsDto;
 import liv.codveda.blog.app.service.interfaces.AnalyticsService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,6 +21,7 @@ public class AnalyticsController {
     }
 
     @GetMapping("/admin/overview")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<AdminAnalyticsDto>> getAdminOverview() {
         var dto = analyticsService.getAdminOverview();
         return ResponseEntity.ok(new ApiResponse<>(dto, "Admin analytics retrieved successfully"));
@@ -27,6 +29,7 @@ public class AnalyticsController {
     }
 
     @GetMapping("/me")
+    @PreAuthorize("authenticated()")
     public ResponseEntity<ApiResponse<UserAnalyticsDto>> getMyOverview() {
         var dto = analyticsService.getMyOverview();
         return ResponseEntity.ok(new ApiResponse<>(dto, "User analytics retrieved successfully"));

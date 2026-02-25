@@ -5,6 +5,7 @@ import liv.codveda.blog.app.domain.entities.Post;
 import liv.codveda.blog.app.domain.entities.Reaction;
 import liv.codveda.blog.app.domain.entities.Users;
 import liv.codveda.blog.app.domain.enums.ReactionType;
+import liv.codveda.blog.app.exception.UnauthorizedException;
 import liv.codveda.blog.app.repository.PostRepository;
 import liv.codveda.blog.app.repository.ReactionRepository;
 import liv.codveda.blog.app.repository.UsersRepository;
@@ -33,12 +34,12 @@ public class ReactionServiceImpl implements ReactionService {
 
     private Users getAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || auth.getName() == null) {
-            throw new EntityNotFoundException("No authenticated user in context");
+        if (auth == null || auth.getName() == null || "anonymousUser".equals(auth.getName())) {
+            throw new UnauthorizedException("Authentication required");
         }
         String email = auth.getName();
         return usersRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
+                .orElseThrow(() -> new UnauthorizedException("Authenticated user not found"));
     }
 
     private Post getPostOrThrow(Long postId) {
@@ -85,6 +86,10 @@ public class ReactionServiceImpl implements ReactionService {
     @Override
     @Transactional(readOnly = true)
     public ReactionType getMyReaction(Long postId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getName() == null || "anonymousUser".equals(auth.getName())) {
+            return null; // anonymous users have no reaction
+        }
         Users user = getAuthenticatedUser();
         Post post = getPostOrThrow(postId);
         return reactionRepository.findTypeByUserAndPost(user, post).orElse(null);

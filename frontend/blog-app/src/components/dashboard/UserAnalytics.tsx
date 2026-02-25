@@ -5,7 +5,7 @@ import {
    XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, AreaChart, Area 
 } from 'recharts';
-import { FileText, MessageSquare, Eye, Calendar, TrendingUp } from 'lucide-react';
+import { FileText, MessageSquare, Eye, Calendar, TrendingUp, Heart } from 'lucide-react';
 import BackendApi from '../../service/BackendApi';
 import { format, subDays, startOfDay } from 'date-fns';
 import {LIVBlogCard, LIVBlogHeader, LIVBlogLayout} from '../ui';
@@ -13,11 +13,17 @@ import {LIVBlogCard, LIVBlogHeader, LIVBlogLayout} from '../ui';
 export const UserAnalytics: React.FC = () => {
   const theme = useTheme();
 
-  const { data: userProfile, isLoading } = useQuery({
+  const { data: analyticsData, isLoading } = useQuery({
+    queryKey: ['user-analytics'],
+    queryFn: () => BackendApi.getMyOverviewAnalytics(),
+  });
+
+  const { data: userProfile } = useQuery({
     queryKey: ['user-profile'],
     queryFn: () => BackendApi.getUserProfile(),
   });
 
+  const analyticsResponse = analyticsData?.data;
   const profile = userProfile?.data;
   //@ts-ignore
   const posts = profile?.posts || [];
@@ -34,15 +40,17 @@ export const UserAnalytics: React.FC = () => {
     }
   }, []);
 
-  // Calculate stats
+  // Calculate stats from analytics endpoint
   const stats = React.useMemo(() => ({
-    totalPosts: posts.length,
-    totalComments: comments.length,
+    totalPosts: analyticsResponse?.totalPosts ?? posts.length,
+    totalComments: analyticsResponse?.totalComments ?? comments.length,
     totalDrafts: draftsCount,
-    totalViews: posts.reduce((sum, post) => sum + (post.views || 0), 0),
-    totalLikes: posts.reduce((sum, post) => sum + (post.likes || 0), 0),
-    avgViewsPerPost: posts.length > 0 ? Math.round(posts.reduce((sum, post) => sum + (post.views || 0), 0) / posts.length) : 0,
-  }), [posts, comments, draftsCount]);
+    totalViews: analyticsResponse?.totalPostViews ?? posts.reduce((sum, post) => sum + (post.views || 0), 0),
+    totalLikes: analyticsResponse?.totalPostLikes ?? posts.reduce((sum, post) => sum + (post.likes || 0), 0),
+    totalCommentLikes: analyticsResponse?.totalCommentLikes ?? 0,
+    totalCommentDislikes: analyticsResponse?.totalCommentDislikes ?? 0,
+    avgViewsPerPost: analyticsResponse?.totalPostViews && analyticsResponse?.totalPosts ? Math.round(analyticsResponse.totalPostViews / analyticsResponse.totalPosts) : 0,
+  }), [analyticsResponse, posts, comments, draftsCount]);
 
   if (isLoading) {
     return (
@@ -77,8 +85,8 @@ export const UserAnalytics: React.FC = () => {
           { label: 'Total Comments', value: stats.totalComments, icon: MessageSquare, color: theme.palette.secondary.main },
           { label: 'Draft Posts', value: stats.totalDrafts, icon: FileText, color: theme.palette.warning.main },
           { label: 'Total Views', value: stats.totalViews, icon: Eye, color: theme.palette.success.main },
-          { label: 'Total Likes', value: stats.totalLikes, icon: TrendingUp, color: theme.palette.info.main },
-          { label: 'Avg Views/Post', value: stats.avgViewsPerPost, icon: Eye, color: theme.palette.primary.main },
+          { label: 'Post Likes', value: stats.totalLikes, icon: TrendingUp, color: theme.palette.info.main },
+          { label: 'Comment Likes', value: stats.totalCommentLikes, icon: Heart, color: theme.palette.error.main },
         ].map((metric) => (
           <LIVBlogCard
             key={metric.label}
