@@ -1,8 +1,8 @@
 package liv.codveda.blog.app.repository;
 
 import liv.codveda.blog.app.domain.entities.Post;
+import liv.codveda.blog.app.domain.entities.Users;
 import liv.codveda.blog.app.domain.enums.Category;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,8 +10,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.SequencedCollection;
-
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
@@ -19,6 +17,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     // Find posts by exact category match (case-insensitive)
     Page<Post> findByCategory(Category category, Pageable pageable);
+
+    // Find all posts by a given user
+    List<Post> findByUsers(Users users);
 
     // Return distinct non-null categories
     @Query("select distinct p.category from Post p where p.category is not null")

@@ -7,8 +7,11 @@ import liv.codveda.blog.app.domain.dto.response.Paged;
 import liv.codveda.blog.app.domain.dto.response.PostDto;
 import liv.codveda.blog.app.domain.entities.Post;
 import liv.codveda.blog.app.domain.enums.Category;
+import liv.codveda.blog.app.domain.enums.ReactionType;
 import liv.codveda.blog.app.domain.mapper.interfaces.PostMapper;
 import liv.codveda.blog.app.service.interfaces.BlogService;
+import liv.codveda.blog.app.service.interfaces.PostViewService;
+import liv.codveda.blog.app.service.interfaces.ReactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.data.domain.Page;
@@ -20,18 +23,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.SequencedCollection;
 
 @RestController
 @RequestMapping("api/v1/post")
 public class BlogPostController  {
     private final PostMapper postMapper;
     private final BlogService blogService;
+    private final ReactionService reactionService;
+    private final PostViewService postViewService;
 
     @Autowired
-    public BlogPostController(PostMapper postMapper, BlogService blogService) {
+    public BlogPostController(PostMapper postMapper, BlogService blogService,
+                              ReactionService reactionService,
+                              PostViewService postViewService) {
         this.postMapper = postMapper;
         this.blogService = blogService;
+        this.reactionService = reactionService;
+        this.postViewService = postViewService;
     }
 
     @PostMapping
@@ -92,9 +100,35 @@ public class BlogPostController  {
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<PostDto>> getPostById(@PathVariable Long id) {
+        // Record unique view for authenticated users
+        postViewService.recordView(id);
+
         Post post = blogService.getPostById(id);
-        PostDto responseDto = postMapper.postToPostDto(post);
-        return ResponseEntity.ok(new ApiResponse<>(responseDto, "Post retrieved successfully"));
+        PostDto baseDto = postMapper.postToPostDto(post);
+
+        Long likeCount = reactionService.countReactions(id, ReactionType.LIKE);
+        Long viewCount = postViewService.countViews(id);
+        Boolean isLiked = null;
+        try {
+            isLiked = ReactionType.LIKE.equals(reactionService.getMyReaction(id));
+        } catch (Exception ignored) {
+            // unauthenticated or no reaction
+        }
+
+        PostDto enriched = new PostDto(
+                baseDto.id(),
+                baseDto.title(),
+                baseDto.category(),
+                baseDto.content(),
+                baseDto.user(),
+                baseDto.createdAt(),
+                baseDto.updatedAt(),
+                baseDto.comments(),
+                likeCount,
+                viewCount,
+                isLiked
+        );
+        return ResponseEntity.ok(new ApiResponse<>(enriched, "Post retrieved successfully"));
     }
 
 
@@ -134,6 +168,26 @@ public class BlogPostController  {
                 posts.isLast()
         );
         return ResponseEntity.ok(new ApiResponse<>(response, "Posts by category retrieved successfully"));
+    }
+
+    // ---- Reactions (Like) ----
+    @PostMapping("/{id}/like")
+    public ResponseEntity<ApiResponse<Void>> likePost(@PathVariable Long id) {
+        reactionService.setReaction(id, ReactionType.LIKE);
+        return ResponseEntity.ok(new ApiResponse<>(null, "Post liked successfully"));
+    }
+
+    @DeleteMapping("/{id}/like")
+    public ResponseEntity<ApiResponse<Void>> unlikePost(@PathVariable Long id) {
+        reactionService.removeReaction(id);
+        return ResponseEntity.ok(new ApiResponse<>(null, "Like removed successfully"));
+    }
+
+    // ---- Views ----
+    @GetMapping("/{id}/views")
+    public ResponseEntity<ApiResponse<Long>> getPostViews(@PathVariable Long id) {
+        long views = postViewService.countViews(id);
+        return ResponseEntity.ok(new ApiResponse<>(views, "Post views retrieved successfully"));
     }
 
 }
