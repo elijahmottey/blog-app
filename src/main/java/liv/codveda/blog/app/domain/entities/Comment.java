@@ -7,9 +7,11 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
-@ToString(exclude = {"users", "post"})
+@ToString(exclude = {"users", "post", "parent", "replies"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -31,6 +33,13 @@ public class Comment {
     @JoinColumn(name = "post_id")
     private Post post;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Comment parent;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Comment> replies = new ArrayList<>();
+
     /**
      * Timestamp automatically set when the user is created.
      */
@@ -42,6 +51,4 @@ public class Comment {
      */
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-
 }
