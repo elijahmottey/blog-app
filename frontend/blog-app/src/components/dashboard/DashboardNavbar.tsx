@@ -62,7 +62,7 @@ interface DashboardNavbarProps {
 const SearchWrapper = styled('div')(({ theme }) => ({
   position: 'relative',
   borderRadius: '2px',
-  backgroundColor: '#ffffff',
+  backgroundColor: theme.palette.mode === 'dark' ? '#1f2937' : '#ffffff',
   marginRight: theme.spacing(2),
   marginLeft: 0,
   width: '100%',

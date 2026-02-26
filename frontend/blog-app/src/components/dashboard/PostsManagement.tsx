@@ -154,23 +154,6 @@ export const PostsManagement: React.FC = () => {
 
   return (
     <div className="aws-spacing-y-sm">
-      <LIVBlogHeader
-        title=""
-        subtitle=""
-        size="large"
-        actions={
-          <div className="flex gap-2">
-            <Button onClick={refreshPosts} variant="outlined" className="aws-button aws-button-secondary">
-              <RefreshCw size={10} style={{ marginRight: '4px' }} />
-              Refresh
-            </Button>
-            <Button component={Link} to="/dashboard/posts/create" variant="contained" className="aws-button aws-button-primary">
-              <Plus size={10} style={{ marginRight: '4px' }} />
-              Create Post
-            </Button>
-          </div>
-        }
-      />
 
       <LIVBlogCard padding="medium" className="aws-margin-b-lg">
         <div className="flex flex-col md:flex-row gap-4">
@@ -212,6 +195,10 @@ export const PostsManagement: React.FC = () => {
             <option value="SPORTS">Sports</option>
           </TextField>
         </div>
+        <Button onClick={refreshPosts} variant="outlined" className="aws-button aws-button-secondary">
+          <RefreshCw size={10} style={{ marginTop: '4px' }} />
+          Refresh
+        </Button>
       </LIVBlogCard>
 
       <LIVBlogCard padding="none">
