@@ -12,6 +12,7 @@ import { format } from 'date-fns';
 import { useTheme } from '@mui/material/styles';
 import {LIVBlogCard, LIVBlogHeader, LIVBlogLayout} from '../ui';
 import { Button, TextField, Chip } from '@mui/material';
+import useDocumentTitle from "../../hooks/useDocumentTitle.ts";
 
 const profileSchema = yup.object({
     name: yup.string().required('Name is required').min(2, 'Name must be at least 2 characters'),
@@ -25,6 +26,7 @@ export const ProfileManagement: React.FC = () => {
     const queryClient = useQueryClient();
     const [activeTab, setActiveTab] = useState<'profile' | 'stats' | 'account'>('profile');
     const [isEditing, setIsEditing] = useState(false);
+    useDocumentTitle('LIVBlog | Profile');
 
     const { data: userStats } = useQuery({
         queryKey: ['user-stats'],

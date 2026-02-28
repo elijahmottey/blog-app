@@ -32,6 +32,7 @@ import BackendApi from '../../service/BackendApi';
 import { toast } from 'sonner';
 import { LIVBlogCard, LIVBlogLayout } from '../ui';
 import { useTheme, alpha } from '@mui/material/styles';
+import useDocumentTitle from "../../hooks/useDocumentTitle.ts";
 
 export const UserDashboard: React.FC = () => {
   const { user, userProfile } = useAuth();
@@ -39,6 +40,7 @@ export const UserDashboard: React.FC = () => {
   const theme = useTheme();
   const [showProfilePopup, setShowProfilePopup] = useState(false);
   const [profileDescription, setProfileDescription] = useState('');
+  useDocumentTitle('LIVBlog | Dashboard');
 
   // Check if profile needs completion on component mount
   useEffect(() => {

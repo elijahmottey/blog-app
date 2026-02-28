@@ -23,6 +23,7 @@ import { downloadPost, downloadPostPdf } from '../../lib/download';
 import { LikeButton } from './LikeButton';
 import { LIVBlogCard, LIVBlogLayout } from '../ui';
 import { useTheme, alpha } from '@mui/material/styles';
+import useDocumentTitle from "../../hooks/useDocumentTitle.ts";
 
 export const PostDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -41,6 +42,7 @@ export const PostDetail: React.FC = () => {
   const [alternateVoices, setAlternateVoices] = useState(false);
   const [currentParagraph, setCurrentParagraph] = useState(-1);
   const theme = useTheme();
+    useDocumentTitle('LIVBlog | Post Details');
 
   const postId = parseInt(id || '0');
   const audioRef = useRef<HTMLAudioElement | null>(null);

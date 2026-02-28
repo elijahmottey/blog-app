@@ -6,8 +6,10 @@ import { DashboardNavbar } from './DashboardNavbar';
 import { DashboardSidebar } from './DashboardSidebar';
 import { DashboardRightRail } from './DashboardRightRail';
 import { LIVBlogLayout } from '../ui';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 export const DashboardLayout: React.FC = () => {
+  useDocumentTitle('LIVBlog - Dashboard');
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isPersistent = useMediaQuery(theme.breakpoints.up('lg'));

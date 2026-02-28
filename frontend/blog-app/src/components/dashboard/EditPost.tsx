@@ -9,6 +9,7 @@ import BackendApi, { type PostDto } from '../../service/BackendApi';
 import { toast } from 'sonner';
 import { LIVBlogCard, LIVBlogHeader, LIVBlogLayout } from '../ui';
 import { Button, TextField, Chip, useTheme } from '@mui/material';
+import useDocumentTitle from "../../hooks/useDocumentTitle.ts";
 
 interface PostFormData {
   title: string;
@@ -29,6 +30,7 @@ export const EditPost: React.FC = () => {
   const [previewMode, setPreviewMode] = useState(false);
   const theme = useTheme();
   const postId = parseInt(id || '0');
+  useDocumentTitle('LIVBlog | Edit Post');
 
   // Fetch post data
   const { data: postData, isLoading: postLoading } = useQuery({
@@ -344,6 +346,7 @@ export const EditPost: React.FC = () => {
                     padding: '24px',
                     borderRadius: '12px',
                     overflow: 'auto',
+                    // @ts-ignore
                     backgroundColor: alpha(theme.palette.background.paper, 0.5),
                     border: `1px solid ${theme.palette.divider}`,
                   }}

@@ -17,6 +17,7 @@ import { format } from 'date-fns';
 import { useAuth } from "../../context/AuthContext.tsx";
 import {LIVBlogCard} from '../ui';
 import { useTheme } from '@mui/material/styles';
+import useDocumentTitle from "../../hooks/useDocumentTitle.ts";
 
 export const PostsManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -27,6 +28,7 @@ export const PostsManagement: React.FC = () => {
   const observer = useRef<IntersectionObserver | null>(null);
 
   const { user, isAdmin } = useAuth();
+  useDocumentTitle('LIVBlog | Posts');
 
   useEffect(() => {
     const handlePostCreated = () => {

@@ -9,9 +9,12 @@ import { FileText, MessageSquare, Eye, Calendar, TrendingUp, Heart } from 'lucid
 import BackendApi from '../../service/BackendApi';
 import { format, subDays, startOfDay } from 'date-fns';
 import {LIVBlogCard, LIVBlogHeader, LIVBlogLayout} from '../ui';
+import useDocumentTitle from "../../hooks/useDocumentTitle.ts";
 
 export const UserAnalytics: React.FC = () => {
   const theme = useTheme();
+
+    useDocumentTitle('LIVBlog | Analytics');
 
   const { data: analyticsData, isLoading } = useQuery({
     queryKey: ['user-analytics'],
