@@ -1,8 +1,10 @@
 import React from 'react';
 import { Box, Typography, Container, Paper, Divider } from '@mui/material';
 import { Shield, Lock, Database, User } from 'lucide-react';
+import useDocumentTitle from "../hooks/useDocumentTitle.ts";
 
 const PrivacyPolicy: React.FC = () => {
+  useDocumentTitle('LIVBlog - Privacy Policy');
   return (
     <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', py: 6 }}>
       <Container maxWidth="md">

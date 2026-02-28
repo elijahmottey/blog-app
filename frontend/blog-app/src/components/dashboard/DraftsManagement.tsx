@@ -28,6 +28,7 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { LIVBlogLayout, LIVBlogHeader, LIVBlogCard} from '../ui';
 import { useTheme } from '@mui/material/styles';
+import useDocumentTitle from "../../hooks/useDocumentTitle.ts";
 
 interface DraftPost {
   id: string;
@@ -45,6 +46,7 @@ export const DraftsManagement: React.FC = () => {
     open: false,
     draft: null
   });
+  useDocumentTitle('LIVBlog | Drafts ');
 
   useEffect(() => {
     loadDrafts();

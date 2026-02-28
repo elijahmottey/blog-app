@@ -3,8 +3,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Home, ArrowLeft } from 'lucide-react';
 import { Button, Box, Typography, Paper } from '@mui/material';
+import useDocumentTitle from "../hooks/useDocumentTitle.ts";
 
 export const NotFound: React.FC = () => {
+    useDocumentTitle('LIVBlog - Page Not Found');
     return (
         <Box
             sx={{

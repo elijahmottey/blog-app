@@ -2,8 +2,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
+import useDocumentTitle from "../hooks/useDocumentTitle.ts";
 
 export const Unauthorized: React.FC = () => {
+    useDocumentTitle('LIVBlog - Unauthorized Access');
     const theme = useTheme();
     return (
         <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: theme.palette.background.default }}>

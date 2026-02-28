@@ -1,8 +1,10 @@
 import React from 'react';
 import { Box, Typography, Container, Paper, Divider } from '@mui/material';
 import { FileText, Users } from 'lucide-react';
+import useDocumentTitle from "../hooks/useDocumentTitle.ts";
 
 const TermsOfService: React.FC = () => {
+  useDocumentTitle('LIVBlog - Terms of Service');
   return (
     <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', py: 6 }}>
       <Container maxWidth="md">

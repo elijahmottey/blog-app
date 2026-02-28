@@ -4,10 +4,12 @@ import { MessageSquare } from 'lucide-react';
 import { CircularProgress, Avatar, Divider } from '@mui/material';
 import { LIVBlogHeader, LIVBlogCard } from '../ui';
 import { useTheme } from '@mui/material/styles';
+import useDocumentTitle from "../../hooks/useDocumentTitle.ts";
 
 export const CommentsManagement: React.FC = () => {
   const { userProfile, loading } = useAuth();
   const theme = useTheme();
+    useDocumentTitle('LIVBlog | Comments ');
 
   if (loading) {
     return (

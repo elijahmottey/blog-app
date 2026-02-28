@@ -5,6 +5,7 @@ import { CalendarDays, User, Search, Filter, Download, X } from 'lucide-react';
 import BackendApi, { type PostDto } from '../service/BackendApi';
 import { excerpt, formatDate } from '../lib/utils';
 import { downloadPost, downloadPostPdf } from '../lib/download';
+import useDocumentTitle from "../hooks/useDocumentTitle.ts";
 
 const Blog: React.FC = () => {
   const [posts, setPosts] = useState<PostDto[]>([]);
@@ -20,6 +21,7 @@ const Blog: React.FC = () => {
   const [searchParams] = useSearchParams();
   const postsPerPage = 9;
   const navigate = useNavigate();
+  useDocumentTitle('LIVBlog - Blog');
   const { category: routeCategory } = useParams<{ category?: string }>();
 
   const getCategoryImage = (category?: string) => {

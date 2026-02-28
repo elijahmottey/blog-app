@@ -4,6 +4,7 @@ import { Box, Container, Typography, Avatar, Paper, Chip, CircularProgress, Butt
 import { ArrowLeft, Mail, Calendar, FileText, MessageSquare } from 'lucide-react';
 import BackendApi from '../service/BackendApi';
 import { format } from 'date-fns';
+import useDocumentTitle from "../hooks/useDocumentTitle.ts";
 
 export const AuthorProfile: React.FC = () => {
   const { username } = useParams<{ username: string }>();
@@ -11,7 +12,7 @@ export const AuthorProfile: React.FC = () => {
   const [author, setAuthor] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  useDocumentTitle('LIVBlog - Author Profile');
   useEffect(() => {
     fetchAuthorProfile();
   }, [username]);

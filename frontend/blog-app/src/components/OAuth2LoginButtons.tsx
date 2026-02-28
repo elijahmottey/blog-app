@@ -1,4 +1,5 @@
 import React from 'react';
+import useDocumentTitle from "../hooks/useDocumentTitle.ts";
 
 interface OAuth2LoginButtonsProps {
   className?: string;
@@ -10,6 +11,7 @@ const OAuth2LoginButtons: React.FC<OAuth2LoginButtonsProps> = ({ className = '' 
   const handleGoogleLogin = () => {
     window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
   };
+    useDocumentTitle('LIVBlog - OAuth2 Login');
 
   const handleGithubLogin = () => {
     window.location.href = `${API_BASE_URL}/oauth2/authorization/github`;

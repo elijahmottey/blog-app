@@ -1,8 +1,10 @@
 import React from 'react';
 import { Box, Typography, Container, Paper, Avatar, Chip } from '@mui/material';
 import { Code, Users, BookOpen, Award } from 'lucide-react';
+import useDocumentTitle from "../hooks/useDocumentTitle.ts";
 
 const About: React.FC = () => {
+  useDocumentTitle('LIVBlog - About Us');
   const team = [
     {
       name: 'Elijah Mottey',

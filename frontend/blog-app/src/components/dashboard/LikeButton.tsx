@@ -4,6 +4,7 @@ import { Heart } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import BackendApi from '../../service/BackendApi';
+import useDocumentTitle from "../../hooks/useDocumentTitle.ts";
 
 interface LikeButtonProps {
   postId: number;
@@ -13,6 +14,7 @@ interface LikeButtonProps {
 
 export const LikeButton: React.FC<LikeButtonProps> = ({ postId, likes, isLiked }) => {
   const queryClient = useQueryClient();
+
 
   const likeMutation = useMutation({
     mutationFn: () => isLiked ? BackendApi.unlikePost(postId) : BackendApi.likePost(postId),

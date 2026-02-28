@@ -9,9 +9,11 @@ import { Users, FileText, MessageSquare, TrendingUp, Activity, Eye, Heart, Clock
 import BackendApi from '../../service/BackendApi';
 import { format, subDays, startOfDay } from 'date-fns';
 import { LIVBlogHeader, LIVBlogCard, LIVBlogLayout } from '../ui';
+import useDocumentTitle from "../../hooks/useDocumentTitle.ts";
 
 export const AnalyticsView: React.FC = () => {
   const theme = useTheme();
+  useDocumentTitle('LIVBlog | Analytics');
 
   const { data: adminAnalyticsData } = useQuery({
     queryKey: ['admin-analytics'],

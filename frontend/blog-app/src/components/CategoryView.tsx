@@ -5,6 +5,7 @@ import { User, Download } from 'lucide-react';
 import BackendApi, { type PostDto } from '../service/BackendApi';
 import { excerpt } from '../lib/utils';
 import { downloadPost, downloadPostPdf } from '../lib/download';
+import useDocumentTitle from "../hooks/useDocumentTitle.ts";
 
 const CategoryView: React.FC = () => {
   const { category } = useParams();
@@ -13,6 +14,7 @@ const CategoryView: React.FC = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 9;
+  useDocumentTitle('LIVBlog - Blog');
 
   useEffect(() => {
     if (category) fetchPosts(category, page);

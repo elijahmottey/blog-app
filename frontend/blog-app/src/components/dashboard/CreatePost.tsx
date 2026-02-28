@@ -56,6 +56,7 @@ import { useAuth } from '../../context/AuthContext';
 import { AIChat } from './AIChat';
 import { LIVBlogHeader, LIVBlogCard, LIVBlogLayout } from '../ui';
 import { useTheme } from '@mui/material/styles';
+import useDocumentTitle from "../../hooks/useDocumentTitle.ts";
 
 const schema = yup.object({
   title: yup.string().required('Title is required').min(3, 'Title must be at least 3 characters'),
@@ -92,7 +93,7 @@ export const CreatePost: React.FC = () => {
   const [currentTutorialStep, setCurrentTutorialStep] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
+  useDocumentTitle('LIVBlog | Create New Post');
   // Fetch categories
   const { data: categoriesResponse } = useQuery({
     queryKey: ['categories'],
