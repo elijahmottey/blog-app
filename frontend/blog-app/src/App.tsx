@@ -25,7 +25,12 @@ const queryClient = new QueryClient({
 function App() {
   useEffect(() => {
     // Fetch CSRF token on app load
-    BackendApi.fetchCsrfToken();
+    const fetchToken = async () => {
+      await BackendApi.fetchCsrfToken();
+      // Add a small delay to allow the cookie to be set
+      await new Promise(resolve => setTimeout(resolve, 100));
+    };
+    fetchToken();
   }, []);
 
   return (
