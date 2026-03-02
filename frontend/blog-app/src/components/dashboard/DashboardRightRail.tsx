@@ -12,7 +12,7 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
   const navigate = useNavigate();
   const { user, logout, isAdmin } = useAuth();
   const { mode, toggleMode } = useThemeMode();
-  const { newPostsCount, markAsRead } = useNotifications();
+  const { newPosts, totalNotifications } = useNotifications(isAdmin);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -108,9 +108,11 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
           className="aws-button aws-button-icon hover-subtle"
           onClick={(e) => {
             e.preventDefault();
-            console.log('Right rail notification clicked, count:', newPostsCount);
-            markAsRead();
-            navigate('/dashboard/posts');
+            if (newPosts.length > 0) {
+              navigate(`/dashboard/posts/${newPosts[0]}?highlight=true`);
+            } else {
+              navigate('/dashboard/posts');
+            }
           }}
           sx={{ 
             color: 'text.secondary',
@@ -120,7 +122,7 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
             }
           }}
         >
-          <Badge badgeContent={newPostsCount} color="error" overlap="circular">
+          <Badge badgeContent={totalNotifications} color="error" overlap="circular">
             <Bell size={16} />
           </Badge>
         </IconButton>

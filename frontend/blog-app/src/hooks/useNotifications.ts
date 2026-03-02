@@ -2,38 +2,119 @@ import { useQuery } from '@tanstack/react-query';
 import BackendApi from '../service/BackendApi';
 import { useEffect, useState } from 'react';
 
-export const useNotifications = () => {
-  const [lastPostCount, setLastPostCount] = useState<number | null>(null);
-  const [newPostsCount, setNewPostsCount] = useState(0);
+interface NotificationData {
+  newPosts: number[];
+  newUsers: number[];
+  lastPostCount: number;
+  lastUserCount: number;
+}
+
+export const useNotifications = (isAdmin: boolean = false) => {
+  const [notificationData, setNotificationData] = useState<NotificationData>({
+    newPosts: [],
+    newUsers: [],
+    lastPostCount: 0,
+    lastUserCount: 0
+  });
 
   const { data: postsData } = useQuery({
     queryKey: ['posts-notification'],
-    queryFn: () => BackendApi.getTotalPost(),
+    queryFn: () => BackendApi.getAllPost(0, 100),
     refetchInterval: 30000,
   });
 
-  useEffect(() => {
-    const totalPosts = postsData?.data || 0;
-    
-    if (lastPostCount === null) {
-      setLastPostCount(totalPosts);
-      const stored = localStorage.getItem('lastSeenPostCount');
-      if (stored) {
-        const diff = totalPosts - parseInt(stored);
-        if (diff > 0) setNewPostsCount(diff);
-      }
-    } else if (totalPosts > lastPostCount) {
-      setNewPostsCount(totalPosts - lastPostCount);
-    }
-  }, [postsData, lastPostCount]);
+  const { data: usersData } = useQuery({
+    queryKey: ['users-notification'],
+    queryFn: () => BackendApi.getAllUsers(0, 100),
+    refetchInterval: 30000,
+    enabled: isAdmin,
+  });
 
-  const markAsRead = () => {
-    const totalPosts = postsData?.data || 0;
-    setLastPostCount(totalPosts);
-    setNewPostsCount(0);
-    localStorage.setItem('lastSeenPostCount', totalPosts.toString());
-    console.log('Notifications marked as read, navigating...');
+  useEffect(() => {
+    const stored = localStorage.getItem('notificationData');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      setNotificationData(parsed);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!postsData?.data?.content) return;
+
+    const posts = postsData.data.content;
+    const currentPostIds = posts.map((p: any) => p.id).sort((a: number, b: number) => b - a);
+    
+    if (notificationData.lastPostCount === 0) {
+      setNotificationData(prev => ({ ...prev, lastPostCount: currentPostIds.length }));
+      return;
+    }
+
+    const newPostIds = currentPostIds.slice(0, currentPostIds.length - notificationData.lastPostCount);
+    if (newPostIds.length > 0) {
+      setNotificationData(prev => ({
+        ...prev,
+        newPosts: [...new Set([...prev.newPosts, ...newPostIds])],
+        lastPostCount: currentPostIds.length
+      }));
+    }
+  }, [postsData]);
+
+  useEffect(() => {
+    if (!isAdmin || !usersData?.data?.content) return;
+
+    const users = usersData.data.content;
+    const currentUserIds = users.map((u: any) => u.id).sort((a: number, b: number) => b - a);
+    
+    if (notificationData.lastUserCount === 0) {
+      setNotificationData(prev => ({ ...prev, lastUserCount: currentUserIds.length }));
+      return;
+    }
+
+    const newUserIds = currentUserIds.slice(0, currentUserIds.length - notificationData.lastUserCount);
+    if (newUserIds.length > 0) {
+      setNotificationData(prev => ({
+        ...prev,
+        newUsers: [...new Set([...prev.newUsers, ...newUserIds])],
+        lastUserCount: currentUserIds.length
+      }));
+    }
+  }, [usersData, isAdmin]);
+
+  useEffect(() => {
+    localStorage.setItem('notificationData', JSON.stringify(notificationData));
+  }, [notificationData]);
+
+  const markPostAsRead = (postId: number) => {
+    setNotificationData(prev => ({
+      ...prev,
+      newPosts: prev.newPosts.filter(id => id !== postId)
+    }));
   };
 
-  return { newPostsCount, markAsRead };
+  const markAllPostsAsRead = () => {
+    setNotificationData(prev => ({ ...prev, newPosts: [] }));
+  };
+
+  const markUserAsRead = (userId: number) => {
+    setNotificationData(prev => ({
+      ...prev,
+      newUsers: prev.newUsers.filter(id => id !== userId)
+    }));
+  };
+
+  const markAllUsersAsRead = () => {
+    setNotificationData(prev => ({ ...prev, newUsers: [] }));
+  };
+
+  const totalNotifications = notificationData.newPosts.length + notificationData.newUsers.length;
+
+  return { 
+    newPosts: notificationData.newPosts,
+    newUsers: notificationData.newUsers,
+    totalNotifications,
+    markPostAsRead,
+    markAllPostsAsRead,
+    markUserAsRead,
+    markAllUsersAsRead
+  };
 };

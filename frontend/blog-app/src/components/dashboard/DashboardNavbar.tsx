@@ -114,7 +114,8 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
   const navigate = useNavigate();
   const theme = useTheme();
   const location = useLocation();
-  const { newPostsCount, markAsRead } = useNotifications();
+  const { newPosts, newUsers, totalNotifications, markPostAsRead, markUserAsRead } = useNotifications(isAdmin);
+  const [notificationDrawerOpen, setNotificationDrawerOpen] = useState(false);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -369,15 +370,10 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
                    <IconButton 
                      color="inherit" 
                      sx={{ position: 'relative' }}
-                     onClick={(e) => {
-                       e.preventDefault();
-                       console.log('Notification clicked, count:', newPostsCount);
-                       markAsRead();
-                       navigate('/dashboard/posts');
-                     }}
+                     onClick={() => setNotificationDrawerOpen(true)}
                    >
                      <Badge
-                         badgeContent={newPostsCount}
+                         badgeContent={totalNotifications}
                          color="error"
                          overlap="circular"
                      >

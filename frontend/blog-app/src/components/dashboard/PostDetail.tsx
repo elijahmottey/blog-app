@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowLeft,
@@ -24,6 +24,7 @@ import { LikeButton } from './LikeButton';
 import { LIVBlogCard, LIVBlogLayout } from '../ui';
 import { useTheme, alpha } from '@mui/material/styles';
 import useDocumentTitle from "../../hooks/useDocumentTitle.ts";
+import { useNotifications } from '../../hooks/useNotifications';
 
 // CommentThread component for nested replies
 const CommentThread: React.FC<{
@@ -142,9 +143,11 @@ const CommentThread: React.FC<{
 
 export const PostDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const queryClient = useQueryClient();
+  const { markPostAsRead } = useNotifications(isAdmin);
   const [commentText, setCommentText] = useState('');
   const [showComments, setShowComments] = useState(true);
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
@@ -153,19 +156,28 @@ export const PostDetail: React.FC = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [voiceGender, setVoiceGender] = useState<'male' | 'female'>('female');
   const [voiceTone, setVoiceTone] = useState<'clear' | 'power'>('power');
-  // Two podcast-style presets: A = warm/narrator (male-leaning), B = bright/narrator (female-leaning)
   const [voicePreset, setVoicePreset] = useState<'podcastA' | 'podcastB'>('podcastA');
   const [readingSpeed, setReadingSpeed] = useState(0.8);
   const [alternateVoices, setAlternateVoices] = useState(false);
   const [currentParagraph, setCurrentParagraph] = useState(-1);
+  const [isHighlighted, setIsHighlighted] = useState(false);
   const theme = useTheme();
-    useDocumentTitle('LIVBlog | Post Details');
+  useDocumentTitle('LIVBlog | Post Details');
 
   const postId = parseInt(id || '0');
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
   const [generatingAudio, setGeneratingAudio] = useState(false);
   const isUsingSpeechRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    const highlight = searchParams.get('highlight');
+    if (highlight === 'true') {
+      setIsHighlighted(true);
+      markPostAsRead(postId);
+      setTimeout(() => setIsHighlighted(false), 30000);
+    }
+  }, [searchParams, postId, markPostAsRead]);
 
   // Fetch post details
   const { data: post, isLoading: postLoading, error: postError } = useQuery({
@@ -1130,7 +1142,11 @@ export const PostDetail: React.FC = () => {
       <LIVBlogCard
         variant="elevated"
         padding={window.innerWidth < 768 ? "medium" : "large"}
-        style={{ marginBottom: window.innerWidth < 768 ? '20px' : '32px' }}
+        style={{ 
+          marginBottom: window.innerWidth < 768 ? '20px' : '32px',
+          backgroundColor: isHighlighted ? alpha(theme.palette.success.main, 0.15) : undefined,
+          transition: 'background-color 1s ease'
+        }}
       >
         {/* Post Body */}
         <div style={{ marginBottom: '32px' }}>
