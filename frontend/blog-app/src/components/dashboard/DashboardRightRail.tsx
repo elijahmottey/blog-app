@@ -5,12 +5,14 @@ import { Home, FileText, MessageSquare, Users, Bell, Shield, LogOut } from 'luci
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeModeContext';
+import { useNotifications } from '../../hooks/useNotifications';
 
 export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDesktop = false }) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const { user, logout, isAdmin } = useAuth();
   const { mode, toggleMode } = useThemeMode();
+  const { newPostsCount, markAsRead } = useNotifications();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -104,6 +106,12 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
         <IconButton 
           size="small" 
           className="aws-button aws-button-icon hover-subtle"
+          onClick={(e) => {
+            e.preventDefault();
+            console.log('Right rail notification clicked, count:', newPostsCount);
+            markAsRead();
+            navigate('/dashboard/posts');
+          }}
           sx={{ 
             color: 'text.secondary',
             '&:hover': {
@@ -112,7 +120,7 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
             }
           }}
         >
-          <Badge badgeContent={3} color="error" variant="dot">
+          <Badge badgeContent={newPostsCount} color="error" overlap="circular">
             <Bell size={16} />
           </Badge>
         </IconButton>

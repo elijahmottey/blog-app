@@ -37,7 +37,9 @@ const CommentThread: React.FC<{
   setReplyText: (text: string) => void;
   handleReply: (id: number) => void;
   replyMutation: any;
-}> = ({ comment, level, theme, user, replyingTo, setReplyingTo, replyText, setReplyText, handleReply, replyMutation }) => {
+  onLike: (commentId: number) => void;
+  onDislike: (commentId: number) => void;
+}> = ({ comment, level, theme, user, replyingTo, setReplyingTo, replyText, setReplyText, handleReply, replyMutation, onLike, onDislike }) => {
   const indent = level * 32;
   const colors = [
     { bg: alpha(theme.palette.background.paper, 0.7), border: alpha(theme.palette.divider, 0.5), avatar: theme.palette.primary.main, size: 40 },
@@ -83,8 +85,35 @@ const CommentThread: React.FC<{
             </Typography>
           </div>
           <div style={{ display: 'flex', gap: '16px', marginTop: '12px', paddingLeft: '4px' }}>
-            <Button size="small" startIcon={<ThumbsUp size={12} />} style={{ fontSize: '0.7rem', color: theme.palette.text.secondary, textTransform: 'none', minWidth: 'auto', padding: '4px 8px' }}>
-              Like
+            <Button 
+              size="small" 
+              startIcon={<ThumbsUp size={12} />} 
+              onClick={() => onLike(comment.id)}
+              style={{ 
+                fontSize: '0.7rem', 
+                color: comment.isLiked ? theme.palette.success.main : theme.palette.text.secondary, 
+                textTransform: 'none', 
+                minWidth: 'auto', 
+                padding: '4px 8px',
+                fontWeight: comment.isLiked ? 600 : 400
+              }}
+            >
+              {comment.likes || 0}
+            </Button>
+            <Button 
+              size="small" 
+              startIcon={<ThumbsUp size={12} style={{ transform: 'rotate(180deg)' }} />} 
+              onClick={() => onDislike(comment.id)}
+              style={{ 
+                fontSize: '0.7rem', 
+                color: comment.isDisliked ? theme.palette.error.main : theme.palette.text.secondary, 
+                textTransform: 'none', 
+                minWidth: 'auto', 
+                padding: '4px 8px',
+                fontWeight: comment.isDisliked ? 600 : 400
+              }}
+            >
+              {comment.dislikes || 0}
             </Button>
             <Button size="small" onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)} style={{ fontSize: '0.7rem', color: theme.palette.text.secondary, textTransform: 'none', minWidth: 'auto', padding: '4px 8px' }}>
               {replyingTo === comment.id ? 'Cancel' : 'Reply'}
@@ -103,7 +132,7 @@ const CommentThread: React.FC<{
       {comment.replies && comment.replies.length > 0 && (
         <div style={{ marginTop: '12px' }}>
           {comment.replies.map((reply: any, idx: number) => (
-            <CommentThread key={reply.id || idx} comment={reply} level={level + 1} theme={theme} user={user} replyingTo={replyingTo} setReplyingTo={setReplyingTo} replyText={replyText} setReplyText={setReplyText} handleReply={handleReply} replyMutation={replyMutation} />
+            <CommentThread key={reply.id || idx} comment={reply} level={level + 1} theme={theme} user={user} replyingTo={replyingTo} setReplyingTo={setReplyingTo} replyText={replyText} setReplyText={setReplyText} handleReply={handleReply} replyMutation={replyMutation} onLike={onLike} onDislike={onDislike} />
           ))}
         </div>
       )}
@@ -143,6 +172,12 @@ export const PostDetail: React.FC = () => {
     queryKey: ['post', postId],
     queryFn: () => BackendApi.getPostById(postId),
     enabled: !!postId,
+    retry: 1,
+    onError: (error: any) => {
+      if (error?.status === 500) {
+        toast.error('Server error loading post. Please try again.');
+      }
+    }
   });
 
   // Fetch comments for this post
@@ -185,6 +220,24 @@ export const PostDetail: React.FC = () => {
     onError: (error: any) => {
       toast.error('Failed to add reply: ' + (error.message || 'Unknown error'));
     },
+  });
+
+  // Like comment mutation
+  const likeCommentMutation = useMutation({
+    mutationFn: (commentId: number) => BackendApi.likeComment(commentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['post-comments', postId] });
+    },
+    onError: () => toast.error('Failed to like comment'),
+  });
+
+  // Dislike comment mutation
+  const dislikeCommentMutation = useMutation({
+    mutationFn: (commentId: number) => BackendApi.dislikeComment(commentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['post-comments', postId] });
+    },
+    onError: () => toast.error('Failed to dislike comment'),
   });
 
   // Delete post mutation
@@ -230,6 +283,22 @@ export const PostDetail: React.FC = () => {
       return;
     }
     replyMutation.mutate({ parentId, content: replyText });
+  };
+
+  const handleLikeComment = (commentId: number) => {
+    if (!user) {
+      toast.error('Please login to like comments');
+      return;
+    }
+    likeCommentMutation.mutate(commentId);
+  };
+
+  const handleDislikeComment = (commentId: number) => {
+    if (!user) {
+      toast.error('Please login to dislike comments');
+      return;
+    }
+    dislikeCommentMutation.mutate(commentId);
   };
 
   const handleDelete = () => {
@@ -723,10 +792,14 @@ export const PostDetail: React.FC = () => {
   }
 
   if (postError || !post?.data) {
+    const errorMessage = (postError as any)?.status === 500 
+      ? 'Server error loading this post. The post may not exist or there was a database issue.'
+      : 'Post not found';
+    
     return (
       <LIVBlogLayout.Container>
         <LIVBlogCard
-          title="Post Not Found"
+          title="Error Loading Post"
           variant="default"
           padding="large"
         >
@@ -737,7 +810,7 @@ export const PostDetail: React.FC = () => {
                 fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
               }}
             >
-              Post not found
+              {errorMessage}
             </div>
             <Button
               component={Link}
@@ -777,7 +850,11 @@ export const PostDetail: React.FC = () => {
       content: comment.content || 'No content',
       author: getUserName(comment.users),
       createdAt: comment.createdAt,
-      parentId: comment.parentId
+      parentId: comment.parentId,
+      likes: comment.likes || 0,
+      dislikes: comment.dislikes || 0,
+      isLiked: comment.isLiked || false,
+      isDisliked: comment.isDisliked || false
     };
   };
 
@@ -1310,6 +1387,8 @@ export const PostDetail: React.FC = () => {
                   setReplyText={setReplyText}
                   handleReply={handleReply}
                   replyMutation={replyMutation}
+                  onLike={handleLikeComment}
+                  onDislike={handleDislikeComment}
                 />
               ))
             )}

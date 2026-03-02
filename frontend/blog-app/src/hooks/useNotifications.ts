@@ -9,7 +9,7 @@ export const useNotifications = () => {
   const { data: postsData } = useQuery({
     queryKey: ['posts-notification'],
     queryFn: () => BackendApi.getTotalPost(),
-    refetchInterval: 30000, // Check every 30 seconds
+    refetchInterval: 30000,
   });
 
   useEffect(() => {
@@ -32,6 +32,7 @@ export const useNotifications = () => {
     setLastPostCount(totalPosts);
     setNewPostsCount(0);
     localStorage.setItem('lastSeenPostCount', totalPosts.toString());
+    console.log('Notifications marked as read, navigating...');
   };
 
   return { newPostsCount, markAsRead };

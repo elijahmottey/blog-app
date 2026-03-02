@@ -369,7 +369,9 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
                    <IconButton 
                      color="inherit" 
                      sx={{ position: 'relative' }}
-                     onClick={() => {
+                     onClick={(e) => {
+                       e.preventDefault();
+                       console.log('Notification clicked, count:', newPostsCount);
                        markAsRead();
                        navigate('/dashboard/posts');
                      }}
