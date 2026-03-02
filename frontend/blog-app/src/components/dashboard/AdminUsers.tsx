@@ -519,7 +519,9 @@ export const AdminUsers: React.FC = () => {
                   <TableCell sx={{ fontWeight: 'bold' }}>User</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Email</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Role</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Posts/Comments</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Posts</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Views/Likes</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Comments</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Joined</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Last Active</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }} align="center">Actions</TableCell>
@@ -528,7 +530,7 @@ export const AdminUsers: React.FC = () => {
               <TableBody>
                 {displayUsers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                      <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
                         <Typography color="text.secondary">
                           {searchTerm ? 'No users found matching your search' : 'No users found'}
                         </Typography>
@@ -582,27 +584,43 @@ export const AdminUsers: React.FC = () => {
                             />
                           </TableCell>
                           <TableCell>
-                            <Box sx={{ display: 'flex', gap: 3 }}>
-                              <Tooltip title="Posts">
-                                <Box sx={{ textAlign: 'center' }}>
-                                  <Typography variant="h6" color="primary">
-                                    {getUserPostCount(user)}
-                                  </Typography>
-                                  <Typography variant="caption" color="text.secondary">
-                                    Posts
-                                  </Typography>
-                                </Box>
-                              </Tooltip>
-                              <Tooltip title="Comments">
-                                <Box sx={{ textAlign: 'center' }}>
-                                  <Typography variant="h6" color="secondary">
-                                    {getUserCommentCount(user)}
-                                  </Typography>
-                                  <Typography variant="caption" color="text.secondary">
-                                    Comments
-                                  </Typography>
-                                </Box>
-                              </Tooltip>
+                            <Box sx={{ textAlign: 'center' }}>
+                              <Typography variant="h6" color="primary">
+                                {getUserPostCount(user)}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Posts
+                              </Typography>
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Box sx={{ display: 'flex', gap: 2 }}>
+                              <Box sx={{ textAlign: 'center' }}>
+                                <Typography variant="body2" color="success.main" sx={{ fontWeight: 'bold' }}>
+                                  {Array.isArray(user.posts) ? user.posts.reduce((sum, p) => sum + (p.views || 0), 0) : 0}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  Views
+                                </Typography>
+                              </Box>
+                              <Box sx={{ textAlign: 'center' }}>
+                                <Typography variant="body2" color="error.main" sx={{ fontWeight: 'bold' }}>
+                                  {Array.isArray(user.posts) ? user.posts.reduce((sum, p) => sum + (p.likes || 0), 0) : 0}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  Likes
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Box sx={{ textAlign: 'center' }}>
+                              <Typography variant="h6" color="secondary">
+                                {getUserCommentCount(user)}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Comments
+                              </Typography>
                             </Box>
                           </TableCell>
                           <TableCell>

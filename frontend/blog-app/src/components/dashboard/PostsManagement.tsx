@@ -326,14 +326,14 @@ export const PostsManagement: React.FC = () => {
                                 </span>
                                 </div>
                                 <div className="flex items-center gap-1">
-                                  <Heart size={14} style={{ color: theme.palette.text.secondary }} />
-                                  <span className="aws-text-body" style={{ color: theme.palette.text.secondary, fontSize: '0.75rem' }}>
+                                  <Heart size={14} style={{ color: theme.palette.error.main }} />
+                                  <span className="aws-text-body" style={{ color: theme.palette.text.secondary, fontSize: '0.75rem', fontWeight: 600 }}>
                                     {post.likes ?? 0}
                                 </span>
                                 </div>
                                 <div className="flex items-center gap-1">
-                                  <Eye size={14} style={{ color: theme.palette.text.secondary }} />
-                                  <span className="aws-text-body" style={{ color: theme.palette.text.secondary, fontSize: '0.75rem' }}>
+                                  <Eye size={14} style={{ color: theme.palette.success.main }} />
+                                  <span className="aws-text-body" style={{ color: theme.palette.text.secondary, fontSize: '0.75rem', fontWeight: 600 }}>
                                     {post.views ?? 0}
                                 </span>
                                 </div>

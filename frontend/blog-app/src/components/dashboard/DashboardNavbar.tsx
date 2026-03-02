@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   Menu,
-  X,
   Search,
   Bell,
   User,
@@ -17,9 +16,7 @@ import {
   Sun,
   Shield,
   Bot,
-  MessageCircle,
-  PenSquare,
-  Plus
+  PenSquare
 } from 'lucide-react';
 import {
   AppBar,
@@ -108,6 +105,7 @@ interface SearchResult {
   title: string;
   content: string;
   url: string;
+  role?: string;
 }
 
 export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, isSidebarOpen, isMobile, isDesktop }) => {
@@ -140,47 +138,51 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
     }
     (async () => {
       try {
-        const [posts, users, comments] = await Promise.all([
+        const [postsRes, usersRes, commentsRes] = await Promise.all([
           BackendApi.getAllPost(0, 50),
-          BackendApi.getAllUsers(),
+          BackendApi.getAllUsers(0, 50),
           BackendApi.getAllPostComment(0, 50)
         ]);
         
         const q = debouncedTerm.toLowerCase();
-        const results = [];
+        const results: SearchResult[] = [];
         
         // Search posts
-        const filteredPosts = posts.data?.content?.filter((p: any) => 
+        const posts = postsRes.data?.content || [];
+        const filteredPosts = posts.filter((p: any) => 
           (p.title || '').toLowerCase().includes(q) || 
           (p.content || '').toLowerCase().includes(q)
-        ) || [];
+        );
         
         results.push(...filteredPosts.slice(0, 5).map((p: any) => ({
           type: 'post',
           id: p.id,
-          title: p.title,
+          title: p.title || 'Untitled',
           content: (p.content || '').slice(0, 120) + ((p.content || '').length > 120 ? '...' : ''),
           url: `/dashboard/posts/${p.id}`
         })));
         
         // Search users
-        const filteredUsers = Array.isArray(users) ? users.filter((u: any) => 
+        const users = usersRes.data?.content || [];
+        const filteredUsers = users.filter((u: any) => 
           (u.name || '').toLowerCase().includes(q) || 
           (u.email || '').toLowerCase().includes(q)
-        ) : [];
+        );
         
         results.push(...filteredUsers.slice(0, 3).map((u: any) => ({
           type: 'user',
           id: u.id,
-          title: u.name,
-          content: u.email,
-          url: `/dashboard/admin/users`
+          title: u.name || 'Unknown User',
+          content: u.email || '',
+          url: isAdmin ? `/dashboard/admin/user/${u.id}/view` : `/dashboard/profile`,
+          role: u.role || 'USER'
         })));
         
         // Search comments
-        const filteredComments = comments.data?.content?.filter((c: any) => 
+        const comments = commentsRes.data?.content || [];
+        const filteredComments = comments.filter((c: any) => 
           (c.content || '').toLowerCase().includes(q)
-        ) || [];
+        );
         
         results.push(...filteredComments.slice(0, 3).map((c: any) => ({
           type: 'comment',
@@ -192,11 +194,12 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
         
         if (active) setSearchResults(results);
       } catch (e) {
+        console.error('Search error:', e);
         if (active) setSearchResults([]);
       }
     })();
     return () => { active = false; };
-  }, [debouncedTerm]);
+  }, [debouncedTerm, isAdmin]);
 
   const handleProfileClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -259,7 +262,7 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
                      <StyledInputBase
                          value={searchTerm}
                          onChange={(e) => setSearchTerm(e.target.value)}
-                         placeholder="Search"
+                         placeholder="Search posts, users, comments..."
                          inputProps={{ 'aria-label': 'search' }}
                          onKeyDown={(e) => {
                            if (e.key === 'Enter') {
@@ -274,17 +277,24 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
                      {/* Dropdown results */}
                      {searchResults.length > 0 && (
                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, boxShadow: theme.shadows[8], zIndex: 1600, maxHeight: 360, overflow: 'auto', borderRadius: 4, marginTop: 4 }}>
-                         {searchResults.map((r) => (
-                           <div key={`${r.type}-${r.id}`} style={{ padding: '8px 12px', cursor: 'pointer', borderBottom: `1px solid ${theme.palette.divider}` }} onClick={() => { navigate(r.url); setSearchTerm(''); setSearchResults([]); }}>
-                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                               <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, backgroundColor: theme.palette.primary.light, color: theme.palette.primary.contrastText, textTransform: 'uppercase' }}>{r.type}</span>
-                               <div style={{ fontWeight: 600, color: theme.palette.text.primary, fontSize: '0.875rem' }}>{r.title}</div>
+                         {searchResults.map((r) => {
+                           const typeColor = r.type === 'post' ? theme.palette.primary.main : r.type === 'user' ? theme.palette.success.main : theme.palette.warning.main;
+                           const TypeIcon = r.type === 'post' ? FileText : r.type === 'user' ? User : MessageSquare;
+                           const roleColor = r.role === 'ADMIN' ? theme.palette.error.main : theme.palette.info.main;
+                           return (
+                             <div key={`${r.type}-${r.id}`} style={{ padding: '10px 12px', cursor: 'pointer', borderBottom: `1px solid ${theme.palette.divider}`, transition: 'background 0.2s' }} onClick={() => { navigate(r.url); setSearchTerm(''); setSearchResults([]); }} onMouseEnter={(e) => e.currentTarget.style.background = theme.palette.action.hover} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                                 <TypeIcon size={14} style={{ color: typeColor }} />
+                                 <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 12, backgroundColor: alpha(typeColor, 0.1), color: typeColor, textTransform: 'uppercase', fontWeight: 600 }}>{r.type}</span>
+                                 <div style={{ fontWeight: 600, color: theme.palette.text.primary, fontSize: '0.875rem', flex: 1 }}>{r.title}</div>
+                                 {r.role && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 12, backgroundColor: alpha(roleColor, 0.1), color: roleColor, textTransform: 'uppercase', fontWeight: 600 }}>{r.role}</span>}
+                               </div>
+                               <div style={{ fontSize: '0.75rem', color: theme.palette.text.secondary, marginLeft: 24 }}>{r.content}</div>
                              </div>
-                             <div style={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>{r.content}</div>
-                           </div>
-                         ))}
-                         <div style={{ padding: 8, textAlign: 'center' }}>
-                           <button onClick={() => { navigate(`/?q=${encodeURIComponent(searchTerm)}`); setSearchResults([]); }} style={{ background: 'transparent', border: 'none', color: theme.palette.primary.main, cursor: 'pointer', fontSize: '0.875rem' }}>See all results</button>
+                           );
+                         })}
+                         <div style={{ padding: 8, textAlign: 'center', borderTop: `1px solid ${theme.palette.divider}` }}>
+                           <button onClick={() => { navigate(`/?q=${encodeURIComponent(searchTerm)}`); setSearchResults([]); }} style={{ background: 'transparent', border: 'none', color: theme.palette.primary.main, cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, padding: '4px 8px' }}>See all results →</button>
                          </div>
                        </div>
                      )}
@@ -568,20 +578,28 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
              </Box>
              {/* show results */}
              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-               {searchResults.map((r) => (
-                 <Button key={`${r.type}-${r.id}`} startIcon={<Search size={14} />} sx={{ justifyContent: 'flex-start' }} component={Link} to={r.url} onClick={() => setSearchOpen(false)}>
-                   <div style={{ textAlign: 'left' }}>
-                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                       <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, backgroundColor: theme.palette.primary.light, color: theme.palette.primary.contrastText, textTransform: 'uppercase' }}>{r.type}</span>
-                       <div style={{ fontWeight: 600 }}>{r.title}</div>
+               {searchResults.map((r) => {
+                 const typeColor = r.type === 'post' ? theme.palette.primary.main : r.type === 'user' ? theme.palette.success.main : theme.palette.warning.main;
+                 const TypeIcon = r.type === 'post' ? FileText : r.type === 'user' ? User : MessageSquare;
+                 const roleColor = r.role === 'ADMIN' ? theme.palette.error.main : theme.palette.info.main;
+                 return (
+                   <Button key={`${r.type}-${r.id}`} startIcon={<TypeIcon size={14} style={{ color: typeColor }} />} sx={{ justifyContent: 'flex-start', textAlign: 'left', p: 1.5 }} component={Link} to={r.url} onClick={() => { setSearchOpen(false); setSearchTerm(''); setSearchResults([]); }}>
+                     <div style={{ textAlign: 'left', width: '100%' }}>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+                         <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 12, backgroundColor: alpha(typeColor, 0.1), color: typeColor, textTransform: 'uppercase', fontWeight: 600 }}>{r.type}</span>
+                         <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{r.title}</div>
+                         {r.role && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 12, backgroundColor: alpha(roleColor, 0.1), color: roleColor, textTransform: 'uppercase', fontWeight: 600 }}>{r.role}</span>}
+                       </div>
+                       <div style={{ fontSize: 12, color: theme.palette.text.secondary }}>{r.content}</div>
                      </div>
-                     <div style={{ fontSize: 12, color: theme.palette.text.secondary }}>{r.content}</div>
-                   </div>
+                   </Button>
+                 );
+               })}
+               {searchResults.length > 0 && (
+                 <Button onClick={() => { navigate(`/?q=${encodeURIComponent(searchTerm)}`); setSearchOpen(false); setSearchTerm(''); setSearchResults([]); }} variant="outlined" fullWidth>
+                   See all results →
                  </Button>
-               ))}
-               <Button onClick={() => { navigate(`/?q=${encodeURIComponent(searchTerm)}`); setSearchOpen(false); }}>
-                 See all results
-               </Button>
+               )}
              </Box>
            </Box>
          </Drawer>

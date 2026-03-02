@@ -91,6 +91,7 @@ export const UserAnalytics: React.FC = () => {
           { label: 'Total Views', value: stats.totalViews, icon: Eye, color: theme.palette.success.main },
           { label: 'Post Likes', value: stats.totalLikes, icon: TrendingUp, color: theme.palette.info.main },
           { label: 'Comment Likes', value: stats.totalCommentLikes, icon: Heart, color: theme.palette.error.main },
+          { label: 'Comment Dislikes', value: stats.totalCommentDislikes, icon: TrendingUp, color: theme.palette.warning.main },
         ].map((metric) => (
           <LIVBlogCard
             key={metric.label}
@@ -190,11 +191,11 @@ export const UserAnalytics: React.FC = () => {
 
       {/* Recent Posts */}
       <LIVBlogCard
-        title="Recent Posts Performance"
+        title="Individual Posts Performance"
         variant="default"
         padding="large"
       >
-        <div style={{ maxHeight: 300, overflow: 'auto' }}>
+        <div style={{ maxHeight: 400, overflow: 'auto' }}>
           {posts.slice(0, 5).map((post, index) => (
             <div 
               key={post.id || index} 
