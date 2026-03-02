@@ -48,6 +48,7 @@ import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 import { useThemeMode } from '../../context/ThemeModeContext';
 import BackendApi, { type PostDto } from '../../service/BackendApi';
+import { useNotifications } from '../../hooks/useNotifications';
 
 interface DashboardNavbarProps {
   onMenuClick: () => void;
@@ -113,6 +114,7 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
   const navigate = useNavigate();
   const theme = useTheme();
   const location = useLocation();
+  const { newPostsCount, markAsRead } = useNotifications();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -364,11 +366,17 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
                {/* Notifications (top bar) - visible on mobile & tablet; desktop uses right rail */}
                {(isMobile || (!isDesktop && !isMobile)) && (
                  <Tooltip title="Notifications">
-                   <IconButton color="inherit" sx={{ position: 'relative' }}>
+                   <IconButton 
+                     color="inherit" 
+                     sx={{ position: 'relative' }}
+                     onClick={() => {
+                       markAsRead();
+                       navigate('/dashboard/posts');
+                     }}
+                   >
                      <Badge
-                         badgeContent={3}
+                         badgeContent={newPostsCount}
                          color="error"
-                         variant="dot"
                          overlap="circular"
                      >
                        <Bell size={20} />

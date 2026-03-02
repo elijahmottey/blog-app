@@ -25,6 +25,92 @@ import { LIVBlogCard, LIVBlogLayout } from '../ui';
 import { useTheme, alpha } from '@mui/material/styles';
 import useDocumentTitle from "../../hooks/useDocumentTitle.ts";
 
+// CommentThread component for nested replies
+const CommentThread: React.FC<{
+  comment: any;
+  level: number;
+  theme: any;
+  user: any;
+  replyingTo: number | null;
+  setReplyingTo: (id: number | null) => void;
+  replyText: string;
+  setReplyText: (text: string) => void;
+  handleReply: (id: number) => void;
+  replyMutation: any;
+}> = ({ comment, level, theme, user, replyingTo, setReplyingTo, replyText, setReplyText, handleReply, replyMutation }) => {
+  const indent = level * 32;
+  const colors = [
+    { bg: alpha(theme.palette.background.paper, 0.7), border: alpha(theme.palette.divider, 0.5), avatar: theme.palette.primary.main, size: 40 },
+    { bg: alpha(theme.palette.secondary.main, 0.08), border: alpha(theme.palette.secondary.main, 0.3), avatar: theme.palette.secondary.main, size: 36 },
+    { bg: alpha(theme.palette.info.main, 0.06), border: alpha(theme.palette.info.main, 0.25), avatar: theme.palette.info.main, size: 32 }
+  ];
+  const style = colors[Math.min(level, 2)];
+
+  return (
+    <div style={{ marginLeft: `${indent}px`, position: 'relative' }}>
+      {level > 0 && (
+        <div style={{
+          position: 'absolute',
+          left: '-16px',
+          top: '20px',
+          width: '2px',
+          height: 'calc(100% - 20px)',
+          backgroundColor: style.border
+        }} />
+      )}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
+        <Avatar sx={{ bgcolor: style.avatar, width: style.size, height: style.size }}>
+          {comment.author.charAt(0).toUpperCase()}
+        </Avatar>
+        <div style={{ flex: 1 }}>
+          <div style={{
+            padding: level === 0 ? '20px' : level === 1 ? '16px' : '12px',
+            borderRadius: '12px',
+            backgroundColor: style.bg,
+            border: `1px solid ${style.border}`,
+            borderLeft: level > 0 ? `3px solid ${style.avatar}` : `1px solid ${style.border}`
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', fontSize: level > 1 ? '0.8rem' : '0.875rem' }}>
+                {comment.author}
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>
+                {comment.createdAt ? format(new Date(comment.createdAt), 'MMM dd, yyyy') : 'Recently'}
+              </Typography>
+            </div>
+            <Typography variant="body2" sx={{ color: 'text.primary', lineHeight: 1.6, fontSize: level > 1 ? '0.8rem' : '0.875rem' }}>
+              {comment.content}
+            </Typography>
+          </div>
+          <div style={{ display: 'flex', gap: '16px', marginTop: '12px', paddingLeft: '4px' }}>
+            <Button size="small" startIcon={<ThumbsUp size={12} />} style={{ fontSize: '0.7rem', color: theme.palette.text.secondary, textTransform: 'none', minWidth: 'auto', padding: '4px 8px' }}>
+              Like
+            </Button>
+            <Button size="small" onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)} style={{ fontSize: '0.7rem', color: theme.palette.text.secondary, textTransform: 'none', minWidth: 'auto', padding: '4px 8px' }}>
+              {replyingTo === comment.id ? 'Cancel' : 'Reply'}
+            </Button>
+          </div>
+          {replyingTo === comment.id && user && (
+            <div style={{ marginTop: '12px', paddingLeft: '4px' }}>
+              <TextField value={replyText} onChange={(e) => setReplyText(e.target.value)} placeholder="Write a reply..." multiline rows={2} fullWidth variant="outlined" size="small" sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '0.8rem' } }} />
+              <Button onClick={() => handleReply(comment.id!)} disabled={replyMutation.isPending || !replyText.trim()} variant="contained" size="small" startIcon={<Send size={12} />} style={{ marginTop: '8px', borderRadius: '6px', fontSize: '0.7rem' }}>
+                {replyMutation.isPending ? 'Sending...' : 'Send Reply'}
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+      {comment.replies && comment.replies.length > 0 && (
+        <div style={{ marginTop: '12px' }}>
+          {comment.replies.map((reply: any, idx: number) => (
+            <CommentThread key={reply.id || idx} comment={reply} level={level + 1} theme={theme} user={user} replyingTo={replyingTo} setReplyingTo={setReplyingTo} replyText={replyText} setReplyText={setReplyText} handleReply={handleReply} replyMutation={replyMutation} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const PostDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -32,6 +118,8 @@ export const PostDetail: React.FC = () => {
   const queryClient = useQueryClient();
   const [commentText, setCommentText] = useState('');
   const [showComments, setShowComments] = useState(true);
+  const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState('');
   const [isReading, setIsReading] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [voiceGender, setVoiceGender] = useState<'male' | 'female'>('female');
@@ -84,6 +172,21 @@ export const PostDetail: React.FC = () => {
     },
   });
 
+  // Reply mutation
+  const replyMutation = useMutation({
+    mutationFn: ({ parentId, content }: { parentId: number; content: string }) =>
+        BackendApi.replyToComment(postId, parentId, { content } as CommentDto),
+    onSuccess: () => {
+      toast.success('Reply added!');
+      setReplyText('');
+      setReplyingTo(null);
+      queryClient.invalidateQueries({ queryKey: ['post-comments', postId] });
+    },
+    onError: (error: any) => {
+      toast.error('Failed to add reply: ' + (error.message || 'Unknown error'));
+    },
+  });
+
   // Delete post mutation
   const deleteMutation = useMutation({
     mutationFn: () => BackendApi.deletePostBlog(postId),
@@ -115,6 +218,18 @@ export const PostDetail: React.FC = () => {
     }
 
     commentMutation.mutate(commentText);
+  };
+
+  const handleReply = (parentId: number) => {
+    if (!user) {
+      toast.error('Please login to reply');
+      return;
+    }
+    if (!replyText.trim()) {
+      toast.error('Reply cannot be empty');
+      return;
+    }
+    replyMutation.mutate({ parentId, content: replyText });
   };
 
   const handleDelete = () => {
@@ -661,8 +776,35 @@ export const PostDetail: React.FC = () => {
       id: comment.id,
       content: comment.content || 'No content',
       author: getUserName(comment.users),
-      createdAt: comment.createdAt
+      createdAt: comment.createdAt,
+      parentId: comment.parentId
     };
+  };
+
+  // Organize comments into parent-child structure
+  const organizeComments = (comments: CommentDto[]) => {
+    const commentMap = new Map();
+    const rootComments: any[] = [];
+    
+    // First pass: create map of all comments
+    comments.forEach(comment => {
+      const data = getCommentData(comment);
+      commentMap.set(data.id, { ...data, replies: [] });
+    });
+    
+    // Second pass: organize into tree structure
+    comments.forEach(comment => {
+      const data = getCommentData(comment);
+      const commentWithReplies = commentMap.get(data.id);
+      
+      if (data.parentId && commentMap.has(data.parentId)) {
+        commentMap.get(data.parentId).replies.push(commentWithReplies);
+      } else {
+        rootComments.push(commentWithReplies);
+      }
+    });
+    
+    return rootComments;
   };
 
   return (
@@ -1155,93 +1297,21 @@ export const PostDetail: React.FC = () => {
                 </Typography>
               </div>
             ) : (
-              postComments.map((comment: CommentDto, index: number) => {
-                const commentData = getCommentData(comment);
-                return (
-                  <div key={commentData.id || index} style={{ 
-                    display: 'flex', 
-                    flexDirection: 'column',
-                    gap: '12px'
-                  }}>
-                    <Avatar 
-                      sx={{ 
-                        bgcolor: 'primary.main',
-                        width: 40,
-                        height: 40
-                      }}
-                    >
-                      {commentData.author.charAt(0).toUpperCase()}
-                    </Avatar>
-                    <div style={{ flex: 1 }}>
-                      <div 
-                        style={{
-                          padding: '20px',
-                          borderRadius: '12px',
-                          backgroundColor: alpha(theme.palette.background.paper, 0.7),
-                          border: `1px solid ${alpha(theme.palette.divider, 0.5)}`
-                        }}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                          <Typography 
-                            variant="subtitle2" 
-                            sx={{ 
-                              fontWeight: 600,
-                              color: 'text.primary'
-                            }}
-                          >
-                            {commentData.author}
-                          </Typography>
-                          <Typography 
-                            variant="caption" 
-                            sx={{ 
-                              color: 'text.secondary',
-                              fontSize: '0.75rem'
-                            }}
-                          >
-                            {commentData.createdAt ? format(new Date(commentData.createdAt), 'MMM dd, yyyy') : 'Recently'}
-                          </Typography>
-                        </div>
-                        <Typography 
-                          variant="body2" 
-                          sx={{ 
-                            color: 'text.primary',
-                            lineHeight: 1.6
-                          }}
-                        >
-                          {commentData.content}
-                        </Typography>
-                      </div>
-                      <div style={{ display: 'flex', gap: '16px', marginTop: '12px', paddingLeft: '4px' }}>
-                        <Button
-                          size="small"
-                          startIcon={<ThumbsUp size={14} />}
-                          style={{
-                            fontSize: '0.75rem',
-                            color: theme.palette.text.secondary,
-                            textTransform: 'none',
-                            minWidth: 'auto',
-                            padding: '4px 8px'
-                          }}
-                        >
-                          Like
-                        </Button>
-                        <Button
-                          size="small"
-                          style={{
-                            fontSize: '0.75rem',
-                            color: theme.palette.text.secondary,
-                            textTransform: 'none',
-                            minWidth: 'auto',
-                            padding: '4px 8px'
-                          }}
-                        >
-                          Reply
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
+              organizeComments(postComments).map((commentData: any, index: number) => (
+                <CommentThread 
+                  key={commentData.id || index}
+                  comment={commentData}
+                  level={0}
+                  theme={theme}
+                  user={user}
+                  replyingTo={replyingTo}
+                  setReplyingTo={setReplyingTo}
+                  replyText={replyText}
+                  setReplyText={setReplyText}
+                  handleReply={handleReply}
+                  replyMutation={replyMutation}
+                />
+              ))
             )}
           </div>
         </LIVBlogCard>
