@@ -9,6 +9,7 @@ import liv.codveda.blog.app.exception.UnauthorizedException;
 import liv.codveda.blog.app.repository.PostRepository;
 import liv.codveda.blog.app.repository.ReactionRepository;
 import liv.codveda.blog.app.repository.UsersRepository;
+import liv.codveda.blog.app.service.interfaces.NotificationService;
 import liv.codveda.blog.app.service.interfaces.ReactionService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,13 +24,16 @@ public class ReactionServiceImpl implements ReactionService {
     private final ReactionRepository reactionRepository;
     private final PostRepository postRepository;
     private final UsersRepository usersRepository;
+    private final NotificationService notificationService;
 
     public ReactionServiceImpl(ReactionRepository reactionRepository,
                                PostRepository postRepository,
-                               UsersRepository usersRepository) {
+                               UsersRepository usersRepository,
+                               NotificationService notificationService) {
         this.reactionRepository = reactionRepository;
         this.postRepository = postRepository;
         this.usersRepository = usersRepository;
+        this.notificationService = notificationService;
     }
 
     private Users getAuthenticatedUser() {
@@ -65,6 +69,15 @@ public class ReactionServiceImpl implements ReactionService {
             r.setPost(post);
             r.setType(type);
             reactionRepository.save(r);
+            
+            if (type == ReactionType.LIKE && !post.getUsers().getId().equals(user.getId())) {
+                notificationService.createNotification(
+                    post.getUsers(),
+                    "LIKE",
+                    user.getName() + " liked your post: " + post.getTitle(),
+                    postId
+                );
+            }
         }
     }
 

@@ -110,6 +110,16 @@ export interface CommentDto{
     updatedAt: string;
 }
 
+export interface NotificationDto {
+    id: number;
+    userId: number;
+    type: string;
+    message: string;
+    referenceId: number;
+    isRead: boolean;
+    createdAt: string;
+}
+
 
 
 
@@ -512,6 +522,23 @@ export default class BackendApi {
         } catch (error) {
             throw this.handleError(error);
         }
+    }
+
+    // ---- NOTIFICATIONS ----
+    static async getNotifications(page: number = 0, size: number = 10) {
+        return this.get<ApiResponse<PagedResponse<NotificationDto>>>(`/notifications?page=${page}&size=${size}`);
+    }
+
+    static async getUnreadNotificationCount() {
+        return this.get<ApiResponse<number>>('/notifications/unread-count');
+    }
+
+    static async markNotificationAsRead(notificationId: number) {
+        return this.put<ApiResponse<void>>(`/notifications/${notificationId}/read`, {});
+    }
+
+    static async markAllNotificationsAsRead() {
+        return this.put<ApiResponse<void>>('/notifications/read-all', {});
     }
 }
 

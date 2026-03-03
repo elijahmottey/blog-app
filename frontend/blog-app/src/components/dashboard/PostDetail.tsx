@@ -185,11 +185,6 @@ export const PostDetail: React.FC = () => {
     queryFn: () => BackendApi.getPostById(postId),
     enabled: !!postId,
     retry: 1,
-    onError: (error: any) => {
-      if (error?.status === 500) {
-        toast.error('Server error loading post. Please try again.');
-      }
-    }
   });
 
   // Fetch comments for this post

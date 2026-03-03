@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, IconButton, Tooltip, Badge, Avatar, Menu as MuiMenu, MenuItem, Divider, Typography, Chip, ListItemIcon } from '@mui/material';
+import { Box, IconButton, Tooltip, Badge, Avatar, Menu as MuiMenu, MenuItem, Divider, Typography, Chip, ListItemIcon, Drawer } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { Home, FileText, MessageSquare, Users, Bell, Shield, LogOut } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -13,6 +13,7 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
   const { user, logout, isAdmin } = useAuth();
   const { mode, toggleMode } = useThemeMode();
   const { newPosts, totalNotifications } = useNotifications(isAdmin);
+  const [notificationDrawerOpen, setNotificationDrawerOpen] = useState(false);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -106,14 +107,7 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
         <IconButton 
           size="small" 
           className="aws-button aws-button-icon hover-subtle"
-          onClick={(e) => {
-            e.preventDefault();
-            if (newPosts.length > 0) {
-              navigate(`/dashboard/posts/${newPosts[0]}?highlight=true`);
-            } else {
-              navigate('/dashboard/posts');
-            }
-          }}
+          onClick={() => setNotificationDrawerOpen(true)}
           sx={{ 
             color: 'text.secondary',
             '&:hover': {
@@ -270,6 +264,101 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
           </MenuItem>
         </MuiMenu>
       </Box>
+      
+      <NotificationDrawer open={notificationDrawerOpen} onClose={() => setNotificationDrawerOpen(false)} isAdmin={isAdmin} />
     </Box>
+  );
+};
+
+// Add notification drawer at the end
+const NotificationDrawer: React.FC<{ open: boolean; onClose: () => void; isAdmin: boolean }> = ({ open, onClose, isAdmin }) => {
+  const theme = useTheme();
+  const navigate = useNavigate();
+  const { newPosts, newUsers, totalNotifications, markPostAsRead, markUserAsRead } = useNotifications(isAdmin);
+
+  return (
+    <Drawer
+      anchor="right"
+      open={open}
+      onClose={onClose}
+      PaperProps={{
+        sx: {
+          width: { xs: '100%', sm: 400 },
+          maxWidth: '100%'
+        },
+      }}
+    >
+      <Box sx={{ p: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Notifications</Typography>
+          <IconButton size="small" onClick={onClose}>
+            <span style={{ fontSize: '1.5rem' }}>×</span>
+          </IconButton>
+        </Box>
+        
+        {totalNotifications === 0 ? (
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Bell size={48} style={{ color: theme.palette.text.secondary, marginBottom: 16 }} />
+            <Typography variant="body2" color="text.secondary">No new notifications</Typography>
+          </Box>
+        ) : (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {newPosts.map((postId) => (
+              <Box
+                key={`post-${postId}`}
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  border: `1px solid ${theme.palette.divider}`,
+                  cursor: 'pointer',
+                  '&:hover': { bgcolor: theme.palette.action.hover },
+                  transition: 'background-color 0.2s'
+                }}
+                onClick={() => {
+                  markPostAsRead(postId);
+                  onClose();
+                  navigate(`/dashboard/posts/${postId}?highlight=true`);
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                  <FileText size={16} style={{ color: theme.palette.primary.main }} />
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>New Post</Typography>
+                </Box>
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                  A new post has been published. Click to view.
+                </Typography>
+              </Box>
+            ))}
+            
+            {isAdmin && newUsers.map((userId) => (
+              <Box
+                key={`user-${userId}`}
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  border: `1px solid ${theme.palette.divider}`,
+                  cursor: 'pointer',
+                  '&:hover': { bgcolor: theme.palette.action.hover },
+                  transition: 'background-color 0.2s'
+                }}
+                onClick={() => {
+                  markUserAsRead(userId);
+                  onClose();
+                  navigate(`/dashboard/admin/user/${userId}/view`);
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                  <Users size={16} style={{ color: theme.palette.success.main }} />
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>New User</Typography>
+                </Box>
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                  A new user has registered. Click to view profile.
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        )}
+      </Box>
+    </Drawer>
   );
 };

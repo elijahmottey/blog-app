@@ -10,6 +10,7 @@ import liv.codveda.blog.app.exception.UnauthorizedOperationException;
 import liv.codveda.blog.app.repository.CommentRepository;
 import liv.codveda.blog.app.service.interfaces.BlogService;
 import liv.codveda.blog.app.service.interfaces.CommentService;
+import liv.codveda.blog.app.service.interfaces.NotificationService;
 import liv.codveda.blog.app.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,11 +24,13 @@ public class CommentServiceImpl implements CommentService {
 
     private final BlogService blogService;
     private final CommentRepository commentRepository;
+    private final NotificationService notificationService;
 
     @Autowired
-    public CommentServiceImpl(BlogService blogService, CommentRepository commentRepository) {
+    public CommentServiceImpl(BlogService blogService, CommentRepository commentRepository, NotificationService notificationService) {
         this.blogService = blogService;
         this.commentRepository = commentRepository;
+        this.notificationService = notificationService;
     }
 
     private Users getCurrentUser() {
@@ -47,7 +50,18 @@ public class CommentServiceImpl implements CommentService {
         comment.setPost(post);
         comment.setUsers(user);
 
-        return commentRepository.save(comment);
+        Comment savedComment = commentRepository.save(comment);
+        
+        if (!post.getUsers().getId().equals(user.getId())) {
+            notificationService.createNotification(
+                post.getUsers(),
+                "COMMENT",
+                user.getName() + " commented on your post: " + post.getTitle(),
+                postId
+            );
+        }
+        
+        return savedComment;
     }
 
     @Override
@@ -63,7 +77,18 @@ public class CommentServiceImpl implements CommentService {
         comment.setPost(post);
         comment.setUsers(user);
         comment.setParent(parent);
-        return commentRepository.save(comment);
+        Comment savedReply = commentRepository.save(comment);
+        
+        if (!parent.getUsers().getId().equals(user.getId())) {
+            notificationService.createNotification(
+                parent.getUsers(),
+                "REPLY",
+                user.getName() + " replied to your comment",
+                postId
+            );
+        }
+        
+        return savedReply;
     }
 
     @Override

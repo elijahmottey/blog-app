@@ -49,6 +49,7 @@ import { toast } from 'sonner';
 import { useThemeMode } from '../../context/ThemeModeContext';
 import BackendApi, { type PostDto } from '../../service/BackendApi';
 import { useNotifications } from '../../hooks/useNotifications';
+import { NotificationPanel } from './NotificationPanel';
 
 interface DashboardNavbarProps {
   onMenuClick: () => void;
@@ -366,21 +367,7 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
 
                {/* Notifications (top bar) - visible on mobile & tablet; desktop uses right rail */}
                {(isMobile || (!isDesktop && !isMobile)) && (
-                 <Tooltip title="Notifications">
-                   <IconButton 
-                     color="inherit" 
-                     sx={{ position: 'relative' }}
-                     onClick={() => setNotificationDrawerOpen(true)}
-                   >
-                     <Badge
-                         badgeContent={totalNotifications}
-                         color="error"
-                         overlap="circular"
-                     >
-                       <Bell size={20} />
-                     </Badge>
-                   </IconButton>
-                 </Tooltip>
+                 <NotificationPanel />
                )}
 
 
@@ -607,6 +594,91 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
                  </Button>
                )}
              </Box>
+           </Box>
+         </Drawer>
+
+         {/* Notification Drawer */}
+         <Drawer
+             anchor="right"
+             open={notificationDrawerOpen}
+             onClose={() => setNotificationDrawerOpen(false)}
+             PaperProps={{
+               sx: {
+                 width: { xs: '100%', sm: 400 },
+                 maxWidth: '100%'
+               },
+             }}
+         >
+           <Box sx={{ p: 2 }}>
+             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+               <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Notifications</Typography>
+               <IconButton size="small" onClick={() => setNotificationDrawerOpen(false)}>
+                 <span style={{ fontSize: '1.5rem' }}>×</span>
+               </IconButton>
+             </Box>
+             
+             {totalNotifications === 0 ? (
+               <Box sx={{ textAlign: 'center', py: 4 }}>
+                 <Bell size={48} style={{ color: theme.palette.text.secondary, marginBottom: 16 }} />
+                 <Typography variant="body2" color="text.secondary">No new notifications</Typography>
+               </Box>
+             ) : (
+               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                 {newPosts.map((postId) => (
+                   <Box
+                     key={`post-${postId}`}
+                     sx={{
+                       p: 2,
+                       borderRadius: 2,
+                       border: `1px solid ${theme.palette.divider}`,
+                       cursor: 'pointer',
+                       '&:hover': { bgcolor: theme.palette.action.hover },
+                       transition: 'background-color 0.2s'
+                     }}
+                     onClick={() => {
+                       markPostAsRead(postId);
+                       setNotificationDrawerOpen(false);
+                       navigate(`/dashboard/posts/${postId}?highlight=true`);
+                     }}
+                   >
+                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                       <FileText size={16} style={{ color: theme.palette.primary.main }} />
+                       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>New Post</Typography>
+                     </Box>
+                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                       A new post has been published. Click to view.
+                     </Typography>
+                   </Box>
+                 ))}
+                 
+                 {isAdmin && newUsers.map((userId) => (
+                   <Box
+                     key={`user-${userId}`}
+                     sx={{
+                       p: 2,
+                       borderRadius: 2,
+                       border: `1px solid ${theme.palette.divider}`,
+                       cursor: 'pointer',
+                       '&:hover': { bgcolor: theme.palette.action.hover },
+                       transition: 'background-color 0.2s'
+                     }}
+                     onClick={() => {
+                       markUserAsRead(userId);
+                       setNotificationDrawerOpen(false);
+                       navigate(`/dashboard/admin/user/${userId}/view`);
+                     }}
+                   >
+                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                       <Users size={16} style={{ color: theme.palette.success.main }} />
+                       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>New User</Typography>
+                     </Box>
+                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                       A new user has registered. Click to view profile.
+                     </Typography>
+                   </Box>
+                 ))}
+               </Box>
+             )}
            </Box>
          </Drawer>
 
