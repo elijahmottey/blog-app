@@ -144,10 +144,15 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
     (async () => {
       try {
         // Fetch more data for a better "overall" search experience
+        const postsPromise = BackendApi.getAllPost(0, 100);
+        const commentsPromise = BackendApi.getAllPostComment(0, 100);
+        // Only fetch users if admin to avoid 403 errors
+        const usersPromise = isAdmin ? BackendApi.getAllUsers(0, 100) : Promise.resolve({ content: [] } as any);
+
         const [postsRes, usersRes, commentsRes] = await Promise.all([
-          BackendApi.getAllPost(0, 10),
-          BackendApi.getAllUsers(0, 10),
-          BackendApi.getAllPostComment(0, 10)
+          postsPromise,
+          usersPromise,
+          commentsPromise
         ]);
         
         const q = debouncedTerm.toLowerCase();
@@ -171,7 +176,8 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
         })));
         
         // Search users (Name, Email)
-        const users = usersRes.data?.content || [];
+        // Handle different response structures (PagedResponse vs ApiResponse)
+        const users = (usersRes as any).content || (usersRes as any).data?.content || [];
         const filteredUsers = users.filter((u: any) => 
           (u.name || '').toLowerCase().includes(q) || 
           (u.email || '').toLowerCase().includes(q)
@@ -189,19 +195,44 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
         
         // Search comments (Content, Author)
         const comments = commentsRes.data?.content || [];
-        const filteredComments = comments.filter((c: any) => 
-          (c.content || '').toLowerCase().includes(q) ||
-          (c.users || '').toLowerCase().includes(q)
-        );
+        const filteredComments = comments.filter((c: any) => {
+          const contentMatch = (c.content || '').toLowerCase().includes(q);
+          let authorName = '';
+          if (typeof c.users === 'string') {
+            authorName = c.users;
+          } else if (typeof c.users === 'object' && c.users !== null) {
+            authorName = c.users.name || '';
+          }
+          const authorMatch = authorName.toLowerCase().includes(q);
+          return contentMatch || authorMatch;
+        });
         
-        results.push(...filteredComments.slice(0, 3).map((c: any) => ({
-          type: 'comment' as 'comment',
-          id: c.id,
-          title: `Comment by ${c.users || 'Anonymous'}`,
-          content: (c.content || '').slice(0, 100) + ((c.content || '').length > 100 ? '...' : ''),
-          url: `/dashboard/posts/${c.posts ? c.posts.split(',')[0] : ''}`, // Assuming we can navigate to the post
-          date: c.createdAt
-        })));
+        results.push(...filteredComments.slice(0, 3).map((c: any) => {
+          let authorName = 'Anonymous';
+          if (typeof c.users === 'string') {
+            authorName = c.users;
+          } else if (typeof c.users === 'object' && c.users !== null) {
+            authorName = c.users.name || 'Anonymous';
+          }
+
+          let postId = '';
+          if (typeof c.posts === 'string') {
+             postId = c.posts.split(',')[0];
+          } else if (typeof c.posts === 'number') {
+             postId = c.posts.toString();
+          } else if (typeof c.posts === 'object' && c.posts !== null) {
+             postId = c.posts.id?.toString() || '';
+          }
+
+          return {
+            type: 'comment' as 'comment',
+            id: c.id,
+            title: `Comment by ${authorName}`,
+            content: (c.content || '').slice(0, 100) + ((c.content || '').length > 100 ? '...' : ''),
+            url: `/dashboard/posts/${postId}`,
+            date: c.createdAt
+          };
+        }));
         
         if (active) setSearchResults(results);
       } catch (e) {
