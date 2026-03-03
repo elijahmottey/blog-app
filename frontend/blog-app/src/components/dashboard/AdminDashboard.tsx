@@ -152,7 +152,7 @@ export const AdminDashboard: React.FC = () => {
                         color: theme.palette.text.primary,
                         fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
                       }}>Comments</th>
-                      <th style={{ 
+                      <th style={{
                         padding: '12px 16px', 
                         textAlign: 'center', 
                         fontSize: '0.875rem', 
@@ -164,10 +164,10 @@ export const AdminDashboard: React.FC = () => {
                   </thead>
                   <tbody>
                     {usersData?.content?.map((user: UserDto) => {
-                      const userPosts = postsData?.data?.content?.filter((post: any) => 
+                      const userPosts = postsData?.data?.content?.filter((post: any) =>
                         post.users === user.name || post.users === user.email
                       ) || [];
-                      const userComments = commentsData?.data?.content?.filter((comment: any) => 
+                      const userComments = commentsData?.data?.content?.filter((comment: any) =>
                         comment.users === user.name || comment.users === user.email
                       ) || [];
                       
@@ -605,6 +605,46 @@ export const AdminDashboard: React.FC = () => {
                 fontSize: '0.875rem',
                 margin: 0
               }}>Detailed platform statistics</p>
+            </div>
+          </div>
+          <div 
+            onClick={() => navigate('/dashboard/admin/reports')}
+            style={{
+              padding: '24px',
+              borderRadius: '12px',
+              border: `1px solid ${theme.palette.divider}`,
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+              display: 'flex',
+              gap: '16px',
+              alignItems: 'flex-start',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <div 
+              style={{
+                width: '48px',
+                height: '48px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '12px',
+                backgroundColor: alpha(theme.palette.error.main, 0.12)
+              }}
+            >
+              <AlertTriangle style={{ width: 24, height: 24, color: theme.palette.error.main }} />
+            </div>
+            <div>
+              <p style={{ 
+                fontWeight: 600, 
+                color: theme.palette.text.primary,
+                margin: '0 0 4px 0'
+              }}>Manage Reports</p>
+              <p style={{ 
+                color: theme.palette.text.secondary, 
+                fontSize: '0.875rem',
+                margin: 0
+              }}>Review and manage reported content</p>
             </div>
           </div>
         </div>

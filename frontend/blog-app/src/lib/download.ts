@@ -1,4 +1,5 @@
 import type { PostDto } from "../service/BackendApi";
+import { toast } from "sonner";
 
 // Sanitize string for safe filename
 function slugify(input: string): string {
@@ -30,13 +31,20 @@ function formatIsoDate(iso?: string): string {
   }
 }
 
-export function downloadPost(post: PostDto) {
+export function downloadPost(post: PostDto, isAuthenticated: boolean) {
+  if (!isAuthenticated) {
+    toast.error("You must be logged in to download posts.");
+    return;
+  }
+
   const title = post.title || "blog-post";
   const author = (post as any).users?.name || (post as any).users || "Anonymous";
   const createdDate = formatIsoDate(post.createdAt) || new Date().toISOString().slice(0, 10);
   const filename = `${slugify(title)}_${createdDate}.txt`;
 
   const lines: string[] = [];
+  lines.push("LIVBlog");
+  lines.push("");
   lines.push(`# ${title}`);
   lines.push("");
   lines.push(`Author: ${author}`);
@@ -60,13 +68,29 @@ export function downloadPost(post: PostDto) {
   URL.revokeObjectURL(url);
 }
 
-export function downloadPostPdf(post: PostDto) {
+export async function downloadPostPdf(post: PostDto, isAuthenticated: boolean) {
+  if (!isAuthenticated) {
+    toast.error("You must be logged in to download posts.");
+    return;
+  }
+
   const title = post.title || "blog-post";
   const author = (post as any).users?.name || (post as any).users || "Anonymous";
   const created = post.createdAt ? new Date(post.createdAt).toLocaleString() : "";
   const updated = post.updatedAt ? new Date(post.updatedAt).toLocaleString() : "";
   const createdDate = formatIsoDate(post.createdAt) || new Date().toISOString().slice(0, 10);
   const fileBase = `${slugify(title)}_${createdDate}`;
+
+  // Fetch the logo and convert it to a data URL
+  const response = await fetch('/LIV Blog logo design.png');
+  const blob = await response.blob();
+  const reader = new FileReader();
+  reader.readAsDataURL(blob);
+  const logoDataUrl = await new Promise<string>(resolve => {
+    reader.onloadend = () => {
+      resolve(reader.result as string);
+    };
+  });
 
   // Basic HTML formatting for print-to-PDF
   const safeContent = (post.content || "")
@@ -78,7 +102,18 @@ export function downloadPostPdf(post: PostDto) {
   <meta charset="utf-8" />
   <title>${fileBase}.pdf</title>
   <style>
-    body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; padding: 32px; color: #111; }
+    body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; padding: 32px; color: #111; position: relative; }
+    .watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-45deg);
+      opacity: 0.5;
+      pointer-events: none;
+      width: 80%;
+      height: auto;
+    }
+    .logo { font-size: 24px; font-weight: bold; margin-bottom: 16px; }
     h1 { font-size: 28px; margin: 0 0 8px; }
     .meta { color: #555; margin-bottom: 16px; font-size: 12px; }
     hr { border: 0; border-top: 1px solid #ddd; margin: 16px 0; }
@@ -86,6 +121,8 @@ export function downloadPostPdf(post: PostDto) {
   </style>
 </head>
 <body>
+  <img src="${logoDataUrl}" class="watermark" alt="LIVBlog Watermark" />
+  <div class="logo">LIVBlog</div>
   <h1>${title}</h1>
   <div class="meta">Author: ${author}${created ? ` • Created: ${created}` : ""}${updated ? ` • Updated: ${updated}` : ""}</div>
   <hr />
@@ -96,8 +133,8 @@ export function downloadPostPdf(post: PostDto) {
 </body>
 </html>`;
 
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
+  const newBlob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(newBlob);
   const w = window.open(url, '_blank');
   if (!w) {
     // Fallback: open data URL directly

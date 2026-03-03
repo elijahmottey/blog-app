@@ -28,6 +28,7 @@ import {AnalyticsView} from "./components/dashboard/AnalyticsView.tsx";
 import {UserActivityPage} from "./components/dashboard/UserActivityPage.tsx";
 import { AuthorProfile } from "./components/AuthorProfile.tsx";
 import OAuth2RedirectHandler from "./components/OAuth2RedirectHandler.tsx";
+import { ReportedPosts } from "./components/dashboard/ReportedPosts.tsx";
 
 export const PagesRoute = () => {
     return (
@@ -155,6 +156,7 @@ export const PagesRoute = () => {
                                     <Route path="admin/users" element={<AdminUsers />} />
                                     <Route path="admin/user/:id/view" element={<UserActivityPage />} />
                                     <Route path="admin/analytics" element={<> <AnalyticsView/></>} />
+                                    <Route path="admin/reports" element={<ReportedPosts />} />
                                 </Route>
                             </Route>
                         </Route>

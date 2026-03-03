@@ -14,7 +14,6 @@ export class WebSocketService {
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
       onConnect: () => {
-        console.log('WebSocket connected');
         this.subscribe(userId, onNotification);
       },
       onStompError: (frame) => {

@@ -22,29 +22,32 @@ export const useNotificationSystem = (userId?: number) => {
     queryKey: ['notifications'],
     queryFn: () => BackendApi.getNotifications(0, 50),
     enabled: !!userId,
+    refetchInterval: 30000,
   });
 
   const { data: unreadCountData } = useQuery({
     queryKey: ['unread-count'],
     queryFn: () => BackendApi.getUnreadNotificationCount(),
     enabled: !!userId,
+    refetchInterval: 30000,
   });
 
   useEffect(() => {
     if (!userId) return;
 
-    const handleNotification = (notification: Notification) => {
-      setRealtimeNotifications((prev) => [notification, ...prev]);
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      queryClient.invalidateQueries({ queryKey: ['unread-count'] });
-      toast.info(notification.message, { autoClose: 5000 });
-    };
+    // Temporarily disabled WebSocket - using polling instead
+    // const handleNotification = (notification: Notification) => {
+    //   setRealtimeNotifications((prev) => [notification, ...prev]);
+    //   queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    //   queryClient.invalidateQueries({ queryKey: ['unread-count'] });
+    //   toast.info(notification.message, { autoClose: 5000 });
+    // };
 
-    webSocketService.connect(userId, handleNotification);
+    // webSocketService.connect(userId, handleNotification);
 
-    return () => {
-      webSocketService.disconnect();
-    };
+    // return () => {
+    //   webSocketService.disconnect();
+    // };
   }, [userId, queryClient]);
 
   const markAsReadMutation = useMutation({

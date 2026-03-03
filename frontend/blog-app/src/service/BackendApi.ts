@@ -93,6 +93,7 @@ export interface PostDto{
     comments?:string[];
     likes?: number;
     views?: number;
+    downloads?: number;
     isLiked?: boolean;
 }
 
@@ -108,6 +109,16 @@ export interface CommentDto{
     isDisliked?: boolean;
     createdAt: string;
     updatedAt: string;
+}
+
+export interface PostReportDto {
+    id: number;
+    postId: number;
+    postTitle: string;
+    reporterId: number;
+    reporterName: string;
+    reason: string;
+    createdAt: string;
 }
 
 export interface NotificationDto {
@@ -322,12 +333,12 @@ export default class BackendApi {
     // ---- ROLE HELPERS ----
     static getRoles(): Roles[] {
         const roles = localStorage.getItem("roles1");
-        
+
         if (!roles) return [];
-        
+
         const parsedRoles = JSON.parse(roles);
         console.log('Parsed roles:', parsedRoles);
-        
+
         // Handle both string and array formats from backend
         let roleArray: string[];
         if (typeof parsedRoles === 'string') {
@@ -337,7 +348,7 @@ export default class BackendApi {
         } else {
             return [];
         }
-        
+
         // Remove ROLE_ prefix if present and convert to Roles enum
         return roleArray.map(role => {
             const cleanRole = role.startsWith('ROLE_') ? role.substring(5) : role;
@@ -423,6 +434,10 @@ export default class BackendApi {
     }
     static async updatePost(PostData: PostDto, postId: number) {
         return this.put<ApiResponse<PostDto>>(`/post/${postId}`, PostData);
+    }
+
+    static async trackPostDownload(postId: number) {
+        return this.post<ApiResponse<any>>(`/post/${postId}/download`, {});
     }
 
 
@@ -539,6 +554,19 @@ export default class BackendApi {
 
     static async markAllNotificationsAsRead() {
         return this.put<ApiResponse<void>>('/notifications/read-all', {});
+    }
+
+    // ---- POST REPORTS ----
+    static async reportPost(postId: number, reason: string) {
+        return this.post<ApiResponse<void>>(`/reports/post/${postId}`, { reason });
+    }
+
+    static async getPostReports(page: number = 0, size: number = 10) {
+        return this.get<ApiResponse<PagedResponse<PostReportDto>>>(`/reports?page=${page}&size=${size}`);
+    }
+
+    static async deleteReport(reportId: number) {
+        return this.delete<ApiResponse<void>>(`/reports/${reportId}`);
     }
 }
 

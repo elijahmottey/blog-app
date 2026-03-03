@@ -167,53 +167,31 @@ export const PostsManagement: React.FC = () => {
   }
 
   return (
-      <div className="aws-spacing-y-sm">
+      <div className="aws-spacing-y-sm   ">
+        <div className="mb-5">
+          <TextField
+              select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              variant="outlined"
+              size="small"
+              className="aws-font"
+              style={{ minWidth: '180px' }}
+              SelectProps={{ native: true }}
+          >
+            <option value="all">All Categories</option>
+            <option value="TECHNOLOGY">Technology</option>
+            <option value="SPIRITUAL">Spiritual</option>
+            <option value="POLITICS">Politics</option>
+            <option value="LEADERSHIP">Leadership</option>
+            <option value="CULTURE">Culture</option>
+            <option value="HEALTH">Health</option>
+            <option value="BUSINESS">Business</option>
+            <option value="EDUCATION">Education</option>
+            <option value="SPORTS">Sports</option>
+          </TextField>
+        </div>
 
-        <LIVBlogCard padding="medium" className="aws-margin-b-lg">
-          <div className="flex flex-col md:flex-row gap-4">
-            <TextField
-                placeholder="Search posts by title or content..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                variant="outlined"
-                fullWidth
-                size="small"
-                className="aws-font"
-                InputProps={{
-                  startAdornment: (
-                      <InputAdornment position="start">
-                        <Search size={16} />
-                      </InputAdornment>
-                  )
-                }}
-            />
-            <TextField
-                select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                variant="outlined"
-                size="small"
-                className="aws-font"
-                style={{ minWidth: '180px' }}
-                SelectProps={{ native: true }}
-            >
-              <option value="all">All Categories</option>
-              <option value="TECHNOLOGY">Technology</option>
-              <option value="SPIRITUAL">Spiritual</option>
-              <option value="POLITICS">Politics</option>
-              <option value="LEADERSHIP">Leadership</option>
-              <option value="CULTURE">Culture</option>
-              <option value="HEALTH">Health</option>
-              <option value="BUSINESS">Business</option>
-              <option value="EDUCATION">Education</option>
-              <option value="SPORTS">Sports</option>
-            </TextField>
-          </div>
-          {/*<Button onClick={refreshPosts} variant="outlined" className="aws-button aws-button-secondary">*/}
-          {/*  <RefreshCw size={10} style={{ marginTop: '4px' }} />*/}
-          {/*  Refresh*/}
-          {/*</Button>*/}
-        </LIVBlogCard>
 
         <LIVBlogCard padding="none">
           {filteredPosts.length === 0 && !isFetching ? (

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import BackendApi, { type UserDto, type UserProfile } from '../service/BackendApi';
 import { Roles } from "../enums/Roles.ts";
+import { toast } from 'sonner'; // Assuming toast is available for notifications
 
 interface AuthContextType {
   user: UserDto | null;
@@ -32,19 +33,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshUser = async () => {
     if (BackendApi.isAuthenticated()) {
-      const profileResp = await BackendApi.getUserProfile();
-      const profile = profileResp.data;
-      setUserProfile(profile);
-      const userWithRoles: UserDto = {
-        id: profile.id,
-        name: profile.name,
-        email: profile.email,
-        description: profile.description,
-        roles: BackendApi.getRoles(),
-        createdAt: profile.createdAt,
-        updatedAt: profile.updatedAt,
-      };
-      setUser(userWithRoles);
+      try {
+        const profileResp = await BackendApi.getUserProfile();
+        const profile = profileResp.data;
+        setUserProfile(profile);
+        const userWithRoles: UserDto = {
+          id: profile.id,
+          name: profile.name,
+          email: profile.email,
+          description: profile.description,
+          roles: BackendApi.getRoles(),
+          createdAt: profile.createdAt,
+          updatedAt: profile.updatedAt,
+        };
+        setUser(userWithRoles);
+      } catch (error) {
+        console.error('Failed to fetch user profile during refresh:', error);
+        BackendApi.clearTokens();
+        setUser(null);
+        setUserProfile(null);
+      }
     }
   };
 
@@ -54,8 +62,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           await refreshUser();
         } catch (error) {
-          console.error('Failed to fetch user profile:', error);
+          console.error('Failed to fetch user profile during initialization:', error);
           BackendApi.clearTokens();
+          setUser(null);
+          setUserProfile(null);
         }
       }
       setLoading(false);
@@ -76,13 +86,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
+    // Clear client-side state immediately
+    setUser(null);
+    setUserProfile(null);
+    BackendApi.clearTokens(); // Clear local storage tokens
+
     try {
+      // Attempt to invalidate token on the server, but don't block client-side logout if it fails
       await BackendApi.logoutUser();
+      toast.success('Logged out successfully.');
     } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      setUser(null);
-      setUserProfile(null);
+      console.error('Server-side logout error (may be due to expired token or network issue):', error);
+      toast.info('Logged out locally. Server session may have already expired or could not be invalidated.');
     }
   };
 

@@ -12,9 +12,11 @@ import {
   Download,
   Tag,
   Volume2,
-  VolumeX
+  VolumeX,
+  Flag,
+  MoreVertical
 } from 'lucide-react';
-import { Button, Typography, TextField, Avatar, Chip, CircularProgress } from '@mui/material';
+import { Button, Typography, TextField, Avatar, Chip, CircularProgress, IconButton, Menu, MenuItem } from '@mui/material';
 import BackendApi, { type CommentDto, type PostDto } from '../../service/BackendApi';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
@@ -145,7 +147,7 @@ export const PostDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
   const { markPostAsRead } = useNotifications(isAdmin);
   const [commentText, setCommentText] = useState('');
@@ -163,6 +165,15 @@ export const PostDetail: React.FC = () => {
   const [isHighlighted, setIsHighlighted] = useState(false);
   const theme = useTheme();
   useDocumentTitle('LIVBlog | Post Details');
+
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   const postId = parseInt(id || '0');
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -266,6 +277,21 @@ export const PostDetail: React.FC = () => {
     },
   });
 
+  // Report post mutation
+  const reportMutation = useMutation({
+    mutationFn: (reason: string) => BackendApi.reportPost(postId, reason),
+    onSuccess: () => {
+      toast.success('Post reported successfully');
+    },
+    onError: (err: any) => {
+      if (err?.message?.includes('already reported')) {
+        toast.error('You have already reported this post');
+      } else {
+        toast.error('Failed to report post');
+      }
+    },
+  });
+
   const handleComment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
@@ -311,6 +337,13 @@ export const PostDetail: React.FC = () => {
   const handleDelete = () => {
     if (window.confirm('Are you sure you want to delete this post?')) {
       deleteMutation.mutate();
+    }
+  };
+
+  const handleReport = () => {
+    const reason = prompt('Why are you reporting this post?');
+    if (reason && reason.trim()) {
+      reportMutation.mutate(reason.trim());
     }
   };
 
@@ -1194,53 +1227,45 @@ export const PostDetail: React.FC = () => {
             </Button>
           </div>
 
-          <div style={{ 
-            display: 'flex', 
-            flexDirection: window.innerWidth < 768 ? 'column' : 'row',
-            gap: window.innerWidth < 768 ? '8px' : '12px'
-          }}>
-            <Button
-              onClick={handleReadPost}
-              startIcon={isReading ? <VolumeX /> : <Volume2 />}
-              variant="outlined"
-              size={window.innerWidth < 768 ? "small" : "medium"}
-              style={{
-                borderRadius: '10px',
-                borderColor: alpha(theme.palette.success.main, 0.3),
-                color: theme.palette.success.main,
-                backgroundColor: isReading ? alpha(theme.palette.success.main, 0.1) : 'transparent',
-                fontSize: window.innerWidth < 768 ? '0.75rem' : '0.875rem'
-              }}
+          <div>
+            <IconButton
+              aria-label="more"
+              id="long-button"
+              aria-controls={open ? 'long-menu' : undefined}
+              aria-expanded={open ? 'true' : undefined}
+              aria-haspopup="true"
+              onClick={handleClick}
             >
-              {isReading ? 'Stop Reading' : 'Read Aloud'}
-            </Button>
-            <Button
-              onClick={() => downloadPost(postData)}
-              startIcon={<Download />}
-              variant="outlined"
-              size={window.innerWidth < 768 ? "small" : "medium"}
-              style={{
-                borderRadius: '10px',
-                borderColor: alpha(theme.palette.info.main, 0.3),
-                color: theme.palette.info.main,
-                fontSize: window.innerWidth < 768 ? '0.75rem' : '0.875rem'
+              <MoreVertical />
+            </IconButton>
+            <Menu
+              id="long-menu"
+              MenuListProps={{
+                'aria-labelledby': 'long-button',
               }}
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
             >
-              {window.innerWidth < 768 ? 'TXT' : 'Download TXT'}
-            </Button>
-            <Button
-              onClick={() => downloadPostPdf(postData)}
-              variant="outlined"
-              size={window.innerWidth < 768 ? "small" : "medium"}
-              style={{
-                borderRadius: '10px',
-                borderColor: alpha(theme.palette.info.main, 0.3),
-                color: theme.palette.info.main,
-                fontSize: window.innerWidth < 768 ? '0.75rem' : '0.875rem'
-              }}
-            >
-              {window.innerWidth < 768 ? 'PDF' : 'Download PDF'}
-            </Button>
+              <MenuItem onClick={() => { handleReadPost(); handleClose(); }}>
+                <Volume2 size={16} style={{ marginRight: '8px' }} />
+                {isReading ? 'Stop Reading' : 'Read Aloud'}
+              </MenuItem>
+              <MenuItem onClick={() => { downloadPost(postData, isAuthenticated); handleClose(); }}>
+                <Download size={16} style={{ marginRight: '8px' }} />
+                Download TXT
+              </MenuItem>
+              <MenuItem onClick={() => { downloadPostPdf(postData, isAuthenticated); handleClose(); }}>
+                <Download size={16} style={{ marginRight: '8px' }} />
+                Download PDF
+              </MenuItem>
+              {user && !canEditOrDelete && (
+                <MenuItem onClick={() => { handleReport(); handleClose(); }} disabled={reportMutation.isPending}>
+                  <Flag size={16} style={{ marginRight: '8px' }} />
+                  Report
+                </MenuItem>
+              )}
+            </Menu>
           </div>
         </div>
       </LIVBlogCard>
@@ -1409,4 +1434,3 @@ export const PostDetail: React.FC = () => {
     </div>
   );
 };
-
