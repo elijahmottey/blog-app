@@ -164,7 +164,7 @@ export const PostDetail: React.FC = () => {
   const [currentParagraph, setCurrentParagraph] = useState(-1);
   const [isHighlighted, setIsHighlighted] = useState(false);
   const theme = useTheme();
-  useDocumentTitle('LIVBlog | Post Details');
+
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -198,12 +198,15 @@ export const PostDetail: React.FC = () => {
     retry: 1,
   });
 
+  useDocumentTitle(`LIVBlog | ${post?.data?.title || 'Untitled Post'}`);
+
   // Fetch comments for this post
   const { data: commentsData, isLoading: commentsLoading } = useQuery({
     queryKey: ['post-comments', postId],
     queryFn: () => BackendApi.getCommentsByPostId(postId),
     enabled: !!postId,
   });
+
 
   // Comments for this post
   const postComments = (commentsData?.data as any)?.content || [];

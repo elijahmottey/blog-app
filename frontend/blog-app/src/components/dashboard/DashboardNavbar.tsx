@@ -102,12 +102,13 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 interface SearchResult {
-  type: string;
+  type: 'post' | 'user' | 'comment';
   id: number;
   title: string;
   content: string;
   url: string;
   role?: string;
+  date?: string;
 }
 
 export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, isSidebarOpen, isMobile, isDesktop }) => {
@@ -142,31 +143,34 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
     }
     (async () => {
       try {
+        // Fetch more data for a better "overall" search experience
         const [postsRes, usersRes, commentsRes] = await Promise.all([
-          BackendApi.getAllPost(0, 50),
-          BackendApi.getAllUsers(0, 50),
-          BackendApi.getAllPostComment(0, 50)
+          BackendApi.getAllPost(0, 10),
+          BackendApi.getAllUsers(0, 10),
+          BackendApi.getAllPostComment(0, 10)
         ]);
         
         const q = debouncedTerm.toLowerCase();
         const results: SearchResult[] = [];
         
-        // Search posts
+        // Search posts (Title, Content, Category)
         const posts = postsRes.data?.content || [];
         const filteredPosts = posts.filter((p: any) => 
           (p.title || '').toLowerCase().includes(q) || 
-          (p.content || '').toLowerCase().includes(q)
+          (p.content || '').toLowerCase().includes(q) ||
+          (p.category || '').toLowerCase().includes(q)
         );
         
         results.push(...filteredPosts.slice(0, 5).map((p: any) => ({
-          type: 'post',
+          type: 'post' as 'post',
           id: p.id,
           title: p.title || 'Untitled',
           content: (p.content || '').slice(0, 120) + ((p.content || '').length > 120 ? '...' : ''),
-          url: `/dashboard/posts/${p.id}`
+          url: `/dashboard/posts/${p.id}`,
+          date: p.createdAt
         })));
         
-        // Search users
+        // Search users (Name, Email)
         const users = usersRes.data?.content || [];
         const filteredUsers = users.filter((u: any) => 
           (u.name || '').toLowerCase().includes(q) || 
@@ -174,26 +178,29 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
         );
         
         results.push(...filteredUsers.slice(0, 3).map((u: any) => ({
-          type: 'user',
+          type: 'user' as 'user',
           id: u.id,
           title: u.name || 'Unknown User',
           content: u.email || '',
-          url: isAdmin ? `/dashboard/admin/user/${u.id}/view` : `/dashboard/profile`,
-          role: u.role || 'USER'
+          url: isAdmin ? `/dashboard/admin/user/${u.id}/view` : `/profile/${u.name}`,
+          role: u.role || 'USER',
+          date: u.createdAt
         })));
         
-        // Search comments
+        // Search comments (Content, Author)
         const comments = commentsRes.data?.content || [];
         const filteredComments = comments.filter((c: any) => 
-          (c.content || '').toLowerCase().includes(q)
+          (c.content || '').toLowerCase().includes(q) ||
+          (c.users || '').toLowerCase().includes(q)
         );
         
         results.push(...filteredComments.slice(0, 3).map((c: any) => ({
-          type: 'comment',
+          type: 'comment' as 'comment',
           id: c.id,
-          title: 'Comment',
+          title: `Comment by ${c.users || 'Anonymous'}`,
           content: (c.content || '').slice(0, 100) + ((c.content || '').length > 100 ? '...' : ''),
-          url: `/dashboard/comments`
+          url: `/dashboard/posts/${c.posts ? c.posts.split(',')[0] : ''}`, // Assuming we can navigate to the post
+          date: c.createdAt
         })));
         
         if (active) setSearchResults(results);
@@ -280,24 +287,25 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
 
                      {/* Dropdown results */}
                      {searchResults.length > 0 && (
-                       <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, boxShadow: theme.shadows[8], zIndex: 1600, maxHeight: 360, overflow: 'auto', borderRadius: 4, marginTop: 4 }}>
+                       <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, boxShadow: theme.shadows[8], zIndex: 1600, maxHeight: 400, overflow: 'auto', borderRadius: 4, marginTop: 4 }}>
                          {searchResults.map((r) => {
                            const typeColor = r.type === 'post' ? theme.palette.primary.main : r.type === 'user' ? theme.palette.success.main : theme.palette.warning.main;
                            const TypeIcon = r.type === 'post' ? FileText : r.type === 'user' ? User : MessageSquare;
                            const roleColor = r.role === 'ADMIN' ? theme.palette.error.main : theme.palette.info.main;
                            return (
-                             <div key={`${r.type}-${r.id}`} style={{ padding: '10px 12px', cursor: 'pointer', borderBottom: `1px solid ${theme.palette.divider}`, transition: 'background 0.2s' }} onClick={() => { navigate(r.url); setSearchTerm(''); setSearchResults([]); }} onMouseEnter={(e) => e.currentTarget.style.background = theme.palette.action.hover} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                             <div key={`${r.type}-${r.id}`} style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: `1px solid ${theme.palette.divider}`, transition: 'background 0.2s' }} onClick={() => { navigate(r.url); setSearchTerm(''); setSearchResults([]); }} onMouseEnter={(e) => e.currentTarget.style.background = theme.palette.action.hover} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
                                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-                                 <TypeIcon size={14} style={{ color: typeColor }} />
-                                 <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 12, backgroundColor: alpha(typeColor, 0.1), color: typeColor, textTransform: 'uppercase', fontWeight: 600 }}>{r.type}</span>
-                                 <div style={{ fontWeight: 600, color: theme.palette.text.primary, fontSize: '0.875rem', flex: 1 }}>{r.title}</div>
-                                 {r.role && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 12, backgroundColor: alpha(roleColor, 0.1), color: roleColor, textTransform: 'uppercase', fontWeight: 600 }}>{r.role}</span>}
+                                 <TypeIcon size={16} style={{ color: typeColor }} />
+                                 <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 12, backgroundColor: alpha(typeColor, 0.1), color: typeColor, textTransform: 'uppercase', fontWeight: 700 }}>{r.type}</span>
+                                 <div style={{ fontWeight: 600, color: theme.palette.text.primary, fontSize: '0.9rem', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.title}</div>
+                                 {r.role && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 12, backgroundColor: alpha(roleColor, 0.1), color: roleColor, textTransform: 'uppercase', fontWeight: 700 }}>{r.role}</span>}
                                </div>
-                               <div style={{ fontSize: '0.75rem', color: theme.palette.text.secondary, marginLeft: 24 }}>{r.content}</div>
+                               <div style={{ fontSize: '0.8rem', color: theme.palette.text.secondary, marginLeft: 26, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{r.content}</div>
+                               {r.date && <div style={{ fontSize: '0.7rem', color: theme.palette.text.disabled, marginLeft: 26, marginTop: 4 }}>{new Date(r.date).toLocaleDateString()}</div>}
                              </div>
                            );
                          })}
-                         <div style={{ padding: 8, textAlign: 'center', borderTop: `1px solid ${theme.palette.divider}` }}>
+                         <div style={{ padding: 12, textAlign: 'center', borderTop: `1px solid ${theme.palette.divider}` }}>
                            <button onClick={() => { navigate(`/?q=${encodeURIComponent(searchTerm)}`); setSearchResults([]); }} style={{ background: 'transparent', border: 'none', color: theme.palette.primary.main, cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, padding: '4px 8px' }}>See all results →</button>
                          </div>
                        </div>

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Users, FileText, MessageSquare, TrendingUp, AlertTriangle, Activity, Eye, Trash2, Shield } from 'lucide-react';
+import { Users, FileText, MessageSquare, TrendingUp, AlertTriangle, Activity, Eye, Trash2, Shield, Download } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import BackendApi, { type UserDto } from '../../service/BackendApi';
+import BackendApi, { type UserDto, type PostDto } from '../../service/BackendApi';
 import { useTheme, alpha } from '@mui/material/styles';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { format } from 'date-fns';
@@ -85,6 +85,7 @@ export const AdminDashboard: React.FC = () => {
   const totalUsers = totalUsersData?.data || 0;
   const totalPosts = totalPostsData?.data || 0;
   const totalComments = totalCommentsData?.data || 0;
+  const totalDownloads = postsData?.data?.content?.reduce((acc: number, post: PostDto) => acc + (post.downloads || 0), 0) || 0;
   const flaggedContent = 3;
   const systemHealth = 98;
 
@@ -152,7 +153,7 @@ export const AdminDashboard: React.FC = () => {
                         color: theme.palette.text.primary,
                         fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
                       }}>Comments</th>
-                      <th style={{
+                      <th style={{ 
                         padding: '12px 16px', 
                         textAlign: 'center', 
                         fontSize: '0.875rem', 
@@ -164,10 +165,10 @@ export const AdminDashboard: React.FC = () => {
                   </thead>
                   <tbody>
                     {usersData?.content?.map((user: UserDto) => {
-                      const userPosts = postsData?.data?.content?.filter((post: any) =>
+                      const userPosts = postsData?.data?.content?.filter((post: any) => 
                         post.users === user.name || post.users === user.email
                       ) || [];
-                      const userComments = commentsData?.data?.content?.filter((comment: any) =>
+                      const userComments = commentsData?.data?.content?.filter((comment: any) => 
                         comment.users === user.name || comment.users === user.email
                       ) || [];
                       
@@ -296,6 +297,7 @@ export const AdminDashboard: React.FC = () => {
                 { label: 'Total Users', value: totalUsers, icon: <Users />, accent: theme.palette.primary.main, note: '+12% from last month' },
                 { label: 'Total Posts', value: totalPosts, icon: <FileText />, accent: theme.palette.success.main, note: '+8% from last month' },
                 { label: 'Total Comments', value: totalComments, icon: <MessageSquare />, accent: theme.palette.secondary.main, note: '+15% from last month' },
+                { label: 'Total Downloads', value: totalDownloads, icon: <Download />, accent: theme.palette.info.main, note: 'All time' },
                 { label: 'Flagged Content', value: flaggedContent, icon: <AlertTriangle />, accent: theme.palette.error.main, note: 'Requires attention' },
               ].map((c) => (
                 <LIVBlogCard

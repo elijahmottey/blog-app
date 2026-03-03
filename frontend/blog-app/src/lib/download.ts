@@ -1,4 +1,4 @@
-import type { PostDto } from "../service/BackendApi";
+import BackendApi, { type PostDto } from "../service/BackendApi";
 import { toast } from "sonner";
 
 // Sanitize string for safe filename
@@ -37,6 +37,11 @@ export function downloadPost(post: PostDto, isAuthenticated: boolean) {
     return;
   }
 
+  // Track download
+  if (post.id) {
+    BackendApi.trackPostDownload(post.id).catch(err => console.error("Failed to track download", err));
+  }
+
   const title = post.title || "blog-post";
   const author = (post as any).users?.name || (post as any).users || "Anonymous";
   const createdDate = formatIsoDate(post.createdAt) || new Date().toISOString().slice(0, 10);
@@ -72,6 +77,11 @@ export async function downloadPostPdf(post: PostDto, isAuthenticated: boolean) {
   if (!isAuthenticated) {
     toast.error("You must be logged in to download posts.");
     return;
+  }
+
+  // Track download
+  if (post.id) {
+    BackendApi.trackPostDownload(post.id).catch(err => console.error("Failed to track download", err));
   }
 
   const title = post.title || "blog-post";
