@@ -14,9 +14,11 @@ import {
   Volume2,
   VolumeX,
   Flag,
-  MoreVertical
+  MoreVertical,
+  Bookmark,
+  Highlighter
 } from 'lucide-react';
-import { Button, Typography, TextField, Avatar, Chip, CircularProgress, IconButton, Menu, MenuItem, Box } from '@mui/material';
+import { Button, Typography, TextField, Avatar, Chip, CircularProgress, IconButton, Menu, MenuItem, Box, Tooltip } from '@mui/material';
 import BackendApi, { type CommentDto, type PostDto } from '../../service/BackendApi';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
@@ -207,6 +209,15 @@ export const PostDetail: React.FC = () => {
     enabled: !!postId,
   });
 
+  // Fetch highlights
+  const { data: highlightsData } = useQuery({
+    queryKey: ['highlights', postId],
+    queryFn: () => BackendApi.getHighlights(postId),
+    enabled: !!postId && !!user,
+  });
+
+  const highlights = highlightsData?.data || [];
+
 
   // Comments for this post
   const postComments = (commentsData?.data as any)?.content || [];
@@ -295,6 +306,26 @@ export const PostDetail: React.FC = () => {
     },
   });
 
+  // LIVMark mutation
+  const livMarkMutation = useMutation({
+    mutationFn: () => BackendApi.toggleLIVMark(postId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['post', postId] });
+      toast.success(postData.isSaved ? 'Removed from LIVSave' : 'Saved to LIVSave');
+    },
+    onError: () => toast.error('Failed to update bookmark'),
+  });
+
+  // Highlight mutation
+  const highlightMutation = useMutation({
+    mutationFn: (data: any) => BackendApi.addHighlight(postId, data),
+    onSuccess: () => {
+      toast.success('Highlight added');
+      queryClient.invalidateQueries({ queryKey: ['highlights', postId] });
+    },
+    onError: () => toast.error('Failed to add highlight'),
+  });
+
   const handleComment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
@@ -347,6 +378,34 @@ export const PostDetail: React.FC = () => {
     const reason = prompt('Why are you reporting this post?');
     if (reason && reason.trim()) {
       reportMutation.mutate(reason.trim());
+    }
+  };
+
+  const handleTextSelection = () => {
+    if (!user) return;
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed) return;
+
+    const text = selection.toString();
+    if (!text.trim()) return;
+
+    // Simple check to ensure we are selecting inside the post content
+    // This is a basic implementation.
+    
+    const start = safePostContent.indexOf(text);
+    if (start === -1) return;
+
+    // Confirm adding highlight
+    if (window.confirm('Do you want to highlight this text and add a note?')) {
+        const note = prompt("Add a note (optional):");
+        highlightMutation.mutate({
+            selectedText: text,
+            note: note,
+            startOffset: start,
+            endOffset: start + text.length,
+            color: 'yellow'
+        });
+        selection.removeAllRanges();
     }
   };
 
@@ -1194,7 +1253,7 @@ export const PostDetail: React.FC = () => {
         }}
       >
         {/* Post Body */}
-        <div style={{ marginBottom: '32px' }}>
+        <div style={{ marginBottom: '32px' }} onMouseUp={handleTextSelection}>
           <div style={{
             fontSize: '1.125rem',
             lineHeight: 1.7,
@@ -1203,6 +1262,27 @@ export const PostDetail: React.FC = () => {
             {renderContent(safePostContent)}
           </div>
         </div>
+
+        {/* Highlights Display */}
+        {highlights.length > 0 && (
+            <Box sx={{ mb: 4, p: 2, bgcolor: alpha(theme.palette.warning.main, 0.05), borderRadius: 2 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Highlighter size={16} /> Your Highlights & Notes
+                </Typography>
+                {highlights.map((highlight: any) => (
+                    <Box key={highlight.id} sx={{ mb: 2, p: 1.5, bgcolor: 'background.paper', borderRadius: 1, borderLeft: `3px solid ${theme.palette.warning.main}` }}>
+                        <Typography variant="body2" sx={{ fontStyle: 'italic', mb: 0.5 }}>
+                            "{highlight.selectedText}"
+                        </Typography>
+                        {highlight.note && (
+                            <Typography variant="caption" color="text.secondary">
+                                Note: {highlight.note}
+                            </Typography>
+                        )}
+                    </Box>
+                ))}
+            </Box>
+        )}
 
         {/* Post Actions */}
         <div 
@@ -1226,6 +1306,20 @@ export const PostDetail: React.FC = () => {
               likes={postData.likes || 0}
               isLiked={postData.isLiked || false}
             />
+
+            <Tooltip title={postData.isSaved ? "Remove from LIVSave" : "Save to LIVSave"}>
+                <IconButton 
+                    onClick={() => livMarkMutation.mutate()} 
+                    disabled={livMarkMutation.isPending}
+                    color={postData.isSaved ? "primary" : "default"}
+                    sx={{ 
+                        border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+                        borderRadius: '10px'
+                    }}
+                >
+                    <Bookmark size={20} fill={postData.isSaved ? "currentColor" : "none"} />
+                </IconButton>
+            </Tooltip>
 
             <Button
               onClick={() => setShowComments(!showComments)}

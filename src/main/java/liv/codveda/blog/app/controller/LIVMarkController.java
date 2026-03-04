@@ -21,12 +21,12 @@ public class LIVMarkController {
     private final LIVMarkService livMarkService;
 
     @PostMapping("/{postId}")
-    public ResponseEntity<ApiResponse<String>> toggleLIVMark(
+    public ResponseEntity<ApiResponse<Void>> toggleLIVMark(
             @PathVariable Long postId,
             @AuthenticationPrincipal Users user
     ) {
         livMarkService.toggleLIVMark(postId, user);
-        return ResponseEntity.ok(new ApiResponse<>("Success", null));
+        return ResponseEntity.ok(new ApiResponse<>(null, "Success"));
     }
 
     @GetMapping("/{postId}/status")
@@ -35,7 +35,7 @@ public class LIVMarkController {
             @AuthenticationPrincipal Users user
     ) {
         boolean isMarked = livMarkService.isLIVMarked(postId, user);
-        return ResponseEntity.ok(new ApiResponse<>("Success", isMarked));
+        return ResponseEntity.ok(new ApiResponse<>(isMarked, "Success"));
     }
 
     @GetMapping
@@ -46,6 +46,6 @@ public class LIVMarkController {
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Paged<PostDto> posts = livMarkService.getLIVMarkedPosts(user, pageable);
-        return ResponseEntity.ok(new ApiResponse<>("Success", posts));
+        return ResponseEntity.ok(new ApiResponse<>(posts, "Success"));
     }
 }

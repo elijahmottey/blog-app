@@ -57,7 +57,7 @@ public class LIVMarkServiceImpl implements LIVMarkService {
         Page<LIVMark> marks = livMarkRepository.findByUser(user, pageable);
         
         Page<PostDto> postDtos = marks.map(mark -> {
-            PostDto dto = postMapper.toDto(mark.getPost());
+            PostDto dto = postMapper.postToPostDto(mark.getPost());
             // Since we are fetching marked posts, isSaved is always true.
             return new PostDto(
                 dto.id(), dto.title(), dto.category(), dto.content(), dto.user(),
@@ -66,6 +66,13 @@ public class LIVMarkServiceImpl implements LIVMarkService {
             );
         });
 
-        return new Paged<>(postDtos);
+        return new Paged<>(
+                postDtos.getContent(),
+                postDtos.getNumber(),
+                postDtos.getSize(),
+                postDtos.getTotalElements(),
+                postDtos.getTotalPages(),
+                postDtos.isLast()
+        );
     }
 }

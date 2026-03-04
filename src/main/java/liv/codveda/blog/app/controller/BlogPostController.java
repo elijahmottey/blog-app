@@ -6,10 +6,12 @@ import liv.codveda.blog.app.domain.dto.response.ApiResponse;
 import liv.codveda.blog.app.domain.dto.response.Paged;
 import liv.codveda.blog.app.domain.dto.response.PostDto;
 import liv.codveda.blog.app.domain.entities.Post;
+import liv.codveda.blog.app.domain.entities.Users;
 import liv.codveda.blog.app.domain.enums.Category;
 import liv.codveda.blog.app.domain.enums.ReactionType;
 import liv.codveda.blog.app.domain.mapper.interfaces.PostMapper;
 import liv.codveda.blog.app.service.interfaces.BlogService;
+import liv.codveda.blog.app.service.interfaces.LIVMarkService;
 import liv.codveda.blog.app.service.interfaces.PostViewService;
 import liv.codveda.blog.app.service.interfaces.ReactionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,15 +36,18 @@ public class BlogPostController  {
     private final BlogService blogService;
     private final ReactionService reactionService;
     private final PostViewService postViewService;
+    private final LIVMarkService livMarkService;
 
     @Autowired
     public BlogPostController(PostMapper postMapper, BlogService blogService,
                               ReactionService reactionService,
-                              PostViewService postViewService) {
+                              PostViewService postViewService,
+                              LIVMarkService livMarkService) {
         this.postMapper = postMapper;
         this.blogService = blogService;
         this.reactionService = reactionService;
         this.postViewService = postViewService;
+        this.livMarkService = livMarkService;
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -112,8 +119,13 @@ public class BlogPostController  {
         Long likeCount = reactionService.countReactions(id, ReactionType.LIKE);
         Long viewCount = postViewService.countViews(id);
         Boolean isLiked = null;
+        Boolean isSaved = null;
         try {
-            isLiked = ReactionType.LIKE.equals(reactionService.getMyReaction(id));
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && authentication.getPrincipal() instanceof Users user) {
+                isLiked = ReactionType.LIKE.equals(reactionService.getMyReaction(id));
+                isSaved = livMarkService.isLIVMarked(id, user);
+            }
         } catch (Exception ignored) {
             // unauthenticated or no reaction
         }
@@ -129,7 +141,8 @@ public class BlogPostController  {
                 baseDto.comments(),
                 likeCount,
                 viewCount,
-                isLiked
+                isLiked,
+                isSaved
         );
         return ResponseEntity.ok(new ApiResponse<>(enriched, "Post retrieved successfully"));
     }

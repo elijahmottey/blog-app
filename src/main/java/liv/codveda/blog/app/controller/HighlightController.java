@@ -26,16 +26,16 @@ public class HighlightController {
             @AuthenticationPrincipal Users user
     ) {
         HighlightDto highlight = highlightService.addHighlight(postId, request, user);
-        return ResponseEntity.ok(new ApiResponse<>("Highlight added", highlight));
+        return ResponseEntity.ok(new ApiResponse<>(highlight, "Highlight added"));
     }
 
     @DeleteMapping("/{highlightId}")
-    public ResponseEntity<ApiResponse<String>> deleteHighlight(
+    public ResponseEntity<ApiResponse<Void>> deleteHighlight(
             @PathVariable Long highlightId,
             @AuthenticationPrincipal Users user
     ) {
         highlightService.deleteHighlight(highlightId, user);
-        return ResponseEntity.ok(new ApiResponse<>("Highlight deleted", null));
+        return ResponseEntity.ok(new ApiResponse<>(null, "Highlight deleted"));
     }
 
     @GetMapping("/post/{postId}")
@@ -44,7 +44,7 @@ public class HighlightController {
             @AuthenticationPrincipal Users user
     ) {
         List<HighlightDto> highlights = highlightService.getHighlights(postId, user);
-        return ResponseEntity.ok(new ApiResponse<>("Success", highlights));
+        return ResponseEntity.ok(new ApiResponse<>(highlights, "Success"));
     }
 
     @PutMapping("/{highlightId}/note")
@@ -54,6 +54,6 @@ public class HighlightController {
             @AuthenticationPrincipal Users user
     ) {
         HighlightDto highlight = highlightService.updateNote(highlightId, note, user);
-        return ResponseEntity.ok(new ApiResponse<>("Note updated", highlight));
+        return ResponseEntity.ok(new ApiResponse<>(highlight, "Note updated"));
     }
 }
