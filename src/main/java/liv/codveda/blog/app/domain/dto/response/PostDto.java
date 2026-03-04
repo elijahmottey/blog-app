@@ -18,6 +18,7 @@ public record PostDto(
         List<CommentReferenceDto> comments,
         Long likes,
         Long views,
-        Boolean isLiked
+        Boolean isLiked,
+        Boolean isSaved
 ) {
 }

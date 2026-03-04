@@ -81,7 +81,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public ResponseEntity<?> register(Register request, HttpServletResponse response) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ConflictException(HttpStatus.CONFLICT, "Email is already in use.");
+            throw new ConflictException("Email is already in use.");
         }
 
         var admin = Users.builder()
@@ -116,7 +116,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public ResponseEntity<?> registerAdmin(Register request, HttpServletResponse response) {
         if (usersRepository.existsByEmail(request.getEmail())) {
-            throw new ConflictException(HttpStatus.CONFLICT, "Email is already in use.");
+            throw new ConflictException("Email is already in use.");
         }
 
         var admin = Users.builder()

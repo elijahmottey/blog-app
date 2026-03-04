@@ -47,6 +47,7 @@ public class PostMapperImpl implements PostMapper {
                         ).orElse(null),
                 null,
                 null,
+                null,
                 null
         );
     }

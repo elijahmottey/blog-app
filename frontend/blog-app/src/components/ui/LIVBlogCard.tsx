@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTheme } from '@mui/material/styles';
+import { Box } from '@mui/material';
 
 interface LIVBlogCardProps {
   children: React.ReactNode;
@@ -105,9 +106,9 @@ export const LIVBlogCard: React.FC<LIVBlogCardProps> = ({
   };
 
   return (
-    <div
+    <Box
       className={className}
-      style={cardStyles}
+      sx={cardStyles}
       onClick={onClick}
     >
       {(title || subtitle || actions) && (
@@ -166,7 +167,7 @@ export const LIVBlogCard: React.FC<LIVBlogCardProps> = ({
       <div style={{ color: theme.palette.text.primary }}>
         {children}
       </div>
-    </div>
+    </Box>
   );
 };
 

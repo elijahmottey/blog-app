@@ -16,7 +16,7 @@ import {
   Flag,
   MoreVertical
 } from 'lucide-react';
-import { Button, Typography, TextField, Avatar, Chip, CircularProgress, IconButton, Menu, MenuItem } from '@mui/material';
+import { Button, Typography, TextField, Avatar, Chip, CircularProgress, IconButton, Menu, MenuItem, Box } from '@mui/material';
 import BackendApi, { type CommentDto, type PostDto } from '../../service/BackendApi';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
@@ -1029,7 +1029,8 @@ export const PostDetail: React.FC = () => {
                 >
                   {(postData.user?.name || postAuthorName).charAt(0).toUpperCase()}
                 </Avatar>
-                <span
+                <Box
+                    component="span"
                     style={{ fontSize: '0.875rem' }}
                     sx={{
                       color: theme.palette.text.secondary,
@@ -1041,7 +1042,7 @@ export const PostDetail: React.FC = () => {
                     }}
                 >
                   By {postData.user?.name || postAuthorName}
-                </span>
+                </Box>
               </Link>
             </div>
             <span style={{ color: theme.palette.text.secondary }}>•</span>

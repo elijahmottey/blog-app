@@ -48,7 +48,8 @@ import {
   Dialog,
   DialogContent,
   DialogActions,
-  Box
+  Box,
+  Paper
 } from '@mui/material';
 import BackendApi from '../../service/BackendApi';
 import { toast } from 'sonner';
@@ -58,7 +59,6 @@ import { LIVBlogHeader, LIVBlogCard, LIVBlogLayout } from '../ui';
 import { useTheme } from '@mui/material/styles';
 import useDocumentTitle from "../../hooks/useDocumentTitle.ts";
 
-const MIN_DRAFT_WORDS = 2;
 const MIN_PUBLISH_WORDS = 50;
 
 const schema = yup.object({
@@ -150,16 +150,6 @@ export const CreatePost: React.FC = () => {
   const saveDraft = (isAutoSave = false) => {
     const formData = getValues();
     if (!formData.title && !formData.content) return;
-
-    const currentContent = formData.content || '';
-    const currentWordCount = currentContent.trim().split(/\s+/).filter(word => word.length > 0).length;
-
-    if (currentWordCount < MIN_DRAFT_WORDS) {
-      if (!isAutoSave) {
-        toast.error(`Draft must have at least ${MIN_DRAFT_WORDS} words to be saved.`);
-      }
-      return;
-    }
 
     const drafts = JSON.parse(localStorage.getItem('blog_drafts') || '[]');
     const draftId = currentDraftId || Date.now().toString();
@@ -408,7 +398,7 @@ export const CreatePost: React.FC = () => {
 
   // Auto-play tutorial
   useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
+    let interval: any;
     if (isAutoPlaying && showTutorialPopup) {
       interval = setInterval(() => {
         setCurrentTutorialStep(prev => {
@@ -596,28 +586,38 @@ export const CreatePost: React.FC = () => {
         }
       />
 
-      <LIVBlogLayout.Grid cols={4} gap="md" className="aws-margin-b-lg">
-        <LIVBlogCard title="Words" padding="small" className="text-center">
-          <div className="aws-header-md" style={{ color: theme.palette.primary.main, margin: 0 }}>
-            {wordCount}
-          </div>
-        </LIVBlogCard>
-        <LIVBlogCard title="Characters" padding="small" className="text-center">
-          <div className="aws-header-md" style={{ color: theme.palette.secondary.main, margin: 0 }}>
-            {watchedContent.length}
-          </div>
-        </LIVBlogCard>
-        <LIVBlogCard title="Paragraphs" padding="small" className="text-center">
-          <div className="aws-header-md" style={{ color: theme.palette.success.main, margin: 0 }}>
-            {paragraphCount}
-          </div>
-        </LIVBlogCard>
-        <LIVBlogCard title="Reading Time" padding="small" className="text-center">
-          <div className="aws-header-md" style={{ color: theme.palette.warning.main, margin: 0 }}>
-            {readingTime} min
-          </div>
-        </LIVBlogCard>
-      </LIVBlogLayout.Grid>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, gap: 2, mb: 3 }}>
+        {[
+          { label: 'Words', value: wordCount, color: theme.palette.primary.main },
+          { label: 'Characters', value: watchedContent.length, color: theme.palette.secondary.main },
+          { label: 'Paragraphs', value: paragraphCount, color: theme.palette.success.main },
+          { label: 'Reading Time', value: `${readingTime} min`, color: theme.palette.warning.main },
+        ].map((stat, index) => (
+          <Paper
+            key={index}
+            elevation={0}
+            sx={{
+              p: 1.5,
+              textAlign: 'center',
+              border: `1px solid ${theme.palette.divider}`,
+              borderRadius: 2,
+              bgcolor: theme.palette.background.paper,
+              transition: 'transform 0.2s',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+              }
+            }}
+          >
+            <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', fontWeight: 700, letterSpacing: 0.5, fontSize: '0.7rem' }}>
+              {stat.label}
+            </Typography>
+            <Typography variant="h6" sx={{ color: stat.color, fontWeight: 800, lineHeight: 1, mt: 0.5, fontSize: '1.25rem' }}>
+              {stat.value}
+            </Typography>
+          </Paper>
+        ))}
+      </Box>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Tutorial Choice Popup */}
@@ -1086,7 +1086,7 @@ export const CreatePost: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ minHeight: '500px' }}>
+          <div style={{ minHeight: '100%' }}>
             {isPreview ? (
               <div className="aws-spacing-lg">
                 {watchedTitle && (
@@ -1105,7 +1105,8 @@ export const CreatePost: React.FC = () => {
                 {...register('content')}
                 inputRef={textareaRef}
                 multiline
-                rows={20}
+                minRows={8}
+                maxRows={Infinity}
                 placeholder="Start writing your masterpiece here..."
                 variant="outlined"
                 fullWidth
@@ -1128,9 +1129,6 @@ export const CreatePost: React.FC = () => {
         {wordCount < MIN_PUBLISH_WORDS && (
           <Alert severity="warning" className="aws-font">
             Post must be at least {MIN_PUBLISH_WORDS} words to publish. You need {MIN_PUBLISH_WORDS - wordCount} more words.
-            {wordCount < MIN_DRAFT_WORDS && (
-                <span> (At least {MIN_DRAFT_WORDS} words required to save draft)</span>
-            )}
           </Alert>
         )}
 
@@ -1163,7 +1161,6 @@ export const CreatePost: React.FC = () => {
           <Button
             onClick={() => saveDraft(false)}
             variant="outlined"
-            disabled={wordCount < MIN_DRAFT_WORDS}
             className="aws-button aws-button-secondary"
           >
             <FileText size={16} style={{ marginRight: '8px' }} />
