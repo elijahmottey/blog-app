@@ -949,7 +949,7 @@ export const PostDetail: React.FC = () => {
             startIcon={<ArrowLeft />}
             style={{
               borderRadius: '10px',
-              padding: '8px 16px'
+              padding: '4px 5px'
             }}
           >
             Back to Posts
@@ -966,7 +966,7 @@ export const PostDetail: React.FC = () => {
                 to={`/dashboard/posts/${postId}/edit`}
                 variant="outlined"
                 startIcon={<Edit />}
-                size={window.innerWidth < 768 ? "small" : "medium"}
+                size={window.innerWidth < 768 ? "small" : "small"}
                 style={{
                   borderRadius: '10px',
                   borderColor: theme.palette.warning.main,
@@ -981,7 +981,7 @@ export const PostDetail: React.FC = () => {
                 disabled={deleteMutation.isPending}
                 variant="outlined"
                 startIcon={<Trash2 />}
-                size={window.innerWidth < 768 ? "small" : "medium"}
+                size={window.innerWidth < 768 ? "small" : "small"}
                 style={{
                   borderRadius: '10px',
                   borderColor: theme.palette.error.main,
@@ -1172,7 +1172,7 @@ export const PostDetail: React.FC = () => {
       {/* Post Content */}
       <LIVBlogCard
         variant="elevated"
-        padding={window.innerWidth < 768 ? "medium" : "large"}
+        padding={window.innerWidth < 768 ? "small" : "large"}
         style={{ 
           marginBottom: window.innerWidth < 768 ? '20px' : '32px',
           backgroundColor: isHighlighted ? alpha(theme.palette.success.main, 0.15) : undefined,

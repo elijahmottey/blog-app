@@ -29,6 +29,7 @@ import {UserActivityPage} from "./components/dashboard/UserActivityPage.tsx";
 import { AuthorProfile } from "./components/AuthorProfile.tsx";
 import OAuth2RedirectHandler from "./components/OAuth2RedirectHandler.tsx";
 import { ReportedPosts } from "./components/dashboard/ReportedPosts.tsx";
+import { HelpSupport } from "./components/dashboard/HelpSupport.tsx";
 
 export const PagesRoute = () => {
     return (
@@ -150,6 +151,7 @@ export const PagesRoute = () => {
                                 <Route path="comments" element={<CommentsManagement />} />
                                 <Route path="profile" element={<ProfileManagement />} />
                                 <Route path="ai-chat" element={<AIChatPage />} />
+                                <Route path="help" element={<HelpSupport />} />
 
                                 {/* Admin-only routes - nested inside AdminRoute */}
                                 <Route element={<AdminRoute />}>

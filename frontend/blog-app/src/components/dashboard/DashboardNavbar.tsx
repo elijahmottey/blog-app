@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   Menu,
@@ -126,16 +126,16 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [quickActionsOpen, setQuickActionsOpen] = useState(false);
   const { mode, toggleMode } = useThemeMode();
-  const searchRef = React.useRef<HTMLDivElement | null>(null);
+  const searchRef = useRef<HTMLDivElement | null>(null);
 
-  // debounce
-  React.useEffect(() => {
+  // Debounce search term
+  useEffect(() => {
     const id = setTimeout(() => setDebouncedTerm(searchTerm.trim()), 300);
     return () => clearTimeout(id);
   }, [searchTerm]);
 
-  // fetch & filter when debounced term changes
-  React.useEffect(() => {
+  // Fetch and filter search results
+  useEffect(() => {
     let active = true;
     if (debouncedTerm.length === 0) {
       setSearchResults([]);
@@ -143,96 +143,69 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
     }
     (async () => {
       try {
-        // Fetch more data for a better "overall" search experience
         const postsPromise = BackendApi.getAllPost(0, 100);
         const commentsPromise = BackendApi.getAllPostComment(0, 100);
-        // Only fetch users if admin to avoid 403 errors
         const usersPromise = isAdmin ? BackendApi.getAllUsers(0, 100) : Promise.resolve({ content: [] } as any);
 
-        const [postsRes, usersRes, commentsRes] = await Promise.all([
-          postsPromise,
-          usersPromise,
-          commentsPromise
-        ]);
+        const [postsRes, usersRes, commentsRes] = await Promise.all([postsPromise, usersPromise, commentsPromise]);
         
         const q = debouncedTerm.toLowerCase();
         const results: SearchResult[] = [];
         
-        // Search posts (Title, Content, Category)
+        // Posts
         const posts = postsRes.data?.content || [];
-        const filteredPosts = posts.filter((p: any) => 
-          (p.title || '').toLowerCase().includes(q) || 
-          (p.content || '').toLowerCase().includes(q) ||
-          (p.category || '').toLowerCase().includes(q)
+        results.push(...posts
+          .filter((p: any) => (p.title || '').toLowerCase().includes(q) || (p.content || '').toLowerCase().includes(q) || (p.category || '').toLowerCase().includes(q))
+          .slice(0, 5)
+          .map((p: any) => ({
+            type: 'post' as 'post',
+            id: p.id,
+            title: p.title || 'Untitled',
+            content: (p.content || '').slice(0, 120) + '...',
+            url: `/dashboard/posts/${p.id}`,
+            date: p.createdAt
+          }))
         );
         
-        results.push(...filteredPosts.slice(0, 5).map((p: any) => ({
-          type: 'post' as 'post',
-          id: p.id,
-          title: p.title || 'Untitled',
-          content: (p.content || '').slice(0, 120) + ((p.content || '').length > 120 ? '...' : ''),
-          url: `/dashboard/posts/${p.id}`,
-          date: p.createdAt
-        })));
-        
-        // Search users (Name, Email)
-        // Handle different response structures (PagedResponse vs ApiResponse)
+        // Users
         const users = (usersRes as any).content || (usersRes as any).data?.content || [];
-        const filteredUsers = users.filter((u: any) => 
-          (u.name || '').toLowerCase().includes(q) || 
-          (u.email || '').toLowerCase().includes(q)
+        results.push(...users
+          .filter((u: any) => (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q))
+          .slice(0, 3)
+          .map((u: any) => ({
+            type: 'user' as 'user',
+            id: u.id,
+            title: u.name || 'Unknown User',
+            content: u.email || '',
+            url: isAdmin ? `/dashboard/admin/user/${u.id}/view` : `/profile/${u.name}`,
+            role: u.role || 'USER',
+            date: u.createdAt
+          }))
         );
         
-        results.push(...filteredUsers.slice(0, 3).map((u: any) => ({
-          type: 'user' as 'user',
-          id: u.id,
-          title: u.name || 'Unknown User',
-          content: u.email || '',
-          url: isAdmin ? `/dashboard/admin/user/${u.id}/view` : `/profile/${u.name}`,
-          role: u.role || 'USER',
-          date: u.createdAt
-        })));
-        
-        // Search comments (Content, Author)
+        // Comments
         const comments = commentsRes.data?.content || [];
-        const filteredComments = comments.filter((c: any) => {
-          const contentMatch = (c.content || '').toLowerCase().includes(q);
-          let authorName = '';
-          if (typeof c.users === 'string') {
-            authorName = c.users;
-          } else if (typeof c.users === 'object' && c.users !== null) {
-            authorName = c.users.name || '';
-          }
-          const authorMatch = authorName.toLowerCase().includes(q);
-          return contentMatch || authorMatch;
-        });
-        
-        results.push(...filteredComments.slice(0, 3).map((c: any) => {
-          let authorName = 'Anonymous';
-          if (typeof c.users === 'string') {
-            authorName = c.users;
-          } else if (typeof c.users === 'object' && c.users !== null) {
-            authorName = c.users.name || 'Anonymous';
-          }
-
-          let postId = '';
-          if (typeof c.posts === 'string') {
-             postId = c.posts.split(',')[0];
-          } else if (typeof c.posts === 'number') {
-             postId = c.posts.toString();
-          } else if (typeof c.posts === 'object' && c.posts !== null) {
-             postId = c.posts.id?.toString() || '';
-          }
-
-          return {
-            type: 'comment' as 'comment',
-            id: c.id,
-            title: `Comment by ${authorName}`,
-            content: (c.content || '').slice(0, 100) + ((c.content || '').length > 100 ? '...' : ''),
-            url: `/dashboard/posts/${postId}`,
-            date: c.createdAt
-          };
-        }));
+        results.push(...comments
+          .filter((c: any) => {
+            const contentMatch = (c.content || '').toLowerCase().includes(q);
+            const authorName = typeof c.users === 'object' ? c.users?.name : c.users;
+            const authorMatch = (authorName || '').toLowerCase().includes(q);
+            return contentMatch || authorMatch;
+          })
+          .slice(0, 3)
+          .map((c: any) => {
+            const authorName = typeof c.users === 'object' ? c.users?.name : c.users;
+            const postId = typeof c.posts === 'object' ? c.posts?.id : (typeof c.posts === 'string' ? c.posts.split(',')[0] : c.posts);
+            return {
+              type: 'comment' as 'comment',
+              id: c.id,
+              title: `Comment by ${authorName || 'Anonymous'}`,
+              content: (c.content || '').slice(0, 100) + '...',
+              url: `/dashboard/posts/${postId || ''}`,
+              date: c.createdAt
+            };
+          })
+        );
         
         if (active) setSearchResults(results);
       } catch (e) {
@@ -243,13 +216,20 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
     return () => { active = false; };
   }, [debouncedTerm, isAdmin]);
 
-  const handleProfileClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+  // Handle click outside to close search results
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setSearchResults([]);
+        setSearchTerm('');
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-  const handleProfileClose = () => {
-    setAnchorEl(null);
-  };
+  const handleProfileClick = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
+  const handleProfileClose = () => setAnchorEl(null);
 
   const handleLogout = () => {
     logout();
@@ -258,13 +238,19 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
     handleProfileClose();
   };
 
+  const handleSearchNavigation = (url: string) => {
+    navigate(url);
+    setSearchTerm('');
+    setSearchResults([]);
+    setSearchOpen(false);
+  };
+
   const quickActions = [
     { label: 'Dashboard', icon: <Home size={16} />, path: '/home' },
     { label: 'Posts', icon: <FileText size={16} />, path: '/dashboard/posts' },
     { label: 'Comments', icon: <MessageSquare size={16} />, path: '/dashboard/comments' },
     ...(isAdmin ? [{ label: 'Users', icon: <Users size={16} />, path: '/dashboard/admin/users' }] : []),
   ];
-
 
   return (
        <>
@@ -281,477 +267,118 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
             }}
          >
            <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 1, sm: 2 }, minHeight: '50px !important', height: '50px' }}>
-             {/* Left Section */}
              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-               <IconButton
-                   edge="start"
-                   color="inherit"
-                   aria-label="menu"
-                   onClick={onMenuClick}
-                   sx={{ mr: 1 }}
-               >
-                 {isSidebarOpen ? <Menu size={20} /> : <Menu size={20} />}
+               <IconButton edge="start" color="inherit" aria-label="menu" onClick={onMenuClick} sx={{ mr: 1 }}>
+                 <Menu size={20} />
                </IconButton>
              </Box>
 
-             {/* Center Section - Search (desktop & tablet) */}
              {(!isMobile) && (
-                 <SearchWrapper>
+                 <SearchWrapper ref={searchRef}>
                    <SearchIconWrapper>
                      <Search size={16} />
                    </SearchIconWrapper>
-                   <div style={{ position: 'relative' }} ref={searchRef}>
-                     <StyledInputBase
-                         value={searchTerm}
-                         onChange={(e) => setSearchTerm(e.target.value)}
-                         placeholder="Search posts, users, comments..."
-                         inputProps={{ 'aria-label': 'search' }}
-                         onKeyDown={(e) => {
-                           if (e.key === 'Enter') {
-                             // navigate to home with query
-                             navigate(`/?q=${encodeURIComponent(searchTerm)}`);
-                             setSearchResults([]);
-                             setSearchOpen(false);
-                           }
-                         }}
-                     />
-
-                     {/* Dropdown results */}
-                     {searchResults.length > 0 && (
-                       <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, boxShadow: theme.shadows[8], zIndex: 1600, maxHeight: 400, overflow: 'auto', borderRadius: 4, marginTop: 4 }}>
-                         {searchResults.map((r) => {
-                           const typeColor = r.type === 'post' ? theme.palette.primary.main : r.type === 'user' ? theme.palette.success.main : theme.palette.warning.main;
-                           const TypeIcon = r.type === 'post' ? FileText : r.type === 'user' ? User : MessageSquare;
-                           const roleColor = r.role === 'ADMIN' ? theme.palette.error.main : theme.palette.info.main;
-                           return (
-                             <div key={`${r.type}-${r.id}`} style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: `1px solid ${theme.palette.divider}`, transition: 'background 0.2s' }} onClick={() => { navigate(r.url); setSearchTerm(''); setSearchResults([]); }} onMouseEnter={(e) => e.currentTarget.style.background = theme.palette.action.hover} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
-                               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-                                 <TypeIcon size={16} style={{ color: typeColor }} />
-                                 <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 12, backgroundColor: alpha(typeColor, 0.1), color: typeColor, textTransform: 'uppercase', fontWeight: 700 }}>{r.type}</span>
-                                 <div style={{ fontWeight: 600, color: theme.palette.text.primary, fontSize: '0.9rem', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.title}</div>
-                                 {r.role && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 12, backgroundColor: alpha(roleColor, 0.1), color: roleColor, textTransform: 'uppercase', fontWeight: 700 }}>{r.role}</span>}
-                               </div>
-                               <div style={{ fontSize: '0.8rem', color: theme.palette.text.secondary, marginLeft: 26, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{r.content}</div>
-                               {r.date && <div style={{ fontSize: '0.7rem', color: theme.palette.text.disabled, marginLeft: 26, marginTop: 4 }}>{new Date(r.date).toLocaleDateString()}</div>}
+                   <StyledInputBase
+                       value={searchTerm}
+                       onChange={(e) => setSearchTerm(e.target.value)}
+                       placeholder="Search posts, users, comments..."
+                       inputProps={{ 'aria-label': 'search' }}
+                   />
+                   {searchResults.length > 0 && (
+                     <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, boxShadow: theme.shadows[8], zIndex: 1600, maxHeight: 400, overflow: 'auto', borderRadius: 4, marginTop: 4 }}>
+                       {searchResults.map((r) => {
+                         const typeColor = r.type === 'post' ? theme.palette.primary.main : r.type === 'user' ? theme.palette.success.main : theme.palette.warning.main;
+                         const TypeIcon = r.type === 'post' ? FileText : r.type === 'user' ? User : MessageSquare;
+                         return (
+                           <div key={`${r.type}-${r.id}`} style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: `1px solid ${theme.palette.divider}` }} onClick={() => handleSearchNavigation(r.url)} onMouseEnter={(e) => e.currentTarget.style.background = theme.palette.action.hover} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                               <TypeIcon size={16} style={{ color: typeColor }} />
+                               <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 12, backgroundColor: alpha(typeColor, 0.1), color: typeColor, textTransform: 'uppercase', fontWeight: 700 }}>{r.type}</span>
+                               <div style={{ fontWeight: 600, color: theme.palette.text.primary, fontSize: '0.9rem', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.title}</div>
+                               {r.role && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 12, backgroundColor: alpha(theme.palette.error.main, 0.1), color: theme.palette.error.main, textTransform: 'uppercase', fontWeight: 700 }}>{r.role}</span>}
                              </div>
-                           );
-                         })}
-                         <div style={{ padding: 12, textAlign: 'center', borderTop: `1px solid ${theme.palette.divider}` }}>
-                           <button onClick={() => { navigate(`/?q=${encodeURIComponent(searchTerm)}`); setSearchResults([]); }} style={{ background: 'transparent', border: 'none', color: theme.palette.primary.main, cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, padding: '4px 8px' }}>See all results →</button>
-                         </div>
-                       </div>
-                     )}
-                   </div>
+                             <div style={{ fontSize: '0.8rem', color: theme.palette.text.secondary, marginLeft: 26, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{r.content}</div>
+                             {r.date && <div style={{ fontSize: '0.7rem', color: theme.palette.text.disabled, marginLeft: 26, marginTop: 4 }}>{new Date(r.date).toLocaleDateString()}</div>}
+                           </div>
+                         );
+                       })}
+                     </div>
+                   )}
                  </SearchWrapper>
              )}
 
-             {/* Right Section */}
              <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
-               {/* Search Button (Mobile) */}
                {isMobile && (
                    <Tooltip title="Search">
-                     <IconButton
-                         color="inherit"
-                         onClick={() => setSearchOpen(true)}
-                         sx={{ display: { xs: 'flex', md: 'none' } }}
-                     >
+                     <IconButton color="inherit" onClick={() => setSearchOpen(true)}>
                        <Search size={20} />
                      </IconButton>
                    </Tooltip>
                )}
-
-               {/* Create Post Icon */}
                <Tooltip title="Create Post">
-                 <IconButton
-                     component={Link}
-                     to="/dashboard/posts/create"
-                     color="inherit"
-                     sx={{ 
-                       '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' } 
-                     }}
-                 >
+                 <IconButton component={Link} to="/dashboard/posts/create" color="inherit">
                    <PenSquare size={20} />
                  </IconButton>
                </Tooltip>
-
-               {/* AI Chat Icon */}
                <Tooltip title="AI Chat">
-                 <IconButton
-                     component={Link}
-                     to="/dashboard/ai-chat"
-                     color="inherit"
-                     sx={{ 
-                       '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' } 
-                     }}
-                 >
+                 <IconButton component={Link} to="/dashboard/ai-chat" color="inherit">
                    <Bot size={20} />
                  </IconButton>
                </Tooltip>
-
-               {/* Theme Mode Toggle (top bar) - show on mobile and tablet; desktop uses right rail */}
                { (isMobile || (!isDesktop && !isMobile)) && (
-                 <Tooltip title={`${mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}`}>
-                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                     {mode === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
-                     <Switch
-                         size="small"
-                         checked={mode === 'dark'}
-                         onChange={toggleMode}
-                         color="primary"
-                         inputProps={{ 'aria-label': 'toggle color mode' }}
-                     />
+                 <Tooltip title={`Switch to ${mode === 'dark' ? 'light' : 'dark'} mode`}>
+                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                     <Switch size="small" checked={mode === 'dark'} onChange={toggleMode} />
                    </Box>
                  </Tooltip>
                )}
-
-               {/* Notifications (top bar) - visible on mobile & tablet; desktop uses right rail */}
-               {(isMobile || (!isDesktop && !isMobile)) && (
-                 <NotificationPanel />
-               )}
-
-
-               {/* Profile Section - show on mobile & tablet; desktop profile moved to right rail */}
+               {(isMobile || (!isDesktop && !isMobile)) && <NotificationPanel />}
                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                   <IconButton
-                       onClick={handleProfileClick}
-                       sx={{
-                         p: 0.5,
-                         '&:hover': {
-                           bgcolor: 'rgba(0,0,0,0.04)',
-                         },
-                       }}
-                   >
-                     <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 1 }}>
-                       <div
-                         style={{
-                           width: 24,
-                           height: 24,
-                           backgroundColor: user?.avatar ? 'transparent' : theme.palette.primary.main,
-                           color: 'white',
-                           fontWeight: 'bold',
-                           fontSize: '0.75rem',
-                           borderRadius: '50%',
-                           display: 'flex',
-                           alignItems: 'center',
-                           justifyContent: 'center',
-                           overflow: 'hidden'
-                         }}
-                       >
-                         {user?.avatar ? (
-                           <img
-                             src={user.avatar}
-                             alt={user.name || 'User'}
-                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                           />
-                         ) : (
-                           user?.name?.charAt(0)?.toUpperCase() || 'U'
-                         )}
-                       </div>
-                     {!isMobile && (
-                       <Typography variant="body2" sx={{ color: 'text.primary', fontSize: '0.875rem' }}>
-                         {user?.name || 'User'}
-                       </Typography>
-                     )}
-                     <ChevronDown size={14} color={theme.palette.text.secondary} />
-                   </Box>
-                 </IconButton>
+                   <IconButton onClick={handleProfileClick} sx={{ p: 0.5 }}>
+                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                       <Avatar sx={{ width: 24, height: 24, bgcolor: 'primary.main', fontSize: '0.75rem' }}>
+                         {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                       </Avatar>
+                       {!isMobile && <Typography variant="body2">{user?.name || 'User'}</Typography>}
+                       <ChevronDown size={14} />
+                     </Box>
+                   </IconButton>
                </Box>
              </Box>
            </Toolbar>
          </AppBar>
 
-         {/* Profile Menu */}
-         <MuiMenu
-             anchorEl={anchorEl}
-             open={Boolean(anchorEl)}
-             onClose={handleProfileClose}
-             onClick={handleProfileClose}
-             PaperProps={{
-               elevation: 3,
-               sx: {
-                 mt: 0.5,
-                 minWidth: 200,
-                 borderRadius: 0,
-                 overflow: 'visible',
-                 filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.1))',
-               },
-             }}
-             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-         >
-           {/* User Info Section */}
+         <MuiMenu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleProfileClose} PaperProps={{ sx: { mt: 0.5, minWidth: 200 } }}>
            <Box sx={{ p: 2 }}>
-             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-               <div
-                 style={{
-                   width: 48,
-                   height: 48,
-                   backgroundColor: user?.avatar ? 'transparent' : theme.palette.primary.main,
-                   color: 'white',
-                   fontWeight: 'bold',
-                   fontSize: '1rem',
-                   borderRadius: '50%',
-                   display: 'flex',
-                   alignItems: 'center',
-                   justifyContent: 'center',
-                   overflow: 'hidden'
-                 }}
-               >
-                 {user?.avatar ? (
-                   <img
-                     src={user.avatar}
-                     alt={user.name || 'User'}
-                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                   />
-                 ) : (
-                   user?.name?.charAt(0)?.toUpperCase() || 'U'
-                 )}
-               </div>
-               <Box>
-                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                   {user?.name || 'User'}
-                 </Typography>
-                 <Typography variant="body2" color="text.secondary">
-                   {user?.email || 'user@example.com'}
-                 </Typography>
-                 {isAdmin && (
-                     <Chip
-                         label="Admin"
-                         size="small"
-                         color="error"
-                         variant="outlined"
-                         sx={{ mt: 0.5, height: 20 }}
-                         icon={<Shield size={12} />}
-                     />
-                 )}
-               </Box>
-             </Box>
-
+             <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>{user?.name || 'User'}</Typography>
+             <Typography variant="body2" color="text.secondary">{user?.email}</Typography>
+             {isAdmin && <Chip label="Admin" size="small" color="error" variant="outlined" sx={{ mt: 1 }} icon={<Shield size={12} />} />}
            </Box>
-
            <Divider />
-
-           {/* Menu Items */}
-           <MenuItem component={Link} to="/dashboard/profile">
-             <ListItemIcon>
-               <User size={18} />
-             </ListItemIcon>
-             <ListItemText primary="My Profile" />
-           </MenuItem>
-
-
-           <MenuItem component={Link} to="/dashboard/help">
-             <ListItemIcon>
-               <HelpCircle size={18} />
-             </ListItemIcon>
-             <ListItemText primary="Help & Support" />
-           </MenuItem>
-
+           <MenuItem component={Link} to="/dashboard/profile" onClick={handleProfileClose}><ListItemIcon><User size={18} /></ListItemIcon>My Profile</MenuItem>
+           <MenuItem component={Link} to="/dashboard/help" onClick={handleProfileClose}><ListItemIcon><HelpCircle size={18} /></ListItemIcon>Help & Support</MenuItem>
+           {isAdmin && <Divider />}
+           {isAdmin && <MenuItem component={Link} to="/dashboard/admin/users" onClick={handleProfileClose}><ListItemIcon><Users size={18} /></ListItemIcon>Manage Users</MenuItem>}
            <Divider />
-
-           {/* Admin Section */}
-           {isAdmin && (
-               <Box>
-                 <Box sx={{ px: 2, py: 1 }}>
-                   <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
-                     ADMIN PANEL
-                   </Typography>
-                 </Box>
-                 <MenuItem component={Link} to="/dashboard/admin/users">
-                   <ListItemIcon>
-                     <Users size={18} />
-                   </ListItemIcon>
-                   <ListItemText primary="Manage Users" />
-                 </MenuItem>
-
-                 <Divider />
-               </Box>
-           )}
-
-           {/* Logout */}
-           <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
-             <ListItemIcon sx={{ color: 'error.main' }}>
-               <LogOut size={18} />
-             </ListItemIcon>
-             <ListItemText primary="Logout" />
-           </MenuItem>
+           <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}><ListItemIcon sx={{ color: 'error.main' }}><LogOut size={18} /></ListItemIcon>Logout</MenuItem>
          </MuiMenu>
 
-         {/* Mobile Search Drawer */}
-         <Drawer
-             anchor="top"
-             open={searchOpen}
-             onClose={() => setSearchOpen(false)}
-             PaperProps={{
-               sx: {
-                 height: 'auto',
-                 borderBottomLeftRadius: 8,
-                 borderBottomRightRadius: 8,
-               },
-             }}
-         >
-           <Box sx={{ p: 2 }}>
+         <Drawer anchor="top" open={searchOpen} onClose={() => setSearchOpen(false)}>
+           <Box sx={{ p: 2 }} ref={searchRef}>
              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                <Search size={20} />
-               <InputBase
-                   fullWidth
-                   value={searchTerm}
-                   onChange={(e) => setSearchTerm(e.target.value)}
-                   placeholder="Search posts, users, comments..."
-                   autoFocus
-                   sx={{ fontSize: '1rem' }}
-                   onKeyDown={(e) => {
-                     if (e.key === 'Enter') {
-                       navigate(`/?q=${encodeURIComponent(searchTerm)}`);
-                       setSearchOpen(false);
-                     }
-                   }}
-               />
+               <InputBase fullWidth value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search..." autoFocus />
              </Box>
-             {/* show results */}
              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-               {searchResults.map((r) => {
-                 const typeColor = r.type === 'post' ? theme.palette.primary.main : r.type === 'user' ? theme.palette.success.main : theme.palette.warning.main;
-                 const TypeIcon = r.type === 'post' ? FileText : r.type === 'user' ? User : MessageSquare;
-                 const roleColor = r.role === 'ADMIN' ? theme.palette.error.main : theme.palette.info.main;
-                 return (
-                   <Button key={`${r.type}-${r.id}`} startIcon={<TypeIcon size={14} style={{ color: typeColor }} />} sx={{ justifyContent: 'flex-start', textAlign: 'left', p: 1.5 }} component={Link} to={r.url} onClick={() => { setSearchOpen(false); setSearchTerm(''); setSearchResults([]); }}>
-                     <div style={{ textAlign: 'left', width: '100%' }}>
-                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
-                         <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 12, backgroundColor: alpha(typeColor, 0.1), color: typeColor, textTransform: 'uppercase', fontWeight: 600 }}>{r.type}</span>
-                         <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{r.title}</div>
-                         {r.role && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 12, backgroundColor: alpha(roleColor, 0.1), color: roleColor, textTransform: 'uppercase', fontWeight: 600 }}>{r.role}</span>}
-                       </div>
-                       <div style={{ fontSize: 12, color: theme.palette.text.secondary }}>{r.content}</div>
-                     </div>
-                   </Button>
-                 );
-               })}
-               {searchResults.length > 0 && (
-                 <Button onClick={() => { navigate(`/?q=${encodeURIComponent(searchTerm)}`); setSearchOpen(false); setSearchTerm(''); setSearchResults([]); }} variant="outlined" fullWidth>
-                   See all results →
+               {searchResults.map((r) => (
+                 <Button key={`${r.type}-${r.id}`} startIcon={r.type === 'post' ? <FileText size={14} /> : r.type === 'user' ? <User size={14} /> : <MessageSquare size={14} />} sx={{ justifyContent: 'flex-start', textAlign: 'left' }} onClick={() => handleSearchNavigation(r.url)}>
+                   <Box>
+                     <Typography variant="body1">{r.title}</Typography>
+                     <Typography variant="body2" color="text.secondary">{r.content}</Typography>
+                   </Box>
                  </Button>
-               )}
-             </Box>
-           </Box>
-         </Drawer>
-
-         {/* Notification Drawer */}
-         <Drawer
-             anchor="right"
-             open={notificationDrawerOpen}
-             onClose={() => setNotificationDrawerOpen(false)}
-             PaperProps={{
-               sx: {
-                 width: { xs: '100%', sm: 400 },
-                 maxWidth: '100%'
-               },
-             }}
-         >
-           <Box sx={{ p: 2 }}>
-             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-               <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Notifications</Typography>
-               <IconButton size="small" onClick={() => setNotificationDrawerOpen(false)}>
-                 <span style={{ fontSize: '1.5rem' }}>×</span>
-               </IconButton>
-             </Box>
-             
-             {totalNotifications === 0 ? (
-               <Box sx={{ textAlign: 'center', py: 4 }}>
-                 <Bell size={48} style={{ color: theme.palette.text.secondary, marginBottom: 16 }} />
-                 <Typography variant="body2" color="text.secondary">No new notifications</Typography>
-               </Box>
-             ) : (
-               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                 {newPosts.map((postId) => (
-                   <Box
-                     key={`post-${postId}`}
-                     sx={{
-                       p: 2,
-                       borderRadius: 2,
-                       border: `1px solid ${theme.palette.divider}`,
-                       cursor: 'pointer',
-                       '&:hover': { bgcolor: theme.palette.action.hover },
-                       transition: 'background-color 0.2s'
-                     }}
-                     onClick={() => {
-                       markPostAsRead(postId);
-                       setNotificationDrawerOpen(false);
-                       navigate(`/dashboard/posts/${postId}?highlight=true`);
-                     }}
-                   >
-                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                       <FileText size={16} style={{ color: theme.palette.primary.main }} />
-                       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>New Post</Typography>
-                     </Box>
-                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
-                       A new post has been published. Click to view.
-                     </Typography>
-                   </Box>
-                 ))}
-                 
-                 {isAdmin && newUsers.map((userId) => (
-                   <Box
-                     key={`user-${userId}`}
-                     sx={{
-                       p: 2,
-                       borderRadius: 2,
-                       border: `1px solid ${theme.palette.divider}`,
-                       cursor: 'pointer',
-                       '&:hover': { bgcolor: theme.palette.action.hover },
-                       transition: 'background-color 0.2s'
-                     }}
-                     onClick={() => {
-                       markUserAsRead(userId);
-                       setNotificationDrawerOpen(false);
-                       navigate(`/dashboard/admin/user/${userId}/view`);
-                     }}
-                   >
-                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                       <Users size={16} style={{ color: theme.palette.success.main }} />
-                       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>New User</Typography>
-                     </Box>
-                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
-                       A new user has registered. Click to view profile.
-                     </Typography>
-                   </Box>
-                 ))}
-               </Box>
-             )}
-           </Box>
-         </Drawer>
-
-         {/* Quick Actions Drawer for Mobile */}
-         <Drawer
-             anchor="bottom"
-             open={quickActionsOpen}
-             onClose={() => setQuickActionsOpen(false)}
-             PaperProps={{
-               sx: {
-                 height: 'auto',
-                 borderTopLeftRadius: 8,
-                 borderTopRightRadius: 8,
-               },
-             }}
-         >
-           <Box sx={{ p: 2 }}>
-             <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold', textAlign: 'center' }}>
-               Quick Actions
-             </Typography>
-             <List>
-               {quickActions.map((action) => (
-                   <ListItem key={action.label} disablePadding>
-                     <ListItemButton
-                         component={Link}
-                         to={action.path}
-                         onClick={() => setQuickActionsOpen(false)}
-                     >
-                       <ListItemIcon>{action.icon}</ListItemIcon>
-                       <ListItemText primary={action.label} />
-                     </ListItemButton>
-                   </ListItem>
                ))}
-             </List>
+             </Box>
            </Box>
          </Drawer>
        </>
