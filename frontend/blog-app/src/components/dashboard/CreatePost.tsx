@@ -408,7 +408,7 @@ export const CreatePost: React.FC = () => {
 
   // Auto-play tutorial
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (isAutoPlaying && showTutorialPopup) {
       interval = setInterval(() => {
         setCurrentTutorialStep(prev => {

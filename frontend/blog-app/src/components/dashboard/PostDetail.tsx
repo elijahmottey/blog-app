@@ -1029,13 +1029,17 @@ export const PostDetail: React.FC = () => {
                 >
                   {(postData.user?.name || postAuthorName).charAt(0).toUpperCase()}
                 </Avatar>
-                <span style={{ 
-                  fontSize: '0.875rem', 
-                  color: theme.palette.text.secondary,
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  '&:hover': { textDecoration: 'underline' }
-                }}>
+                <span
+                    style={{ fontSize: '0.875rem' }}
+                    sx={{
+                      color: theme.palette.text.secondary,
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      '&:hover': {
+                        textDecoration: 'underline',
+                      },
+                    }}
+                >
                   By {postData.user?.name || postAuthorName}
                 </span>
               </Link>
