@@ -227,11 +227,24 @@ export const UserDashboard: React.FC = () => {
           <p style={{ 
             fontSize: '1.125rem', 
             color: 'rgba(255,255,255,0.9)', 
-            margin: 0,
+            margin: '0 0 16px 0',
             lineHeight: 1.6
           }}>
             Here's what's happening with your blog today. Keep creating amazing content!
           </p>
+          {user?.description && (
+            <div style={{ 
+              backgroundColor: 'rgba(255,255,255,0.1)', 
+              padding: '12px 16px', 
+              borderRadius: '8px',
+              maxWidth: '600px',
+              backdropFilter: 'blur(4px)'
+            }}>
+              <Typography variant="body2" style={{ color: 'rgba(255,255,255,0.95)', fontStyle: 'italic' }}>
+                "{user.description}"
+              </Typography>
+            </div>
+          )}
         </div>
         <div style={{
           position: 'absolute',

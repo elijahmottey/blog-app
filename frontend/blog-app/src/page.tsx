@@ -26,7 +26,7 @@ import { AdminUsers } from "./components/dashboard/AdminUsers.tsx";
 import { Unauthorized } from "./components/unauthorized.tsx";
 import {AnalyticsView} from "./components/dashboard/AnalyticsView.tsx";
 import {UserActivityPage} from "./components/dashboard/UserActivityPage.tsx";
-import { AuthorProfile } from "./components/AuthorProfile.tsx";
+import { AuthorProfile } from "./components/dashboard/AuthorProfile.tsx";
 import OAuth2RedirectHandler from "./components/OAuth2RedirectHandler.tsx";
 import { ReportedPosts } from "./components/dashboard/ReportedPosts.tsx";
 import { HelpSupport } from "./components/dashboard/HelpSupport.tsx";
@@ -117,16 +117,6 @@ export const PagesRoute = () => {
                             }
                         />
                         <Route
-                            path="/profile/:username"
-                            element={
-                                <>
-                                    <Navbar />
-                                    <AuthorProfile />
-                                    <Footer />
-                                </>
-                            }
-                        />
-                        <Route
                             path="/terms-of-service"
                             element={
                                 <>
@@ -152,6 +142,7 @@ export const PagesRoute = () => {
                                 <Route path="profile" element={<ProfileManagement />} />
                                 <Route path="ai-chat" element={<AIChatPage />} />
                                 <Route path="help" element={<HelpSupport />} />
+                                <Route path="profile/:username" element={<AuthorProfile />} />
 
                                 {/* Admin-only routes - nested inside AdminRoute */}
                                 <Route element={<AdminRoute />}>

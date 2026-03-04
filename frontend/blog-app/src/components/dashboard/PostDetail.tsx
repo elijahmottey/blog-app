@@ -949,7 +949,7 @@ export const PostDetail: React.FC = () => {
             startIcon={<ArrowLeft />}
             style={{
               borderRadius: '10px',
-              padding: '4px 5px'
+              padding: '8px 16px'
             }}
           >
             Back to Posts
@@ -1013,23 +1013,31 @@ export const PostDetail: React.FC = () => {
             flexWrap: 'wrap'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Avatar 
-                sx={{ 
-                  width: 32, 
-                  height: 32, 
-                  bgcolor: 'primary.main',
-                  fontSize: '0.875rem'
-                }}
+              <Link 
+                to={`/dashboard/profile/${postData.user?.name || postAuthorName}`}
+                style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}
               >
-                {(postData.user?.name || postAuthorName).charAt(0).toUpperCase()}
-              </Avatar>
-              <span style={{ 
-                fontSize: '0.875rem', 
-                color: theme.palette.text.secondary,
-                fontWeight: 500
-              }}>
-                By {postData.user?.name || postAuthorName}
-              </span>
+                <Avatar 
+                  sx={{ 
+                    width: 32, 
+                    height: 32, 
+                    bgcolor: 'primary.main',
+                    fontSize: '0.875rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {(postData.user?.name || postAuthorName).charAt(0).toUpperCase()}
+                </Avatar>
+                <span style={{ 
+                  fontSize: '0.875rem', 
+                  color: theme.palette.text.secondary,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  '&:hover': { textDecoration: 'underline' }
+                }}>
+                  By {postData.user?.name || postAuthorName}
+                </span>
+              </Link>
             </div>
             <span style={{ color: theme.palette.text.secondary }}>•</span>
             <span style={{ 
@@ -1172,7 +1180,7 @@ export const PostDetail: React.FC = () => {
       {/* Post Content */}
       <LIVBlogCard
         variant="elevated"
-        padding={window.innerWidth < 768 ? "small" : "large"}
+        padding={window.innerWidth < 768 ? "medium" : "large"}
         style={{ 
           marginBottom: window.innerWidth < 768 ? '20px' : '32px',
           backgroundColor: isHighlighted ? alpha(theme.palette.success.main, 0.15) : undefined,

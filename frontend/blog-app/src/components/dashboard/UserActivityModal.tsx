@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, FileText, MessageSquare, Eye } from 'lucide-react';
+import { X, FileText, MessageSquare, Eye, ThumbsUp, Heart } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useTheme, alpha } from '@mui/material/styles';
 import { format } from 'date-fns';
@@ -41,11 +41,17 @@ export const UserActivityModal: React.FC<UserActivityModalProps> = ({ user, onCl
   
   const draftsCount = getDraftsCount();
 
+  // Calculate total views and likes from posts
+  const totalViews = Array.isArray(userPosts) ? userPosts.reduce((sum: number, post: any) => sum + (post.views || 0), 0) : 0;
+  const totalLikes = Array.isArray(userPosts) ? userPosts.reduce((sum: number, post: any) => sum + (post.likes || 0), 0) : 0;
+
   const stats = {
     totalPosts: Array.isArray(userPosts) ? userPosts.length : 0,
     totalComments: Array.isArray(userComments) ? userComments.length : 0,
     publishedPosts: Array.isArray(userPosts) ? userPosts.filter((post: any) => post.content && post.content.length > 0).length : 0,
     draftPosts: draftsCount,
+    totalViews: totalViews,
+    totalLikes: totalLikes,
   };
 
   return (
@@ -82,6 +88,15 @@ export const UserActivityModal: React.FC<UserActivityModalProps> = ({ user, onCl
           </button>
         </div>
 
+        {/* Description Section */}
+        {user.description && (
+          <div style={{ marginBottom: 24, padding: 16, backgroundColor: alpha(theme.palette.background.default, 0.5), borderRadius: 8, border: `1px solid ${theme.palette.divider}` }}>
+            <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: theme.palette.text.primary, marginBottom: 8 }}>About</h4>
+            <p style={{ fontSize: '0.875rem', color: theme.palette.text.secondary, margin: 0, lineHeight: 1.6 }}>
+              {user.description}
+            </p>
+          </div>
+        )}
 
         {/* Stats Overview */}
         <div style={{
@@ -95,6 +110,8 @@ export const UserActivityModal: React.FC<UserActivityModalProps> = ({ user, onCl
             { label: 'Published', value: stats.publishedPosts, icon: Eye, color: theme.palette.success.main },
             { label: 'Drafts', value: stats.draftPosts, icon: FileText, color: theme.palette.warning.main },
             { label: 'Comments', value: stats.totalComments, icon: MessageSquare, color: theme.palette.secondary.main },
+            { label: 'Total Views', value: stats.totalViews, icon: Eye, color: theme.palette.info.main },
+            { label: 'Total Likes', value: stats.totalLikes, icon: ThumbsUp, color: theme.palette.error.main },
           ].map((stat) => (
             <div key={stat.label} style={{
               padding: 16,
@@ -134,6 +151,14 @@ export const UserActivityModal: React.FC<UserActivityModalProps> = ({ user, onCl
                       <p style={{ fontSize: '0.75rem', color: theme.palette.text.secondary, margin: 0 }}>
                         {post.content ? `${post.content.substring(0, 100)}...` : 'No content'}
                       </p>
+                      <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>
+                        <span style={{ fontSize: '0.75rem', color: theme.palette.text.secondary, display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <Eye size={12} /> {post.views || 0}
+                        </span>
+                        <span style={{ fontSize: '0.75rem', color: theme.palette.text.secondary, display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <ThumbsUp size={12} /> {post.likes || 0}
+                        </span>
+                      </div>
                     </div>
                     <div style={{ fontSize: '0.75rem', color: theme.palette.text.secondary, marginLeft: 12 }}>
                       {post.createdAt ? format(new Date(post.createdAt), 'MMM dd') : 'Unknown'}
