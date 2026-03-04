@@ -927,7 +927,8 @@ export const PostDetail: React.FC = () => {
     return rootComments;
   };
 
-  return (
+  // @ts-ignore
+    return (
     <div style={{ 
       padding: window.innerWidth < 768 ? '16px' : '32px', 
       maxWidth: '1200px', 

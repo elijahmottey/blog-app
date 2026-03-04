@@ -58,9 +58,17 @@ import { LIVBlogHeader, LIVBlogCard, LIVBlogLayout } from '../ui';
 import { useTheme } from '@mui/material/styles';
 import useDocumentTitle from "../../hooks/useDocumentTitle.ts";
 
+const MIN_DRAFT_WORDS = 2;
+const MIN_PUBLISH_WORDS = 50;
+
 const schema = yup.object({
   title: yup.string().required('Title is required').min(3, 'Title must be at least 3 characters'),
-  content: yup.string().required('Content is required').min(10, 'Content must be at least 10 characters'),
+  content: yup.string()
+    .required('Content is required')
+    .test('min-words', `Content must be at least ${MIN_PUBLISH_WORDS} words`, value => {
+      if (!value) return false;
+      return value.trim().split(/\s+/).filter(w => w.length > 0).length >= MIN_PUBLISH_WORDS;
+    }),
 });
 
 type PostFormData = {
@@ -139,9 +147,19 @@ export const CreatePost: React.FC = () => {
   }, [location.state, setValue]);
 
   // Draft management functions
-  const saveDraft = () => {
+  const saveDraft = (isAutoSave = false) => {
     const formData = getValues();
     if (!formData.title && !formData.content) return;
+
+    const currentContent = formData.content || '';
+    const currentWordCount = currentContent.trim().split(/\s+/).filter(word => word.length > 0).length;
+
+    if (currentWordCount < MIN_DRAFT_WORDS) {
+      if (!isAutoSave) {
+        toast.error(`Draft must have at least ${MIN_DRAFT_WORDS} words to be saved.`);
+      }
+      return;
+    }
 
     const drafts = JSON.parse(localStorage.getItem('blog_drafts') || '[]');
     const draftId = currentDraftId || Date.now().toString();
@@ -160,7 +178,9 @@ export const CreatePost: React.FC = () => {
     
     localStorage.setItem('blog_drafts', JSON.stringify(updatedDrafts));
     setCurrentDraftId(draftId);
-    toast.success('Draft saved successfully!');
+    if (!isAutoSave) {
+      toast.success('Draft saved successfully!');
+    }
   };
 
   // Auto-save draft every 30 seconds
@@ -168,7 +188,7 @@ export const CreatePost: React.FC = () => {
     const interval = setInterval(() => {
       const formData = getValues();
       if (formData.title || formData.content) {
-        saveDraft();
+        saveDraft(true);
       }
     }, 30000);
 
@@ -1105,9 +1125,12 @@ export const CreatePost: React.FC = () => {
           </div>
         </LIVBlogCard>
 
-        {watchedContent.length > 0 && watchedContent.length < 10 && (
+        {wordCount < MIN_PUBLISH_WORDS && (
           <Alert severity="warning" className="aws-font">
-            Content must be at least 10 characters. You need {10 - watchedContent.length} more characters.
+            Post must be at least {MIN_PUBLISH_WORDS} words to publish. You need {MIN_PUBLISH_WORDS - wordCount} more words.
+            {wordCount < MIN_DRAFT_WORDS && (
+                <span> (At least {MIN_DRAFT_WORDS} words required to save draft)</span>
+            )}
           </Alert>
         )}
 
@@ -1138,8 +1161,9 @@ export const CreatePost: React.FC = () => {
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t" style={{ borderColor: theme.palette.divider }}>
           <Button
-            onClick={saveDraft}
+            onClick={() => saveDraft(false)}
             variant="outlined"
+            disabled={wordCount < MIN_DRAFT_WORDS}
             className="aws-button aws-button-secondary"
           >
             <FileText size={16} style={{ marginRight: '8px' }} />
@@ -1157,7 +1181,7 @@ export const CreatePost: React.FC = () => {
             <Button
               type="submit"
               variant="contained"
-              disabled={isSubmitting || createPostMutation.isPending || watchedContent.length < 10}
+              disabled={isSubmitting || createPostMutation.isPending || wordCount < MIN_PUBLISH_WORDS}
               className="aws-button aws-button-primary"
             >
               {createPostMutation.isPending ? (
