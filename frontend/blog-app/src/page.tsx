@@ -30,6 +30,7 @@ import { AuthorProfile } from "./components/dashboard/AuthorProfile.tsx";
 import OAuth2RedirectHandler from "./components/OAuth2RedirectHandler.tsx";
 import { ReportedPosts } from "./components/dashboard/ReportedPosts.tsx";
 import { HelpSupport } from "./components/dashboard/HelpSupport.tsx";
+import { LIVSave } from "./components/dashboard/LIVSave";
 
 export const PagesRoute = () => {
     return (
@@ -143,6 +144,7 @@ export const PagesRoute = () => {
                                 <Route path="ai-chat" element={<AIChatPage />} />
                                 <Route path="help" element={<HelpSupport />} />
                                 <Route path="profile/:username" element={<AuthorProfile />} />
+                                <Route path="livsave" element={<LIVSave />} />
 
                                 {/* Admin-only routes - nested inside AdminRoute */}
                                 <Route element={<AdminRoute />}>

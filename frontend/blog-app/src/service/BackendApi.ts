@@ -95,6 +95,7 @@ export interface PostDto{
     views?: number;
     downloads?: number;
     isLiked?: boolean;
+    isSaved?: boolean;
 }
 
 export interface CommentDto{
@@ -131,7 +132,24 @@ export interface NotificationDto {
     createdAt: string;
 }
 
+export interface HighlightDto {
+    id: number;
+    postId: number;
+    selectedText: string;
+    note?: string;
+    startOffset: number;
+    endOffset: number;
+    color?: string;
+    createdAt: string;
+}
 
+export interface HighlightRequest {
+    selectedText: string;
+    note?: string;
+    startOffset: number;
+    endOffset: number;
+    color?: string;
+}
 
 
 
@@ -567,6 +585,36 @@ export default class BackendApi {
 
     static async deleteReport(reportId: number) {
         return this.delete<ApiResponse<void>>(`/reports/${reportId}`);
+    }
+
+    // ---- LIVMARKS (Bookmarks) ----
+    static async toggleLIVMark(postId: number) {
+        return this.post<ApiResponse<void>>(`/livmarks/${postId}`, {});
+    }
+
+    static async isLIVMarked(postId: number) {
+        return this.get<ApiResponse<boolean>>(`/livmarks/${postId}/status`);
+    }
+
+    static async getLIVMarkedPosts(page: number = 0, size: number = 10) {
+        return this.get<ApiResponse<PagedResponse<PostDto>>>(`/livmarks?page=${page}&size=${size}`);
+    }
+
+    // ---- HIGHLIGHTS ----
+    static async addHighlight(postId: number, data: HighlightRequest) {
+        return this.post<ApiResponse<HighlightDto>>(`/highlights/post/${postId}`, data);
+    }
+
+    static async deleteHighlight(highlightId: number) {
+        return this.delete<ApiResponse<void>>(`/highlights/${highlightId}`);
+    }
+
+    static async getHighlights(postId: number) {
+        return this.get<ApiResponse<HighlightDto[]>>(`/highlights/post/${postId}`);
+    }
+
+    static async updateHighlightNote(highlightId: number, note: string) {
+        return this.put<ApiResponse<HighlightDto>>(`/highlights/${highlightId}/note`, note);
     }
 }
 
