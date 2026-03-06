@@ -108,7 +108,7 @@ export const CreatePost: React.FC = () => {
     queryFn: () => BackendApi.getCategories(),
   });
 
-  const categories = categoriesResponse?.data || ['General','Spiritual Life', 'Technology', 'Lifestyle', 'Business', 'Health', 'Education'];
+  const categories = categoriesResponse?.data || ['General', 'Spiritual Life', 'Technology', 'Lifestyle', 'Business', 'Health', 'Education'];
 
   // Ensure selectedCategory defaults to the first available category when categories load
   useEffect(() => {
@@ -138,7 +138,7 @@ export const CreatePost: React.FC = () => {
       setValue('content', draft.content);
       setCurrentDraftId(draft.id);
     }
-    
+
     // Show tutorial popup on first visit
     const hasSeenTutorial = localStorage.getItem('livblog_tutorial_seen');
     if (!hasSeenTutorial) {
@@ -154,7 +154,7 @@ export const CreatePost: React.FC = () => {
     const drafts = JSON.parse(localStorage.getItem('blog_drafts') || '[]');
     const draftId = currentDraftId || Date.now().toString();
     const now = new Date().toISOString();
-    
+
     const draft: DraftPost = {
       id: draftId,
       title: formData.title || 'Untitled Draft',
@@ -165,7 +165,7 @@ export const CreatePost: React.FC = () => {
 
     const updatedDrafts = drafts.filter((d: DraftPost) => d.id !== draftId);
     updatedDrafts.unshift(draft);
-    
+
     localStorage.setItem('blog_drafts', JSON.stringify(updatedDrafts));
     setCurrentDraftId(draftId);
     if (!isAutoSave) {
@@ -189,7 +189,7 @@ export const CreatePost: React.FC = () => {
     const drafts = JSON.parse(localStorage.getItem('blog_drafts') || '[]');
     const updatedDrafts = drafts.filter((d: DraftPost) => d.id !== draftId);
     localStorage.setItem('blog_drafts', JSON.stringify(updatedDrafts));
-    
+
     if (currentDraftId === draftId) {
       setCurrentDraftId(null);
       setValue('title', '');
@@ -199,8 +199,8 @@ export const CreatePost: React.FC = () => {
 
   const createPostMutation = useMutation({
     mutationFn: (data: PostFormData) => {
-      return BackendApi.createPost({ 
-        title: data.title, 
+      return BackendApi.createPost({
+        title: data.title,
         content: data.content,
         category: data.category,
         users: user?.name || 'Anonymous'
@@ -487,74 +487,74 @@ export const CreatePost: React.FC = () => {
 
   const formatContent = (content: string) => {
     return content
-        .split('\n')
-        .map((line, index) => {
-          // Handle blockquotes
-          if (line.trim().startsWith('>')) {
-            return `<blockquote>${line.substring(1).trim()}</blockquote>`;
-          }
+      .split('\n')
+      .map((line, index) => {
+        // Handle blockquotes
+        if (line.trim().startsWith('>')) {
+          return `<blockquote>${line.substring(1).trim()}</blockquote>`;
+        }
 
-          // Handle code blocks
-          if (line.trim().startsWith('```')) {
-            return '<pre><code>';
-          }
-          if (line.trim() === '```') {
-            return '</code></pre>';
-          }
+        // Handle code blocks
+        if (line.trim().startsWith('```')) {
+          return '<pre><code>';
+        }
+        if (line.trim() === '```') {
+          return '</code></pre>';
+        }
 
-          // Handle headers
-          if (line.startsWith('# ')) {
-            return `<h1 style="font-size: 1.875rem; font-weight: 800; margin-bottom: 1.5rem; margin-top: 2rem; padding-bottom: 0.5rem;">${line.substring(2)}</h1>`;
-          }
-          if (line.startsWith('## ')) {
-            return `<h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; margin-top: 1.5rem;">${line.substring(3)}</h2>`;
-          }
-          if (line.startsWith('### ')) {
-            return `<h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; margin-top: 1.25rem;">${line.substring(4)}</h3>`;
-          }
+        // Handle headers
+        if (line.startsWith('# ')) {
+          return `<h1 style="font-size: 1.875rem; font-weight: 800; margin-bottom: 1.5rem; margin-top: 2rem; padding-bottom: 0.5rem;">${line.substring(2)}</h1>`;
+        }
+        if (line.startsWith('## ')) {
+          return `<h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; margin-top: 1.5rem;">${line.substring(3)}</h2>`;
+        }
+        if (line.startsWith('### ')) {
+          return `<h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; margin-top: 1.25rem;">${line.substring(4)}</h3>`;
+        }
 
-          // Handle bold text
-          line = line.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 700;">$1</strong>');
+        // Handle bold text
+        line = line.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 700;">$1</strong>');
 
-          // Handle italic text
-          line = line.replace(/\*(.*?)\*/g, '<em style="font-style: italic;">$1</em>');
+        // Handle italic text
+        line = line.replace(/\*(.*?)\*/g, '<em style="font-style: italic;">$1</em>');
 
-          // Handle inline code
-          line = line.replace(/`([^`]+)`/g, '<code>$1</code>');
+        // Handle inline code
+        line = line.replace(/`([^`]+)`/g, '<code>$1</code>');
 
-          // Handle images
-          line = line.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width: 100%; height: auto; margin: 1rem 0; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />');
+        // Handle images
+        line = line.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width: 100%; height: auto; margin: 1rem 0; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />');
 
-          // Handle links
-          line = line.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+        // Handle links
+        line = line.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
 
-          // Handle ordered lists
-          if (/^\d+\.\s/.test(line)) {
-            return `<li style="margin-left: 1.5rem; margin-bottom: 0.25rem; list-style-type: decimal;">${line.substring(line.indexOf('.') + 2)}</li>`;
-          }
+        // Handle ordered lists
+        if (/^\d+\.\s/.test(line)) {
+          return `<li style="margin-left: 1.5rem; margin-bottom: 0.25rem; list-style-type: decimal;">${line.substring(line.indexOf('.') + 2)}</li>`;
+        }
 
-          // Handle unordered lists
-          if (/^-\s/.test(line) || /^\*\s/.test(line)) {
-            return `<li style="margin-left: 1.5rem; margin-bottom: 0.25rem; list-style-type: disc;">${line.substring(2)}</li>`;
-          }
+        // Handle unordered lists
+        if (/^-\s/.test(line) || /^\*\s/.test(line)) {
+          return `<li style="margin-left: 1.5rem; margin-bottom: 0.25rem; list-style-type: disc;">${line.substring(2)}</li>`;
+        }
 
-          // Handle empty lines
-          if (line.trim() === '') {
-            return '<br>';
-          }
+        // Handle empty lines
+        if (line.trim() === '') {
+          return '<br>';
+        }
 
-          // Check if previous line was a list item
-          const prevLine = content.split('\n')[index - 1];
-          const isInList = prevLine && (/^\d+\.\s/.test(prevLine) || /^-\s/.test(prevLine) || /^\*\s/.test(prevLine));
+        // Check if previous line was a list item
+        const prevLine = content.split('\n')[index - 1];
+        const isInList = prevLine && (/^\d+\.\s/.test(prevLine) || /^-\s/.test(prevLine) || /^\*\s/.test(prevLine));
 
-          if (isInList) {
-            return `<li style="margin-left: 1.5rem; margin-bottom: 0.25rem; list-style-type: disc;">${line}</li>`;
-          }
+        if (isInList) {
+          return `<li style="margin-left: 1.5rem; margin-bottom: 0.25rem; list-style-type: disc;">${line}</li>`;
+        }
 
-          // Regular paragraphs
-          return `<p style="margin-bottom: 1rem; line-height: 1.8; font-size: 1.125rem;">${line}</p>`;
-        })
-        .join('');
+        // Regular paragraphs
+        return `<p style="margin-bottom: 1rem; line-height: 1.8; font-size: 1.125rem;">${line}</p>`;
+      })
+      .join('');
   };
 
   // Calculate statistics
@@ -621,8 +621,8 @@ export const CreatePost: React.FC = () => {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Tutorial Choice Popup */}
-        <Dialog 
-          open={showTutorialPopup && currentTutorialStep === 0 && !isAutoPlaying} 
+        <Dialog
+          open={showTutorialPopup && currentTutorialStep === 0 && !isAutoPlaying}
           onClose={handleTutorialClose}
           maxWidth="sm"
           fullWidth
@@ -641,7 +641,7 @@ export const CreatePost: React.FC = () => {
             <Typography variant="body1" style={{ marginBottom: '32px', color: theme.palette.text.secondary }}>
               How would you like to learn about creating amazing blog posts?
             </Typography>
-            
+
             <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
               <Button
                 onClick={() => handleTutorialChoice('slideshow')}
@@ -662,7 +662,7 @@ export const CreatePost: React.FC = () => {
                 Quick Guide
               </Button>
             </div>
-            
+
             <Button
               onClick={handleTutorialSkip}
               variant="text"
@@ -675,8 +675,8 @@ export const CreatePost: React.FC = () => {
         </Dialog>
 
         {/* Tutorial Slideshow Popup */}
-        <Dialog 
-          open={showTutorialPopup && (currentTutorialStep > 0 || isAutoPlaying)} 
+        <Dialog
+          open={showTutorialPopup && (currentTutorialStep > 0 || isAutoPlaying)}
           onClose={handleTutorialClose}
           maxWidth="md"
           fullWidth
@@ -709,7 +709,7 @@ export const CreatePost: React.FC = () => {
               <Typography variant="body1" style={{ fontSize: '1.125rem', opacity: 0.9 }}>
                 {tutorialSteps[currentTutorialStep].content}
               </Typography>
-              
+
               {tutorialSteps[currentTutorialStep].example && (
                 <Box style={{
                   marginTop: '24px',
@@ -723,7 +723,7 @@ export const CreatePost: React.FC = () => {
                   {tutorialSteps[currentTutorialStep].example}
                 </Box>
               )}
-              
+
               {/* Curved Arrow */}
               {currentTutorialStep < tutorialSteps.length - 1 && (
                 <div style={{
@@ -732,17 +732,17 @@ export const CreatePost: React.FC = () => {
                   right: '32px',
                   animation: 'bounce 2s infinite'
                 }}>
-                  <ArrowRight 
-                    size={32} 
-                    style={{ 
+                  <ArrowRight
+                    size={32}
+                    style={{
                       color: theme.palette.primary.main,
                       transform: 'rotate(45deg)'
-                    }} 
+                    }}
                   />
                 </div>
               )}
             </Box>
-            
+
             {/* Progress Indicator */}
             <Box style={{ padding: '16px 32px' }}>
               <div style={{
@@ -758,8 +758,8 @@ export const CreatePost: React.FC = () => {
                       width: '8px',
                       height: '8px',
                       borderRadius: '50%',
-                      backgroundColor: index <= currentTutorialStep 
-                        ? theme.palette.primary.main 
+                      backgroundColor: index <= currentTutorialStep
+                        ? theme.palette.primary.main
                         : theme.palette.grey[300],
                       transition: 'all 0.3s ease'
                     }}
@@ -771,7 +771,7 @@ export const CreatePost: React.FC = () => {
               </Typography>
             </Box>
           </DialogContent>
-          
+
           <DialogActions style={{ padding: '16px 32px 32px', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', gap: '12px' }}>
               <Button
@@ -791,7 +791,7 @@ export const CreatePost: React.FC = () => {
                 Skip Tutorial
               </Button>
             </div>
-            
+
             <div style={{ display: 'flex', gap: '12px' }}>
               {currentTutorialStep > 0 && (
                 <Button
@@ -854,7 +854,7 @@ export const CreatePost: React.FC = () => {
 
         {/* Tutorial Section */}
         <LIVBlogCard padding="none" style={{ marginBottom: '24px' }}>
-          <div 
+          <div
             onClick={() => setShowTutorial(!showTutorial)}
             style={{
               padding: '16px 24px',
@@ -875,12 +875,12 @@ export const CreatePost: React.FC = () => {
             </div>
             {showTutorial ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </div>
-          
+
           {showTutorial && (
             <div style={{ padding: '24px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-                <div style={{ 
-                  padding: '16px', 
+                <div style={{
+                  padding: '16px',
                   backgroundColor: theme.palette.success.light + '10',
                   borderRadius: '8px',
                   border: `1px solid ${theme.palette.success.light}`
@@ -889,9 +889,9 @@ export const CreatePost: React.FC = () => {
                     <Type size={16} /> 1. Compelling Titles
                   </h4>
                   <p style={{ margin: '0 0 8px 0', fontSize: '0.875rem' }}>Use # for your main title:</p>
-                  <code style={{ 
-                    backgroundColor: theme.palette.grey[100], 
-                    padding: '4px 8px', 
+                  <code style={{
+                    backgroundColor: theme.palette.grey[100],
+                    padding: '4px 8px',
                     borderRadius: '4px',
                     fontSize: '0.8rem',
                     display: 'block',
@@ -906,8 +906,8 @@ export const CreatePost: React.FC = () => {
                   </ul>
                 </div>
 
-                <div style={{ 
-                  padding: '16px', 
+                <div style={{
+                  padding: '16px',
                   backgroundColor: theme.palette.info.light + '10',
                   borderRadius: '8px',
                   border: `1px solid ${theme.palette.info.light}`
@@ -916,9 +916,9 @@ export const CreatePost: React.FC = () => {
                     <Image size={16} /> 2. Add Images
                   </h4>
                   <p style={{ margin: '0 0 8px 0', fontSize: '0.875rem' }}>Insert images anywhere:</p>
-                  <code style={{ 
-                    backgroundColor: theme.palette.grey[100], 
-                    padding: '4px 8px', 
+                  <code style={{
+                    backgroundColor: theme.palette.grey[100],
+                    padding: '4px 8px',
                     borderRadius: '4px',
                     fontSize: '0.8rem',
                     display: 'block',
@@ -933,8 +933,8 @@ export const CreatePost: React.FC = () => {
                   </ul>
                 </div>
 
-                <div style={{ 
-                  padding: '16px', 
+                <div style={{
+                  padding: '16px',
                   backgroundColor: theme.palette.warning.light + '10',
                   borderRadius: '8px',
                   border: `1px solid ${theme.palette.warning.light}`
@@ -943,9 +943,9 @@ export const CreatePost: React.FC = () => {
                     <Heading1 size={16} /> 3. Structure Content
                   </h4>
                   <p style={{ margin: '0 0 8px 0', fontSize: '0.875rem' }}>Organize with headers:</p>
-                  <code style={{ 
-                    backgroundColor: theme.palette.grey[100], 
-                    padding: '4px 8px', 
+                  <code style={{
+                    backgroundColor: theme.palette.grey[100],
+                    padding: '4px 8px',
                     borderRadius: '4px',
                     fontSize: '0.8rem',
                     display: 'block',
@@ -961,8 +961,8 @@ export const CreatePost: React.FC = () => {
                   </ul>
                 </div>
 
-                <div style={{ 
-                  padding: '16px', 
+                <div style={{
+                  padding: '16px',
                   backgroundColor: theme.palette.secondary.light + '10',
                   borderRadius: '8px',
                   border: `1px solid ${theme.palette.secondary.light}`
@@ -971,9 +971,9 @@ export const CreatePost: React.FC = () => {
                     <Bold size={16} /> 4. Format Text
                   </h4>
                   <p style={{ margin: '0 0 8px 0', fontSize: '0.875rem' }}>Emphasize important points:</p>
-                  <code style={{ 
-                    backgroundColor: theme.palette.grey[100], 
-                    padding: '4px 8px', 
+                  <code style={{
+                    backgroundColor: theme.palette.grey[100],
+                    padding: '4px 8px',
                     borderRadius: '4px',
                     fontSize: '0.8rem',
                     display: 'block',
@@ -990,10 +990,10 @@ export const CreatePost: React.FC = () => {
                   </ul>
                 </div>
               </div>
-              
-              <div style={{ 
-                marginTop: '20px', 
-                padding: '16px', 
+
+              <div style={{
+                marginTop: '20px',
+                padding: '16px',
                 backgroundColor: theme.palette.primary.light + '10',
                 borderRadius: '8px',
                 textAlign: 'center'
@@ -1205,8 +1205,6 @@ export const CreatePost: React.FC = () => {
           }
         }
       `}</style>
-
-      <AIChat isExpanded={false} />
     </div>
   );
 };

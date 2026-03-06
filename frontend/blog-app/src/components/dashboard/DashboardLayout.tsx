@@ -7,6 +7,7 @@ import { DashboardSidebar } from './DashboardSidebar';
 import { DashboardRightRail } from './DashboardRightRail';
 import { LIVBlogLayout } from '../ui';
 import useDocumentTitle from '../../hooks/useDocumentTitle';
+import { AIChat } from './AIChat';
 
 export const DashboardLayout: React.FC = () => {
   useDocumentTitle('LIVBlog - Dashboard');
@@ -16,6 +17,7 @@ export const DashboardLayout: React.FC = () => {
   const isWide = useMediaQuery(theme.breakpoints.up('lg'));
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isAiChatOpen, setIsAiChatOpen] = useState(false);
 
   useEffect(() => {
     // Don't auto-open sidebar based on screen size
@@ -25,6 +27,10 @@ export const DashboardLayout: React.FC = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const toggleAiChat = () => {
+    setIsAiChatOpen(!isAiChatOpen);
+  };
+
   const closeSidebar = () => {
     if (!isPersistent) {
       setIsSidebarOpen(false);
@@ -32,11 +38,11 @@ export const DashboardLayout: React.FC = () => {
   };
 
   return (
-    <div 
-      className="aws-font" 
-      style={{ 
-        minHeight: '100vh', 
-        backgroundColor: theme.palette.background.default, 
+    <div
+      className="aws-font"
+      style={{
+        minHeight: '100vh',
+        backgroundColor: theme.palette.background.default,
         display: 'flex',
         fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
       }}
@@ -51,20 +57,36 @@ export const DashboardLayout: React.FC = () => {
         <DashboardSidebar isOpen={isSidebarOpen} onClose={closeSidebar} isMobile={true} />
       )}
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, transition: 'all 0.3s ease' }}>
         <DashboardNavbar onMenuClick={toggleSidebar} isSidebarOpen={isSidebarOpen} isMobile={!isPersistent} isDesktop={isWide} />
 
-        <main style={{ flex: 1, overflowX: 'hidden' }}>
-          <div className="aws-spacing-y-lg">
-            <LIVBlogLayout.Container>
-              <Outlet />
-            </LIVBlogLayout.Container>
+        <main style={{ flex: 1, overflowX: 'hidden', display: 'flex' }}>
+          <div style={{ flex: 1, overflowY: 'auto', transition: 'all 0.3s ease' }}>
+            <div className="aws-spacing-y-lg">
+              <LIVBlogLayout.Container>
+                <Outlet />
+              </LIVBlogLayout.Container>
+            </div>
+          </div>
+
+          {/* AI Chat Side Panel */}
+          <div style={{
+            width: isAiChatOpen ? (isWide ? '400px' : '350px') : '0px',
+            opacity: isAiChatOpen ? 1 : 0,
+            overflow: 'hidden',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            borderLeft: isAiChatOpen ? `1px solid ${theme.palette.divider}` : 'none',
+            backgroundColor: theme.palette.background.paper,
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            {isAiChatOpen && <AIChat variant="sidebar" onClose={() => setIsAiChatOpen(false)} />}
           </div>
         </main>
       </div>
 
       <div style={{ flex: isWide ? '0 0 72px' : '0 0 0', display: isWide ? 'block' : 'none' }}>
-        <DashboardRightRail isDesktop={isWide} />
+        <DashboardRightRail isDesktop={isWide} onToggleAiChat={toggleAiChat} isAiChatOpen={isAiChatOpen} />
       </div>
     </div>
   );

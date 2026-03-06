@@ -74,9 +74,16 @@ interface ChatHistory {
 interface AIChatProps {
   isExpanded?: boolean;
   onToggleExpand?: (expanded: boolean) => void;
+  variant?: 'floating' | 'sidebar';
+  onClose?: () => void;
 }
 
-export const AIChat: React.FC<AIChatProps> = ({ isExpanded = false, onToggleExpand }) => {
+export const AIChat: React.FC<AIChatProps> = ({
+  isExpanded = false,
+  onToggleExpand,
+  variant = 'floating',
+  onClose
+}) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -221,19 +228,19 @@ export const AIChat: React.FC<AIChatProps> = ({ isExpanded = false, onToggleExpa
   const handleCopyMessage = (content: string, messageId: string) => {
     navigator.clipboard.writeText(content);
     setMessages(prev => prev.map(msg =>
-        msg.id === messageId ? { ...msg, copied: true } : msg
+      msg.id === messageId ? { ...msg, copied: true } : msg
     ));
     toast.success('Copied to clipboard!');
     setTimeout(() => {
       setMessages(prev => prev.map(msg =>
-          msg.id === messageId ? { ...msg, copied: false } : msg
+        msg.id === messageId ? { ...msg, copied: false } : msg
       ));
     }, 2000);
   };
 
   const handleRateMessage = (messageId: string, liked: boolean) => {
     setMessages(prev => prev.map(msg =>
-        msg.id === messageId ? { ...msg, liked } : msg
+      msg.id === messageId ? { ...msg, liked } : msg
     ));
     toast.success(`Message ${liked ? 'liked' : 'disliked'}!`);
   };
@@ -246,9 +253,13 @@ export const AIChat: React.FC<AIChatProps> = ({ isExpanded = false, onToggleExpa
   };
 
   const handleMinimize = () => {
-    setIsMinimized(true);
-    setLocalExpanded(false);
-    onToggleExpand?.(false);
+    if (variant === 'sidebar' && onClose) {
+      onClose();
+    } else {
+      setIsMinimized(true);
+      setLocalExpanded(false);
+      onToggleExpand?.(false);
+    }
   };
 
   const handleClearChat = () => {
@@ -293,431 +304,462 @@ export const AIChat: React.FC<AIChatProps> = ({ isExpanded = false, onToggleExpa
     toast.success('Chat history loaded!');
   };
 
-  if (isMinimized) {
+  if (isMinimized && variant === 'floating') {
     return (
-        <Zoom in={true}>
-          <Fab
-              color="primary"
-              onClick={handleToggle}
-              sx={(theme) => ({
-                position: 'fixed',
-                bottom: 24,
-                right: 24,
-                zIndex: 9999,
-                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${darken(theme.palette.secondary.main, 0.1)} 100%)`,
-                boxShadow: `0 8px 32px ${alpha(theme.palette.primary.main, 0.4)}`,
-                '&:hover': {
-                  background: `linear-gradient(135deg, ${darken(theme.palette.primary.main, 0.05)} 0%, ${darken(theme.palette.secondary.main, 0.15)} 100%)`,
-                  transform: 'scale(1.1)',
-                },
-                transition: 'all 0.3s ease',
-              })}
+      <Zoom in={true}>
+        <Fab
+          onClick={handleToggle}
+          sx={(theme) => ({
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            zIndex: 9999,
+            background: 'linear-gradient(135deg, #1A73E8 0%, #A142F4 50%, #E9429E 100%)',
+            color: 'white',
+            boxShadow: '0 4px 14px 0 rgba(161, 66, 244, 0.39)',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #1765CC 0%, #8E3BD8 50%, #D4398D 100%)',
+              transform: 'scale(1.05)',
+              boxShadow: '0 6px 20px rgba(161, 66, 244, 0.5)',
+            },
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          })}
+        >
+          <Badge
+            badgeContent={mutation.isPending ? '✨' : messages.length}
+            color="error"
           >
-            <Badge
-                badgeContent={mutation.isPending ? '🤔' : messages.length}
-                color="secondary"
-            >
-              <Bot />
-            </Badge>
-          </Fab>
-        </Zoom>
+            <Sparkles className="animate-pulse" />
+          </Badge>
+        </Fab>
+      </Zoom>
     );
   }
 
-  // @ts-ignore
-  return (
-      <Slide direction="up" in={true} mountOnEnter unmountOnExit>
-        <Paper
-            elevation={15}
-            sx={(theme) => ({
-              position: 'fixed',
-              bottom: 24,
-              right: 24,
-              zIndex: 9999,
-              width: { xs: 'calc(100vw - 50px)', sm: 420, md: 500 },
-              height: 550,
+  const containerContent = (
+    <>
+      <Box
+        sx={(theme) => ({
+          background: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(10px)',
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          p: 2,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          color: theme.palette.text.primary,
+        })}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 32,
+              height: 32,
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #1A73E8 0%, #A142F4 50%, #E9429E 100%)',
+              color: 'white',
+            }}
+          >
+            <Sparkles size={18} />
+          </Box>
+          <Box>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, background: 'linear-gradient(90deg, #1A73E8, #A142F4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              Help me write
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+              LIV AI Assistant
+            </Typography>
+          </Box>
+        </Box>
+
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          <Tooltip title="Chat History">
+            <IconButton
+              size="small"
+              onClick={handleHistoryClick}
+              sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary', bgcolor: 'action.hover' } }}
+            >
+              <History size={18} />
+            </IconButton>
+          </Tooltip>
+
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleHistoryClose}
+            PaperProps={{
+              sx: { width: 280, maxHeight: 300, borderRadius: 2 }
+            }}
+          >
+            <Typography sx={{ p: 2, fontWeight: 'bold' }}>
+              Chat History
+            </Typography>
+            <Divider />
+            {chatHistory.length === 0 ? (
+              <Typography sx={{ p: 2, color: 'text.secondary' }}>
+                No history yet
+              </Typography>
+            ) : (
+              chatHistory.map((history) => (
+                <MenuItem
+                  key={history.id}
+                  onClick={() => loadHistory(history)}
+                  sx={{ py: 1 }}
+                >
+                  <ListItemText
+                    primary={history.title}
+                    secondary={formatDistanceToNow(history.timestamp, { addSuffix: true })}
+                  />
+                </MenuItem>
+              ))
+            )}
+          </Menu>
+
+          <Tooltip title="Clear Chat">
+            <IconButton
+              size="small"
+              onClick={handleClearChat}
+              sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary', bgcolor: 'action.hover' } }}
+            >
+              <Trash2 size={18} />
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title={isMinimized ? "Maximize" : "Minimize"}>
+            <IconButton
+              size="small"
+              onClick={handleMinimize}
+              sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary', bgcolor: 'action.hover' } }}
+            >
+              <Minimize2 size={18} />
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title="Close">
+            <IconButton
+              size="small"
+              onClick={handleMinimize}
+              sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary', bgcolor: 'action.hover' } }}
+            >
+              <X size={18} />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
+
+      {/* Messages Area */}
+      <Box
+        sx={{
+          flex: 1,
+          overflowY: 'auto',
+          p: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          bgcolor: 'background.default',
+        }}
+      >
+        {showQuickActions && (
+          <Zoom in={true}>
+            <Box sx={{ mb: 2 }}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {quickActions.map((action) => (
+                  <Chip
+                    key={action.id}
+                    label={action.title}
+                    onClick={() => handleQuickAction(action.prompt)}
+                    icon={action.icon}
+                    sx={(theme) => ({
+                      bgcolor: 'background.paper',
+                      color: 'text.primary',
+                      border: `1px solid ${theme.palette.divider}`,
+                      borderRadius: '16px', // Pill shape
+                      py: 2.5,
+                      px: 1,
+                      fontSize: '0.85rem',
+                      '& .MuiChip-icon': {
+                        color: 'transparent',
+                        background: 'linear-gradient(135deg, #1A73E8 0%, #A142F4 100%)',
+                        WebkitBackgroundClip: 'text',
+                      },
+                      '&:hover': {
+                        bgcolor: 'action.hover',
+                        borderColor: theme.palette.text.disabled,
+                      },
+                      transition: 'all 0.2s',
+                    })}
+                    size="medium"
+                  />
+                ))}
+              </Box>
+            </Box>
+          </Zoom>
+        )}
+
+        {messages.map((message) => (
+          <Box
+            key={message.id}
+            sx={{
               display: 'flex',
               flexDirection: 'column',
-              borderRadius: 2,
-              overflow: 'hidden',
-              background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.08)} 0%, ${alpha(theme.palette.secondary.main, 0.08)} 100%)`,
-            })}
-        >
-          {/* Header */}
-          <Box
-              sx={(theme) => ({
-                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${darken(theme.palette.secondary.main, 0.1)} 100%)`,
-                color: theme.palette.getContrastText(theme.palette.primary.main),
-                p: 2,
+              alignItems: message.type === 'user' ? 'flex-end' : 'flex-start',
+              width: '100%',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, maxWidth: message.type === 'user' ? '85%' : '100%', width: message.type === 'ai' ? '100%' : 'auto' }}>
+              {message.type === 'ai' && (
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 28,
+                    height: 28,
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #1A73E8 0%, #A142F4 50%, #E9429E 100%)',
+                    color: 'white',
+                    mt: 0.5,
+                    flexShrink: 0
+                  }}
+                >
+                  <Sparkles size={14} />
+                </Box>
+              )}
+
+              <Box
+                sx={{
+                  p: message.type === 'user' ? 2 : 0,
+                  pt: message.type === 'ai' ? 0.5 : 2,
+                  borderRadius: message.type === 'user' ? '24px' : 0,
+                  borderBottomRightRadius: message.type === 'user' ? '4px' : 0,
+                  bgcolor: message.type === 'user' ? 'action.hover' : 'transparent',
+                  color: 'text.primary',
+                  position: 'relative',
+                  width: message.type === 'ai' ? '100%' : 'auto'
+                }}
+              >
+                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6, fontSize: '0.95rem' }}>
+                  {message.content}
+                </Typography>
+
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5 }}>
+                  {message.type === 'ai' && (
+                    <>
+                      <Tooltip title="Copy">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleCopyMessage(message.content, message.id)}
+                          sx={{
+                            width: 28,
+                            height: 28,
+                            color: message.copied ? 'success.main' : 'text.secondary',
+                            '&:hover': { bgcolor: 'action.hover', color: 'text.primary' },
+                          }}
+                        >
+                          <Copy size={16} />
+                        </IconButton>
+                      </Tooltip>
+
+                      <Tooltip title="Helpful">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleRateMessage(message.id, true)}
+                          sx={{
+                            width: 28,
+                            height: 28,
+                            color: message.liked === true ? 'success.main' : 'text.secondary',
+                            '&:hover': { bgcolor: 'action.hover', color: 'success.main' },
+                          }}
+                        >
+                          <ThumbsUp size={16} />
+                        </IconButton>
+                      </Tooltip>
+
+                      <Tooltip title="Not helpful">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleRateMessage(message.id, false)}
+                          sx={{
+                            width: 28,
+                            height: 28,
+                            color: message.liked === false ? 'error.main' : 'text.secondary',
+                            '&:hover': { bgcolor: 'action.hover', color: 'error.main' },
+                          }}
+                        >
+                          <ThumbsDown size={16} />
+                        </IconButton>
+                      </Tooltip>
+                    </>
+                  )}
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        ))}
+
+        {typingIndicator && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 1 }}>
+            <Box
+              sx={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between',
-              })}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Avatar
-                  sx={{
-                    bgcolor: 'white',
-                    color: 'primary.main',
-                    width: 32,
-                    height: 32,
-                  }}
-              >
-                <Bot size={20} />
-              </Avatar>
-              <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                  LIV AI Assistant
-                </Typography>
-                <Typography variant="caption" sx={{ opacity: 0.9 }}>
-                  Powered by GPT-4
-                </Typography>
-              </Box>
-            </Box>
-
-            <Box sx={{ display: 'flex', gap: 0.5 }}>
-              <Tooltip title="Chat History">
-                <IconButton
-                    size="small"
-                    onClick={handleHistoryClick}
-                    sx={{ color: 'white' }}
-                >
-                  <History size={18} />
-                </IconButton>
-              </Tooltip>
-
-              <Menu
-                  anchorEl={anchorEl}
-                  open={Boolean(anchorEl)}
-                  onClose={handleHistoryClose}
-                  PaperProps={{
-                    sx: { width: 280, maxHeight: 300 }
-                  }}
-              >
-                <Typography sx={{ p: 2, fontWeight: 'bold' }}>
-                  Chat History
-                </Typography>
-                <Divider />
-                {chatHistory.length === 0 ? (
-                    <Typography sx={{ p: 2, color: 'text.secondary' }}>
-                      No history yet
-                    </Typography>
-                ) : (
-                    chatHistory.map((history) => (
-                        <MenuItem
-                            key={history.id}
-                            onClick={() => loadHistory(history)}
-                            sx={{ py: 1 }}
-                        >
-                          <ListItemText
-                              primary={history.title}
-                              secondary={formatDistanceToNow(history.timestamp, { addSuffix: true })}
-                          />
-                        </MenuItem>
-                    ))
-                )}
-              </Menu>
-
-              <Tooltip title="Clear Chat">
-                <IconButton
-                    size="small"
-                    onClick={handleClearChat}
-                    sx={{ color: 'white' }}
-                >
-                  <Trash2 size={18} />
-                </IconButton>
-              </Tooltip>
-
-              <Tooltip title={isMinimized ? "Maximize" : "Minimize"}>
-                <IconButton
-                    size="small"
-                    onClick={handleMinimize}
-                    sx={{ color: 'white' }}
-                >
-                  <Minimize2 size={18} />
-                </IconButton>
-              </Tooltip>
-
-              <Tooltip title="Close">
-                <IconButton
-                    size="small"
-                    onClick={handleMinimize}
-                    sx={{ color: 'white' }}
-                >
-                  <X size={18} />
-                </IconButton>
-              </Tooltip>
-            </Box>
-          </Box>
-
-          {/* Messages Area */}
-          <Box
-              sx={{
-                flex: 1,
-                overflowY: 'auto',
-                p: 2,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 2,
-                bgcolor: 'background.default',
+                justifyContent: 'center',
+                width: 28,
+                height: 28,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #1A73E8 0%, #A142F4 50%, #E9429E 100%)',
+                color: 'white',
               }}
-          >
-            {showQuickActions && (
-                <Zoom in={true}>
-                  <Card sx={{ mb: 2, bgcolor: 'primary.50' }}>
-                    <CardContent>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                        🚀 Quick Actions
-                      </Typography>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                        {quickActions.map((action) => (
-                            <Chip
-                                key={action.id}
-                                label={action.title}
-                                onClick={() => handleQuickAction(action.prompt)}
-                                icon={action.icon}
-                                sx={(theme) => {
-                                  const main = theme.palette[action.palette].main;
-                                  return {
-                                    bgcolor: alpha(main, 0.08),
-                                    color: main,
-                                    border: `1px solid ${alpha(main, 0.2)}`,
-                                    '&:hover': {
-                                      bgcolor: alpha(main, 0.15),
-                                    },
-                                  };
-                                }}
-                                size="small"
-                            />
-                        ))}
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Zoom>
-            )}
-
-            {messages.map((message) => (
-                <Box
-                    key={message.id}
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: message.type === 'user' ? 'flex-end' : 'flex-start',
-                    }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, maxWidth: '85%' }}>
-                    {message.type === 'ai' && (
-                        <Avatar
-                            sx={{
-                              width: 28,
-                              height: 28,
-                              bgcolor: 'primary.main',
-                              mt: 0.5,
-                            }}
-                        >
-                          <Bot size={16} />
-                        </Avatar>
-                    )}
-
-                    <Paper
-                        elevation={1}
-                        sx={{
-                          p: 1.5,
-                          borderRadius: 2,
-                          borderTopLeftRadius: message.type === 'ai' ? 4 : 16,
-                          borderTopRightRadius: message.type === 'user' ? 4 : 16,
-                          bgcolor: message.type === 'user' ? 'primary.main' : 'background.paper',
-                          color: message.type === 'user' ? 'white' : 'text.primary',
-                          position: 'relative',
-                        }}
-                    >
-                      <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
-                        {message.content}
-                      </Typography>
-
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1 }}>
-                        <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                          {formatDistanceToNow(message.timestamp, { addSuffix: true })}
-                        </Typography>
-
-                        {message.type === 'ai' && (
-                            <>
-                              <Tooltip title="Copy">
-                                <IconButton
-                                    size="small"
-                                    onClick={() => handleCopyMessage(message.content, message.id)}
-                                    sx={{
-                                      width: 24,
-                                      height: 24,
-                                      color: message.copied ? 'success.main' : 'inherit',
-                                      opacity: 0.7,
-                                      '&:hover': { opacity: 1 },
-                                    }}
-                                >
-                                  <Copy size={12} />
-                                </IconButton>
-                              </Tooltip>
-
-                              <Tooltip title="Helpful">
-                                <IconButton
-                                    size="small"
-                                    onClick={() => handleRateMessage(message.id, true)}
-                                    sx={{
-                                      width: 24,
-                                      height: 24,
-                                      color: message.liked === true ? 'success.main' : 'inherit',
-                                      opacity: 0.7,
-                                      '&:hover': { opacity: 1 },
-                                    }}
-                                >
-                                  <ThumbsUp size={12} />
-                                </IconButton>
-                              </Tooltip>
-
-                              <Tooltip title="Not helpful">
-                                <IconButton
-                                    size="small"
-                                    onClick={() => handleRateMessage(message.id, false)}
-                                    sx={{
-                                      width: 24,
-                                      height: 24,
-                                      color: message.liked === false ? 'error.main' : 'inherit',
-                                      opacity: 0.7,
-                                      '&:hover': { opacity: 1 },
-                                    }}
-                                >
-                                  <ThumbsDown size={12} />
-                                </IconButton>
-                              </Tooltip>
-                            </>
-                        )}
-                      </Box>
-                    </Paper>
-
-                    {message.type === 'user' && (
-                        <Avatar
-                            sx={{
-                              width: 28,
-                              height: 28,
-                              bgcolor: 'secondary.main',
-                              mt: 0.5,
-                            }}
-                        >
-                          <User size={16} />
-                        </Avatar>
-                    )}
-                  </Box>
-                </Box>
-            ))}
-
-            {typingIndicator && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 1 }}>
-                  <Avatar
-                      sx={{
-                        width: 28,
-                        height: 28,
-                        bgcolor: 'primary.main',
-                      }}
-                  >
-                    <Bot size={16} />
-                  </Avatar>
-                  <Paper
-                      sx={{
-                        p: 1.5,
-                        borderRadius: 2,
-                        borderTopLeftRadius: 4,
-                        bgcolor: 'background.paper',
-                      }}
-                  >
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <CircularProgress size={12} />
-                      <Typography variant="caption" color="text.secondary">
-                        AI is thinking...
-                      </Typography>
-                    </Box>
-                  </Paper>
-                </Box>
-            )}
-
-            <div ref={messagesEndRef} />
-          </Box>
-
-          {/* Input Area */}
-          <Box
+            >
+              <Sparkles size={14} className="animate-pulse" />
+            </Box>
+            <Paper
               sx={{
-                p: 2,
-                borderTop: 1,
-                borderColor: 'divider',
+                p: 1.5,
+                borderRadius: 2,
+                borderTopLeftRadius: 4,
                 bgcolor: 'background.paper',
               }}
-          >
-            <form onSubmit={handleSendMessage}>
-              <TextField
-                  inputRef={inputRef}
-                  fullWidth
-                  multiline
-                  maxRows={4}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask the AI assistant..."
-                  disabled={mutation.isPending}
-                  variant="outlined"
-                  size="small"
-                  InputProps={{
-                    endAdornment: (
-                        <InputAdornment position="end">
-                          <Tooltip title="Voice Input">
-                            <IconButton
-                                size="small"
-                                onClick={handleVoiceInput}
-                                sx={{
-                                  color: isRecording ? 'error.main' : 'inherit',
-                                }}
-                            >
-                              {isRecording ? <MicOff size={18} /> : <Mic size={18} />}
-                            </IconButton>
-                          </Tooltip>
-                        </InputAdornment>
-                    ),
-                    sx: { borderRadius: 2, pr: 1 }
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage(e);
-                    }
-                  }}
-              />
-
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+            >
+              <Box sx={{ display: 'flex', gap: 0.5 }}>
+                <CircularProgress size={12} />
                 <Typography variant="caption" color="text.secondary">
-                  Press Enter to send, Shift+Enter for new line
+                  AI is thinking...
                 </Typography>
-
-                <Button
-                    type="submit"
-                    variant="contained"
-                    disabled={mutation.isPending || !input.trim()}
-                    startIcon={mutation.isPending ? <CircularProgress size={16} /> : <Send size={16} />}
-                    sx={(theme) => ({
-                      background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${darken(theme.palette.secondary.main, 0.1)} 100%)`,
-                      borderRadius: 2,
-                      textTransform: 'none',
-                      px: 2,
-                      '&:hover': {
-                        background: `linear-gradient(135deg, ${darken(theme.palette.primary.main, 0.05)} 0%, ${darken(theme.palette.secondary.main, 0.15)} 100%)`,
-                      },
-                      '&:disabled': {
-                        background: theme.palette.action.disabledBackground,
-                      },
-                    })}
-                >
-                  {mutation.isPending ? 'Thinking...' : 'Send'}
-                </Button>
               </Box>
-            </form>
+            </Paper>
           </Box>
-        </Paper>
-      </Slide>
+        )}
+
+        <div ref={messagesEndRef} />
+      </Box>
+
+      {/* Input Area */}
+      <Box
+        sx={{
+          p: 2,
+          borderTop: 1,
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
+        }}
+      >
+        <form onSubmit={handleSendMessage} style={{ position: 'relative' }}>
+          <TextField
+            inputRef={inputRef}
+            fullWidth
+            multiline
+            maxRows={4}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Ask me anything..."
+            disabled={mutation.isPending}
+            variant="outlined"
+            sx={(theme) => ({
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '24px',
+                pr: 10, // give space for absolute positioned buttons
+                bgcolor: 'background.paper',
+                transition: 'all 0.3s ease',
+                '& fieldset': {
+                  borderColor: theme.palette.divider,
+                  borderWidth: '1px',
+                },
+                '&:hover fieldset': {
+                  borderColor: alpha(theme.palette.text.primary, 0.2),
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'transparent', // We'll use box-shadow for glowing border
+                },
+                '&.Mui-focused': {
+                  boxShadow: `0 0 0 2px transparent, 0 0 0 4px ${alpha('#A142F4', 0.2)}`,
+                  background: `linear-gradient(white, white) padding-box, linear-gradient(135deg, #1A73E8 0%, #A142F4 50%, #E9429E 100%) border-box`,
+                  border: '1px solid transparent',
+                }
+              }
+            })}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage(e);
+              }
+            }}
+          />
+
+          <Box sx={{ position: 'absolute', right: 8, bottom: 8, display: 'flex', gap: 0.5, alignItems: 'center' }}>
+            <Tooltip title="Voice Input">
+              <IconButton
+                size="small"
+                onClick={handleVoiceInput}
+                sx={{
+                  color: isRecording ? 'error.main' : 'text.secondary',
+                  bgcolor: isRecording ? alpha('#f44336', 0.1) : 'transparent',
+                  '&:hover': { bgcolor: 'action.hover' }
+                }}
+              >
+                {isRecording ? <MicOff size={18} /> : <Mic size={18} />}
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="Send">
+              <span>
+                <IconButton
+                  type="submit"
+                  disabled={mutation.isPending || !input.trim()}
+                  sx={{
+                    color: (input.trim() || mutation.isPending) ? 'primary.main' : 'text.disabled',
+                    '&:hover': { bgcolor: 'action.hover' }
+                  }}
+                >
+                  {mutation.isPending ? <CircularProgress size={18} thickness={5} /> : <Send size={18} />}
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Box>
+        </form>
+      </Box>
+    </>
+  );
+
+  if (variant === 'sidebar') {
+    return (
+      <Box
+        sx={(theme) => ({
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          background: `rgba(255, 255, 255, 0.5)`, // transparent to show layout background
+          flex: 1
+        })}
+      >
+        {containerContent}
+      </Box>
+    );
+  }
+
+  return (
+    <Slide direction="up" in={true} mountOnEnter unmountOnExit>
+      <Paper
+        elevation={15}
+        sx={(theme) => ({
+          position: 'fixed',
+          bottom: 24,
+          right: 24,
+          zIndex: 9999,
+          width: { xs: 'calc(100vw - 50px)', sm: 420, md: 500 },
+          height: 550,
+          display: 'flex',
+          flexDirection: 'column',
+          borderRadius: 2,
+          overflow: 'hidden',
+          background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.08)} 0%, ${alpha(theme.palette.secondary.main, 0.08)} 100%)`,
+        })}
+      >
+        {containerContent}
+      </Paper>
+    </Slide>
   );
 };

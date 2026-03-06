@@ -1,13 +1,23 @@
 import React, { useState } from 'react';
 import { Box, IconButton, Tooltip, Badge, Avatar, Menu as MuiMenu, MenuItem, Divider, Typography, Chip, ListItemIcon, Drawer } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { Home, FileText, MessageSquare, Users, Bell, Shield, LogOut } from 'lucide-react';
+import { Home, FileText, MessageSquare, Users, Bell, Shield, LogOut, Sparkles } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeModeContext';
 import { useNotifications } from '../../hooks/useNotifications';
 
-export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDesktop = false }) => {
+interface DashboardRightRailProps {
+  isDesktop?: boolean;
+  onToggleAiChat?: () => void;
+  isAiChatOpen?: boolean;
+}
+
+export const DashboardRightRail: React.FC<DashboardRightRailProps> = ({
+  isDesktop = false,
+  onToggleAiChat,
+  isAiChatOpen = false
+}) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const { user, logout, isAdmin } = useAuth();
@@ -56,12 +66,12 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'center' }}>
         {quickActions.map((a) => (
           <Tooltip key={a.label} title={a.label} placement="left">
-            <IconButton 
-              component={Link} 
-              to={a.to} 
-              size="small" 
+            <IconButton
+              component={Link}
+              to={a.to}
+              size="small"
               className="aws-button aws-button-icon hover-subtle"
-              sx={{ 
+              sx={{
                 color: 'text.secondary',
                 '&:hover': {
                   backgroundColor: theme.palette.action.hover,
@@ -79,11 +89,11 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
 
       {/* Theme toggle */}
       <Tooltip title={mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} placement="left">
-        <IconButton 
-          size="small" 
-          onClick={toggleMode} 
+        <IconButton
+          size="small"
+          onClick={toggleMode}
           className="aws-button aws-button-icon hover-subtle"
-          sx={{ 
+          sx={{
             color: 'text.secondary',
             '&:hover': {
               backgroundColor: theme.palette.action.hover,
@@ -91,12 +101,12 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
             }
           }}
         >
-          {mode === 'dark' ? 
+          {mode === 'dark' ?
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" fill="currentColor"/>
-            </svg> : 
+              <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" fill="currentColor" />
+            </svg> :
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           }
         </IconButton>
@@ -104,11 +114,11 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
 
       {/* Notifications */}
       <Tooltip title="Notifications" placement="left">
-        <IconButton 
-          size="small" 
+        <IconButton
+          size="small"
           className="aws-button aws-button-icon hover-subtle"
           onClick={() => setNotificationDrawerOpen(true)}
-          sx={{ 
+          sx={{
             color: 'text.secondary',
             '&:hover': {
               backgroundColor: theme.palette.action.hover,
@@ -119,6 +129,26 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
           <Badge badgeContent={totalNotifications} color="error" overlap="circular">
             <Bell size={16} />
           </Badge>
+        </IconButton>
+      </Tooltip>
+
+      <Tooltip title={isAiChatOpen ? "Close AI Assistant" : "Open AI Assistant"} placement="left">
+        <IconButton
+          size="small"
+          onClick={onToggleAiChat}
+          sx={{
+            mt: 1,
+            background: isAiChatOpen
+              ? theme.palette.action.selected
+              : 'transparent',
+            color: isAiChatOpen ? theme.palette.primary.main : 'text.secondary',
+            '&:hover': {
+              background: 'linear-gradient(135deg, rgba(26, 115, 232, 0.1) 0%, rgba(161, 66, 244, 0.1) 100%)',
+              color: '#A142F4'
+            }
+          }}
+        >
+          <Sparkles size={18} />
         </IconButton>
       </Tooltip>
 
@@ -154,11 +184,11 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
             )}
           </div>
         </IconButton>
-        <MuiMenu 
-          anchorEl={anchorEl} 
-          open={open} 
-          onClose={handleClose} 
-          anchorOrigin={{ vertical: 'top', horizontal: 'left' }} 
+        <MuiMenu
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
           transformOrigin={{ vertical: 'top', horizontal: 'right' }}
           PaperProps={{
             sx: {
@@ -195,56 +225,56 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
                 )}
               </div>
               <Box>
-                <Typography 
-                  variant="subtitle2" 
-                  sx={{ 
+                <Typography
+                  variant="subtitle2"
+                  sx={{
                     fontWeight: 'bold',
                     fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
                   }}
                 >
                   {user?.name || 'User'}
                 </Typography>
-                <Typography 
-                  variant="caption" 
+                <Typography
+                  variant="caption"
                   color="text.secondary"
                   sx={{ fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
                 >
                   {user?.email}
                 </Typography>
                 {isAdmin && (
-                  <Chip 
-                    label="Admin" 
-                    size="small" 
-                    color="error" 
-                    sx={{ 
+                  <Chip
+                    label="Admin"
+                    size="small"
+                    color="error"
+                    sx={{
                       mt: 0.5,
                       fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                       fontSize: '0.75rem'
-                    }} 
-                    icon={<Shield size={12} />} 
+                    }}
+                    icon={<Shield size={12} />}
                   />
                 )}
               </Box>
             </Box>
           </Box>
           <Divider />
-          <MenuItem 
-            component={Link} 
+          <MenuItem
+            component={Link}
             to="/dashboard/profile"
             sx={{ fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
           >
             Profile
           </MenuItem>
-          <MenuItem 
-            component={Link} 
+          <MenuItem
+            component={Link}
             to="/dashboard/help"
             sx={{ fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
           >
             Help & Support
           </MenuItem>
           {isAdmin && (
-            <MenuItem 
-              component={Link} 
+            <MenuItem
+              component={Link}
               to="/dashboard/admin/users"
               sx={{ fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
             >
@@ -252,9 +282,9 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
             </MenuItem>
           )}
           <Divider />
-          <MenuItem 
-            onClick={handleLogout} 
-            sx={{ 
+          <MenuItem
+            onClick={handleLogout}
+            sx={{
               color: 'error.main',
               fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
             }}
@@ -264,7 +294,7 @@ export const DashboardRightRail: React.FC<{ isDesktop?: boolean }> = ({ isDeskto
           </MenuItem>
         </MuiMenu>
       </Box>
-      
+
       <NotificationDrawer open={notificationDrawerOpen} onClose={() => setNotificationDrawerOpen(false)} isAdmin={isAdmin} />
     </Box>
   );
@@ -295,7 +325,7 @@ const NotificationDrawer: React.FC<{ open: boolean; onClose: () => void; isAdmin
             <span style={{ fontSize: '1.5rem' }}>×</span>
           </IconButton>
         </Box>
-        
+
         {totalNotifications === 0 ? (
           <Box sx={{ textAlign: 'center', py: 4 }}>
             <Bell size={48} style={{ color: theme.palette.text.secondary, marginBottom: 16 }} />
@@ -329,7 +359,7 @@ const NotificationDrawer: React.FC<{ open: boolean; onClose: () => void; isAdmin
                 </Typography>
               </Box>
             ))}
-            
+
             {isAdmin && newUsers.map((userId) => (
               <Box
                 key={`user-${userId}`}
