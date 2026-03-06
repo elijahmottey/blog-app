@@ -38,7 +38,7 @@ public class Post {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @JsonIgnoreProperties({"posts"})
+    @JsonIgnoreProperties({ "posts" })
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private Users users;
@@ -49,7 +49,22 @@ public class Post {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "post", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "post", cascade = { CascadeType.PERSIST, CascadeType.REMOVE }, fetch = FetchType.LAZY)
     @BatchSize(size = 20)
     private List<Comment> comments;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<PostView> postViews;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Reaction> reactions;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<PostReport> postReports;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Highlight> highlights;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<LIVMark> livMarks;
 }

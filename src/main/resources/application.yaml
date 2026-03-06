@@ -64,6 +64,14 @@ spring:
       - userById
       - userByEmail
       - userBlogHistory
+      - postComments
+      - totalComments
+      - postTotal
+      - livMarks
+      - isLIVMarked
+      - highlights
+      - commentReactions
+      - myCommentReaction
     caffeine:
       spec: maximumSize=500,expireAfterWrite=10m   # Cache size + expiration time
 

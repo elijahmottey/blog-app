@@ -27,17 +27,35 @@ public class ChatController {
     public ResponseEntity<List<ChatMessageResponse>> getChatHistory(
             @PathVariable Long userId,
             @AuthenticationPrincipal Users currentUser) {
-        
+
         log.info("Fetching chat history between user {} and user {}", currentUser.getId(), userId);
         List<ChatMessageResponse> history = chatService.getChatHistory(currentUser.getId(), userId);
         return ResponseEntity.ok(history);
     }
 
-    // WebSocket endpoint to receive messages
-    // The client sends to "/app/chat"
     @MessageMapping("/chat")
-    public void processMessage(@Payload ChatMessageRequest chatMessage, @AuthenticationPrincipal Users currentUser) {
-        log.info("Received WebSocket chat message from user {} to user {}", currentUser.getId(), chatMessage.getRecipientId());
+    public void processMessage(@Payload ChatMessageRequest chatMessage, java.security.Principal principal) {
+        if (principal == null) {
+            log.error("Unauthenticated user attempted to send chat message");
+            return;
+        }
+
+        Users currentUser = null;
+        if (principal instanceof org.springframework.security.authentication.UsernamePasswordAuthenticationToken) {
+            Object p = ((org.springframework.security.authentication.UsernamePasswordAuthenticationToken) principal)
+                    .getPrincipal();
+            if (p instanceof Users) {
+                currentUser = (Users) p;
+            }
+        }
+
+        if (currentUser == null || currentUser.getId() == null) {
+            log.error("Unable to resolve authenticated user for WebSocket message");
+            return;
+        }
+
+        log.info("Received WebSocket chat message from user {} to user {}", currentUser.getId(),
+                chatMessage.getRecipientId());
         chatService.processMessage(currentUser.getId(), chatMessage);
     }
 }

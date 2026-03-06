@@ -1,6 +1,5 @@
 package liv.codveda.blog.app.controller;
 
-
 import jakarta.validation.Valid;
 import liv.codveda.blog.app.domain.dto.response.ApiResponse;
 import liv.codveda.blog.app.domain.dto.response.Paged;
@@ -31,7 +30,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/post")
-public class BlogPostController  {
+public class BlogPostController {
     private final PostMapper postMapper;
     private final BlogService blogService;
     private final ReactionService reactionService;
@@ -40,9 +39,9 @@ public class BlogPostController  {
 
     @Autowired
     public BlogPostController(PostMapper postMapper, BlogService blogService,
-                              ReactionService reactionService,
-                              PostViewService postViewService,
-                              LIVMarkService livMarkService) {
+            ReactionService reactionService,
+            PostViewService postViewService,
+            LIVMarkService livMarkService) {
         this.postMapper = postMapper;
         this.blogService = blogService;
         this.reactionService = reactionService;
@@ -59,13 +58,10 @@ public class BlogPostController  {
         Post savedPost = blogService.postBlog(post);
 
         PostDto responseDto = postMapper.postToPostDto(savedPost);
-        ApiResponse<PostDto> response =
-                new ApiResponse<>(responseDto, "Post created successfully");
+        ApiResponse<PostDto> response = new ApiResponse<>(responseDto, "Post created successfully");
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-
-
 
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{id}")
@@ -73,12 +69,12 @@ public class BlogPostController  {
         blogService.deletePost(id);
         return ResponseEntity.ok(new ApiResponse<>(null, "Post deleted successfully"));
     }
+
     @GetMapping("/total")
-    public ResponseEntity<ApiResponse<Integer>> getTotalPosts(){
+    public ResponseEntity<ApiResponse<Integer>> getTotalPosts() {
         Integer totalPosts = blogService.getTotalPosts();
         return ResponseEntity.ok(new ApiResponse<>(totalPosts, "Total posts retrieved successfully"));
     }
-
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<PostDto>> updatePost(
@@ -91,46 +87,40 @@ public class BlogPostController  {
         PostDto responseDto = postMapper.postToPostDto(updatedPost);
         return ResponseEntity.ok(new ApiResponse<>(responseDto, "Post updated successfully"));
     }
+
     @GetMapping("/list")
-//    @PreAuthorize("hasAuthority('ADMIN') ")
+    // @PreAuthorize("hasAuthority('ADMIN') ")
     public ResponseEntity<ApiResponse<Paged<PostDto>>> getAllPostsByUser(Pageable pageable) {
         Page<Post> post = blogService.getAllPosts(pageable);
         Paged<PostDto> postResponse = new Paged<>(
-                post.getContent().stream().map(postMapper::postToPostDto).toList(),
+                post.getContent().stream().map(this::enrichPostDto).toList(),
                 post.getNumber(),
                 post.getSize(),
                 post.getTotalElements(),
                 post.getTotalPages(),
-                post.isLast()
-        );
+                post.isLast());
         return ResponseEntity.ok(new ApiResponse<>(postResponse, "post list retrieved successfully"));
 
     }
 
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<PostDto>> getPostById(@PathVariable Long id) {
-        // Record unique view for authenticated users
-        postViewService.recordView(id);
-
-        Post post = blogService.getPostById(id);
+    private PostDto enrichPostDto(Post post) {
         PostDto baseDto = postMapper.postToPostDto(post);
 
-        Long likeCount = reactionService.countReactions(id, ReactionType.LIKE);
-        Long viewCount = postViewService.countViews(id);
+        Long likeCount = reactionService.countReactions(post.getId(), ReactionType.LIKE);
+        Long viewCount = postViewService.countViews(post.getId());
         Boolean isLiked = null;
         Boolean isSaved = null;
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication != null && authentication.getPrincipal() instanceof Users user) {
-                isLiked = ReactionType.LIKE.equals(reactionService.getMyReaction(id));
-                isSaved = livMarkService.isLIVMarked(id, user);
+                isLiked = ReactionType.LIKE.equals(reactionService.getMyReaction(post.getId()));
+                isSaved = livMarkService.isLIVMarked(post.getId(), user);
             }
         } catch (Exception ignored) {
             // unauthenticated or no reaction
         }
 
-        PostDto enriched = new PostDto(
+        return new PostDto(
                 baseDto.id(),
                 baseDto.title(),
                 baseDto.category(),
@@ -142,11 +132,18 @@ public class BlogPostController  {
                 likeCount,
                 viewCount,
                 isLiked,
-                isSaved
-        );
-        return ResponseEntity.ok(new ApiResponse<>(enriched, "Post retrieved successfully"));
+                isSaved);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<PostDto>> getPostById(@PathVariable Long id) {
+        // Record unique view for authenticated users
+        postViewService.recordView(id);
+
+        Post post = blogService.getPostById(id);
+        PostDto enriched = enrichPostDto(post);
+        return ResponseEntity.ok(new ApiResponse<>(enriched, "Post retrieved successfully"));
+    }
 
     @GetMapping("/search-titles")
     public ResponseEntity<ApiResponse<Page<PostDto>>> searchPostByTitle(
@@ -157,7 +154,7 @@ public class BlogPostController  {
 
         Page<Post> postPage = blogService.getPostByTitle(title, pageable);
 
-        return ResponseEntity.ok(new ApiResponse<>(postPage.map(postMapper::postToPostDto),
+        return ResponseEntity.ok(new ApiResponse<>(postPage.map(this::enrichPostDto),
                 "posts title retrieved successfully"));
     }
 
@@ -171,18 +168,16 @@ public class BlogPostController  {
     @GetMapping("/category/{category}")
     public ResponseEntity<ApiResponse<Paged<PostDto>>> getPostsByCategory(
             @PathVariable String category,
-            Pageable pageable
-    ) {
+            Pageable pageable) {
         Category categoryEnum = Category.fromString(category);
         Page<Post> posts = blogService.getPostsByCategory(categoryEnum, pageable);
         Paged<PostDto> response = new Paged<>(
-                posts.getContent().stream().map(postMapper::postToPostDto).toList(),
+                posts.getContent().stream().map(this::enrichPostDto).toList(),
                 posts.getNumber(),
                 posts.getSize(),
                 posts.getTotalElements(),
                 posts.getTotalPages(),
-                posts.isLast()
-        );
+                posts.isLast());
         return ResponseEntity.ok(new ApiResponse<>(response, "Posts by category retrieved successfully"));
     }
 

@@ -1,9 +1,9 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTheme, alpha } from '@mui/material/styles';
-import { 
-   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, LineChart, Line 
+import {
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, LineChart, Line
 } from 'recharts';
 import { Users, FileText, MessageSquare, TrendingUp, Activity, Eye, Heart, Clock } from 'lucide-react';
 import BackendApi from '../../service/BackendApi';
@@ -54,7 +54,7 @@ export const AnalyticsView: React.FC = () => {
   const users = usersData?.data?.content || [];
   const posts = postsData?.data?.content || [];
   const comments = commentsData?.data?.content || [];
-  
+
   // Get admin analytics data
   const adminAnalytics = adminAnalyticsData?.data;
 
@@ -64,7 +64,7 @@ export const AnalyticsView: React.FC = () => {
   const totalUsers = totalUsersData?.data || 0;
   const totalPosts = totalPostsData?.data || 0;
   const totalComments = totalCommentsData?.data || 0;
-  
+
   // Get drafts count from localStorage
   const getDraftsCount = () => {
     try {
@@ -74,7 +74,7 @@ export const AnalyticsView: React.FC = () => {
       return 0;
     }
   };
-  
+
   const totalDrafts = getDraftsCount();
 
   // Generate user growth data (last 30 days)
@@ -82,7 +82,7 @@ export const AnalyticsView: React.FC = () => {
     const data = [];
     for (let i = 29; i >= 0; i--) {
       const date = startOfDay(subDays(new Date(), i));
-      const usersUpToDate = users.filter(user => 
+      const usersUpToDate = users.filter(user =>
         user.createdAt && new Date(user.createdAt) <= date
       ).length;
       data.push({
@@ -98,10 +98,10 @@ export const AnalyticsView: React.FC = () => {
     const data = [];
     for (let i = 6; i >= 0; i--) {
       const date = startOfDay(subDays(new Date(), i));
+      const targetDateStr = format(date, 'yyyy-MM-dd');
       const postsOnDate = posts.filter(post => {
         if (!post.createdAt) return false;
-        const postDate = startOfDay(new Date(post.createdAt));
-        return postDate.getTime() === date.getTime();
+        return format(new Date(post.createdAt), 'yyyy-MM-dd') === targetDateStr;
       }).length;
       data.push({
         day: format(date, 'EEE'),
@@ -134,7 +134,8 @@ export const AnalyticsView: React.FC = () => {
     const items = posts.map(post => {
       const views = post.views || 0;
       const likes = post.likes || 0;
-      const commentsCount = comments.filter(comment => comment.posts === post.title).length;
+      //@ts-ignore
+      const commentsCount = comments.filter(comment => comment.posts?.id === post.id).length;
 
       // Raw score: weight likes higher than views (assumption: 1 like ~ 10 views)
       const rawScore = views + likes * 10;
@@ -187,38 +188,38 @@ export const AnalyticsView: React.FC = () => {
       </div>
 
       {/* Key Metrics Grid */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(auto-fit, minmax(280px, 1fr))', 
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(auto-fit, minmax(280px, 1fr))',
         gap: window.innerWidth < 768 ? '16px' : '20px',
         marginBottom: window.innerWidth < 768 ? '24px' : '32px'
       }}>
         {[
-          { 
-            label: 'Total Users', 
-            value: totalStats.totalUsers, 
-            icon: Users, 
+          {
+            label: 'Total Users',
+            value: totalStats.totalUsers,
+            icon: Users,
             color: theme.palette.primary.main,
             trend: '+12%',
             subtitle: 'Active community members'
           },
-          { 
-            label: 'Total Posts', 
-            value: totalStats.totalPosts, 
-            icon: FileText, 
+          {
+            label: 'Total Posts',
+            value: totalStats.totalPosts,
+            icon: FileText,
             color: theme.palette.success.main,
             trend: '+8%',
             subtitle: 'Published articles'
           },
-          { 
-            label: 'Total Comments', 
-            value: totalStats.totalComments, 
-            icon: MessageSquare, 
+          {
+            label: 'Total Comments',
+            value: totalStats.totalComments,
+            icon: MessageSquare,
             color: theme.palette.secondary.main,
             trend: '+15%',
             subtitle: 'User interactions'
           },
-          { 
+          {
             label: 'Total Post Likes',
             value: totalStats.totalPostLikes,
             icon: Heart,
@@ -226,7 +227,7 @@ export const AnalyticsView: React.FC = () => {
             trend: '+5%',
             subtitle: 'Post engagement'
           },
-          { 
+          {
             label: 'Total Post Views',
             value: totalStats.totalPostViews,
             icon: Eye,
@@ -234,7 +235,7 @@ export const AnalyticsView: React.FC = () => {
             trend: '+20%',
             subtitle: 'Content visibility'
           },
-          { 
+          {
             label: 'Comment Engagement',
             value: `${totalStats.totalCommentLikes} / ${totalStats.totalCommentDislikes}`,
             icon: TrendingUp,
@@ -254,7 +255,7 @@ export const AnalyticsView: React.FC = () => {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <div 
+              <div
                 style={{
                   width: '48px',
                   height: '48px',
@@ -267,13 +268,13 @@ export const AnalyticsView: React.FC = () => {
               >
                 <metric.icon size={24} style={{ color: metric.color }} />
               </div>
-              <div 
+              <div
                 style={{
                   fontSize: '0.75rem',
                   fontWeight: 600,
                   color: metric.trend.startsWith('+') ? theme.palette.success.main : theme.palette.error.main,
                   backgroundColor: alpha(
-                    metric.trend.startsWith('+') ? theme.palette.success.main : theme.palette.error.main, 
+                    metric.trend.startsWith('+') ? theme.palette.success.main : theme.palette.error.main,
                     0.1
                   ),
                   padding: '4px 8px',
@@ -284,7 +285,7 @@ export const AnalyticsView: React.FC = () => {
               </div>
             </div>
             <div style={{ marginBottom: '8px' }}>
-              <div 
+              <div
                 style={{
                   fontSize: '2rem',
                   fontWeight: 700,
@@ -294,7 +295,7 @@ export const AnalyticsView: React.FC = () => {
               >
                 {metric.value}
               </div>
-              <div 
+              <div
                 style={{
                   fontSize: '1rem',
                   fontWeight: 600,
@@ -304,7 +305,7 @@ export const AnalyticsView: React.FC = () => {
               >
                 {metric.label}
               </div>
-              <div 
+              <div
                 style={{
                   fontSize: '0.875rem',
                   color: theme.palette.text.secondary
@@ -318,9 +319,9 @@ export const AnalyticsView: React.FC = () => {
       </div>
 
       {/* Charts Row 1 */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(auto-fit, minmax(300px, 1fr))', 
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(auto-fit, minmax(300px, 1fr))',
         gap: window.innerWidth < 768 ? '20px' : '24px',
         marginBottom: window.innerWidth < 768 ? '24px' : '32px'
       }}>
@@ -335,25 +336,25 @@ export const AnalyticsView: React.FC = () => {
             <AreaChart data={userGrowthData}>
               <defs>
                 <linearGradient id="userGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor={theme.palette.primary.main} stopOpacity={0}/>
+                  <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={theme.palette.primary.main} stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.divider, 0.5)} />
-              <XAxis 
-                dataKey="date" 
+              <XAxis
+                dataKey="date"
                 stroke={theme.palette.text.secondary}
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
               />
-              <YAxis 
+              <YAxis
                 stroke={theme.palette.text.secondary}
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
               />
-              <Tooltip 
+              <Tooltip
                 contentStyle={{
                   backgroundColor: theme.palette.background.paper,
                   border: `1px solid ${theme.palette.divider}`,
@@ -361,9 +362,9 @@ export const AnalyticsView: React.FC = () => {
                   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)'
                 }}
               />
-              <Area 
-                type="monotone" 
-                dataKey="users" 
+              <Area
+                type="monotone"
+                dataKey="users"
                 stroke={theme.palette.primary.main}
                 strokeWidth={3}
                 fill="url(#userGradient)"
@@ -384,20 +385,20 @@ export const AnalyticsView: React.FC = () => {
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={postActivityData}>
               <CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.divider, 0.5)} />
-              <XAxis 
-                dataKey="day" 
+              <XAxis
+                dataKey="day"
                 stroke={theme.palette.text.secondary}
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
               />
-              <YAxis 
+              <YAxis
                 stroke={theme.palette.text.secondary}
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
               />
-              <Tooltip 
+              <Tooltip
                 contentStyle={{
                   backgroundColor: theme.palette.background.paper,
                   border: `1px solid ${theme.palette.divider}`,
@@ -410,8 +411,8 @@ export const AnalyticsView: React.FC = () => {
                   return item ? item.date : label;
                 }}
               />
-              <Bar 
-                dataKey="posts" 
+              <Bar
+                dataKey="posts"
                 fill={theme.palette.success.main}
                 radius={[8, 8, 0, 0]}
               />
@@ -421,9 +422,9 @@ export const AnalyticsView: React.FC = () => {
       </div>
 
       {/* Charts Row 2 */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
         gap: '24px',
         marginBottom: '32px'
       }}>
@@ -449,7 +450,7 @@ export const AnalyticsView: React.FC = () => {
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip 
+              <Tooltip
                 contentStyle={{
                   backgroundColor: theme.palette.background.paper,
                   border: `1px solid ${theme.palette.divider}`,
@@ -462,7 +463,7 @@ export const AnalyticsView: React.FC = () => {
           <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginTop: '16px' }}>
             {roleDistribution.map((entry) => (
               <div key={entry.name} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div 
+                <div
                   style={{
                     width: '12px',
                     height: '12px',
@@ -487,7 +488,7 @@ export const AnalyticsView: React.FC = () => {
         >
           <div style={{ maxHeight: 280, overflow: 'auto' }}>
             {engagementData.slice(0, 6).map((item, index) => (
-              <div 
+              <div
                 key={item.id || index}
                 style={{
                   display: 'flex',
@@ -498,7 +499,7 @@ export const AnalyticsView: React.FC = () => {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-                  <div 
+                  <div
                     style={{
                       width: '32px',
                       height: '32px',
@@ -515,7 +516,7 @@ export const AnalyticsView: React.FC = () => {
                     #{index + 1}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ 
+                    <div style={{
                       fontSize: '0.875rem',
                       fontWeight: 600,
                       color: theme.palette.text.primary,
@@ -563,43 +564,43 @@ export const AnalyticsView: React.FC = () => {
         variant="elevated"
         padding="large"
       >
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
           gap: '24px'
         }}>
           {[
-            { 
-              label: 'Active Users (Last 7 Days)', 
-              value: Math.floor(totalUsers * 0.7), 
+            {
+              label: 'Active Users (Last 7 Days)',
+              value: Math.floor(totalUsers * 0.7),
               total: totalUsers,
               color: theme.palette.success.main,
               icon: Users
             },
-            { 
-              label: 'Content Moderation Queue', 
-              value: 2, 
+            {
+              label: 'Content Moderation Queue',
+              value: 2,
               total: totalPosts + totalComments,
               color: theme.palette.warning.main,
               icon: Activity
             },
-            { 
-              label: 'System Uptime', 
-              value: '99.9%', 
+            {
+              label: 'System Uptime',
+              value: '99.9%',
               total: '100%',
               color: theme.palette.success.main,
               icon: TrendingUp
             },
-            { 
-              label: 'Average Response Time', 
-              value: '120ms', 
+            {
+              label: 'Average Response Time',
+              value: '120ms',
               total: '<200ms',
               color: theme.palette.info.main,
               icon: Clock
             },
           ].map((metric, index) => (
-            <div 
-              key={index} 
+            <div
+              key={index}
               style={{
                 padding: '24px',
                 borderRadius: '12px',
@@ -608,7 +609,7 @@ export const AnalyticsView: React.FC = () => {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                <div 
+                <div
                   style={{
                     width: '40px',
                     height: '40px',
