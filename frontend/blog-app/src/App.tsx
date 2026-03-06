@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeModeProvider } from './context/ThemeModeContext';
 import CookieConsent from './components/CookieConsent';
+import { NotificationProvider } from './context/NotificationContext';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,16 +38,18 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeModeProvider>
         <AuthProvider>
-          <PagesRoute/>
-          <CookieConsent />
-          <Toaster
-              richColors
-              closeButton
-              position="top-right"
-              duration={4000}
-              expand={true}
-              visibleToasts={3}
-          />
+          <NotificationProvider>
+            <PagesRoute/>
+            <CookieConsent />
+            <Toaster
+                richColors
+                closeButton
+                position="top-right"
+                duration={4000}
+                expand={true}
+                visibleToasts={3}
+            />
+          </NotificationProvider>
         </AuthProvider>
       </ThemeModeProvider>
     </QueryClientProvider>

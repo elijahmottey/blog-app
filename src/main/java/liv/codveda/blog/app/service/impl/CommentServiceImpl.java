@@ -1,4 +1,3 @@
-
 package liv.codveda.blog.app.service.impl;
 
 import jakarta.transaction.Transactional;
@@ -11,8 +10,9 @@ import liv.codveda.blog.app.repository.CommentRepository;
 import liv.codveda.blog.app.service.interfaces.BlogService;
 import liv.codveda.blog.app.service.interfaces.CommentService;
 import liv.codveda.blog.app.service.interfaces.NotificationService;
-import liv.codveda.blog.app.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -43,6 +43,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"postComments", "totalComments"}, allEntries = true)
     public Comment createComment(Long postId, Comment comment) {
         Users user = getCurrentUser();
         Post post = blogService.getPostById(postId);
@@ -66,6 +67,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"postComments", "totalComments"}, allEntries = true)
     public Comment createReply(Long postId, Long parentCommentId, Comment comment) {
         Users user = getCurrentUser();
         Post post = blogService.getPostById(postId);
@@ -93,6 +95,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"postComments", "totalComments"}, allEntries = true)
     public void deleteComment(Long id) {
         Comment comment = getCommentById(id);
         Users currentUser = getCurrentUser();
@@ -112,6 +115,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Cacheable(value = "postComments", key = "#postId + '-' + #pageable.pageNumber")
     public Page<Comment> getCommentsByPostById(Long postId, Pageable pageable) {
         return this.commentRepository.findAllByPostId(postId, pageable);
     }
@@ -124,6 +128,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"postComments"}, allEntries = true)
     public Comment updateComment(Comment comment) {
         Comment existingComment = getCommentById(comment.getId());
         Users currentUser = getCurrentUser();
@@ -137,6 +142,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Cacheable(value = "totalComments")
     public Integer getTotalComments() {
         return Math.toIntExact(commentRepository.count());
     }

@@ -10,6 +10,8 @@ import liv.codveda.blog.app.repository.HighlightRepository;
 import liv.codveda.blog.app.repository.PostRepository;
 import liv.codveda.blog.app.service.interfaces.HighlightService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,7 @@ public class HighlightServiceImpl implements HighlightService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "highlights", key = "#postId + '-' + #user.id")
     public HighlightDto addHighlight(Long postId, HighlightRequest request, Users user) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
@@ -45,6 +48,7 @@ public class HighlightServiceImpl implements HighlightService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "highlights", allEntries = true)
     public void deleteHighlight(Long highlightId, Users user) {
         Highlight highlight = highlightRepository.findById(highlightId)
                 .orElseThrow(() -> new ResourceNotFoundException("Highlight not found"));
@@ -57,6 +61,7 @@ public class HighlightServiceImpl implements HighlightService {
     }
 
     @Override
+    @Cacheable(value = "highlights", key = "#postId + '-' + #user.id")
     public List<HighlightDto> getHighlights(Long postId, Users user) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
@@ -68,6 +73,7 @@ public class HighlightServiceImpl implements HighlightService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "highlights", allEntries = true)
     public HighlightDto updateNote(Long highlightId, String note, Users user) {
         Highlight highlight = highlightRepository.findById(highlightId)
                 .orElseThrow(() -> new ResourceNotFoundException("Highlight not found"));

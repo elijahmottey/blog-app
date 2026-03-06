@@ -1,16 +1,19 @@
 package liv.codveda.blog.app.service.impl;
 
-import jakarta.persistence.EntityNotFoundException;
 import liv.codveda.blog.app.domain.entities.Post;
 import liv.codveda.blog.app.domain.entities.Reaction;
 import liv.codveda.blog.app.domain.entities.Users;
 import liv.codveda.blog.app.domain.enums.ReactionType;
 import liv.codveda.blog.app.exception.UnauthorizedException;
-import liv.codveda.blog.app.repository.PostRepository;
+
 import liv.codveda.blog.app.repository.ReactionRepository;
 import liv.codveda.blog.app.repository.UsersRepository;
+import liv.codveda.blog.app.service.interfaces.BlogService;
 import liv.codveda.blog.app.service.interfaces.NotificationService;
 import liv.codveda.blog.app.service.interfaces.ReactionService;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -22,21 +25,22 @@ import java.util.Optional;
 public class ReactionServiceImpl implements ReactionService {
 
     private final ReactionRepository reactionRepository;
-    private final PostRepository postRepository;
+    private final BlogService postService; // Use PostService instead of PostRepository
     private final UsersRepository usersRepository;
     private final NotificationService notificationService;
 
     public ReactionServiceImpl(ReactionRepository reactionRepository,
-                               PostRepository postRepository,
+                               BlogService postService, // Inject PostService
                                UsersRepository usersRepository,
-                               NotificationService notificationService) {
+                               NotificationService notificationService,
+                               @Lazy ReactionService reactionService) {
         this.reactionRepository = reactionRepository;
-        this.postRepository = postRepository;
+        this.postService = postService; // Use PostService
         this.usersRepository = usersRepository;
         this.notificationService = notificationService;
     }
 
-    private Users getAuthenticatedUser() {
+    public Users getAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || auth.getName() == null || "anonymousUser".equals(auth.getName())) {
             throw new UnauthorizedException("Authentication required");
@@ -47,20 +51,20 @@ public class ReactionServiceImpl implements ReactionService {
     }
 
     private Post getPostOrThrow(Long postId) {
-        return postRepository.findById(postId)
-                .orElseThrow(() -> new EntityNotFoundException("Post with id " + postId + " not found"));
+        // Use PostService which should have caching
+        return postService.getPostById(postId);
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = {"postReactions", "myPostReaction"}, allEntries = true)
     public void setReaction(Long postId, ReactionType type) {
         Users user = getAuthenticatedUser();
-        Post post = getPostOrThrow(postId);
+        Post post = getPostOrThrow(postId); // Now uses cached post if available
 
         Optional<Reaction> existing = reactionRepository.findByUserAndPost(user, post);
         if (existing.isPresent()) {
             Reaction r = existing.get();
-            // If the same reaction type is set again, keep it as is.
             r.setType(type);
             reactionRepository.save(r);
         } else {
@@ -69,13 +73,13 @@ public class ReactionServiceImpl implements ReactionService {
             r.setPost(post);
             r.setType(type);
             reactionRepository.save(r);
-            
+
             if (type == ReactionType.LIKE && !post.getUsers().getId().equals(user.getId())) {
                 notificationService.createNotification(
-                    post.getUsers(),
-                    "LIKE",
-                    user.getName() + " liked your post: " + post.getTitle(),
-                    postId
+                        post.getUsers(),
+                        "LIKE",
+                        user.getName() + " liked your post: " + post.getTitle(),
+                        postId
                 );
             }
         }
@@ -83,28 +87,31 @@ public class ReactionServiceImpl implements ReactionService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"postReactions", "myPostReaction"}, allEntries = true)
     public void removeReaction(Long postId) {
         Users user = getAuthenticatedUser();
-        Post post = getPostOrThrow(postId);
+        Post post = getPostOrThrow(postId); // Now uses cached post if available
         reactionRepository.findByUserAndPost(user, post).ifPresent(reactionRepository::delete);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "postReactions", key = "#postId + '-' + #type")
     public long countReactions(Long postId, ReactionType type) {
-        Post post = getPostOrThrow(postId);
+        Post post = getPostOrThrow(postId); // Now uses cached post if available
         return reactionRepository.countByPostAndType(post, type);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "myPostReaction", key = "#postId + '-' + #root.target.getAuthenticatedUser().id")
     public ReactionType getMyReaction(Long postId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || auth.getName() == null || "anonymousUser".equals(auth.getName())) {
-            return null; // anonymous users have no reaction
+            return null;
         }
         Users user = getAuthenticatedUser();
-        Post post = getPostOrThrow(postId);
+        Post post = getPostOrThrow(postId); // Now uses cached post if available
         return reactionRepository.findTypeByUserAndPost(user, post).orElse(null);
     }
 }

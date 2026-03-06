@@ -14,6 +14,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+
 @Service
 public class NotificationServiceImpl implements NotificationService {
 
@@ -81,7 +83,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private Users getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        String email = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
         return usersRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User not found"));
     }

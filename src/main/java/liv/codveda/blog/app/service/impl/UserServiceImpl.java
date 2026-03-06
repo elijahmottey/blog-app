@@ -7,33 +7,37 @@ import liv.codveda.blog.app.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 
 @Service
 public class UserServiceImpl implements UserService {
     private final UsersRepository usersRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UserService self;
 
     @Autowired
-    public UserServiceImpl(UsersRepository usersRepository) {
+    public UserServiceImpl(UsersRepository usersRepository,
+                           PasswordEncoder passwordEncoder,
+                           @Lazy UserService userService) {
         this.usersRepository = usersRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.self = userService;
     }
 
     @Override
-    @Cacheable(value = "users", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
+    @Cacheable(value = "users", key = "#pageable.pageNumber + '-' + #pageable.pageSize + '-' + #pageable.sort")
     public Page<Users> getAllUsers(Pageable pageable) {
         return usersRepository.findAll(pageable);
     }
 
-
-
     @Override
     @Cacheable(value = "userById", key = "#id")
     public Users getUserById(Long id) {
-        if ( id <= 0) {
+        if (id <= 0) {
             throw new IllegalArgumentException("Invalid user ID: " + id);
         }
         return this.usersRepository.findById(id)
@@ -41,18 +45,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @CacheEvict(value = {"users", "userById", "userByEmail"}, allEntries = true)
+    @CacheEvict(value = {"users", "userById", "userByEmail", "userTotal", "userBlogHistory"}, allEntries = true)
     public void deleteUserById(long id) {
-        this.getUserById(id);
-        this.usersRepository.deleteById( id);
+        // Check existence directly from DB to avoid populating cache right before deleting it
+        if (!usersRepository.existsById(id)) {
+             throw new NotFoundException("user not found with id: " + id);
+        }
+        this.usersRepository.deleteById(id);
     }
 
     @Override
-    @CacheEvict(value = {"users", "userById", "userByEmail"}, allEntries = true)
+    @CacheEvict(value = {"users", "userById", "userByEmail", "userBlogHistory"}, allEntries = true)
     public Users updateUserById(long id, Users user) {
+        // Fetch directly from Repository to avoid modifying the cached instance in-memory before saving
+        Users existingUser = usersRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("user not found with id: " + id));
 
-
-        Users existingUser = this.getUserById(id);
         if (user.getEmail() != null) {
             existingUser.setEmail(user.getEmail());
         }
@@ -62,12 +70,13 @@ public class UserServiceImpl implements UserService {
         }
 
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            existingUser.setPassword(user.getPassword());
+            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         }
 
         if (user.getDescription() != null) {
             existingUser.setDescription(user.getDescription());
         }
+
         if (user.getRole() != null) {
             existingUser.setRole(user.getRole());
         }
@@ -78,7 +87,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Cacheable(value = "userBlogHistory", key = "#id")
     public Users getUserBlogHistory(long id) {
-        return this.getUserById(id);
+        // Use the proxy to get cached user
+        return self.getUserById(id); // ✅ Now uses cache
     }
 
     @Override
@@ -90,6 +100,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = "userTotal")
     public Integer getUserTotal() {
         return Math.toIntExact(usersRepository.count());
     }

@@ -9,6 +9,8 @@ import liv.codveda.blog.app.repository.CommentReactionRepository;
 import liv.codveda.blog.app.repository.CommentRepository;
 import liv.codveda.blog.app.repository.UsersRepository;
 import liv.codveda.blog.app.service.interfaces.CommentReactionService;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -28,7 +30,7 @@ public class CommentReactionServiceImpl implements CommentReactionService {
         this.usersRepository = usersRepository;
     }
 
-    private Users getAuthenticatedUser() {
+    public Users getAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || auth.getName() == null) {
             throw new IllegalStateException("Unauthenticated");
@@ -44,6 +46,7 @@ public class CommentReactionServiceImpl implements CommentReactionService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"commentReactions", "myCommentReaction"}, allEntries = true)
     public void setReaction(Long commentId, ReactionType type) {
         Users user = getAuthenticatedUser();
         Comment comment = getCommentOrThrow(commentId);
@@ -61,6 +64,7 @@ public class CommentReactionServiceImpl implements CommentReactionService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"commentReactions", "myCommentReaction"}, allEntries = true)
     public void removeReaction(Long commentId) {
         Users user = getAuthenticatedUser();
         Comment comment = getCommentOrThrow(commentId);
@@ -70,6 +74,7 @@ public class CommentReactionServiceImpl implements CommentReactionService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "commentReactions", key = "#commentId + '-' + #type")
     public Long countReactions(Long commentId, ReactionType type) {
         Comment comment = getCommentOrThrow(commentId);
         return commentReactionRepository.countByCommentAndType(comment, type);
@@ -77,6 +82,7 @@ public class CommentReactionServiceImpl implements CommentReactionService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "myCommentReaction", key = "#commentId + '-' + #root.target.getAuthenticatedUser().id")
     public ReactionType getMyReaction(Long commentId) {
         Users user = getAuthenticatedUser();
         Comment comment = getCommentOrThrow(commentId);

@@ -29,6 +29,7 @@ import { LIVBlogCard, LIVBlogLayout } from '../ui';
 import { useTheme, alpha } from '@mui/material/styles';
 import useDocumentTitle from "../../hooks/useDocumentTitle.ts";
 import { useNotifications } from '../../hooks/useNotifications';
+import { ChatWindow } from '../chat/ChatWindow';
 
 // CommentThread component for nested replies
 const CommentThread: React.FC<{
@@ -90,30 +91,30 @@ const CommentThread: React.FC<{
             </Typography>
           </div>
           <div style={{ display: 'flex', gap: '16px', marginTop: '12px', paddingLeft: '4px' }}>
-            <Button 
-              size="small" 
-              startIcon={<ThumbsUp size={12} />} 
+            <Button
+              size="small"
+              startIcon={<ThumbsUp size={12} />}
               onClick={() => onLike(comment.id)}
-              style={{ 
-                fontSize: '0.7rem', 
-                color: comment.isLiked ? theme.palette.success.main : theme.palette.text.secondary, 
-                textTransform: 'none', 
-                minWidth: 'auto', 
+              style={{
+                fontSize: '0.7rem',
+                color: comment.isLiked ? theme.palette.success.main : theme.palette.text.secondary,
+                textTransform: 'none',
+                minWidth: 'auto',
                 padding: '4px 8px',
                 fontWeight: comment.isLiked ? 600 : 400
               }}
             >
               {comment.likes || 0}
             </Button>
-            <Button 
-              size="small" 
-              startIcon={<ThumbsUp size={12} style={{ transform: 'rotate(180deg)' }} />} 
+            <Button
+              size="small"
+              startIcon={<ThumbsUp size={12} style={{ transform: 'rotate(180deg)' }} />}
               onClick={() => onDislike(comment.id)}
-              style={{ 
-                fontSize: '0.7rem', 
-                color: comment.isDisliked ? theme.palette.error.main : theme.palette.text.secondary, 
-                textTransform: 'none', 
-                minWidth: 'auto', 
+              style={{
+                fontSize: '0.7rem',
+                color: comment.isDisliked ? theme.palette.error.main : theme.palette.text.secondary,
+                textTransform: 'none',
+                minWidth: 'auto',
                 padding: '4px 8px',
                 fontWeight: comment.isDisliked ? 600 : 400
               }}
@@ -165,6 +166,10 @@ export const PostDetail: React.FC = () => {
   const [alternateVoices, setAlternateVoices] = useState(false);
   const [currentParagraph, setCurrentParagraph] = useState(-1);
   const [isHighlighted, setIsHighlighted] = useState(false);
+
+  // Chat state
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
   const theme = useTheme();
 
 
@@ -225,9 +230,9 @@ export const PostDetail: React.FC = () => {
   // Comment mutation
   const commentMutation = useMutation({
     mutationFn: (content: string) =>
-        BackendApi.createPostComment({
-          content
-        } as CommentDto, postId),
+      BackendApi.createPostComment({
+        content
+      } as CommentDto, postId),
     onSuccess: () => {
       toast.success('Comment added!');
       setCommentText('');
@@ -242,7 +247,7 @@ export const PostDetail: React.FC = () => {
   // Reply mutation
   const replyMutation = useMutation({
     mutationFn: ({ parentId, content }: { parentId: number; content: string }) =>
-        BackendApi.replyToComment(postId, parentId, { content } as CommentDto),
+      BackendApi.replyToComment(postId, parentId, { content } as CommentDto),
     onSuccess: () => {
       toast.success('Reply added!');
       setReplyText('');
@@ -391,21 +396,21 @@ export const PostDetail: React.FC = () => {
 
     // Simple check to ensure we are selecting inside the post content
     // This is a basic implementation.
-    
+
     const start = safePostContent.indexOf(text);
     if (start === -1) return;
 
     // Confirm adding highlight
     if (window.confirm('Do you want to highlight this text and add a note?')) {
-        const note = prompt("Add a note (optional):");
-        highlightMutation.mutate({
-            selectedText: text,
-            note: note,
-            startOffset: start,
-            endOffset: start + text.length,
-            color: 'yellow'
-        });
-        selection.removeAllRanges();
+      const note = prompt("Add a note (optional):");
+      highlightMutation.mutate({
+        selectedText: text,
+        note: note,
+        startOffset: start,
+        endOffset: start + text.length,
+        color: 'yellow'
+      });
+      selection.removeAllRanges();
     }
   };
 
@@ -507,8 +512,8 @@ export const PostDetail: React.FC = () => {
           : ['samantha', 'joanna', 'kendra', 'zira', 'amy'];
 
         const tonePrefer = voiceTone === 'power'
-          ? ['david','matthew','mark','alloy','google','neural']
-          : ['samantha','joanna','zira','amy','alloy','google','neural'];
+          ? ['david', 'matthew', 'mark', 'alloy', 'google', 'neural']
+          : ['samantha', 'joanna', 'zira', 'amy', 'alloy', 'google', 'neural'];
 
         const basePrefer = voicePreset === 'podcastA' ? podcastAPrefer : podcastBPrefer;
 
@@ -697,7 +702,7 @@ export const PostDetail: React.FC = () => {
             src={src}
             alt={altText || 'Image'}
             loading="lazy"
-            onError={(e) => { try { (e.currentTarget as HTMLImageElement).style.display = 'none'; } catch {} console.warn('Failed to load image', src); }}
+            onError={(e) => { try { (e.currentTarget as HTMLImageElement).style.display = 'none'; } catch { } console.warn('Failed to load image', src); }}
             style={{
               maxWidth: '100%',
               height: 'auto',
@@ -712,13 +717,13 @@ export const PostDetail: React.FC = () => {
       // Handle headers
       if (line.startsWith('# ')) {
         return (
-          <Typography 
-            key={index} 
-            variant="h4" 
-            component="h1" 
-            sx={{ 
-              mt: 3, 
-              mb: 2, 
+          <Typography
+            key={index}
+            variant="h4"
+            component="h1"
+            sx={{
+              mt: 3,
+              mb: 2,
               fontWeight: 'bold',
               fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
             }}
@@ -729,13 +734,13 @@ export const PostDetail: React.FC = () => {
       }
       if (line.startsWith('## ')) {
         return (
-          <Typography 
-            key={index} 
-            variant="h5" 
-            component="h2" 
-            sx={{ 
-              mt: 2, 
-              mb: 1.5, 
+          <Typography
+            key={index}
+            variant="h5"
+            component="h2"
+            sx={{
+              mt: 2,
+              mb: 1.5,
               fontWeight: 'bold',
               fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
             }}
@@ -746,13 +751,13 @@ export const PostDetail: React.FC = () => {
       }
       if (line.startsWith('### ')) {
         return (
-          <Typography 
-            key={index} 
-            variant="h6" 
-            component="h3" 
-            sx={{ 
-              mt: 1.5, 
-              mb: 1, 
+          <Typography
+            key={index}
+            variant="h6"
+            component="h3"
+            sx={{
+              mt: 1.5,
+              mb: 1,
               fontWeight: 'bold',
               fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
             }}
@@ -771,13 +776,13 @@ export const PostDetail: React.FC = () => {
             key={index}
             variant="body1"
             component="p"
-            sx={{ 
-              mb: 1, 
+            sx={{
+              mb: 1,
               lineHeight: 1.6,
               fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
             }}
           >
-            {parts.map((part, partIndex) => 
+            {parts.map((part, partIndex) =>
               partIndex % 2 === 1 ? <strong key={partIndex}>{part}</strong> : part
             )}
           </Typography>
@@ -793,13 +798,13 @@ export const PostDetail: React.FC = () => {
             key={index}
             variant="body1"
             component="p"
-            sx={{ 
-              mb: 1, 
+            sx={{
+              mb: 1,
               lineHeight: 1.6,
               fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
             }}
           >
-            {parts.map((part, partIndex) => 
+            {parts.map((part, partIndex) =>
               partIndex % 2 === 1 ? <em key={partIndex}>{part}</em> : part
             )}
           </Typography>
@@ -815,8 +820,8 @@ export const PostDetail: React.FC = () => {
             key={index}
             variant="body1"
             component="p"
-            sx={{ 
-              mb: 1, 
+            sx={{
+              mb: 1,
               lineHeight: 1.6,
               fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
             }}
@@ -843,8 +848,8 @@ export const PostDetail: React.FC = () => {
           key={index}
           variant="body1"
           component="p"
-          sx={{ 
-            mb: 1, 
+          sx={{
+            mb: 1,
             lineHeight: 1.6,
             fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             backgroundColor: currentParagraph === index ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
@@ -894,10 +899,10 @@ export const PostDetail: React.FC = () => {
   }
 
   if (postError || !post?.data) {
-    const errorMessage = (postError as any)?.status === 500 
+    const errorMessage = (postError as any)?.status === 500
       ? 'Server error loading this post. The post may not exist or there was a database issue.'
       : 'Post not found';
-    
+
     return (
       <LIVBlogLayout.Container>
         <LIVBlogCard
@@ -906,9 +911,9 @@ export const PostDetail: React.FC = () => {
           padding="large"
         >
           <div className="aws-text-center aws-py-6">
-            <div 
+            <div
               className="aws-text-red-600 aws-mb-3"
-              style={{ 
+              style={{
                 fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
               }}
             >
@@ -942,8 +947,8 @@ export const PostDetail: React.FC = () => {
 
   // Safely ensure post content is a string
   const safePostContent = typeof postData.content === 'string'
-      ? postData.content
-      : 'No content available';
+    ? postData.content
+    : 'No content available';
 
   // Helper to safely get comment data
   const getCommentData = (comment: CommentDto) => {
@@ -964,42 +969,42 @@ export const PostDetail: React.FC = () => {
   const organizeComments = (comments: CommentDto[]) => {
     const commentMap = new Map();
     const rootComments: any[] = [];
-    
+
     // First pass: create map of all comments
     comments.forEach(comment => {
       const data = getCommentData(comment);
       commentMap.set(data.id, { ...data, replies: [] });
     });
-    
+
     // Second pass: organize into tree structure
     comments.forEach(comment => {
       const data = getCommentData(comment);
       const commentWithReplies = commentMap.get(data.id);
-      
+
       if (data.parentId && commentMap.has(data.parentId)) {
         commentMap.get(data.parentId).replies.push(commentWithReplies);
       } else {
         rootComments.push(commentWithReplies);
       }
     });
-    
+
     return rootComments;
   };
 
   // @ts-ignore
-    return (
-    <div style={{ 
-      padding: window.innerWidth < 768 ? '16px' : '32px', 
-      maxWidth: '1200px', 
+  return (
+    <div style={{
+      padding: window.innerWidth < 768 ? '16px' : '32px',
+      maxWidth: '1200px',
       margin: '0 auto'
     }}>
       {/* Header */}
       <div style={{ marginBottom: window.innerWidth < 768 ? '20px' : '32px' }}>
-        <div style={{ 
-          display: 'flex', 
+        <div style={{
+          display: 'flex',
           flexDirection: window.innerWidth < 768 ? 'column' : 'row',
           alignItems: window.innerWidth < 768 ? 'stretch' : 'center',
-          gap: window.innerWidth < 768 ? '12px' : '16px', 
+          gap: window.innerWidth < 768 ? '12px' : '16px',
           marginBottom: window.innerWidth < 768 ? '16px' : '24px'
         }}>
           <Button
@@ -1015,8 +1020,8 @@ export const PostDetail: React.FC = () => {
             Back to Posts
           </Button>
           {canEditOrDelete && (
-            <div style={{ 
-              display: 'flex', 
+            <div style={{
+              display: 'flex',
               flexDirection: 'column',
               gap: '8px',
               width: '100%'
@@ -1054,7 +1059,7 @@ export const PostDetail: React.FC = () => {
             </div>
           )}
         </div>
-        
+
         <div style={{ marginBottom: '16px' }}>
           <h1 style={{
             fontSize: window.innerWidth < 768 ? '1.875rem' : '2.5rem',
@@ -1065,22 +1070,22 @@ export const PostDetail: React.FC = () => {
           }}>
             {postData.title || 'Untitled Post'}
           </h1>
-          <div style={{ 
-            display: 'flex', 
+          <div style={{
+            display: 'flex',
             flexDirection: window.innerWidth < 768 ? 'column' : 'row',
             alignItems: window.innerWidth < 768 ? 'flex-start' : 'center',
             gap: window.innerWidth < 768 ? '8px' : '16px',
             flexWrap: 'wrap'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Link 
+              <Link
                 to={`/dashboard/profile/${postData.user?.name || postAuthorName}`}
                 style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}
               >
-                <Avatar 
-                  sx={{ 
-                    width: 32, 
-                    height: 32, 
+                <Avatar
+                  sx={{
+                    width: 32,
+                    height: 32,
                     bgcolor: 'primary.main',
                     fontSize: '0.875rem',
                     cursor: 'pointer'
@@ -1089,32 +1094,51 @@ export const PostDetail: React.FC = () => {
                   {(postData.user?.name || postAuthorName).charAt(0).toUpperCase()}
                 </Avatar>
                 <Box
-                    component="span"
-                    style={{ fontSize: '0.875rem' }}
-                    sx={{
-                      color: theme.palette.text.secondary,
-                      fontWeight: 500,
-                      cursor: 'pointer',
-                      '&:hover': {
-                        textDecoration: 'underline',
-                      },
-                    }}
+                  component="span"
+                  style={{ fontSize: '0.875rem' }}
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                    },
+                  }}
                 >
                   By {postData.user?.name || postAuthorName}
                 </Box>
               </Link>
+              {user && user.id !== postData.user?.id && postData.user?.id && (
+                <Button
+                  onClick={() => setIsChatOpen(true)}
+                  size="small"
+                  variant="outlined"
+                  sx={{
+                    ml: 1,
+                    borderRadius: '20px',
+                    fontSize: '0.7rem',
+                    textTransform: 'none',
+                    padding: '2px 8px',
+                    borderColor: theme.palette.primary.main,
+                    color: theme.palette.primary.main,
+                  }}
+                  startIcon={<MessageCircle size={12} />}
+                >
+                  Chat with Author
+                </Button>
+              )}
             </div>
             <span style={{ color: theme.palette.text.secondary }}>•</span>
-            <span style={{ 
-              fontSize: '0.875rem', 
-              color: theme.palette.text.secondary 
+            <span style={{
+              fontSize: '0.875rem',
+              color: theme.palette.text.secondary
             }}>
               {postData.createdAt ? format(new Date(postData.createdAt), 'MMM dd, yyyy') : 'Unknown'}
             </span>
             {postData.category && (
               <>
                 <span style={{ color: theme.palette.text.secondary }}>•</span>
-                <Chip 
+                <Chip
                   icon={<Tag size={14} />}
                   label={postData.category}
                   variant="outlined"
@@ -1128,9 +1152,9 @@ export const PostDetail: React.FC = () => {
               </>
             )}
           </div>
-          
+
           {/* Audio Controls */}
-          <div style={{ 
+          <div style={{
             marginTop: '16px',
             padding: '12px',
             backgroundColor: alpha(theme.palette.background.paper, 0.5),
@@ -1171,7 +1195,7 @@ export const PostDetail: React.FC = () => {
                 />
                 Alternate Voices
               </label>
-              
+
               {!alternateVoices && (
                 <select
                   value={voiceGender}
@@ -1246,7 +1270,7 @@ export const PostDetail: React.FC = () => {
       <LIVBlogCard
         variant="elevated"
         padding={window.innerWidth < 768 ? "medium" : "large"}
-        style={{ 
+        style={{
           marginBottom: window.innerWidth < 768 ? '20px' : '32px',
           backgroundColor: isHighlighted ? alpha(theme.palette.success.main, 0.15) : undefined,
           transition: 'background-color 1s ease'
@@ -1265,27 +1289,27 @@ export const PostDetail: React.FC = () => {
 
         {/* Highlights Display */}
         {highlights.length > 0 && (
-            <Box sx={{ mb: 4, p: 2, bgcolor: alpha(theme.palette.warning.main, 0.05), borderRadius: 2 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Highlighter size={16} /> Your Highlights & Notes
+          <Box sx={{ mb: 4, p: 2, bgcolor: alpha(theme.palette.warning.main, 0.05), borderRadius: 2 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Highlighter size={16} /> Your Highlights & Notes
+            </Typography>
+            {highlights.map((highlight: any) => (
+              <Box key={highlight.id} sx={{ mb: 2, p: 1.5, bgcolor: 'background.paper', borderRadius: 1, borderLeft: `3px solid ${theme.palette.warning.main}` }}>
+                <Typography variant="body2" sx={{ fontStyle: 'italic', mb: 0.5 }}>
+                  "{highlight.selectedText}"
                 </Typography>
-                {highlights.map((highlight: any) => (
-                    <Box key={highlight.id} sx={{ mb: 2, p: 1.5, bgcolor: 'background.paper', borderRadius: 1, borderLeft: `3px solid ${theme.palette.warning.main}` }}>
-                        <Typography variant="body2" sx={{ fontStyle: 'italic', mb: 0.5 }}>
-                            "{highlight.selectedText}"
-                        </Typography>
-                        {highlight.note && (
-                            <Typography variant="caption" color="text.secondary">
-                                Note: {highlight.note}
-                            </Typography>
-                        )}
-                    </Box>
-                ))}
-            </Box>
+                {highlight.note && (
+                  <Typography variant="caption" color="text.secondary">
+                    Note: {highlight.note}
+                  </Typography>
+                )}
+              </Box>
+            ))}
+          </Box>
         )}
 
         {/* Post Actions */}
-        <div 
+        <div
           style={{
             display: 'flex',
             flexDirection: window.innerWidth < 768 ? 'column' : 'row',
@@ -1296,29 +1320,29 @@ export const PostDetail: React.FC = () => {
             borderTop: `1px solid ${theme.palette.divider}`
           }}
         >
-          <div style={{ 
-            display: 'flex', 
+          <div style={{
+            display: 'flex',
             flexDirection: window.innerWidth < 768 ? 'column' : 'row',
             gap: window.innerWidth < 768 ? '12px' : '16px'
           }}>
-            <LikeButton 
+            <LikeButton
               postId={postId}
               likes={postData.likes || 0}
               isLiked={postData.isLiked || false}
             />
 
             <Tooltip title={postData.isSaved ? "Remove from LIVSave" : "Save to LIVSave"}>
-                <IconButton 
-                    onClick={() => livMarkMutation.mutate()} 
-                    disabled={livMarkMutation.isPending}
-                    color={postData.isSaved ? "primary" : "default"}
-                    sx={{ 
-                        border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
-                        borderRadius: '10px'
-                    }}
-                >
-                    <Bookmark size={20} fill={postData.isSaved ? "currentColor" : "none"} />
-                </IconButton>
+              <IconButton
+                onClick={() => livMarkMutation.mutate()}
+                disabled={livMarkMutation.isPending}
+                color={postData.isSaved ? "primary" : "default"}
+                sx={{
+                  border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+                  borderRadius: '10px'
+                }}
+              >
+                <Bookmark size={20} fill={postData.isSaved ? "currentColor" : "none"} />
+              </IconButton>
             </Tooltip>
 
             <Button
@@ -1392,13 +1416,13 @@ export const PostDetail: React.FC = () => {
           {/* Add Comment Form */}
           {user ? (
             <div style={{ marginBottom: '24px' }}>
-              <div style={{ 
-                display: 'flex', 
+              <div style={{
+                display: 'flex',
                 flexDirection: 'column',
                 gap: '12px'
               }}>
-                <Avatar 
-                  sx={{ 
+                <Avatar
+                  sx={{
                     bgcolor: 'primary.main',
                     width: 48,
                     height: 48
@@ -1445,7 +1469,7 @@ export const PostDetail: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div 
+            <div
               style={{
                 marginBottom: '32px',
                 padding: '32px',
@@ -1455,20 +1479,20 @@ export const PostDetail: React.FC = () => {
                 border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`
               }}
             >
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  mb: 1, 
+              <Typography
+                variant="h6"
+                sx={{
+                  mb: 1,
                   color: 'text.primary',
                   fontWeight: 600
                 }}
               >
                 Join the Discussion
               </Typography>
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  mb: 2, 
+              <Typography
+                variant="body2"
+                sx={{
+                  mb: 2,
                   color: 'text.secondary'
                 }}
               >
@@ -1492,9 +1516,9 @@ export const PostDetail: React.FC = () => {
           )}
 
           {/* Comments List */}
-          <div style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
             gap: '20px'
           }}>
             {commentsLoading ? (
@@ -1505,8 +1529,8 @@ export const PostDetail: React.FC = () => {
                 </Typography>
               </div>
             ) : postComments.length === 0 ? (
-              <div style={{ 
-                textAlign: 'center', 
+              <div style={{
+                textAlign: 'center',
                 padding: '48px 24px',
                 backgroundColor: alpha(theme.palette.background.paper, 0.5),
                 borderRadius: '12px',
@@ -1522,7 +1546,7 @@ export const PostDetail: React.FC = () => {
               </div>
             ) : (
               organizeComments(postComments).map((commentData: any, index: number) => (
-                <CommentThread 
+                <CommentThread
                   key={commentData.id || index}
                   comment={commentData}
                   level={0}
@@ -1541,6 +1565,16 @@ export const PostDetail: React.FC = () => {
             )}
           </div>
         </LIVBlogCard>
+      )}
+
+      {/* Chat Window */}
+      {isChatOpen && postData.user?.id && (
+        <ChatWindow
+          recipientId={postData.user.id}
+          recipientName={postData.user.name || postAuthorName}
+          postId={postId}
+          onClose={() => setIsChatOpen(false)}
+        />
       )}
     </div>
   );

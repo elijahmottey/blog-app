@@ -11,6 +11,9 @@ import liv.codveda.blog.app.repository.LIVMarkRepository;
 import liv.codveda.blog.app.repository.PostRepository;
 import liv.codveda.blog.app.service.interfaces.LIVMarkService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,10 @@ public class LIVMarkServiceImpl implements LIVMarkService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = "livMarks", allEntries = true),
+        @CacheEvict(value = "isLIVMarked", key = "#postId + '-' + #user.id")
+    })
     public void toggleLIVMark(Long postId, Users user) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
@@ -46,6 +53,7 @@ public class LIVMarkServiceImpl implements LIVMarkService {
     }
 
     @Override
+    @Cacheable(value = "isLIVMarked", key = "#postId + '-' + #user.id")
     public boolean isLIVMarked(Long postId, Users user) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
@@ -53,6 +61,7 @@ public class LIVMarkServiceImpl implements LIVMarkService {
     }
 
     @Override
+    @Cacheable(value = "livMarks", key = "#user.id + '-' + #pageable.pageNumber")
     public Paged<PostDto> getLIVMarkedPosts(Users user, Pageable pageable) {
         Page<LIVMark> marks = livMarkRepository.findByUser(user, pageable);
         

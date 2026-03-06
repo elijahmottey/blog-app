@@ -42,8 +42,9 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 
 	// Cache
-	implementation 'com.github.ben-manes.caffeine:caffeine:3.2.2'
 
+	// https://mvnrepository.com/artifact/com.github.ben-manes.caffeine/caffeine
+	implementation("com.github.ben-manes.caffeine:caffeine:3.2.3")
 	// Spring AI
 	implementation 'org.springframework.ai:spring-ai-starter-model-openai'
 	// OpenAPI

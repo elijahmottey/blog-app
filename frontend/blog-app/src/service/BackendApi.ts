@@ -1,183 +1,43 @@
-import axios, {type AxiosRequestConfig } from "axios";
+import axios, { type AxiosRequestConfig } from "axios";
 import { Roles } from "../enums/Roles";
+import type {
+    UserRegistration,
+    UserLogin,
+    PagedResponse,
+    UserDto,
+    UserProfilePost,
+    UserProfileComment,
+    UserProfile,
+    PostDto,
+    CommentDto,
+    PostReportDto,
+    NotificationDto,
+    HighlightDto,
+    HighlightRequest,
+    AuthsResponse,
+    ApiError,
+    ApiResponse
+} from "./types";
 
-// ---- INTERFACES ----
-export interface UserRegistration {
-    userId?: number;
-    email: string;
-    password: string;
-    name: string;
-    description?: string;
-    role?: string;
-}
-
-
-
-export interface UserLogin {
-    email: string;
-    password: string;
-}
-
-export interface PagedResponse<T> {
-    data: any;
-    content: T[];
-    pageNumber: number;
-    pageSize: number;
-    totalElements: number;
-    totalPages: number;
-    lastPage: boolean;
-}
-
-export interface  UserDto{
-    id?: number;
-    name: string;
-    email: string;
-    description?: string;
-    avatar?:string;
-    roles: Roles[];
-    createdAt:string;
-    updatedAt:string;
-    post?: string[];
-    comments?:string[]
-    likes?: number;
-    views?: number;
-}
-
-// Profile shapes returned by /user/get-user-profile
-export interface UserProfilePost {
-    id: number;
-    title: string;
-    content: string;
-    category?: string;
-    avatar?: string;
-    likes?: number;
-    views?: number;
-    createdAt?: string;
-    updatedAt?: string;
-    isLiked?: boolean;
-}
-
-export interface UserProfileComment {
-    id: number;
-    content: string;
-}
-
-export interface UserProfile {
-    id: number;
-    name: string;
-    email: string;
-    description?: string;
-    role: string;
-    createdAt: string;
-    updatedAt: string;
-    posts: UserProfilePost[];
-    comments: UserProfileComment[];
-}
-
-export interface PostDto{
-    id?: number;
-    title: string;
-    content: string;
-    category?: string;
-    user?: {
-        avatar:string;
-        id: number;
-        name: string;
-        email: string;
-        description?: string;
-        role: string;
-    };
-    users?: string;
-    createdAt?:string;
-    updatedAt?:string;
-    comments?:string[];
-    likes?: number;
-    views?: number;
-    downloads?: number;
-    isLiked?: boolean;
-    isSaved?: boolean;
-}
-
-export interface CommentDto{
-    id?: number;
-    content: string;
-    users?: string;
-    posts?: string;
-    parentId?: number | null;
-    likes?: number;
-    dislikes?: number;
-    isLiked?: boolean;
-    isDisliked?: boolean;
-    createdAt: string;
-    updatedAt: string;
-}
-
-export interface PostReportDto {
-    id: number;
-    postId: number;
-    postTitle: string;
-    reporterId: number;
-    reporterName: string;
-    reason: string;
-    createdAt: string;
-}
-
-export interface NotificationDto {
-    id: number;
-    userId: number;
-    type: string;
-    message: string;
-    referenceId: number;
-    isRead: boolean;
-    createdAt: string;
-}
-
-export interface HighlightDto {
-    id: number;
-    postId: number;
-    selectedText: string;
-    note?: string;
-    startOffset: number;
-    endOffset: number;
-    color?: string;
-    createdAt: string;
-}
-
-export interface HighlightRequest {
-    selectedText: string;
-    note?: string;
-    startOffset: number;
-    endOffset: number;
-    color?: string;
-}
-
-
-
-export interface AuthsResponse {
-    accessTokenExpiration?: string;
-    refreshTokenExpiration?: string;
-    role?: string[] | string;
-    name?: string;
-    message?: string;
-    timestamp?: string;
-    requestId?: string;
-}
-
-
-
-export interface ApiError {
-    status?: number;
-    message: string;
-}
-
-export interface ApiResponse<T> {
-    data: T;
-    message: string;
-    timestamp: Date;
-    requestId: string;
-}
-
-
+// Re-export for compatibility
+export type {
+    UserRegistration,
+    UserLogin,
+    PagedResponse,
+    UserDto,
+    UserProfilePost,
+    UserProfileComment,
+    UserProfile,
+    PostDto,
+    CommentDto,
+    PostReportDto,
+    NotificationDto,
+    HighlightDto,
+    HighlightRequest,
+    AuthsResponse,
+    ApiError,
+    ApiResponse
+};
 
 // ---- AXIOS CLIENT ----
 const apiClient = axios.create({
@@ -187,8 +47,6 @@ const apiClient = axios.create({
     },
     withCredentials: true,
 });
-
-
 
 // ---- SERVICE CLASS ----
 export default class BackendApi {
@@ -217,9 +75,6 @@ export default class BackendApi {
             console.error('Failed to fetch CSRF token:', error);
         }
     }
-
-
-
 
     static clearTokens() {
         localStorage.removeItem("roles1");
@@ -287,8 +142,6 @@ export default class BackendApi {
         }
     }
 
-
-
     // ---- AUTH ----
     static async registerUser(registrationData: UserRegistration) {
         const response = await this.post<AuthsResponse>("/auth/signup", registrationData);
@@ -314,15 +167,11 @@ export default class BackendApi {
         return response;
     }
 
-
-
     static async logoutUser() {
         const response = await this.post<ApiResponse<any>>("/auth/logout", {});
         this.clearTokens();
         return response;
     }
-
-
 
     static async refreshAccessToken() {
         // Prevent multiple simultaneous refresh calls
@@ -382,8 +231,6 @@ export default class BackendApi {
         return this.getRoles().includes(Roles.ADMIN);
     }
 
-
-
     static hasAnyRole(allowedRoles: Roles[]) {
         return this.getRoles().some((role) => allowedRoles.includes(role));
     }
@@ -429,7 +276,6 @@ export default class BackendApi {
         return this.put<ApiResponse<UserDto>>('/user/profile', updateData);
     }
 
-
     // -----Post Blog------
     static async deletePostBlog(postId: number) {
         return this.delete<ApiResponse<PostDto>>(`/post/${postId}`);
@@ -443,7 +289,7 @@ export default class BackendApi {
         return this.get<ApiResponse<number>>(`/post/total`);
     }
 
-    static async getAllPost(page:number=0, size:number= 10) {
+    static async getAllPost(page: number = 0, size: number = 10) {
         return this.get<ApiResponse<PagedResponse<PostDto>>>(`/post/list?page=${page}&size=${size}`);
     }
 
@@ -458,8 +304,6 @@ export default class BackendApi {
         return this.post<ApiResponse<any>>(`/post/${postId}/download`, {});
     }
 
-
-
     // ----- Comment Blog------
     static async deletePostComment(commentId: number) {
         return this.delete<ApiResponse<CommentDto>>(`/comment/${commentId}`);
@@ -472,15 +316,15 @@ export default class BackendApi {
         return this.get<ApiResponse<number>>(`/comment/total`);
     }
 
-    static async getAllPostComment(page:number=0,size:number=10) {
+    static async getAllPostComment(page: number = 0, size: number = 10) {
         return this.get<ApiResponse<PagedResponse<CommentDto>>>(`/comment/post?page=${page}&size=${size}`);
     }
 
-    static async getCommentsByPostId(postId: number, page:number=0, size:number=10) {
+    static async getCommentsByPostId(postId: number, page: number = 0, size: number = 10) {
         return this.get<ApiResponse<PagedResponse<CommentDto>>>(`/comment/post/${postId}?page=${page}&size=${size}`);
     }
 
-    static async createPostComment(CommentData: CommentDto, postId:number) {
+    static async createPostComment(CommentData: CommentDto, postId: number) {
         return this.post<ApiResponse<CommentDto>>(`/comment/${postId}`, CommentData);
     }
     static async updatePostComment(CommentData: CommentDto, commentId: number) {
@@ -510,10 +354,15 @@ export default class BackendApi {
     }
 
     //-----AI chat -------
-    static async askAi(prompt: string){
+    static async askAi(prompt: string) {
         return this.get<ApiResponse<string>>("/ai/chat", {
-            params: {prompt},
+            params: { prompt },
         })
+    }
+
+    // ---- CHAT HISTORY ----
+    static async getChatHistory(userId: number) {
+        return this.get<ApiResponse<any>>(`/chat/history/${userId}`);
     }
 
     // ---- LIKES ----
@@ -545,8 +394,6 @@ export default class BackendApi {
     }
 
     // ---- AI TTS ----
-    // generateTts supports either a string (text) or an options object:
-    // { text, gender?, tone?, rate?, alternate? }
     static async generateTts(payload: string | { text: string; gender?: string; tone?: string; rate?: number; alternate?: boolean; preset?: string }) {
         try {
             const body = typeof payload === 'string' ? { text: payload } : payload;
@@ -621,7 +468,6 @@ export default class BackendApi {
 // ---- AXIOS INTERCEPTORS ----
 apiClient.interceptors.request.use(
     (config) => {
-        // Add CSRF token to non-GET requests
         if (config.method && config.method.toUpperCase() !== 'GET') {
             const csrfToken = BackendApi.getCsrfToken();
             if (csrfToken) {
@@ -637,16 +483,11 @@ apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
-
-        // Skip interceptor for refresh token requests
         if (originalRequest.headers?.['X-Skip-Interceptor']) {
             return Promise.reject(error);
         }
-
-        // Only handle 401 errors and prevent infinite loops
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
-
             try {
                 await BackendApi.refreshAccessToken();
                 return apiClient(originalRequest);
