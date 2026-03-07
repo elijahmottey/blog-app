@@ -365,6 +365,14 @@ export default class BackendApi {
         return this.get<ApiResponse<any>>(`/chat/history/${userId}`);
     }
 
+    static async sendChatMessage(messageData: { recipientId: number; content: string; postId?: number }) {
+        return this.post<ApiResponse<any>>(`/chat/send`, messageData);
+    }
+
+    static async markChatAsRead(senderId: number) {
+        return this.put<ApiResponse<any>>(`/chat/read/${senderId}`, {});
+    }
+
     // ---- LIKES ----
     static async likePost(postId: number) {
         return this.post<ApiResponse<any>>(`/post/${postId}/like`, {});

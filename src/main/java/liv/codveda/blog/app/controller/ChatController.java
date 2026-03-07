@@ -8,9 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.util.List;
 
@@ -33,29 +33,31 @@ public class ChatController {
         return ResponseEntity.ok(history);
     }
 
-    @MessageMapping("/chat")
-    public void processMessage(@Payload ChatMessageRequest chatMessage, java.security.Principal principal) {
-        if (principal == null) {
-            log.error("Unauthenticated user attempted to send chat message");
-            return;
+    @PostMapping("/send")
+    public ResponseEntity<ChatMessageResponse> sendMessage(
+            @RequestBody ChatMessageRequest chatMessage,
+            @AuthenticationPrincipal Users currentUser) {
+
+        if (currentUser == null) {
+            return ResponseEntity.status(401).build();
         }
 
-        Users currentUser = null;
-        if (principal instanceof org.springframework.security.authentication.UsernamePasswordAuthenticationToken) {
-            Object p = ((org.springframework.security.authentication.UsernamePasswordAuthenticationToken) principal)
-                    .getPrincipal();
-            if (p instanceof Users) {
-                currentUser = (Users) p;
-            }
-        }
-
-        if (currentUser == null || currentUser.getId() == null) {
-            log.error("Unable to resolve authenticated user for WebSocket message");
-            return;
-        }
-
-        log.info("Received WebSocket chat message from user {} to user {}", currentUser.getId(),
+        log.info("REST chat message from user {} to user {}", currentUser.getId(),
                 chatMessage.getRecipientId());
-        chatService.processMessage(currentUser.getId(), chatMessage);
+        ChatMessageResponse response = chatService.processMessage(currentUser.getId(), chatMessage);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/read/{senderId}")
+    public ResponseEntity<Void> markMessagesAsRead(
+            @PathVariable Long senderId,
+            @AuthenticationPrincipal Users currentUser) {
+
+        if (currentUser == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        chatService.markMessagesAsRead(currentUser.getId(), senderId);
+        return ResponseEntity.ok().build();
     }
 }

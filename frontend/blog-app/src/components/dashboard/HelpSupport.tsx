@@ -80,7 +80,7 @@ export const HelpSupport: React.FC = () => {
 
       <Grid container spacing={4}>
         {/* Left Column: FAQs */}
-        <Grid item xs={12} md={8}>
+        <Grid size={{ xs: 12, md: 5 }}>
           <LIVBlogCard
             title="Frequently Asked Questions"
             variant="elevated"
@@ -156,7 +156,7 @@ export const HelpSupport: React.FC = () => {
             </Typography>
             <form onSubmit={handleContactSubmit}>
               <Grid container spacing={2}>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <TextField
                     fullWidth
                     label="Subject"
@@ -167,7 +167,7 @@ export const HelpSupport: React.FC = () => {
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <TextField
                     fullWidth
                     label="Message"
@@ -180,7 +180,7 @@ export const HelpSupport: React.FC = () => {
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <Button
                     type="submit"
                     variant="contained"
@@ -202,7 +202,7 @@ export const HelpSupport: React.FC = () => {
         </Grid>
 
         {/* Right Column: Quick Links & Info */}
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 7 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <LIVBlogCard
               title="Quick Resources"

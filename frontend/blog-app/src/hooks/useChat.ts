@@ -9,6 +9,7 @@ export interface ChatMessage {
     content: string;
     postId?: number;
     timestamp: string;
+    isRead?: boolean;
 }
 
 export const useChat = (currentUserId: number, recipientId: number) => {
@@ -21,6 +22,9 @@ export const useChat = (currentUserId: number, recipientId: number) => {
             try {
                 const response = await BackendApi.getChatHistory(recipientId);
                 setMessages(response.data);
+
+                // Mark incoming messages as read
+                await BackendApi.markChatAsRead(recipientId);
             } catch (error) {
                 console.error('Failed to fetch chat history:', error);
             } finally {
@@ -30,9 +34,24 @@ export const useChat = (currentUserId: number, recipientId: number) => {
 
         fetchHistory();
 
-        // 2. Subscribe to new messages
-        const handleNewMessage = (message: ChatMessage) => {
-            setMessages((prev) => [...prev, message]);
+        // 2. Subscribe to new messages / read receipts
+        const handleNewMessage = (message: any) => {
+            if (message.type === 'READ_RECEIPT') {
+                // If we get a read receipt indicating the recipient read our messages
+                if (message.readerId === recipientId) {
+                    setMessages(prev => prev.map(msg =>
+                        (msg.senderId === currentUserId && !msg.isRead) ? { ...msg, isRead: true } : msg
+                    ));
+                }
+            } else {
+                // Normal chat message
+                setMessages((prev) => [...prev, message]);
+
+                // If message is from the person we are chatting with, immediately mark it read
+                if (message.senderId === recipientId) {
+                    BackendApi.markChatAsRead(recipientId).catch(console.error);
+                }
+            }
         };
 
         webSocketService.subscribeToChat(currentUserId, handleNewMessage);
@@ -42,27 +61,35 @@ export const useChat = (currentUserId: number, recipientId: number) => {
         };
     }, [currentUserId, recipientId]);
 
-    const sendMessage = useCallback((content: string, postId?: number) => {
-        webSocketService.sendChatMessage({
-            recipientId,
-            content,
-            postId,
-        });
-
-        // Optimistic update isn't strictly necessary as the backend will broadcast it back to the sender
-        // but usually, it's pushed to the recipient. Wait, let's see backend ChatService.
-        // The backend only sends to recipientId!
-        // So the sender MUST optimistic update, or the backend must send to both.
-        // Given our backend sends to `recipientId`, we will optimistic update here.
+    const sendMessage = useCallback(async (content: string, postId?: number) => {
+        // Optimistic update
+        const tempId = Date.now();
         const optimisticMessage: ChatMessage = {
-            id: Date.now(), // Temp ID
+            id: tempId,
             senderId: currentUserId,
             recipientId,
             content,
             postId,
             timestamp: new Date().toISOString(),
+            isRead: false
         };
         setMessages((prev) => [...prev, optimisticMessage]);
+
+        // Send via REST endpoint for secure persistence
+        try {
+            const response = await BackendApi.sendChatMessage({
+                recipientId,
+                content,
+                postId,
+            });
+
+            // Replace optimistic message with actual DB representation
+            setMessages(prev => prev.map(msg => msg.id === tempId ? response.data : msg));
+        } catch (error) {
+            console.error("Failed to send message", error);
+            // Optionally remove pessimistic message or mark as failed
+            setMessages(prev => prev.filter(msg => msg.id !== tempId));
+        }
     }, [currentUserId, recipientId]);
 
     return { messages, sendMessage, isLoading };

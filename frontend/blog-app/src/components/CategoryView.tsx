@@ -76,10 +76,10 @@ const CategoryView: React.FC = () => {
                         <Typography variant="body2">{post.users || 'Anonymous'}</Typography>
                       </Box>
                       <Box sx={{ display: 'flex', gap: 1 }}>
-                        <Button size="small" startIcon={<Download />} onClick={(e) => { e.preventDefault(); downloadPost(post); }}>
+                        <Button size="small" startIcon={<Download />} onClick={(e) => { e.preventDefault(); downloadPost(post, true); }}>
                           TXT
                         </Button>
-                        <Button size="small" onClick={(e) => { e.preventDefault(); downloadPostPdf(post); }}>
+                        <Button size="small" onClick={(e) => { e.preventDefault(); downloadPostPdf(post, true); }}>
                           PDF
                         </Button>
                       </Box>

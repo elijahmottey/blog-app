@@ -20,61 +20,97 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ChatService {
 
-    private final ChatMessageRepository chatMessageRepository;
-    private final UsersRepository userRepository;
-    private final SimpMessagingTemplate messagingTemplate;
+        private final ChatMessageRepository chatMessageRepository;
+        private final UsersRepository userRepository;
+        private final SimpMessagingTemplate messagingTemplate;
 
-    @Transactional
-    public ChatMessageResponse processMessage(Long senderId, ChatMessageRequest request) {
-        log.info("Processing chat message from {} to {}", senderId, request.getRecipientId());
-        
-        Users sender = userRepository.findById(senderId)
-                .orElseThrow(() -> new RuntimeException("Sender not found: " + senderId));
-                
-        Users recipient = userRepository.findById(request.getRecipientId())
-                .orElseThrow(() -> new RuntimeException("Recipient not found: " + request.getRecipientId()));
+        @Transactional
+        public ChatMessageResponse processMessage(Long senderId, ChatMessageRequest request) {
+                log.info("Processing chat message from {} to {}", senderId, request.getRecipientId());
 
-        ChatMessage chatMessage = ChatMessage.builder()
-                .sender(sender)
-                .recipient(recipient)
-                .content(request.getContent())
-                .postId(request.getPostId())
-                .build();
+                Users sender = userRepository.findById(senderId)
+                                .orElseThrow(() -> new RuntimeException("Sender not found: " + senderId));
 
-        ChatMessage savedMessage = chatMessageRepository.save(chatMessage);
-        
-        ChatMessageResponse response = mapToResponse(savedMessage);
+                Users recipient = userRepository.findById(request.getRecipientId())
+                                .orElseThrow(() -> new RuntimeException(
+                                                "Recipient not found: " + request.getRecipientId()));
 
-        // Send via WebSocket to specific user queue
-        String destination = "/topic/messages/" + recipient.getId();
-        log.info("Sending message to destination: {}", destination);
-        messagingTemplate.convertAndSend(destination, response);
+                ChatMessage chatMessage = ChatMessage.builder()
+                                .sender(sender)
+                                .recipient(recipient)
+                                .content(request.getContent())
+                                .postId(request.getPostId())
+                                .isRead(false)
+                                .build();
 
-        return response;
-    }
+                ChatMessage savedMessage = chatMessageRepository.save(chatMessage);
 
-    @Transactional(readOnly = true)
-    public List<ChatMessageResponse> getChatHistory(Long user1Id, Long user2Id) {
-        Users user1 = userRepository.findById(user1Id)
-                .orElseThrow(() -> new RuntimeException("User not found: " + user1Id));
-                
-        Users user2 = userRepository.findById(user2Id)
-                .orElseThrow(() -> new RuntimeException("User not found: " + user2Id));
+                ChatMessageResponse response = mapToResponse(savedMessage);
 
-        return chatMessageRepository.findChatHistory(user1, user2)
-                .stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
+                // Send via WebSocket to specific user queue
+                String destination = "/topic/messages/" + recipient.getId();
+                log.info("Sending message to destination: {}", destination);
+                messagingTemplate.convertAndSend(destination, response);
 
-    private ChatMessageResponse mapToResponse(ChatMessage message) {
-        return ChatMessageResponse.builder()
-                .id(message.getId())
-                .senderId(message.getSender().getId())
-                .recipientId(message.getRecipient().getId())
-                .content(message.getContent())
-                .postId(message.getPostId())
-                .timestamp(message.getTimestamp())
-                .build();
-    }
+                return response;
+        }
+
+        @Transactional
+        public void markMessagesAsRead(Long readerId, Long senderId) {
+                Users reader = userRepository.findById(readerId)
+                                .orElseThrow(() -> new RuntimeException("Reader not found: " + readerId));
+                Users sender = userRepository.findById(senderId)
+                                .orElseThrow(() -> new RuntimeException("Sender not found: " + senderId));
+
+                List<ChatMessage> unreadMessages = chatMessageRepository.findBySenderAndRecipientAndIsReadFalse(sender,
+                                reader);
+
+                if (unreadMessages.isEmpty()) {
+                        return;
+                }
+
+                for (ChatMessage msg : unreadMessages) {
+                        msg.setRead(true);
+                }
+
+                chatMessageRepository.saveAll(unreadMessages);
+
+                // Notify the sender that their messages have been read
+                String destination = "/topic/messages/" + senderId;
+                log.info("Sending read receipt notification to destination: {}", destination);
+
+                // We can send a specialized object or just resend the updated messages.
+                // For simplicity, we send a read receipt notification map.
+                java.util.Map<String, Object> receipt = new java.util.HashMap<>();
+                receipt.put("type", "READ_RECEIPT");
+                receipt.put("readerId", readerId);
+
+                messagingTemplate.convertAndSend(destination, (Object) receipt);
+        }
+
+        @Transactional(readOnly = true)
+        public List<ChatMessageResponse> getChatHistory(Long user1Id, Long user2Id) {
+                Users user1 = userRepository.findById(user1Id)
+                                .orElseThrow(() -> new RuntimeException("User not found: " + user1Id));
+
+                Users user2 = userRepository.findById(user2Id)
+                                .orElseThrow(() -> new RuntimeException("User not found: " + user2Id));
+
+                return chatMessageRepository.findChatHistory(user1, user2)
+                                .stream()
+                                .map(this::mapToResponse)
+                                .collect(Collectors.toList());
+        }
+
+        private ChatMessageResponse mapToResponse(ChatMessage message) {
+                return ChatMessageResponse.builder()
+                                .id(message.getId())
+                                .senderId(message.getSender().getId())
+                                .recipientId(message.getRecipient().getId())
+                                .content(message.getContent())
+                                .postId(message.getPostId())
+                                .timestamp(message.getTimestamp())
+                                .isRead(message.isRead())
+                                .build();
+        }
 }

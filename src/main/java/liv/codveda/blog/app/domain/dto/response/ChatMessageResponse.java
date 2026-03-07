@@ -18,4 +18,5 @@ public class ChatMessageResponse {
     private String content;
     private Long postId;
     private LocalDateTime timestamp;
+    private boolean isRead;
 }

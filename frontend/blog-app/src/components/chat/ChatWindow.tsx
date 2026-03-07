@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useChat } from '../../hooks/useChat';
 import { useAuth } from '../../context/AuthContext';
-import { X, Send } from 'lucide-react';
+import { X, Send, Check, CheckCheck } from 'lucide-react';
 
 interface ChatWindowProps {
     recipientId: number;
@@ -81,15 +81,24 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ recipientId, recipientNa
                             >
                                 <div
                                     className={`max-w-[80%] rounded-2xl px-4 py-2 ${isMe
-                                            ? 'bg-emerald-600 text-white rounded-br-none'
-                                            : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm rounded-bl-none border border-gray-100 dark:border-gray-600'
+                                        ? 'bg-emerald-600 text-white rounded-br-none'
+                                        : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm rounded-bl-none border border-gray-100 dark:border-gray-600'
                                         }`}
                                 >
-                                    <p className="text-sm">{msg.content}</p>
+                                    <p className="text-sm break-words">{msg.content}</p>
                                 </div>
-                                <span className="text-[10px] text-gray-500 mt-1 mx-1">
-                                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </span>
+                                <div className="flex items-center gap-1 mt-1 mx-1">
+                                    <span className="text-[10px] text-gray-500">
+                                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </span>
+                                    {isMe && (
+                                        msg.isRead ? (
+                                            <CheckCheck className="w-3 h-3 text-emerald-500" />
+                                        ) : (
+                                            <Check className="w-3 h-3 text-gray-400" />
+                                        )
+                                    )}
+                                </div>
                             </div>
                         );
                     })

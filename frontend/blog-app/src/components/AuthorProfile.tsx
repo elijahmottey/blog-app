@@ -20,7 +20,7 @@ export const AuthorProfile: React.FC = () => {
   const fetchAuthorProfile = async () => {
     try {
       setLoading(true);
-      
+
       // First try to get the authenticated user's profile
       try {
         const profileResponse = await BackendApi.getUserProfile();
@@ -33,17 +33,17 @@ export const AuthorProfile: React.FC = () => {
       } catch (err) {
         console.log('Not authenticated user profile');
       }
-      
+
       // If not authenticated user, search in all users
       const response = await BackendApi.getAllUsers(0, 1000);
       const users = response.data?.content || [];
-      const foundAuthor = users.find((u: any) => 
+      const foundAuthor = users.find((u: any) =>
         u.name === username || u.email === username
       );
-      
+
       if (foundAuthor && foundAuthor.id) {
         const detailResponse = await BackendApi.getUserById(foundAuthor.id);
-        setAuthor(detailResponse.data);
+        setAuthor((detailResponse as any).data || detailResponse);
       } else {
         setError('Author not found');
       }
@@ -79,8 +79,8 @@ export const AuthorProfile: React.FC = () => {
   return (
     <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', py: 6 }}>
       <Container maxWidth="md">
-        <Button 
-          startIcon={<ArrowLeft />} 
+        <Button
+          startIcon={<ArrowLeft />}
           onClick={() => navigate('/blog')}
           sx={{ mb: 3 }}
         >
@@ -90,9 +90,9 @@ export const AuthorProfile: React.FC = () => {
         <Paper sx={{ p: 4, borderRadius: 2 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
             <Avatar
-              sx={{ 
-                width: 120, 
-                height: 120, 
+              sx={{
+                width: 120,
+                height: 120,
                 bgcolor: 'primary.main',
                 fontSize: '3rem',
                 mb: 2
@@ -100,7 +100,7 @@ export const AuthorProfile: React.FC = () => {
             >
               {author.name?.charAt(0).toUpperCase()}
             </Avatar>
-            
+
             <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
               {author.name}
             </Typography>
