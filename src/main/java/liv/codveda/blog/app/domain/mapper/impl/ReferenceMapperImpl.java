@@ -14,7 +14,8 @@ public class ReferenceMapperImpl implements ReferenceMapper {
     @Override
     public UsersReferenceDto toUsersReference(Users user) {
 
-        if (user == null) return null;
+        if (user == null)
+            return null;
 
         return new UsersReferenceDto(
                 user.getId(),
@@ -22,27 +23,27 @@ public class ReferenceMapperImpl implements ReferenceMapper {
                 user.getEmail(),
                 user.getDescription(),
                 user.getAvatar(),
-                user.getRole()
-        );
+                user.getRole());
     }
 
     @Override
     public PostReferenceDto toPostReference(Post post) {
-        if (post == null) return null;
+        if (post == null)
+            return null;
         return new PostReferenceDto(
                 post.getId(),
                 post.getTitle(),
                 post.getCategory(),
-                post.getContent()
-        );
+                post.getContent());
     }
 
     @Override
     public CommentReferenceDto toCommentReference(Comment comment) {
-        if (comment == null) return null;
+        if (comment == null)
+            return null;
         return new CommentReferenceDto(
                 comment.getId(),
-                comment.getContent()
-        );
+                comment.getContent(),
+                comment.getPost() != null ? comment.getPost().getTitle() : null);
     }
 }

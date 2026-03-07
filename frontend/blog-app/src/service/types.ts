@@ -55,6 +55,7 @@ export interface UserProfilePost {
 export interface UserProfileComment {
     id: number;
     content: string;
+    postTitle?: string;
 }
 
 export interface UserProfile {

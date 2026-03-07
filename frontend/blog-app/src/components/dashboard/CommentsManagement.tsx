@@ -9,7 +9,7 @@ import useDocumentTitle from "../../hooks/useDocumentTitle.ts";
 export const CommentsManagement: React.FC = () => {
   const { userProfile, loading } = useAuth();
   const theme = useTheme();
-    useDocumentTitle('LIVBlog | Comments ');
+  useDocumentTitle('LIVBlog | Comments ');
 
   if (loading) {
     return (
@@ -49,17 +49,20 @@ export const CommentsManagement: React.FC = () => {
               <div key={c.id}>
                 <div className="aws-spacing-md">
                   <div className="flex items-start gap-3">
-                    <Avatar 
-                      style={{ 
-                        backgroundColor: theme.palette.primary.light, 
-                        color: theme.palette.primary.main, 
-                        width: 40, 
-                        height: 40 
+                    <Avatar
+                      style={{
+                        backgroundColor: theme.palette.primary.light,
+                        color: theme.palette.primary.main,
+                        width: 40,
+                        height: 40
                       }}
                     >
                       <MessageSquare size={20} />
                     </Avatar>
                     <div className="flex-1">
+                      <p className="aws-text-body-lg" style={{ color: theme.palette.text.primary, margin: '0 0 8px 0', fontWeight: 500 }}>
+                        {c.postTitle ? `On "${c.postTitle}":` : 'Comment:'}
+                      </p>
                       <p className="aws-text-body-lg" style={{ color: theme.palette.text.primary, margin: '0 0 8px 0' }}>
                         {c.content}
                       </p>
