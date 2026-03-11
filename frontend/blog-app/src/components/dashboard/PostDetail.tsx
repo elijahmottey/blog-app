@@ -1010,7 +1010,7 @@ export const PostDetail: React.FC = () => {
     const blocks = content.split(/\n\s*\n/);
     const pages: string[] = [];
     let currentPageContent = '';
-    const CHAR_LIMIT = 900;
+    const CHAR_LIMIT = 950;
 
     for (const block of blocks) {
       if ((currentPageContent.length + block.length) > CHAR_LIMIT && currentPageContent.length > 0) {

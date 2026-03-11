@@ -51,6 +51,11 @@ const apiClient = axios.create({
 // ---- SERVICE CLASS ----
 export default class BackendApi {
     private static refreshTokenPromise: Promise<string> | null = null;
+    private static onSessionExpired: (() => void) | null = null;
+
+    static setSessionExpiredHandler(handler: () => void) {
+        this.onSessionExpired = handler;
+    }
 
     // ---- CSRF TOKEN HANDLING ----
     static getCsrfToken(): string | null {
@@ -90,7 +95,7 @@ export default class BackendApi {
     }
 
     static getTimeUntilAccessTokenExpiration(): number {
-        return 3600000; // 1 hour default
+        return 900000; // 15 minutes default
     }
 
     // ---- CENTRALIZED ERROR HANDLING ----
@@ -370,7 +375,7 @@ export default class BackendApi {
 
     // ---- CHAT HISTORY ----
     static async getChatHistory(userId: number) {
-        return this.get<ApiResponse<any>>(`/chat/history/${userId}`);
+        return this.get<any[]>(`/chat/history/${userId}`);
     }
 
     static async sendChatMessage(messageData: { recipientId: number; content: string; postId?: number }) {
@@ -479,6 +484,13 @@ export default class BackendApi {
     static async updateHighlightNote(highlightId: number, note: string) {
         return this.put<ApiResponse<HighlightDto>>(`/highlights/${highlightId}/note`, note);
     }
+    
+    // ---- EXPOSE CALLER FOR SESSION EXPIRATION ----
+    static triggerSessionExpiration() {
+        if (this.onSessionExpired) {
+            this.onSessionExpired();
+        }
+    }
 }
 
 // ---- AXIOS INTERCEPTORS ----
@@ -495,24 +507,64 @@ apiClient.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
+let isRefreshing = false;
+let refreshSubscribers = [];
+
+function subscribeTokenRefresh(callback) {
+    refreshSubscribers.push(callback);
+}
+
+function onRefreshed() {
+    refreshSubscribers.forEach(callback => callback());
+    refreshSubscribers = [];
+}
+
 apiClient.interceptors.response.use(
-    (response) => response,
-    async (error) => {
+    response => response,
+    async error => {
+
         const originalRequest = error.config;
+
         if (originalRequest.headers?.['X-Skip-Interceptor']) {
             return Promise.reject(error);
         }
-        if (error.response?.status === 401 && !originalRequest._retry) {
-            originalRequest._retry = true;
-            try {
-                await BackendApi.refreshAccessToken();
-                return apiClient(originalRequest);
-            } catch (refreshError) {
-                BackendApi.clearTokens();
-                window.location.href = "/auth/login";
-                return Promise.reject(refreshError);
-            }
+
+        if (error.response?.status !== 401) {
+            return Promise.reject(error);
         }
-        return Promise.reject(error);
+
+        if (originalRequest._retry) {
+            return Promise.reject(error);
+        }
+
+        originalRequest._retry = true;
+
+        if (isRefreshing) {
+            return new Promise(resolve => {
+                subscribeTokenRefresh(() => {
+                    resolve(apiClient(originalRequest));
+                });
+            });
+        }
+
+        isRefreshing = true;
+
+        try {
+            await BackendApi.refreshAccessToken();
+
+            isRefreshing = false;
+            onRefreshed();
+
+            return apiClient(originalRequest);
+
+        } catch (refreshError) {
+
+            isRefreshing = false;
+
+            BackendApi.clearTokens();
+            BackendApi.triggerSessionExpiration();
+
+            return Promise.reject(refreshError);
+        }
     }
 );
