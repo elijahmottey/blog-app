@@ -34,31 +34,32 @@ public class PostBlogServiceImpl implements BlogService {
 
     @Autowired
     public PostBlogServiceImpl(PostRepository postRepository,
-                               UsersRepository userRepository,
-                               NotificationService notificationService,
-                               @Lazy BlogService blogService) {
+            UsersRepository userRepository,
+            NotificationService notificationService,
+            @Lazy BlogService blogService) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
         this.self = blogService;
     }
 
-    // 🔐 Helper method to get authenticated user
     private Users getAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        assert auth != null;
-        String email = auth.getName();
-
-        return userRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new EntityNotFoundException("User not found with email: " + email));
+        if (auth == null || auth.getName() == null || "anonymousUser".equals(auth.getName())) {
+            throw new EntityNotFoundException("Authentication required");
+        }
+        if (auth.getPrincipal() instanceof Users) {
+            return (Users) auth.getPrincipal();
+        }
+        return userRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + auth.getName()));
     }
 
     private boolean isAdmin(Users user) {
         return user.getRole() == Roles.ADMIN;
     }
 
-    //  Helper method to check post ownership or admin
+    // Helper method to check post ownership or admin
     private void checkPostOwnershipOrAdmin(Post post) {
         Users currentUser = getAuthenticatedUser();
         boolean owner = post.getUsers().getId().equals(currentUser.getId());
@@ -70,7 +71,7 @@ public class PostBlogServiceImpl implements BlogService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {"posts", "postById", "postByTitle", "postsByCategory", "postTotal"}, allEntries = true)
+    @CacheEvict(value = { "posts", "postById", "postByTitle", "postsByCategory", "postTotal" }, allEntries = true)
     public Post postBlog(Post post) {
         Users user = getAuthenticatedUser();
         post.setUsers(user);
@@ -84,8 +85,7 @@ public class PostBlogServiceImpl implements BlogService {
                         u,
                         "NEW_POST",
                         user.getName() + " published a new post: " + savedPost.getTitle(),
-                        savedPost.getId()
-                );
+                        savedPost.getId());
             }
         }
         return savedPost;
@@ -93,7 +93,7 @@ public class PostBlogServiceImpl implements BlogService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {"posts", "postById", "postByTitle", "postsByCategory", "postTotal"}, allEntries = true)
+    @CacheEvict(value = { "posts", "postById", "postByTitle", "postsByCategory", "postTotal" }, allEntries = true)
     public void deletePost(Long id) {
         // Use the proxy to get cached post
         Post post = self.getPostById(id); // ✅ Now uses cache
@@ -111,8 +111,7 @@ public class PostBlogServiceImpl implements BlogService {
     @Cacheable(value = "postById", key = "#id")
     public Post getPostById(Long id) {
         return postRepository.findById(id)
-                .orElseThrow(() ->
-                        new EntityNotFoundException("Post with id " + id + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Post with id " + id + " not found"));
     }
 
     @Override
@@ -123,7 +122,7 @@ public class PostBlogServiceImpl implements BlogService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {"posts", "postById", "postByTitle", "postsByCategory", "postTotal"}, allEntries = true)
+    @CacheEvict(value = { "posts", "postById", "postByTitle", "postsByCategory", "postTotal" }, allEntries = true)
     public Post updatePost(Long id, Post post) {
         // Use the proxy to get cached post
         Post existingPost = self.getPostById(id); // ✅ Now uses cache
@@ -160,8 +159,7 @@ public class PostBlogServiceImpl implements BlogService {
                         u,
                         "UPDATE_POST",
                         notificationMessage,
-                        updatedPost.getId()
-                );
+                        updatedPost.getId());
             }
         }
 

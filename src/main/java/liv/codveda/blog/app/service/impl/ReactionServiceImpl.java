@@ -30,10 +30,10 @@ public class ReactionServiceImpl implements ReactionService {
     private final NotificationService notificationService;
 
     public ReactionServiceImpl(ReactionRepository reactionRepository,
-                               BlogService postService, // Inject PostService
-                               UsersRepository usersRepository,
-                               NotificationService notificationService,
-                               @Lazy ReactionService reactionService) {
+            BlogService postService, // Inject PostService
+            UsersRepository usersRepository,
+            NotificationService notificationService,
+            @Lazy ReactionService reactionService) {
         this.reactionRepository = reactionRepository;
         this.postService = postService; // Use PostService
         this.usersRepository = usersRepository;
@@ -45,8 +45,10 @@ public class ReactionServiceImpl implements ReactionService {
         if (auth == null || auth.getName() == null || "anonymousUser".equals(auth.getName())) {
             throw new UnauthorizedException("Authentication required");
         }
-        String email = auth.getName();
-        return usersRepository.findByEmail(email)
+        if (auth.getPrincipal() instanceof Users) {
+            return (Users) auth.getPrincipal();
+        }
+        return usersRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new UnauthorizedException("Authenticated user not found"));
     }
 
@@ -57,7 +59,7 @@ public class ReactionServiceImpl implements ReactionService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {"postReactions", "myPostReaction"}, allEntries = true)
+    @CacheEvict(value = { "postReactions", "myPostReaction" }, allEntries = true)
     public void setReaction(Long postId, ReactionType type) {
         Users user = getAuthenticatedUser();
         Post post = getPostOrThrow(postId); // Now uses cached post if available
@@ -79,15 +81,14 @@ public class ReactionServiceImpl implements ReactionService {
                         post.getUsers(),
                         "LIKE",
                         user.getName() + " liked your post: " + post.getTitle(),
-                        postId
-                );
+                        postId);
             }
         }
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = {"postReactions", "myPostReaction"}, allEntries = true)
+    @CacheEvict(value = { "postReactions", "myPostReaction" }, allEntries = true)
     public void removeReaction(Long postId) {
         Users user = getAuthenticatedUser();
         Post post = getPostOrThrow(postId); // Now uses cached post if available

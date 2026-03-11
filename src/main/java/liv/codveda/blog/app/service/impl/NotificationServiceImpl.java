@@ -24,9 +24,9 @@ public class NotificationServiceImpl implements NotificationService {
     private final SimpMessagingTemplate messagingTemplate;
 
     @Autowired
-    public NotificationServiceImpl(NotificationRepository notificationRepository, 
-                                   UsersRepository usersRepository,
-                                   SimpMessagingTemplate messagingTemplate) {
+    public NotificationServiceImpl(NotificationRepository notificationRepository,
+            UsersRepository usersRepository,
+            SimpMessagingTemplate messagingTemplate) {
         this.notificationRepository = notificationRepository;
         this.usersRepository = usersRepository;
         this.messagingTemplate = messagingTemplate;
@@ -72,7 +72,8 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void markAllAsRead() {
         Users currentUser = getCurrentUser();
-        Page<Notification> notifications = notificationRepository.findByUserOrderByCreatedAtDesc(currentUser, Pageable.unpaged());
+        Page<Notification> notifications = notificationRepository.findByUserOrderByCreatedAtDesc(currentUser,
+                Pageable.unpaged());
         notifications.forEach(n -> n.setIsRead(true));
         notificationRepository.saveAll(notifications);
     }
@@ -83,8 +84,14 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private Users getCurrentUser() {
-        String email = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
-        return usersRepository.findByEmail(email)
+        org.springframework.security.core.Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getName() == null || "anonymousUser".equals(auth.getName())) {
+            throw new NotFoundException("Authentication required");
+        }
+        if (auth.getPrincipal() instanceof Users) {
+            return (Users) auth.getPrincipal();
+        }
+        return usersRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new NotFoundException("User not found"));
     }
 }

@@ -21,11 +21,11 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     private final UsersRepository usersRepository;
 
     public AnalyticsServiceImpl(PostRepository postRepository,
-                                CommentRepository commentRepository,
-                                ReactionRepository reactionRepository,
-                                CommentReactionRepository commentReactionRepository,
-                                PostViewRepository postViewRepository,
-                                UsersRepository usersRepository) {
+            CommentRepository commentRepository,
+            ReactionRepository reactionRepository,
+            CommentReactionRepository commentReactionRepository,
+            PostViewRepository postViewRepository,
+            UsersRepository usersRepository) {
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
         this.reactionRepository = reactionRepository;
@@ -36,8 +36,11 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
     private Users getAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || auth.getName() == null) {
+        if (auth == null || auth.getName() == null || "anonymousUser".equals(auth.getName())) {
             throw new IllegalStateException("Unauthenticated");
+        }
+        if (auth.getPrincipal() instanceof Users) {
+            return (Users) auth.getPrincipal();
         }
         return usersRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new IllegalStateException("User not found: " + auth.getName()));
@@ -57,8 +60,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 totalPostLikes,
                 totalCommentLikes,
                 totalCommentDislikes,
-                totalPostViews
-        );
+                totalPostViews);
     }
 
     @Override
@@ -68,8 +70,10 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         long totalPosts = postRepository.countByUsers_Id(userId);
         long totalComments = commentRepository.countByPost_Users_Id(userId);
         long totalPostLikes = reactionRepository.countByPost_Users_IdAndType(userId, ReactionType.LIKE);
-        long totalCommentLikes = commentReactionRepository.countByComment_Post_Users_IdAndType(userId, ReactionType.LIKE);
-        long totalCommentDislikes = commentReactionRepository.countByComment_Post_Users_IdAndType(userId, ReactionType.DISLIKE);
+        long totalCommentLikes = commentReactionRepository.countByComment_Post_Users_IdAndType(userId,
+                ReactionType.LIKE);
+        long totalCommentDislikes = commentReactionRepository.countByComment_Post_Users_IdAndType(userId,
+                ReactionType.DISLIKE);
         long totalPostViews = postViewRepository.countByPost_Users_Id(userId);
         return new UserAnalyticsDto(
                 totalPosts,
@@ -77,7 +81,6 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 totalPostLikes,
                 totalCommentLikes,
                 totalCommentDislikes,
-                totalPostViews
-        );
+                totalPostViews);
     }
 }

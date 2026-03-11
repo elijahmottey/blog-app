@@ -5,6 +5,8 @@ import Footer from "./components/footer.tsx";
 import Home from "./components/home.tsx";
 import { Login } from "./components/authentication/login.tsx";
 import { Signup } from "./components/authentication/signup.tsx";
+import ForgotPassword from "./components/authentication/ForgotPassword.tsx";
+import ResetPassword from "./components/authentication/ResetPassword.tsx";
 import { DashboardLayout } from "./components/dashboard/DashboardLayout";
 import { DashboardRouter } from "./components/dashboard/DashboardRouter";
 import { CreatePost } from "./components/dashboard/CreatePost";
@@ -24,8 +26,8 @@ import { AIChatPage } from "./components/dashboard/AIChatPage";
 import { NotFound } from "./components/not-found.tsx";
 import { AdminUsers } from "./components/dashboard/AdminUsers.tsx";
 import { Unauthorized } from "./components/unauthorized.tsx";
-import {AnalyticsView} from "./components/dashboard/AnalyticsView.tsx";
-import {UserActivityPage} from "./components/dashboard/UserActivityPage.tsx";
+import { AnalyticsView } from "./components/dashboard/AnalyticsView.tsx";
+import { UserActivityPage } from "./components/dashboard/UserActivityPage.tsx";
 import { AuthorProfile } from "./components/dashboard/AuthorProfile.tsx";
 import OAuth2RedirectHandler from "./components/OAuth2RedirectHandler.tsx";
 import { ReportedPosts } from "./components/dashboard/ReportedPosts.tsx";
@@ -71,6 +73,22 @@ export const PagesRoute = () => {
                                     <>
                                         <Signup />
 
+                                    </>
+                                }
+                            />
+                            <Route
+                                path="/auth/forgot-password"
+                                element={
+                                    <>
+                                        <ForgotPassword />
+                                    </>
+                                }
+                            />
+                            <Route
+                                path="/auth/reset-password"
+                                element={
+                                    <>
+                                        <ResetPassword />
                                     </>
                                 }
                             />
@@ -150,7 +168,7 @@ export const PagesRoute = () => {
                                 <Route element={<AdminRoute />}>
                                     <Route path="admin/users" element={<AdminUsers />} />
                                     <Route path="admin/user/:id/view" element={<UserActivityPage />} />
-                                    <Route path="admin/analytics" element={<> <AnalyticsView/></>} />
+                                    <Route path="admin/analytics" element={<> <AnalyticsView /></>} />
                                     <Route path="admin/reports" element={<ReportedPosts />} />
                                 </Route>
                             </Route>

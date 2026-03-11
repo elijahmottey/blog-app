@@ -7,32 +7,26 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "notifications")
+@Table(name = "password_reset_tokens")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Notification {
+public class PasswordResetToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @Column(nullable = false, unique = true, length = 2048)
+    private String token;
+
+    @OneToOne(targetEntity = Users.class, fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false, name = "user_id", referencedColumnName = "user_id")
     private Users user;
 
     @Column(nullable = false)
-    private String type;
-
-    @Column(nullable = false)
-    private String message;
-
-    private Long referenceId;
-
-    @Column(nullable = false)
-    @Builder.Default
-    private Boolean isRead = false;
+    private LocalDateTime expiryDate;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

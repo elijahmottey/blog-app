@@ -23,8 +23,8 @@ public class CommentReactionServiceImpl implements CommentReactionService {
     private final UsersRepository usersRepository;
 
     public CommentReactionServiceImpl(CommentReactionRepository commentReactionRepository,
-                                      CommentRepository commentRepository,
-                                      UsersRepository usersRepository) {
+            CommentRepository commentRepository,
+            UsersRepository usersRepository) {
         this.commentReactionRepository = commentReactionRepository;
         this.commentRepository = commentRepository;
         this.usersRepository = usersRepository;
@@ -32,8 +32,11 @@ public class CommentReactionServiceImpl implements CommentReactionService {
 
     public Users getAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || auth.getName() == null) {
+        if (auth == null || auth.getName() == null || "anonymousUser".equals(auth.getName())) {
             throw new IllegalStateException("Unauthenticated");
+        }
+        if (auth.getPrincipal() instanceof Users) {
+            return (Users) auth.getPrincipal();
         }
         return usersRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new IllegalStateException("User not found: " + auth.getName()));
@@ -46,7 +49,7 @@ public class CommentReactionServiceImpl implements CommentReactionService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {"commentReactions", "myCommentReaction"}, allEntries = true)
+    @CacheEvict(value = { "commentReactions", "myCommentReaction" }, allEntries = true)
     public void setReaction(Long commentId, ReactionType type) {
         Users user = getAuthenticatedUser();
         Comment comment = getCommentOrThrow(commentId);
@@ -64,7 +67,7 @@ public class CommentReactionServiceImpl implements CommentReactionService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {"commentReactions", "myCommentReaction"}, allEntries = true)
+    @CacheEvict(value = { "commentReactions", "myCommentReaction" }, allEntries = true)
     public void removeReaction(Long commentId) {
         Users user = getAuthenticatedUser();
         Comment comment = getCommentOrThrow(commentId);

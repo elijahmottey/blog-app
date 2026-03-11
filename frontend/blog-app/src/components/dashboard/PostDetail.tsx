@@ -16,7 +16,11 @@ import {
   Flag,
   MoreVertical,
   Bookmark,
-  Highlighter
+  Highlighter,
+  BookOpen,
+  FileText,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { Button, Typography, TextField, Avatar, Chip, CircularProgress, IconButton, Menu, MenuItem, Box, Tooltip } from '@mui/material';
 import BackendApi, { type CommentDto, type PostDto } from '../../service/BackendApi';
@@ -27,6 +31,8 @@ import { downloadPost, downloadPostPdf } from '../../lib/download';
 import { LikeButton } from './LikeButton';
 import { LIVBlogCard, LIVBlogLayout } from '../ui';
 import { useTheme, alpha } from '@mui/material/styles';
+import { useMediaQuery } from '@mui/material';
+import { motion, AnimatePresence } from 'framer-motion';
 import useDocumentTitle from "../../hooks/useDocumentTitle.ts";
 import { useNotifications } from '../../hooks/useNotifications';
 import { ChatWindow } from '../chat/ChatWindow';
@@ -170,7 +176,12 @@ export const PostDetail: React.FC = () => {
   // Chat state
   const [isChatOpen, setIsChatOpen] = useState(false);
 
+  // View mode state
+  const [isBookMode, setIsBookMode] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -675,42 +686,87 @@ export const PostDetail: React.FC = () => {
         return <br key={index} />;
       }
 
-      // Handle images
-      const imageMatch = line.match(/!\[([^]]*)]\(([^)]+)\)/);
-      if (imageMatch) {
-        let [, altText, imageUrl] = imageMatch;
-        imageUrl = (imageUrl || '').trim();
-
-        // Support optional title after the url: ![alt](url "title")
-        const titleMatch = imageUrl.match(/^([^\s"]+)(?:\s+"([^"]+)")?$/);
-        if (titleMatch) {
-          imageUrl = titleMatch[1];
-        }
-
-        // If URL is relative (not starting with http(s) or data: or blob:), prefix with API base if available
-        let src = imageUrl;
-        if (!/^https?:\/\//i.test(src) && !/^data:|^blob:/i.test(src)) {
-          const base = (import.meta.env.VITE_API_BASE_URL || '').toString();
-          if (base) {
-            src = base.replace(/\/$/, '') + '/' + src.replace(/^\//, '');
-          }
-        }
-
+      // Handle markdown images
+      const mdImageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+      if (mdImageRegex.test(line)) {
+        const parts = line.split(mdImageRegex);
         return (
-          <img
-            key={index}
-            src={src}
-            alt={altText || 'Image'}
-            loading="lazy"
-            onError={(e) => { try { (e.currentTarget as HTMLImageElement).style.display = 'none'; } catch { } console.warn('Failed to load image', src); }}
-            style={{
-              maxWidth: '100%',
-              height: 'auto',
-              margin: '1rem 0',
-              borderRadius: '8px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-            }}
-          />
+          <Typography key={index} variant="body1" component="div" sx={{ mb: 1, textAlign: 'center' }}>
+            {parts.map((part, partIndex) => {
+              if (partIndex % 3 === 1) return null; // alt text (we use it in the next step)
+              if (partIndex % 3 === 2) {
+                let imageUrl = part.trim();
+                let altText = parts[partIndex - 1] || 'Image';
+
+                // Support optional title after the url: ![alt](url "title")
+                const titleMatch = imageUrl.match(/^([^\s"]+)(?:\s+"([^"]+)")?$/);
+                if (titleMatch) {
+                  imageUrl = titleMatch[1];
+                  if (titleMatch[2]) altText = titleMatch[2];
+                }
+
+                let src = imageUrl;
+                if (!/^https?:\/\//i.test(src) && !/^data:|^blob:/i.test(src)) {
+                  const base = (import.meta.env.VITE_API_BASE_URL || '').toString();
+                  if (base) {
+                    src = base.replace(/\/$/, '') + '/' + src.replace(/^\//, '');
+                  }
+                }
+
+                return (
+                  <img
+                    key={partIndex}
+                    src={src}
+                    alt={altText}
+                    loading="lazy"
+                    onError={(e) => { try { (e.currentTarget as HTMLImageElement).style.display = 'none'; } catch { } }}
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '600px',
+                      height: 'auto',
+                      margin: '1rem 0',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    }}
+                  />
+                );
+              }
+              // Regular text
+              return part ? <span key={partIndex}>{part}</span> : null;
+            })}
+          </Typography>
+        );
+      }
+
+      // Handle raw image URLs that aren't inside markdown links
+      const rawImageRegex = /(https?:\/\/[^\s"'>]+\.(?:png|jpe?g|gif|webp|svg)(?:\?[^\s"'>]*)?)/i;
+      if (rawImageRegex.test(line) && !line.includes('](')) {
+        const parts = line.split(new RegExp(rawImageRegex, 'gi'));
+        return (
+          <Typography key={index} variant="body1" component="div" sx={{ mb: 1, textAlign: 'center' }}>
+            {parts.map((part, partIndex) => {
+              if (partIndex % 2 === 1) {
+                return (
+                  <img
+                    key={partIndex}
+                    src={part}
+                    alt="Embedded"
+                    loading="lazy"
+                    onError={(e) => { try { (e.currentTarget as HTMLImageElement).style.display = 'none'; } catch { } }}
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '600px',
+                      height: 'auto',
+                      margin: '1rem 0',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    }}
+                  />
+                );
+              }
+              return part ? <span key={partIndex}>{part}</span> : null;
+            })}
+          </Typography>
         );
       }
 
@@ -950,6 +1006,28 @@ export const PostDetail: React.FC = () => {
     ? postData.content
     : 'No content available';
 
+  const getPages = (content: string) => {
+    const blocks = content.split(/\n\s*\n/);
+    const pages: string[] = [];
+    let currentPageContent = '';
+    const CHAR_LIMIT = 900;
+
+    for (const block of blocks) {
+      if ((currentPageContent.length + block.length) > CHAR_LIMIT && currentPageContent.length > 0) {
+        pages.push(currentPageContent);
+        currentPageContent = block;
+      } else {
+        currentPageContent += (currentPageContent ? '\n\n' : '') + block;
+      }
+    }
+    if (currentPageContent) {
+      pages.push(currentPageContent);
+    }
+    return pages.length > 0 ? pages : ['No content available'];
+  };
+
+  const pages = getPages(safePostContent);
+
   // Helper to safely get comment data
   const getCommentData = (comment: CommentDto) => {
     return {
@@ -993,19 +1071,24 @@ export const PostDetail: React.FC = () => {
 
   // @ts-ignore
   return (
-    <div style={{
-      padding: window.innerWidth < 768 ? '16px' : '32px',
-      maxWidth: '1200px',
-      margin: '0 auto'
-    }}>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      style={{
+        padding: isMobile ? '16px' : '32px',
+        maxWidth: '1200px',
+        margin: '0 auto'
+      }}
+    >
       {/* Header */}
-      <div style={{ marginBottom: window.innerWidth < 768 ? '20px' : '32px' }}>
+      <div style={{ marginBottom: isMobile ? '20px' : '32px' }}>
         <div style={{
           display: 'flex',
-          flexDirection: window.innerWidth < 768 ? 'column' : 'row',
-          alignItems: window.innerWidth < 768 ? 'stretch' : 'center',
-          gap: window.innerWidth < 768 ? '12px' : '16px',
-          marginBottom: window.innerWidth < 768 ? '16px' : '24px'
+          flexDirection: isMobile ? 'column' : 'row',
+          alignItems: isMobile ? 'stretch' : 'center',
+          gap: isMobile ? '12px' : '16px',
+          marginBottom: isMobile ? '16px' : '24px'
         }}>
           <Button
             component={Link}
@@ -1031,12 +1114,12 @@ export const PostDetail: React.FC = () => {
                 to={`/dashboard/posts/${postId}/edit`}
                 variant="outlined"
                 startIcon={<Edit />}
-                size={window.innerWidth < 768 ? "small" : "small"}
+                size={isMobile ? "small" : "small"}
                 style={{
                   borderRadius: '10px',
                   borderColor: theme.palette.warning.main,
                   color: theme.palette.warning.main,
-                  fontSize: window.innerWidth < 768 ? '0.75rem' : '0.875rem'
+                  fontSize: isMobile ? '0.75rem' : '0.875rem'
                 }}
               >
                 Edit Post
@@ -1046,12 +1129,12 @@ export const PostDetail: React.FC = () => {
                 disabled={deleteMutation.isPending}
                 variant="outlined"
                 startIcon={<Trash2 />}
-                size={window.innerWidth < 768 ? "small" : "small"}
+                size={isMobile ? "small" : "small"}
                 style={{
                   borderRadius: '10px',
                   borderColor: theme.palette.error.main,
                   color: theme.palette.error.main,
-                  fontSize: window.innerWidth < 768 ? '0.75rem' : '0.875rem'
+                  fontSize: isMobile ? '0.75rem' : '0.875rem'
                 }}
               >
                 Delete Post
@@ -1062,7 +1145,7 @@ export const PostDetail: React.FC = () => {
 
         <div style={{ marginBottom: '16px' }}>
           <h1 style={{
-            fontSize: window.innerWidth < 768 ? '1.875rem' : '2.5rem',
+            fontSize: isMobile ? '1.875rem' : '2.5rem',
             fontWeight: 700,
             color: theme.palette.text.primary,
             margin: '0 0 12px 0',
@@ -1072,9 +1155,9 @@ export const PostDetail: React.FC = () => {
           </h1>
           <div style={{
             display: 'flex',
-            flexDirection: window.innerWidth < 768 ? 'column' : 'row',
-            alignItems: window.innerWidth < 768 ? 'flex-start' : 'center',
-            gap: window.innerWidth < 768 ? '8px' : '16px',
+            flexDirection: isMobile ? 'column' : 'row',
+            alignItems: isMobile ? 'flex-start' : 'center',
+            gap: isMobile ? '8px' : '16px',
             flexWrap: 'wrap'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1266,26 +1349,93 @@ export const PostDetail: React.FC = () => {
         </div>
       </div>
 
+      {/* View Mode Toggle */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+        <Button
+          onClick={() => {
+            setIsBookMode(!isBookMode);
+            setCurrentPage(0);
+          }}
+          startIcon={isBookMode ? <FileText size={18} /> : <BookOpen size={18} />}
+          variant="outlined"
+          size="small"
+          style={{
+            borderRadius: '20px',
+            textTransform: 'none',
+            color: theme.palette.primary.main,
+            borderColor: theme.palette.primary.main
+          }}
+        >
+          {isBookMode ? 'Switch to Scroll View' : 'Book View'}
+        </Button>
+      </div>
+
       {/* Post Content */}
       <LIVBlogCard
         variant="elevated"
-        padding={window.innerWidth < 768 ? "medium" : "large"}
+        padding={isMobile ? "medium" : "large"}
         style={{
-          marginBottom: window.innerWidth < 768 ? '20px' : '32px',
+          marginBottom: isMobile ? '20px' : '32px',
           backgroundColor: isHighlighted ? alpha(theme.palette.success.main, 0.15) : undefined,
-          transition: 'background-color 1s ease'
+          transition: 'background-color 1s ease',
+          minHeight: isBookMode ? '400px' : 'auto',
+          display: 'flex',
+          flexDirection: 'column'
         }}
       >
         {/* Post Body */}
-        <div style={{ marginBottom: '32px' }} onMouseUp={handleTextSelection}>
+        <div style={{ marginBottom: '32px', flex: 1 }} onMouseUp={handleTextSelection}>
           <div style={{
             fontSize: '1.125rem',
             lineHeight: 1.7,
             color: theme.palette.text.primary
           }}>
-            {renderContent(safePostContent)}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={isBookMode ? `page-${currentPage}` : 'scroll'}
+                initial={{ opacity: 0, x: isBookMode ? 10 : 0 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: isBookMode ? -10 : 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {isBookMode ? renderContent(pages[currentPage]) : renderContent(safePostContent)}
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
+
+        {isBookMode && pages.length > 1 && (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginTop: 'auto',
+            paddingTop: '20px',
+            borderTop: `1px solid ${alpha(theme.palette.divider, 0.5)}`
+          }}>
+            <Button
+              disabled={currentPage === 0}
+              onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+              startIcon={<ChevronLeft />}
+              variant="text"
+              style={{ textTransform: 'none' }}
+            >
+              Previous
+            </Button>
+            <Typography variant="body2" color="text.secondary">
+              Page {currentPage + 1} of {pages.length}
+            </Typography>
+            <Button
+              disabled={currentPage === pages.length - 1}
+              onClick={() => setCurrentPage(p => Math.min(pages.length - 1, p + 1))}
+              endIcon={<ChevronRight />}
+              variant="text"
+              style={{ textTransform: 'none' }}
+            >
+              Next
+            </Button>
+          </div>
+        )}
 
         {/* Highlights Display */}
         {highlights.length > 0 && (
@@ -1312,18 +1462,18 @@ export const PostDetail: React.FC = () => {
         <div
           style={{
             display: 'flex',
-            flexDirection: window.innerWidth < 768 ? 'column' : 'row',
-            justifyContent: window.innerWidth < 768 ? 'flex-start' : 'space-between',
-            alignItems: window.innerWidth < 768 ? 'stretch' : 'center',
-            gap: window.innerWidth < 768 ? '16px' : '0px',
-            paddingTop: window.innerWidth < 768 ? '16px' : '24px',
+            flexDirection: isMobile ? 'column' : 'row',
+            justifyContent: isMobile ? 'flex-start' : 'space-between',
+            alignItems: isMobile ? 'stretch' : 'center',
+            gap: isMobile ? '16px' : '0px',
+            paddingTop: isMobile ? '16px' : '24px',
             borderTop: `1px solid ${theme.palette.divider}`
           }}
         >
           <div style={{
             display: 'flex',
-            flexDirection: window.innerWidth < 768 ? 'column' : 'row',
-            gap: window.innerWidth < 768 ? '12px' : '16px'
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: isMobile ? '12px' : '16px'
           }}>
             <LikeButton
               postId={postId}
@@ -1349,13 +1499,13 @@ export const PostDetail: React.FC = () => {
               onClick={() => setShowComments(!showComments)}
               startIcon={<MessageCircle />}
               variant="outlined"
-              size={window.innerWidth < 768 ? "small" : "medium"}
+              size={isMobile ? "small" : "medium"}
               style={{
                 borderRadius: '10px',
                 borderColor: alpha(theme.palette.secondary.main, 0.3),
                 color: theme.palette.secondary.main,
                 backgroundColor: alpha(theme.palette.secondary.main, 0.05),
-                fontSize: window.innerWidth < 768 ? '0.75rem' : '0.875rem'
+                fontSize: isMobile ? '0.75rem' : '0.875rem'
               }}
             >
               {postComments.length} Comments
@@ -1453,12 +1603,12 @@ export const PostDetail: React.FC = () => {
                         variant="contained"
                         disabled={commentMutation.isPending || !commentText.trim()}
                         startIcon={<Send />}
-                        size={window.innerWidth < 768 ? "small" : "medium"}
+                        size={isMobile ? "small" : "medium"}
                         style={{
                           borderRadius: '10px',
-                          padding: window.innerWidth < 768 ? '8px 16px' : '10px 24px',
+                          padding: isMobile ? '8px 16px' : '10px 24px',
                           fontWeight: 600,
-                          fontSize: window.innerWidth < 768 ? '0.75rem' : '0.875rem'
+                          fontSize: isMobile ? '0.75rem' : '0.875rem'
                         }}
                       >
                         {commentMutation.isPending ? 'Posting...' : 'Post Comment'}
@@ -1502,12 +1652,12 @@ export const PostDetail: React.FC = () => {
                 component={Link}
                 to="/auth/login"
                 variant="contained"
-                size={window.innerWidth < 768 ? "medium" : "large"}
+                size={isMobile ? "medium" : "large"}
                 style={{
                   borderRadius: '10px',
-                  padding: window.innerWidth < 768 ? '10px 24px' : '12px 32px',
+                  padding: isMobile ? '10px 24px' : '12px 32px',
                   fontWeight: 600,
-                  fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem'
+                  fontSize: isMobile ? '0.875rem' : '1rem'
                 }}
               >
                 Login to Comment
@@ -1516,11 +1666,16 @@ export const PostDetail: React.FC = () => {
           )}
 
           {/* Comments List */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '20px'
-          }}>
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px'
+            }}
+          >
             {commentsLoading ? (
               <div style={{ textAlign: 'center', padding: '48px 24px' }}>
                 <CircularProgress size={32} />
@@ -1563,7 +1718,7 @@ export const PostDetail: React.FC = () => {
                 />
               ))
             )}
-          </div>
+          </motion.div>
         </LIVBlogCard>
       )}
 
@@ -1576,6 +1731,6 @@ export const PostDetail: React.FC = () => {
           onClose={() => setIsChatOpen(false)}
         />
       )}
-    </div>
+    </motion.div>
   );
 };

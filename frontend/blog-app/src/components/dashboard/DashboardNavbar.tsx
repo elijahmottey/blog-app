@@ -3,7 +3,6 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   Menu,
   Search,
-  Bell,
   User,
   LogOut,
   Home,
@@ -12,10 +11,7 @@ import {
   Users,
   ChevronDown,
   HelpCircle,
-  Moon,
-  Sun,
   Shield,
-  Bot,
   PenSquare
 } from 'lucide-react';
 import {
@@ -318,11 +314,6 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
                <Tooltip title="Create Post">
                  <IconButton component={Link} to="/dashboard/posts/create" color="inherit">
                    <PenSquare size={20} />
-                 </IconButton>
-               </Tooltip>
-               <Tooltip title="AI Chat">
-                 <IconButton component={Link} to="/dashboard/ai-chat" color="inherit">
-                   <Bot size={20} />
                  </IconButton>
                </Tooltip>
                { (isMobile || (!isDesktop && !isMobile)) && (

@@ -21,8 +21,8 @@ public class PostViewServiceImpl implements PostViewService {
     private final UsersRepository usersRepository;
 
     public PostViewServiceImpl(PostViewRepository postViewRepository,
-                               PostRepository postRepository,
-                               UsersRepository usersRepository) {
+            PostRepository postRepository,
+            UsersRepository usersRepository) {
         this.postViewRepository = postViewRepository;
         this.postRepository = postRepository;
         this.usersRepository = usersRepository;
@@ -32,6 +32,9 @@ public class PostViewServiceImpl implements PostViewService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || auth.getName() == null || "anonymousUser".equals(auth.getName())) {
             return null;
+        }
+        if (auth.getPrincipal() instanceof Users) {
+            return (Users) auth.getPrincipal();
         }
         return usersRepository.findByEmail(auth.getName()).orElse(null);
     }

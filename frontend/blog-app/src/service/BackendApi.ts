@@ -173,6 +173,14 @@ export default class BackendApi {
         return response;
     }
 
+    static async forgotPassword(email: string) {
+        return this.post<ApiResponse<any>>("/auth/forgot-password", { email });
+    }
+
+    static async resetPassword(data: { token: string, newPassword: string }) {
+        return this.post<ApiResponse<any>>("/auth/reset-password", data);
+    }
+
     static async refreshAccessToken() {
         // Prevent multiple simultaneous refresh calls
         if (this.refreshTokenPromise) {
