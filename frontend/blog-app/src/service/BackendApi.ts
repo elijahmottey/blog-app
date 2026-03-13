@@ -39,6 +39,68 @@ export type {
     ApiResponse
 };
 
+// ---- QUERY KEYS FACTORY ----
+// These are for TanStack Query to manage cache keys consistently
+export const queryKeys = {
+    auth: {
+        all: ['auth'] as const,
+        session: () => [...queryKeys.auth.all, 'session'] as const,
+        roles: () => [...queryKeys.auth.all, 'roles'] as const,
+    },
+    users: {
+        all: ['users'] as const,
+        lists: () => [...queryKeys.users.all, 'list'] as const,
+        list: (page: number, size: number) => [...queryKeys.users.lists(), { page, size }] as const,
+        details: () => [...queryKeys.users.all, 'detail'] as const,
+        detail: (id: number) => [...queryKeys.users.details(), id] as const,
+        profile: () => [...queryKeys.users.all, 'profile'] as const,
+        posts: (userId: number) => [...queryKeys.users.all, 'posts', userId] as const,
+    },
+    posts: {
+        all: ['posts'] as const,
+        lists: () => [...queryKeys.posts.all, 'list'] as const,
+        list: (page: number, size: number) => [...queryKeys.posts.lists(), { page, size }] as const,
+        details: () => [...queryKeys.posts.all, 'detail'] as const,
+        detail: (id: number) => [...queryKeys.posts.details(), id] as const,
+        byCategory: (category: string, page: number, size: number) =>
+            [...queryKeys.posts.all, 'category', category, { page, size }] as const,
+        bookmarked: (page: number, size: number) =>
+            [...queryKeys.posts.all, 'bookmarked', { page, size }] as const,
+    },
+    comments: {
+        all: ['comments'] as const,
+        lists: () => [...queryKeys.comments.all, 'list'] as const,
+        list: (page: number, size: number) => [...queryKeys.comments.lists(), { page, size }] as const,
+        byPost: (postId: number, page: number, size: number) =>
+            [...queryKeys.comments.all, 'post', postId, { page, size }] as const,
+        details: () => [...queryKeys.comments.all, 'detail'] as const,
+        detail: (id: number) => [...queryKeys.comments.details(), id] as const,
+    },
+    notifications: {
+        all: ['notifications'] as const,
+        list: (page: number, size: number) => [...queryKeys.notifications.all, { page, size }] as const,
+        unreadCount: () => [...queryKeys.notifications.all, 'unread'] as const,
+    },
+    reports: {
+        all: ['reports'] as const,
+        list: (page: number, size: number) => [...queryKeys.reports.all, { page, size }] as const,
+    },
+    highlights: {
+        all: ['highlights'] as const,
+        byPost: (postId: number) => [...queryKeys.highlights.all, 'post', postId] as const,
+    },
+    analytics: {
+        admin: () => ['analytics', 'admin'] as const,
+        my: () => ['analytics', 'my'] as const,
+    },
+    chat: {
+        history: (userId: number) => ['chat', 'history', userId] as const,
+    },
+    categories: {
+        all: ['categories'] as const,
+    },
+};
+
 // ---- AXIOS CLIENT ----
 const apiClient = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -55,6 +117,12 @@ export default class BackendApi {
 
     static setSessionExpiredHandler(handler: () => void) {
         this.onSessionExpired = handler;
+    }
+
+    static triggerSessionExpiration() {
+        if (this.onSessionExpired) {
+            this.onSessionExpired();
+        }
     }
 
     // ---- CSRF TOKEN HANDLING ----
@@ -484,16 +552,11 @@ export default class BackendApi {
     static async updateHighlightNote(highlightId: number, note: string) {
         return this.put<ApiResponse<HighlightDto>>(`/highlights/${highlightId}/note`, note);
     }
-    
-    // ---- EXPOSE CALLER FOR SESSION EXPIRATION ----
-    static triggerSessionExpiration() {
-        if (this.onSessionExpired) {
-            this.onSessionExpired();
-        }
-    }
 }
 
 // ---- AXIOS INTERCEPTORS ----
+
+// Request interceptor
 apiClient.interceptors.request.use(
     (config) => {
         if (config.method && config.method.toUpperCase() !== 'GET') {
@@ -507,64 +570,64 @@ apiClient.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
+// Response interceptor with concurrency handling
 let isRefreshing = false;
-let refreshSubscribers = [];
+let failedQueue: Array<{
+    resolve: (value?: any) => void;
+    reject: (reason?: any) => void;
+}> = [];
 
-function subscribeTokenRefresh(callback) {
-    refreshSubscribers.push(callback);
-}
+const processQueue = (error: any, token: any = null) => {
+    failedQueue.forEach((prom) => {
+        if (error) {
+            prom.reject(error);
+        } else {
+            prom.resolve(token);
+        }
+    });
 
-function onRefreshed() {
-    refreshSubscribers.forEach(callback => callback());
-    refreshSubscribers = [];
-}
+    failedQueue = [];
+};
 
 apiClient.interceptors.response.use(
-    response => response,
-    async error => {
-
+    (response) => response,
+    async (error) => {
         const originalRequest = error.config;
 
         if (originalRequest.headers?.['X-Skip-Interceptor']) {
             return Promise.reject(error);
         }
 
-        if (error.response?.status !== 401) {
-            return Promise.reject(error);
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            if (isRefreshing) {
+                return new Promise(function (resolve, reject) {
+                    failedQueue.push({ resolve, reject });
+                })
+                    .then((token) => {
+                        return apiClient(originalRequest);
+                    })
+                    .catch((err) => {
+                        return Promise.reject(err);
+                    });
+            }
+
+            originalRequest._retry = true;
+            isRefreshing = true;
+
+            try {
+                await BackendApi.refreshAccessToken();
+                processQueue(null, true);
+                return apiClient(originalRequest);
+            } catch (refreshError) {
+                processQueue(refreshError, null);
+                BackendApi.clearTokens();
+                BackendApi.triggerSessionExpiration();
+                return Promise.reject(refreshError);
+            } finally {
+                isRefreshing = false;
+            }
         }
 
-        if (originalRequest._retry) {
-            return Promise.reject(error);
-        }
-
-        originalRequest._retry = true;
-
-        if (isRefreshing) {
-            return new Promise(resolve => {
-                subscribeTokenRefresh(() => {
-                    resolve(apiClient(originalRequest));
-                });
-            });
-        }
-
-        isRefreshing = true;
-
-        try {
-            await BackendApi.refreshAccessToken();
-
-            isRefreshing = false;
-            onRefreshed();
-
-            return apiClient(originalRequest);
-
-        } catch (refreshError) {
-
-            isRefreshing = false;
-
-            BackendApi.clearTokens();
-            BackendApi.triggerSessionExpiration();
-
-            return Promise.reject(refreshError);
-        }
+        return Promise.reject(error);
     }
 );

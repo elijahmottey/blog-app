@@ -162,10 +162,10 @@ const Footer = () => {
 
                     <p className="text-sm" style={{ color: theme.palette.text.secondary }}>
                         Built with{" "}
-                        <span className="font-medium" style={{ color: theme.palette.primary.main }}>React</span>{" "}
+                        <span className="font-medium" style={{ color: theme.palette.primary.main }}>Love</span>{" "}
                         &{" "}
                         <span className="font-medium" style={{ color: theme.palette.primary.main }}>
-                            Material-UI
+                            God
                         </span>
                     </p>
                 </div>
