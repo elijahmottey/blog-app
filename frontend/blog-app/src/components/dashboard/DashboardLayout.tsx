@@ -41,10 +41,11 @@ export const DashboardLayout: React.FC = () => {
     <div
       className="aws-font"
       style={{
-        minHeight: '100vh',
+        height: '100vh',
         backgroundColor: theme.palette.background.default,
         display: 'flex',
-        fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+        fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        overflow: 'hidden' // Ensure the entire viewport is used and scrolling is handled internally
       }}
     >
       {isPersistent ? (
@@ -57,19 +58,20 @@ export const DashboardLayout: React.FC = () => {
         <DashboardSidebar isOpen={isSidebarOpen} onClose={closeSidebar} isMobile={true} />
       )}
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, transition: 'all 0.3s ease' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, transition: 'all 0.3s ease', height: '100%' }}>
         <DashboardNavbar onMenuClick={toggleSidebar} isSidebarOpen={isSidebarOpen} isMobile={!isPersistent} isDesktop={isWide} />
 
-        <main style={{ flex: 1, overflowX: 'hidden', display: 'flex' }}>
-          <div style={{ flex: 1, overflowY: 'auto', transition: 'all 0.3s ease' }}>
+        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+          <main style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
             <div className="aws-spacing-y-lg">
               <LIVBlogLayout.Container>
                 <Outlet />
               </LIVBlogLayout.Container>
             </div>
-          </div>
+          </main>
 
           {/* AI Chat Side Panel */}
+          {/* We only render this container if it's open or transitioning, but using width/opacity for transition */}
           <div style={{
             width: isAiChatOpen ? (isWide ? '400px' : '350px') : '0px',
             opacity: isAiChatOpen ? 1 : 0,
@@ -78,14 +80,17 @@ export const DashboardLayout: React.FC = () => {
             borderLeft: isAiChatOpen ? `1px solid ${theme.palette.divider}` : 'none',
             backgroundColor: theme.palette.background.paper,
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            height: '100%', // Full height of the parent container
+            position: 'relative' // Ensure it's positioned correctly within the flex container
           }}>
-            {isAiChatOpen && <AIChat variant="sidebar" onClose={() => setIsAiChatOpen(false)} />}
+            {/* Render AIChat only when width is significant to avoid layout thrashing, or keep mounted for state preservation */}
+            <AIChat variant="sidebar" onClose={() => setIsAiChatOpen(false)} />
           </div>
-        </main>
+        </div>
       </div>
 
-      <div style={{ flex: isWide ? '0 0 72px' : '0 0 0', display: isWide ? 'block' : 'none' }}>
+      <div style={{ flex: isWide ? '0 0 72px' : '0 0 0', display: isWide ? 'block' : 'none', height: '100%' }}>
         <DashboardRightRail isDesktop={isWide} onToggleAiChat={toggleAiChat} isAiChatOpen={isAiChatOpen} />
       </div>
     </div>

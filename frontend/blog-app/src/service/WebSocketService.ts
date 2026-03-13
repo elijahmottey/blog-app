@@ -73,7 +73,6 @@ class WebSocketService {
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
       onConnect: () => {
-        console.log('WebSocket Connected');
         this.subscribeToTopics();
       },
       onStompError: (frame) => {

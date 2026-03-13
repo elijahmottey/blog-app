@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Send,
-
   MessageCircle,
   X,
   Minimize2,
@@ -29,7 +28,6 @@ import {
   Chip,
   Tooltip,
   CircularProgress,
-
   ListItemText,
   Divider,
   Fab,
@@ -728,11 +726,13 @@ export const AIChat: React.FC<AIChatProps> = ({
       <Box
         sx={(theme) => ({
           width: '100%',
-          height: '100%',
+          height: '100%', // Use full height from container
           display: 'flex',
           flexDirection: 'column',
-          background: `rgba(255, 255, 255, 0.5)`, // transparent to show layout background
-          flex: 1
+          background: theme.palette.background.paper, 
+          // Removed fixed positioning for sidebar variant
+          borderLeft: `1px solid ${theme.palette.divider}`,
+          // boxShadow: '-4px 0 20px rgba(0,0,0,0.1)', // Removed shadow as it's now part of layout
         })}
       >
         {containerContent}
@@ -750,7 +750,7 @@ export const AIChat: React.FC<AIChatProps> = ({
           right: 24,
           zIndex: 9999,
           width: { xs: 'calc(100vw - 50px)', sm: 420, md: 500 },
-          height: 550,
+          height: 600,
           display: 'flex',
           flexDirection: 'column',
           borderRadius: 2,
