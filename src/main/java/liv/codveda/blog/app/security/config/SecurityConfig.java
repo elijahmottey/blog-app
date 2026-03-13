@@ -48,7 +48,7 @@ public class SecurityConfig {
                                                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                                                 .csrfTokenRequestHandler(requestHandler)
                                                 .ignoringRequestMatchers("/api/v1/auth/**", "/oauth2/**",
-                                                                "/login/oauth2/**", "/api/v1/post", "/ws/**"))
+                                                                "/login/oauth2/**", "/api/v1/post", "/ws/**", "/api/v1/chat/**"))
                                 .cors(Customizer.withDefaults())
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@RequestMapping("/api/v1/chat")
 @RequiredArgsConstructor
 @Slf4j
 public class ChatController {
@@ -40,7 +41,6 @@ public class ChatController {
             if (p instanceof Users) {
                 senderId = ((Users) p).getId();
             } else if (p instanceof String) {
-                // If principal is just a username (email), fetch the user
                 String email = (String) p;
                 try {
                      senderId = userService.getUserByEmail(email).getId();
@@ -82,9 +82,8 @@ public class ChatController {
          chatService.markMessagesAsRead(readerId, senderId);
     }
 
-    // REST API for chat history (Keep this for initial load)
-    @GetMapping("/api/chat/history/{userId}")
-    public ResponseEntity<List<ChatMessageResponse>> getChatHistory(
+    @GetMapping("/history/{userId}")
+    public ResponseEntity<?> getChatHistory(
             @PathVariable Long userId,
             @AuthenticationPrincipal Users currentUser) {
 
@@ -92,19 +91,28 @@ public class ChatController {
             return ResponseEntity.status(401).build();
         }
 
-        log.info("Fetching chat history between user {} and user {}", currentUser.getId(), userId);
-        List<ChatMessageResponse> history = chatService.getChatHistory(currentUser.getId(), userId);
-        return ResponseEntity.ok(history);
+        try {
+            log.info("Fetching chat history between user {} and user {}", currentUser.getId(), userId);
+            List<ChatMessageResponse> history = chatService.getChatHistory(currentUser.getId(), userId);
+            return ResponseEntity.ok(history);
+        } catch (Exception e) {
+            log.error("Error fetching chat history", e);
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
     }
 
-    // REST API to get all conversations for the current user
-    @GetMapping("/api/chat/conversations")
-    public ResponseEntity<List<Map<String, Object>>> getConversations(@AuthenticationPrincipal Users currentUser) {
+    @GetMapping("/conversations")
+    public ResponseEntity<?> getConversations(@AuthenticationPrincipal Users currentUser) {
         if (currentUser == null || currentUser.getId() == null) {
             return ResponseEntity.status(401).build();
         }
         
-        List<Map<String, Object>> conversations = chatService.getConversations(currentUser.getId());
-        return ResponseEntity.ok(conversations);
+        try {
+            List<Map<String, Object>> conversations = chatService.getConversations(currentUser.getId());
+            return ResponseEntity.ok(conversations);
+        } catch (Exception e) {
+            log.error("Error fetching conversations", e);
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
     }
 }

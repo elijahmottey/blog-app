@@ -90,18 +90,23 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         String authHeader = authorization.getFirst();
                         if (authHeader.startsWith("Bearer ")) {
                             accessToken = authHeader.substring(7);
+                        } else if (!authHeader.equals("Bearer undefined") && !authHeader.equals("Bearer null")) {
+                            // Sometimes clients send "Bearer " without a token, or just the token.
+                            // If it's not starting with Bearer, it might just be the token itself if incorrectly formatted by client.
+                            accessToken = authHeader;
                         }
                     }
 
-                    // Fallback to cookie if header is not present
-                    if (accessToken == null) {
+                    // Fallback to cookie if header is not present or invalid
+                    if (accessToken == null || accessToken.trim().isEmpty() || accessToken.equals("undefined") || accessToken.equals("null")) {
                         Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
                         if (sessionAttributes != null && sessionAttributes.containsKey("accessToken")) {
                             accessToken = (String) sessionAttributes.get("accessToken");
                         }
                     }
 
-                    if (accessToken != null) {
+                    // Final check to ensure we don't try to parse literal "undefined" strings from JS cookies
+                    if (accessToken != null && !accessToken.trim().isEmpty() && !accessToken.equals("undefined") && !accessToken.equals("null")) {
                         try {
                             String username = jwtUtils.extractUsername(accessToken);
                             if (username != null) {
@@ -115,15 +120,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                                     log.info("WebSocket authenticated user: {}", username);
                                 } else {
                                     log.warn("Invalid access token for WebSocket connection");
-                                    // return null; // Let it pass for now to debug, but in prod we should return null
                                 }
                             }
                         } catch (Exception e) {
-                            log.error("WebSocket authentication failed: {}", e.getMessage());
-                           // return null; 
+                            // Only log as debug/warn to avoid spamming the logs when unauthenticated users connect
+                            log.debug("WebSocket authentication failed: {}", e.getMessage());
                         }
                     } else {
-                        log.warn("No access token provided for WebSocket connection");
+                        log.debug("No valid access token provided for WebSocket connection");
                     }
                 }
                 return message;

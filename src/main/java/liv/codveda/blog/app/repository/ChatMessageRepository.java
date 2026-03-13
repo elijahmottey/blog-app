@@ -10,12 +10,15 @@ import java.util.List;
 
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
 
-    @Query("SELECT m FROM ChatMessage m WHERE (m.sender = :user1 AND m.recipient = :user2) OR (m.sender = :user2 AND m.recipient = :user1) ORDER BY m.timestamp ASC")
-    List<ChatMessage> findChatHistory(@Param("user1") Users user1, @Param("user2") Users user2);
+    @Query("SELECT m FROM ChatMessage m WHERE (m.sender.id = :user1Id AND m.recipient.id = :user2Id) OR (m.sender.id = :user2Id AND m.recipient.id = :user1Id) ORDER BY m.timestamp ASC")
+    List<ChatMessage> findChatHistory(@Param("user1Id") Long user1Id, @Param("user2Id") Long user2Id);
 
-    List<ChatMessage> findBySenderAndRecipientAndIsReadFalse(Users sender, Users recipient);
+    @Query("SELECT m FROM ChatMessage m WHERE m.sender.id = :senderId AND m.recipient.id = :recipientId AND m.isRead = false")
+    List<ChatMessage> findUnreadMessages(@Param("senderId") Long senderId, @Param("recipientId") Long recipientId);
 
-    @Query("SELECT DISTINCT CASE WHEN m.sender = :user THEN m.recipient ELSE m.sender END " +
-           "FROM ChatMessage m WHERE m.sender = :user OR m.recipient = :user")
-    List<Users> findConversationPartners(@Param("user") Users user);
+    @Query("SELECT DISTINCT m.recipient.id FROM ChatMessage m WHERE m.sender.id = :userId")
+    List<Long> findPartnerIdsWhereUserIsSender(@Param("userId") Long userId);
+
+    @Query("SELECT DISTINCT m.sender.id FROM ChatMessage m WHERE m.recipient.id = :userId")
+    List<Long> findPartnerIdsWhereUserIsRecipient(@Param("userId") Long userId);
 }

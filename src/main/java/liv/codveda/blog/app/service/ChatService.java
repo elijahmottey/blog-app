@@ -12,8 +12,11 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -77,13 +80,7 @@ public class ChatService {
         public void markMessagesAsRead(Long readerId, Long senderId) {
                 if (readerId == null || senderId == null) return;
                 
-                Users reader = userRepository.findById(readerId)
-                                .orElseThrow(() -> new RuntimeException("Reader not found: " + readerId));
-                Users sender = userRepository.findById(senderId)
-                                .orElseThrow(() -> new RuntimeException("Sender not found: " + senderId));
-
-                List<ChatMessage> unreadMessages = chatMessageRepository.findBySenderAndRecipientAndIsReadFalse(sender,
-                                reader);
+                List<ChatMessage> unreadMessages = chatMessageRepository.findUnreadMessages(senderId, readerId);
 
                 if (unreadMessages.isEmpty()) {
                         return;
@@ -99,8 +96,6 @@ public class ChatService {
                 String destination = "/topic/messages/" + senderId;
                 log.info("Sending read receipt notification to destination: {}", destination);
 
-                // We can send a specialized object or just resend the updated messages.
-                // For simplicity, we send a read receipt notification map.
                 java.util.Map<String, Object> receipt = new java.util.HashMap<>();
                 receipt.put("type", "READ_RECEIPT");
                 receipt.put("readerId", readerId);
@@ -118,13 +113,7 @@ public class ChatService {
                     return List.of();
                 }
 
-                Users user1 = userRepository.findById(user1Id)
-                                .orElseThrow(() -> new RuntimeException("User not found: " + user1Id));
-
-                Users user2 = userRepository.findById(user2Id)
-                                .orElseThrow(() -> new RuntimeException("User not found: " + user2Id));
-
-                return chatMessageRepository.findChatHistory(user1, user2)
+                return chatMessageRepository.findChatHistory(user1Id, user2Id)
                                 .stream()
                                 .map(this::mapToResponse)
                                 .collect(Collectors.toList());
@@ -132,22 +121,24 @@ public class ChatService {
 
         @Transactional(readOnly = true)
         public List<Map<String, Object>> getConversations(Long userId) {
-                Users user = userRepository.findById(userId)
-                                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+                // Find all unique user IDs that the current user has chatted with
+                Set<Long> partnerIds = new HashSet<>();
+                partnerIds.addAll(chatMessageRepository.findPartnerIdsWhereUserIsSender(userId));
+                partnerIds.addAll(chatMessageRepository.findPartnerIdsWhereUserIsRecipient(userId));
 
-                List<Users> partners = chatMessageRepository.findConversationPartners(user);
+                List<Users> partners = userRepository.findAllById(partnerIds);
 
                 return partners.stream().map(partner -> {
-                    // Count unread messages from this partner
-                    List<ChatMessage> unread = chatMessageRepository.findBySenderAndRecipientAndIsReadFalse(partner, user);
+                    // Count unread messages from this partner to the current user
+                    List<ChatMessage> unread = chatMessageRepository.findUnreadMessages(partner.getId(), userId);
                     
-                    return Map.of(
-                        "id", partner.getId(),
-                        "name", partner.getName() != null ? partner.getName() : "Unknown",
-                        "email", partner.getEmail() != null ? partner.getEmail() : "",
-                        "avatar", partner.getAvatar() != null ? partner.getAvatar() : "",
-                        "unreadCount", unread.size()
-                    );
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", partner.getId());
+                    map.put("name", partner.getName() != null ? partner.getName() : "Unknown");
+                    map.put("email", partner.getEmail() != null ? partner.getEmail() : "");
+                    map.put("avatar", partner.getAvatar() != null ? partner.getAvatar() : "");
+                    map.put("unreadCount", unread.size());
+                    return map;
                 }).collect(Collectors.toList());
         }
 

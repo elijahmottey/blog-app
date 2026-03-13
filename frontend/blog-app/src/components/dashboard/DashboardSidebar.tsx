@@ -10,7 +10,8 @@ import {
   ChevronDown,
   ChevronRight,
   Bot,
-  Bookmark
+  Bookmark,
+  MessageCircle
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Typography } from "@mui/material";
@@ -57,6 +58,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onCl
         { name: 'Drafts', href: '/dashboard/drafts', icon: FileText },
       ],
     },
+    { name: 'Messages', href: '/dashboard/messages', icon: MessageCircle },
     { name: 'LIVSave', href: '/dashboard/livsave', icon: Bookmark },
     { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
     { name: 'Comments', href: '/dashboard/comments', icon: MessageSquare },

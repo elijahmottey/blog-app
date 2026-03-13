@@ -95,7 +95,7 @@ public class JWTUtils {
                     .parseSignedClaims(token)
                     .getPayload();
         } catch (ExpiredJwtException e) {
-            log.warn("Token expired: {}", e.getMessage());
+            log.debug("Token expired: {}", e.getMessage());
             throw e;
         } catch (SignatureException e) {
             // Try with refresh token secret if access token secret fails
@@ -116,7 +116,7 @@ public class JWTUtils {
         try {
             return validateToken(token, userDetails, secretKey, "ACCESS");
         } catch (Exception e) {
-            log.warn("Access token validation failed: {}", e.getMessage());
+            log.debug("Access token validation failed: {}", e.getMessage());
             return false;
         }
     }
@@ -125,7 +125,7 @@ public class JWTUtils {
         try {
             return validateToken(token, userDetails, refreshSecretKey, "REFRESH");
         } catch (Exception e) {
-            log.warn("Refresh token validation failed: {}", e.getMessage());
+            log.debug("Refresh token validation failed: {}", e.getMessage());
             return false;
         }
     }
@@ -146,7 +146,7 @@ public class JWTUtils {
                     !expiration.before(new Date()) &&
                     tokenType.equals(actualTokenType);
         } catch (Exception e) {
-            log.warn("Token validation failed: {}", e.getMessage());
+            log.debug("Token validation failed: {}", e.getMessage());
             return false;
         }
 
