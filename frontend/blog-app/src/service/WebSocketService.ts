@@ -129,11 +129,22 @@ class WebSocketService {
   sendChatMessage(message: { recipientId: number; content: string; postId?: number }) {
     if (this.client?.connected) {
       this.client.publish({
-        destination: '/app/chat', // Make sure this matches backend @MessageMapping
+        destination: '/app/chat.send', // Matches @MessageMapping("/chat.send") in backend
+        headers: { 'content-type': 'application/json' },
         body: JSON.stringify(message),
       });
     } else {
       console.warn('Cannot send message: WebSocket not connected');
+    }
+  }
+
+  markMessagesAsRead(senderId: number) {
+    if (this.client?.connected) {
+      this.client.publish({
+        destination: '/app/chat.read', // Matches @MessageMapping("/chat.read") in backend
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(senderId), // Only need senderId
+      });
     }
   }
 

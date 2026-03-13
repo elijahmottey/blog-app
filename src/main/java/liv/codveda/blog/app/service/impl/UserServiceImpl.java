@@ -99,6 +99,11 @@ public class UserServiceImpl implements UserService {
                         new NotFoundException("user not found with email: " + email));
     }
 
+    // Helper method for internal usage (not exposed in interface) or expose it if needed
+    public Users getUserByEmail(String email) {
+        return getMyInfo(email);
+    }
+
     @Override
     @Cacheable(value = "userTotal")
     public Integer getUserTotal() {

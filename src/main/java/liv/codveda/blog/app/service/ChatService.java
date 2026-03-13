@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,12 +55,20 @@ public class ChatService {
                 // Send via WebSocket to specific user queue (recipient)
                 String recipientDestination = "/topic/messages/" + recipient.getId();
                 log.info("Sending message to recipient destination: {}", recipientDestination);
-                messagingTemplate.convertAndSend(recipientDestination, response);
+                try {
+                    messagingTemplate.convertAndSend(recipientDestination, response);
+                } catch (Exception e) {
+                    log.error("Failed to send WebSocket message to recipient: {}", e.getMessage());
+                }
 
-                // OPTIONAL: Send back to sender as confirmation (so they see it on other devices instantly)
+                // Send back to sender as confirmation (so they see it on other devices instantly)
                 String senderDestination = "/topic/messages/" + sender.getId();
                 log.info("Sending message back to sender destination: {}", senderDestination);
-                messagingTemplate.convertAndSend(senderDestination, response);
+                try {
+                    messagingTemplate.convertAndSend(senderDestination, response);
+                } catch (Exception e) {
+                    log.error("Failed to send WebSocket message to sender: {}", e.getMessage());
+                }
 
                 return response;
         }
@@ -96,7 +105,11 @@ public class ChatService {
                 receipt.put("type", "READ_RECEIPT");
                 receipt.put("readerId", readerId);
 
-                messagingTemplate.convertAndSend(destination, (Object) receipt);
+                try {
+                    messagingTemplate.convertAndSend(destination, (Object) receipt);
+                } catch (Exception e) {
+                    log.error("Failed to send WebSocket read receipt: {}", e.getMessage());
+                }
         }
 
         @Transactional(readOnly = true)
@@ -115,6 +128,27 @@ public class ChatService {
                                 .stream()
                                 .map(this::mapToResponse)
                                 .collect(Collectors.toList());
+        }
+
+        @Transactional(readOnly = true)
+        public List<Map<String, Object>> getConversations(Long userId) {
+                Users user = userRepository.findById(userId)
+                                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+
+                List<Users> partners = chatMessageRepository.findConversationPartners(user);
+
+                return partners.stream().map(partner -> {
+                    // Count unread messages from this partner
+                    List<ChatMessage> unread = chatMessageRepository.findBySenderAndRecipientAndIsReadFalse(partner, user);
+                    
+                    return Map.of(
+                        "id", partner.getId(),
+                        "name", partner.getName() != null ? partner.getName() : "Unknown",
+                        "email", partner.getEmail() != null ? partner.getEmail() : "",
+                        "avatar", partner.getAvatar() != null ? partner.getAvatar() : "",
+                        "unreadCount", unread.size()
+                    );
+                }).collect(Collectors.toList());
         }
 
         private ChatMessageResponse mapToResponse(ChatMessage message) {

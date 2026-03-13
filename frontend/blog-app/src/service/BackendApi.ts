@@ -95,6 +95,7 @@ export const queryKeys = {
     },
     chat: {
         history: (userId: number) => ['chat', 'history', userId] as const,
+        conversations: () => ['chat', 'conversations'] as const,
     },
     categories: {
         all: ['categories'] as const,
@@ -444,6 +445,10 @@ export default class BackendApi {
     // ---- CHAT HISTORY ----
     static async getChatHistory(userId: number) {
         return this.get<any[]>(`/chat/history/${userId}`);
+    }
+    
+    static async getChatConversations() {
+        return this.get<any[]>(`/chat/conversations`);
     }
 
     static async sendChatMessage(messageData: { recipientId: number; content: string; postId?: number }) {
