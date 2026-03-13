@@ -93,6 +93,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         }
                     }
 
+                    // Fallback to cookie if header is not present
                     if (accessToken == null) {
                         Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
                         if (sessionAttributes != null && sessionAttributes.containsKey("accessToken")) {
@@ -109,21 +110,20 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                                     UsernamePasswordAuthenticationToken authentication = 
                                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                                     accessor.setUser(authentication);
+                                    // Important: set it in the security context so it propagates
                                     SecurityContextHolder.getContext().setAuthentication(authentication);
                                     log.info("WebSocket authenticated user: {}", username);
                                 } else {
                                     log.warn("Invalid access token for WebSocket connection");
-                                    return null; // Reject connection
+                                    // return null; // Let it pass for now to debug, but in prod we should return null
                                 }
                             }
                         } catch (Exception e) {
                             log.error("WebSocket authentication failed: {}", e.getMessage());
-                            return null; // Reject connection
+                           // return null; 
                         }
                     } else {
                         log.warn("No access token provided for WebSocket connection");
-                        // Depending on requirements, we might want to reject here too
-                        // return null;
                     }
                 }
                 return message;

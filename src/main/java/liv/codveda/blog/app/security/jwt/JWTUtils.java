@@ -21,8 +21,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class JWTUtils {
-    private static final long ACCESS_TOKEN_EXPIRATION = 3600000L; // 1 hour
+    // 15 minutes access token expiration as requested
+    private static final long ACCESS_TOKEN_EXPIRATION = 900000L; 
     private static final long REFRESH_TOKEN_EXPIRATION = 604800000L; // 1 week
+    
     private final SecretKey secretKey;
     private final SecretKey refreshSecretKey;
 
@@ -33,30 +35,34 @@ public class JWTUtils {
         // Better way to handle keys in JJWT 0.12.x
         this.secretKey = Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
         this.refreshSecretKey = Keys.hmacShaKeyFor(refreshSecretString.getBytes(StandardCharsets.UTF_8));
-
     }
 
 
     public String generateAccessToken(UserDetails userDetails) {
-        return generateToken(userDetails, secretKey, ACCESS_TOKEN_EXPIRATION);
+        return generateToken(userDetails, secretKey, ACCESS_TOKEN_EXPIRATION, "ACCESS");
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
-        return generateToken(userDetails, refreshSecretKey, REFRESH_TOKEN_EXPIRATION);
+        return generateToken(userDetails, refreshSecretKey, REFRESH_TOKEN_EXPIRATION, "REFRESH");
     }
 
-    private String generateToken(UserDetails userDetails, SecretKey key, long expiration) {
+    private String generateToken(UserDetails userDetails, SecretKey key, long expiration, String tokenType) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("authorities", userDetails.getAuthorities().stream()
+        List<String> authorities = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList()));
-        claims.put("tokenType", expiration == ACCESS_TOKEN_EXPIRATION ? "ACCESS" : "REFRESH");
+                .collect(Collectors.toList());
+        
+        claims.put("authorities", authorities);
+        claims.put("tokenType", tokenType);
+        
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expiration);
 
         return Jwts.builder()
                 .claims(claims)
                 .subject(userDetails.getUsername())
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .issuedAt(now)
+                .expiration(expiryDate)
                 .id(UUID.randomUUID().toString())
                 .signWith(key)
                 .compact();
@@ -149,5 +155,4 @@ public class JWTUtils {
     public Instant extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration).toInstant();
     }
-
 }

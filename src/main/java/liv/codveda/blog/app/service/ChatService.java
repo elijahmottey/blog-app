@@ -26,6 +26,10 @@ public class ChatService {
 
         @Transactional
         public ChatMessageResponse processMessage(Long senderId, ChatMessageRequest request) {
+                if (senderId == null) {
+                    throw new IllegalArgumentException("Sender ID cannot be null");
+                }
+                
                 log.info("Processing chat message from {} to {}", senderId, request.getRecipientId());
 
                 Users sender = userRepository.findById(senderId)
@@ -47,16 +51,23 @@ public class ChatService {
 
                 ChatMessageResponse response = mapToResponse(savedMessage);
 
-                // Send via WebSocket to specific user queue
-                String destination = "/topic/messages/" + recipient.getId();
-                log.info("Sending message to destination: {}", destination);
-                messagingTemplate.convertAndSend(destination, response);
+                // Send via WebSocket to specific user queue (recipient)
+                String recipientDestination = "/topic/messages/" + recipient.getId();
+                log.info("Sending message to recipient destination: {}", recipientDestination);
+                messagingTemplate.convertAndSend(recipientDestination, response);
+
+                // OPTIONAL: Send back to sender as confirmation (so they see it on other devices instantly)
+                String senderDestination = "/topic/messages/" + sender.getId();
+                log.info("Sending message back to sender destination: {}", senderDestination);
+                messagingTemplate.convertAndSend(senderDestination, response);
 
                 return response;
         }
 
         @Transactional
         public void markMessagesAsRead(Long readerId, Long senderId) {
+                if (readerId == null || senderId == null) return;
+                
                 Users reader = userRepository.findById(readerId)
                                 .orElseThrow(() -> new RuntimeException("Reader not found: " + readerId));
                 Users sender = userRepository.findById(senderId)
@@ -90,6 +101,10 @@ public class ChatService {
 
         @Transactional(readOnly = true)
         public List<ChatMessageResponse> getChatHistory(Long user1Id, Long user2Id) {
+                if (user1Id == null || user2Id == null) {
+                    return List.of();
+                }
+
                 Users user1 = userRepository.findById(user1Id)
                                 .orElseThrow(() -> new RuntimeException("User not found: " + user1Id));
 

@@ -72,6 +72,10 @@ public class Users implements UserDetails {
     @BatchSize(size = 20)
     private List<Comment> comments;
 
+    @JsonIgnore
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private RefreshToken refreshToken;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));

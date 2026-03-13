@@ -62,6 +62,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
 
         @Override
+        @Transactional
         public ResponseEntity<BlogResponse> authenticate(Login request, HttpServletResponse response) {
                 authenticationManager.authenticate(
                                 new UsernamePasswordAuthenticationToken(
@@ -76,12 +77,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 Instant accessTokenExpiration = jwtUtils.extractExpiration(accessToken);
                 Instant refreshTokenExpiration = jwtUtils.extractExpiration(refreshToken);
 
-                // Save refresh token to DB
-                RefreshToken rt = RefreshToken.builder()
-                                .user(user)
-                                .token(refreshToken)
-                                .expiryDate(refreshTokenExpiration)
-                                .build();
+                // Update existing refresh token or create new one
+                Optional<RefreshToken> existingToken = refreshTokenRepository.findByUser(user);
+                RefreshToken rt;
+                if (existingToken.isPresent()) {
+                        rt = existingToken.get();
+                        rt.setToken(refreshToken);
+                        rt.setExpiryDate(refreshTokenExpiration);
+                } else {
+                        rt = RefreshToken.builder()
+                                        .user(user)
+                                        .token(refreshToken)
+                                        .expiryDate(refreshTokenExpiration)
+                                        .build();
+                }
                 refreshTokenRepository.save(rt);
 
                 // Set tokens in cookies
@@ -121,6 +130,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 Instant refreshTokenExpiration = jwtUtils.extractExpiration(refreshToken);
 
                 // Save refresh token to DB
+                // No need to check for existing token since it's a new user
                 RefreshToken rt = RefreshToken.builder()
                                 .user(admin)
                                 .token(refreshToken)
@@ -186,6 +196,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
 
         @Override
+        @Transactional
         public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
                 Optional<String> maybeRefresh = cookieUtils.getCookie(request, "refreshToken");
                 if (maybeRefresh.isEmpty()) {
@@ -217,14 +228,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 Instant accessTokenExpiration = jwtUtils.extractExpiration(newAccessToken);
                 Instant refreshTokenExpiration = jwtUtils.extractExpiration(newRefreshToken);
 
-                // Rotatate in DB
-                refreshTokenRepository.delete(dbToken);
-                RefreshToken newRt = RefreshToken.builder()
-                                .user(user)
-                                .token(newRefreshToken)
-                                .expiryDate(refreshTokenExpiration)
-                                .build();
-                refreshTokenRepository.save(newRt);
+                // Update existing refresh token
+                dbToken.setToken(newRefreshToken);
+                dbToken.setExpiryDate(refreshTokenExpiration);
+                refreshTokenRepository.save(dbToken);
 
                 cookieUtils.addCookie(response, "accessToken", newAccessToken, 3600);
                 cookieUtils.addCookie(response, "refreshToken", newRefreshToken, 604800);

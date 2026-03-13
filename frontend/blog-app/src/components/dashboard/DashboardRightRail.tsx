@@ -4,7 +4,6 @@ import { Home, FileText, MessageSquare, Users, Bell, Shield, LogOut, Sparkles } 
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeModeContext';
-import { useNotifications } from '../../hooks/useNotifications';
 import { NotificationPanel } from './NotificationPanel';
 
 interface DashboardRightRailProps {
