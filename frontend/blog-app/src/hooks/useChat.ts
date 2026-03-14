@@ -23,6 +23,7 @@ export const useChat = (currentUserId: number, recipientId: number) => {
                 // Ensure we pass the correct recipientId to fetch history with that specific user
                 const response = await BackendApi.getChatHistory(recipientId);
                 // The backend likely returns a list of messages. Ensure we handle potential data wrapping.
+                // @ts-ignore
                 const history = Array.isArray(response) ? response : (response.data || []);
                 setMessages(history);
 
