@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM gradle:8.5-jdk21 AS build
+FROM gradle:8.14.2-jdk25 AS build
 WORKDIR /app
 
 # Copy build files
