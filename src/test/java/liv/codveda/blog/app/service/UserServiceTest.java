@@ -2,7 +2,6 @@ package liv.codveda.blog.app.service;
 
 import liv.codveda.blog.app.domain.entities.Users;
 import liv.codveda.blog.app.domain.enums.Roles;
-import liv.codveda.blog.app.exception.NotFoundException;
 import liv.codveda.blog.app.repository.UsersRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,9 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,7 +47,7 @@ class UserServiceTest {
                 .build();
 
         SecurityContextHolder.setContext(securityContext);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(Objects.requireNonNull(securityContext.getAuthentication())).thenReturn(authentication);
         when(authentication.getName()).thenReturn("test@example.com");
     }
 
@@ -86,7 +83,7 @@ class UserServiceTest {
 
     @Test
     void testGetAllUsers_Success() {
-        List<Users> users = Arrays.asList(testUser);
+        List<Users> users = Collections.singletonList(testUser);
         Page<Users> userPage = new PageImpl<>(users);
 
         when(usersRepository.findAll(any(Pageable.class))).thenReturn(userPage);
@@ -94,7 +91,7 @@ class UserServiceTest {
         Page<Users> result = usersRepository.findAll(Pageable.unpaged());
 
         assertEquals(1, result.getTotalElements());
-        assertEquals("Test User", result.getContent().get(0).getName());
+        assertEquals("Test User", result.getContent().getFirst().getName());
     }
 
     @Test

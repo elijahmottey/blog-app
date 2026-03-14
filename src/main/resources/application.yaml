@@ -1,4 +1,5 @@
 spring:
+
   security:
     oauth2:
       client:
@@ -108,6 +109,8 @@ app:
     name: ${ADMIN_NAME}
     email: ${ADMIN_EMAIL}
     password: ${ADMIN_PASSWORD}
+
+
 
 
 logging:

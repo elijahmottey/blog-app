@@ -21,7 +21,7 @@ export const MessagesManagement: React.FC = () => {
     const { user } = useAuth();
     const [selectedUser, setSelectedUser] = useState<ConversationPartner | null>(null);
 
-    const { data, isLoading, refetch } = useQuery({
+    const { data, isLoading, refetch, error } = useQuery({
         queryKey: ['chat', 'conversations'],
         queryFn: () => BackendApi.getChatConversations(),
         enabled: !!user,
@@ -56,6 +56,15 @@ export const MessagesManagement: React.FC = () => {
         return (
             <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
                 <CircularProgress />
+            </Box>
+        );
+    }
+    
+    if (error) {
+         return (
+            <Box sx={{ p: 4, textAlign: 'center' }}>
+                <Typography color="error">Failed to load conversations. Please try again later.</Typography>
+                <Typography variant="body2" color="text.secondary">{(error as any)?.message}</Typography>
             </Box>
         );
     }

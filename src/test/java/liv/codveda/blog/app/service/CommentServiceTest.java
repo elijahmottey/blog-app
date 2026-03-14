@@ -4,7 +4,6 @@ import liv.codveda.blog.app.domain.entities.Comment;
 import liv.codveda.blog.app.domain.entities.Post;
 import liv.codveda.blog.app.domain.entities.Users;
 import liv.codveda.blog.app.domain.enums.Roles;
-import liv.codveda.blog.app.exception.NotFoundException;
 import liv.codveda.blog.app.repository.CommentRepository;
 import liv.codveda.blog.app.repository.PostRepository;
 import liv.codveda.blog.app.repository.UsersRepository;
@@ -20,9 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -72,7 +69,7 @@ class CommentServiceTest {
         testComment.setPost(testPost);
 
         SecurityContextHolder.setContext(securityContext);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(Objects.requireNonNull(securityContext.getAuthentication())).thenReturn(authentication);
         when(authentication.getName()).thenReturn("test@example.com");
     }
 
@@ -115,7 +112,7 @@ class CommentServiceTest {
 
     @Test
     void testGetCommentsByPostId_Success() {
-        List<Comment> comments = Arrays.asList(testComment);
+        List<Comment> comments = Collections.singletonList(testComment);
         Page<Comment> commentPage = new PageImpl<>(comments);
 
         when(commentRepository.findAllByPostId(eq(1L), any(Pageable.class)))
@@ -124,12 +121,12 @@ class CommentServiceTest {
         Page<Comment> result = commentRepository.findAllByPostId(1L, Pageable.unpaged());
 
         assertEquals(1, result.getTotalElements());
-        assertEquals("Test Comment", result.getContent().get(0).getContent());
+        assertEquals("Test Comment", result.getContent().getFirst().getContent());
     }
 
     @Test
     void testGetCommentsByUser_Success() {
-        List<Comment> comments = Arrays.asList(testComment);
+        List<Comment> comments = Collections.singletonList(testComment);
         Page<Comment> commentPage = new PageImpl<>(comments);
 
         when(commentRepository.findAll(any(Pageable.class))).thenReturn(commentPage);
@@ -163,7 +160,7 @@ class CommentServiceTest {
 
     @Test
     void testGetAllComments_Success() {
-        List<Comment> comments = Arrays.asList(testComment);
+        List<Comment> comments = Collections.singletonList(testComment);
         Page<Comment> commentPage = new PageImpl<>(comments);
 
         when(commentRepository.findAll(any(Pageable.class))).thenReturn(commentPage);

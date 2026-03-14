@@ -23,6 +23,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -78,7 +79,7 @@ class AuthenticationServiceTest {
     @Test
     void testRegister_Success() {
         when(usersRepository.existsByEmail(anyString())).thenReturn(false);
-        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+        when(Objects.requireNonNull(passwordEncoder.encode(anyString()))).thenReturn("encodedPassword");
         when(usersRepository.save(any(Users.class))).thenReturn(testUser);
         when(jwtUtils.generateAccessToken(any())).thenReturn("accessToken");
         when(jwtUtils.generateRefreshToken(any())).thenReturn("refreshToken");
@@ -131,7 +132,7 @@ class AuthenticationServiceTest {
     @Test
     void testRegisterAdmin_Success() {
         when(usersRepository.existsByEmail(anyString())).thenReturn(false);
-        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+        when(Objects.requireNonNull(passwordEncoder.encode(anyString()))).thenReturn("encodedPassword");
         when(usersRepository.save(any(Users.class))).thenReturn(testUser);
         when(jwtUtils.generateAccessToken(any())).thenReturn("accessToken");
         when(jwtUtils.generateRefreshToken(any())).thenReturn("refreshToken");

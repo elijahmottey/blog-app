@@ -4,7 +4,6 @@ import liv.codveda.blog.app.domain.entities.Post;
 import liv.codveda.blog.app.domain.entities.Users;
 import liv.codveda.blog.app.domain.enums.Category;
 import liv.codveda.blog.app.domain.enums.Roles;
-import liv.codveda.blog.app.exception.NotFoundException;
 import liv.codveda.blog.app.repository.PostRepository;
 import liv.codveda.blog.app.repository.UsersRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,9 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -62,7 +59,7 @@ class PostServiceTest {
         testPost.setUsers(testUser);
 
         SecurityContextHolder.setContext(securityContext);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(Objects.requireNonNull(securityContext.getAuthentication())).thenReturn(authentication);
         when(authentication.getName()).thenReturn("test@example.com");
     }
 
@@ -105,7 +102,7 @@ class PostServiceTest {
 
     @Test
     void testGetAllPosts_Success() {
-        List<Post> posts = Arrays.asList(testPost);
+        List<Post> posts = Collections.singletonList(testPost);
         Page<Post> postPage = new PageImpl<>(posts);
 
         when(postRepository.findAll(any(Pageable.class))).thenReturn(postPage);
@@ -113,7 +110,7 @@ class PostServiceTest {
         Page<Post> result = postRepository.findAll(Pageable.unpaged());
 
         assertEquals(1, result.getTotalElements());
-        assertEquals("Test Post", result.getContent().get(0).getTitle());
+        assertEquals("Test Post", result.getContent().getFirst().getTitle());
     }
 
     @Test
@@ -140,7 +137,7 @@ class PostServiceTest {
 
     @Test
     void testGetPostsByCategory_Success() {
-        List<Post> posts = Arrays.asList(testPost);
+        List<Post> posts = Collections.singletonList(testPost);
         Page<Post> postPage = new PageImpl<>(posts);
 
         when(postRepository.findByCategory(eq(Category.TECHNOLOGY), any(Pageable.class)))
@@ -149,18 +146,18 @@ class PostServiceTest {
         Page<Post> result = postRepository.findByCategory(Category.TECHNOLOGY, Pageable.unpaged());
 
         assertEquals(1, result.getTotalElements());
-        assertEquals(Category.TECHNOLOGY, result.getContent().get(0).getCategory());
+        assertEquals(Category.TECHNOLOGY, result.getContent().getFirst().getCategory());
     }
 
     @Test
     void testGetPostsByUser_Success() {
-        List<Post> posts = Arrays.asList(testPost);
+        List<Post> posts = Collections.singletonList(testPost);
 
         when(postRepository.findByUsers(testUser)).thenReturn(posts);
 
         List<Post> result = postRepository.findByUsers(testUser);
 
         assertEquals(1, result.size());
-        assertEquals(testUser.getId(), result.get(0).getUsers().getId());
+        assertEquals(testUser.getId(), result.getFirst().getUsers().getId());
     }
 }

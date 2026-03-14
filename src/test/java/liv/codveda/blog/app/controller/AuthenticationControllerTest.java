@@ -7,8 +7,11 @@ import liv.codveda.blog.app.security.util.CookieUtils;
 import liv.codveda.blog.app.service.interfaces.AuthenticationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -21,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureJson
 class AuthenticationControllerTest {
 
     @Autowired
@@ -34,6 +38,14 @@ class AuthenticationControllerTest {
 
     @MockitoBean
     private CookieUtils cookieUtils;
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public ObjectMapper objectMapper() {
+            return new ObjectMapper();
+        }
+    }
 
     @Test
     void testRegisterUser_Success() throws Exception {
@@ -70,7 +82,7 @@ class AuthenticationControllerTest {
     void testLogout_Success() throws Exception {
         mockMvc.perform(post("/api/v1/auth/logout"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Logged out successfully"));
+                .andExpect(jsonPath("$.message").value("Logout successful"));
 
         verify(cookieUtils, times(1)).deleteCookie(any(), eq("accessToken"));
         verify(cookieUtils, times(1)).deleteCookie(any(), eq("refreshToken"));
