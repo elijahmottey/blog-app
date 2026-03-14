@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM gradle:8.5-jdk21 AS build
+FROM gradle:8.5-jdk25 AS build
 WORKDIR /app
 
 # Copy build files
@@ -12,7 +12,7 @@ COPY --chown=gradle:gradle src ./src
 RUN gradle clean build -x test --no-daemon
 
 # Stage 2: Run
-FROM eclipse-temurin:21-jre-jammy
+FROM eclipse-temurin:25-jre-jammy
 
 # Install dependencies and create user
 RUN apt-get update && \
