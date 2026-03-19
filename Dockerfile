@@ -1,41 +1,44 @@
-# Stage 1: Build
-FROM gradle:8.14.2-jdk21 AS build
+# --- Stage 1: Build (Optimization & Compilation) ---
+FROM gradle:8.14.2-jdk21-alpine AS builder
 WORKDIR /app
 
-# Copy build files
-COPY --chown=gradle:gradle build.gradle settings.gradle ./
-COPY --chown=gradle:gradle gradle.properties* ./
+# 1. Cache dependencies: Copy only files that define the environment first
+COPY --chown=gradle:gradle build.gradle settings.gradle gradle.properties* ./
 COPY --chown=gradle:gradle gradle ./gradle
+
+# Only download dependencies (this layer is cached unless build files change)
+RUN gradle dependencies --no-daemon || true
+
+# 2. Build: Copy source and compile
 COPY --chown=gradle:gradle src ./src
+RUN gradle clean bootJar -x test --no-daemon
 
-# Build the application
-RUN gradle clean build -x test --no-daemon
+# --- Stage 2: Runtime (Security Hardened) ---
+# Using Alpine for the smallest attack surface (~150MB vs ~450MB)
+FROM eclipse-temurin:21-jre-alpine AS runtime
 
-# Stage 2: Run
-FROM eclipse-temurin:25-jre-jammy
-
-# Install dependencies and create user
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    groupadd -r spring && \
-    useradd -r -g spring spring && \
-    apt-get install -y curl && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# 3. Security: Create a system user with NO shell access
+RUN addgroup -S spring && adduser -S spring -G spring -s /bin/false
 
 WORKDIR /app
 
-# Copy the JAR from build stage
-COPY --from=build /app/build/libs/*.jar app.jar
+# 4. Permissions: Copy JAR and make it Read-Only (chmod 400)
+COPY --from=builder --chown=spring:spring /app/build/libs/*.jar app.jar
+RUN chmod 400 app.jar
 
-# Switch to non-root user
+# 5. Environment: Production JVM Best Practices
+# - ExitOnOutOfMemoryError: Forces container restart if heap dies (crucial for K8s)
+# - MaxRAMPercentage: Dynamically respects container memory limits
+ENV JAVA_OPTS="-XX:+UseContainerSupport \
+               -XX:MaxRAMPercentage=75.0 \
+               -XX:+ExitOnOutOfMemoryError \
+               -Djava.security.egd=file:/dev/./urandom"
+
 USER spring
 
-# JVM options
-ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom"
-
-# Health check
+# 6. Reliability: Healthcheck using wget (native to Alpine)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8080/actuator/health || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
 
-ENTRYPOINT exec java $JAVA_OPTS -jar app.jar
+# 7. Lifecycle: Use JSON form for proper Signal Handling (SIGTERM)
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
