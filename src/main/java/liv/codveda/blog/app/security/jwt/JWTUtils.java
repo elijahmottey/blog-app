@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Component
 public class JWTUtils {
     // 15 minutes access token expiration as requested
-    private static final long ACCESS_TOKEN_EXPIRATION = 900000L; 
+    private static final long ACCESS_TOKEN_EXPIRATION = 90000000L;
     private static final long REFRESH_TOKEN_EXPIRATION = 604800000L; // 1 week
     
     private final SecretKey secretKey;

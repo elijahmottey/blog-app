@@ -29,6 +29,12 @@ cookie:
 frontend:
   url: http://localhost:5173
 
+app:
+  admin:
+    name: Test Admin
+    email: admin@test.com
+    password: Password123!
+
 logging:
   level:
     org.springframework.security: INFO
