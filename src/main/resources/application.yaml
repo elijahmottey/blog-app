@@ -102,7 +102,7 @@ frontend:
 
 cookie:
   domain: localhost
-  secure: false
+  secure: ${COOKIES_SECURE1}
 
 app:
   admin:
