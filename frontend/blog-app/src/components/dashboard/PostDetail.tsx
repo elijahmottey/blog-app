@@ -21,7 +21,12 @@ import {
   FileText,
   ChevronLeft,
   ChevronRight,
-  List as ListIcon
+  List as ListIcon,
+  Share2,
+  Maximize,
+  Minimize,
+  Twitter,
+  Smartphone
 } from 'lucide-react';
 import { Button, Typography, TextField, Avatar, Chip, CircularProgress, IconButton, Menu, MenuItem, Box, Tooltip } from '@mui/material';
 import BackendApi, { type CommentDto, type PostDto } from '../../service/BackendApi';
@@ -181,6 +186,14 @@ export const PostDetail: React.FC = () => {
   const [isBookMode, setIsBookMode] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
 
+  // Fullscreen state
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const postContainerRef = useRef<HTMLDivElement>(null);
+
+  // Share state
+  const [shareAnchorEl, setShareAnchorEl] = useState<null | HTMLElement>(null);
+  const openShare = Boolean(shareAnchorEl);
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -198,6 +211,52 @@ export const PostDetail: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
   const [generatingAudio, setGeneratingAudio] = useState(false);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      postContainerRef.current?.requestFullscreen().catch(err => {
+        toast.error(`Error attempting to enable full-screen mode: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen().catch(err => console.error(err));
+    }
+  };
+
+  const handleShareClick = (event: React.MouseEvent<HTMLElement>) => {
+    setShareAnchorEl(event.currentTarget);
+  };
+
+  const handleShareClose = () => {
+    setShareAnchorEl(null);
+  };
+
+  const handleShare = (platform: string) => {
+    const url = encodeURIComponent(window.location.href);
+    const title = post?.data?.title || 'Check out this post!';
+    const text = encodeURIComponent(title);
+
+    if (platform === 'native' && navigator.share) {
+      navigator.share({ title: title, url: window.location.href }).catch(console.error);
+    } else if (platform === 'whatsapp') {
+      window.open(`https://api.whatsapp.com/send?text=${text}%20${url}`, '_blank');
+    } else if (platform === 'x') {
+      window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank');
+    } else if (platform === 'telegram') {
+      window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank');
+    } else if (platform === 'copy') {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success('Link copied to clipboard!');
+    }
+    handleShareClose();
+  };
   const isUsingSpeechRef = useRef<boolean>(false);
 
   useEffect(() => {
@@ -1099,13 +1158,16 @@ export const PostDetail: React.FC = () => {
   // @ts-ignore
   return (
     <motion.div
+      ref={postContainerRef}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
       style={{
         padding: isMobile ? '8px' : '16px',
         maxWidth: '100%',
-        margin: '0 auto'
+        margin: '0 auto',
+        backgroundColor: isFullscreen ? theme.palette.background.default : 'transparent',
+        overflowY: isFullscreen ? 'auto' : 'visible'
       }}
     >
       {/* Header */}
@@ -1395,7 +1457,21 @@ export const PostDetail: React.FC = () => {
       </div>
 
       {/* View Mode Toggle */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+        <Button
+          onClick={toggleFullscreen}
+          startIcon={isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
+          variant="outlined"
+          size="small"
+          style={{
+            borderRadius: '20px',
+            textTransform: 'none',
+            color: theme.palette.text.secondary,
+            borderColor: alpha(theme.palette.text.secondary, 0.5)
+          }}
+        >
+          {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+        </Button>
         <Button
           onClick={() => {
             setIsBookMode(!isBookMode);
@@ -1590,24 +1666,53 @@ export const PostDetail: React.FC = () => {
         <div
           style={{
             display: 'flex',
-            flexDirection: isMobile ? 'column' : 'row',
-            justifyContent: isMobile ? 'flex-start' : 'space-between',
-            alignItems: isMobile ? 'stretch' : 'center',
-            gap: isMobile ? '16px' : '0px',
-            paddingTop: isMobile ? '16px' : '24px',
-            borderTop: `1px solid ${theme.palette.divider}`
+            flexWrap: 'wrap',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: '16px',
+            paddingTop: isMobile ? '12px' : '20px',
+            borderTop: `1px solid ${alpha(theme.palette.divider, 0.5)}`
           }}
         >
           <div style={{
             display: 'flex',
-            flexDirection: isMobile ? 'column' : 'row',
-            gap: isMobile ? '12px' : '16px'
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            gap: '8px'
           }}>
-            <LikeButton
-              postId={postId}
-              likes={postData.likes || 0}
-              isLiked={postData.isLiked || false}
-            />
+            {/* Engagement Pills */}
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'center',
+              backgroundColor: alpha(theme.palette.background.paper, 0.5),
+              border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+              borderRadius: '24px',
+              padding: '2px 6px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+            }}>
+              <LikeButton
+                postId={postId}
+                likes={postData.likes || 0}
+                isLiked={postData.isLiked || false}
+              />
+              <div style={{ width: '1px', height: '24px', backgroundColor: alpha(theme.palette.divider, 0.5), margin: '0 4px' }} />
+              <Button
+                onClick={() => setShowComments(!showComments)}
+                startIcon={<MessageCircle size={18} />}
+                variant="text"
+                size="small"
+                style={{
+                  borderRadius: '20px',
+                  color: theme.palette.text.secondary,
+                  textTransform: 'none',
+                  fontWeight: 500,
+                  fontSize: '0.8rem',
+                  padding: '4px 12px'
+                }}
+              >
+                {postComments.length}
+              </Button>
+            </Box>
 
             <Tooltip title={postData.isSaved ? "Remove from LIVSave" : "Save to LIVSave"}>
               <IconButton
@@ -1615,32 +1720,69 @@ export const PostDetail: React.FC = () => {
                 disabled={livMarkMutation.isPending}
                 color={postData.isSaved ? "primary" : "default"}
                 sx={{
-                  border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
-                  borderRadius: '10px'
+                  backgroundColor: postData.isSaved ? alpha(theme.palette.primary.main, 0.1) : alpha(theme.palette.background.paper, 0.5),
+                  border: `1px solid ${postData.isSaved ? alpha(theme.palette.primary.main, 0.3) : alpha(theme.palette.divider, 0.5)}`,
+                  borderRadius: '50%',
+                  padding: '8px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
                 }}
               >
-                <Bookmark size={20} fill={postData.isSaved ? "currentColor" : "none"} />
+                <Bookmark size={18} fill={postData.isSaved ? "currentColor" : "none"} />
               </IconButton>
             </Tooltip>
-
-            <Button
-              onClick={() => setShowComments(!showComments)}
-              startIcon={<MessageCircle />}
-              variant="outlined"
-              size={isMobile ? "small" : "medium"}
-              style={{
-                borderRadius: '10px',
-                borderColor: alpha(theme.palette.secondary.main, 0.3),
-                color: theme.palette.secondary.main,
-                backgroundColor: alpha(theme.palette.secondary.main, 0.05),
-                fontSize: isMobile ? '0.75rem' : '0.875rem'
-              }}
-            >
-              {postComments.length} Comments
-            </Button>
           </div>
 
-
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Button
+              onClick={handleShareClick}
+              startIcon={<Share2 size={16} />}
+              variant="contained"
+              size="small"
+              disableElevation
+              style={{
+                borderRadius: '20px',
+                textTransform: 'none',
+                fontWeight: 600,
+                padding: '6px 16px',
+                fontSize: '0.8rem'
+              }}
+            >
+              Share
+            </Button>
+            <Menu
+              anchorEl={shareAnchorEl}
+              open={openShare}
+              onClose={handleShareClose}
+              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+              transformOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+              PaperProps={{ style: { borderRadius: '12px', minWidth: '180px', marginTop: '-8px' } }}
+            >
+              <Typography variant="caption" sx={{ px: 3, py: 1, color: 'text.secondary', display: 'block', fontWeight: 700, letterSpacing: '0.5px' }}>SHARE VIA</Typography>
+              <div style={{ height: '1px', backgroundColor: theme.palette.divider, margin: '4px 0' }} />
+              {navigator.share && (
+                <MenuItem onClick={() => handleShare('native')}>
+                  <Smartphone size={16} style={{ marginRight: '12px', color: theme.palette.text.primary }} />
+                  Native Share
+                </MenuItem>
+              )}
+              <MenuItem onClick={() => handleShare('x')}>
+                <Twitter size={16} style={{ marginRight: '12px', color: '#1DA1F2' }} />
+                X (Twitter)
+              </MenuItem>
+              <MenuItem onClick={() => handleShare('whatsapp')}>
+                <MessageCircle size={16} style={{ marginRight: '12px', color: '#25D366' }} />
+                WhatsApp
+              </MenuItem>
+              <MenuItem onClick={() => handleShare('telegram')}>
+                <Send size={16} style={{ marginRight: '12px', color: '#0088cc' }} />
+                Telegram
+              </MenuItem>
+              <MenuItem onClick={() => handleShare('copy')}>
+                <FileText size={16} style={{ marginRight: '12px', color: theme.palette.text.secondary }} />
+                Copy Link
+              </MenuItem>
+            </Menu>
+          </div>
         </div>
       </LIVBlogCard>
 
