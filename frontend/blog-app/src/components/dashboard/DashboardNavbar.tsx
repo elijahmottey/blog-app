@@ -327,10 +327,30 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                    <IconButton onClick={handleProfileClick} sx={{ p: 0.5 }}>
                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                       <Avatar sx={{ width: 24, height: 24, bgcolor: 'primary.main', fontSize: '0.75rem' }}>
-                         {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                       </Avatar>
-                       {!isMobile && <Typography variant="body2">{user?.name || 'User'}</Typography>}
+                        <div
+                          className="flex items-center justify-center rounded-full"
+                          style={{
+                            width: '32px',
+                            height: '32px',
+                            backgroundColor: user?.avatar ? 'transparent' : theme.palette.primary.main,
+                            color: 'white',
+                            fontWeight: 'bold',
+                            fontSize: '0.875rem',
+                            flexShrink: 0,
+                            overflow: 'hidden'
+                          }}
+                        >
+                          {user?.avatar ? (
+                            <img
+                              src={user.avatar}
+                              alt={user.name || 'User'}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                          ) : (
+                            (user?.name || 'U').charAt(0).toUpperCase()
+                          )}
+                        </div>
+                       {!isMobile && <Typography variant="body2" sx={{ fontWeight: 600 }}>{user?.name || 'User'}</Typography>}
                        <ChevronDown size={14} />
                      </Box>
                    </IconButton>
@@ -339,11 +359,36 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ onMenuClick, i
            </Toolbar>
          </AppBar>
 
-         <MuiMenu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleProfileClose} PaperProps={{ sx: { mt: 0.5, minWidth: 200 } }}>
-           <Box sx={{ p: 2 }}>
-             <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>{user?.name || 'User'}</Typography>
-             <Typography variant="body2" color="text.secondary">{user?.email}</Typography>
-             {isAdmin && <Chip label="Admin" size="small" color="error" variant="outlined" sx={{ mt: 1 }} icon={<Shield size={12} />} />}
+         <MuiMenu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleProfileClose} PaperProps={{ sx: { mt: 0.5, minWidth: 240, borderRadius: '12px', boxShadow: theme.shadows[4] } }}>
+           <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+             <div
+               className="flex items-center justify-center rounded-full"
+               style={{
+                 width: '44px',
+                 height: '44px',
+                 backgroundColor: user?.avatar ? 'transparent' : theme.palette.primary.main,
+                 color: 'white',
+                 fontWeight: 'bold',
+                 fontSize: '1.25rem',
+                 flexShrink: 0,
+                 overflow: 'hidden'
+               }}
+             >
+               {user?.avatar ? (
+                 <img
+                   src={user.avatar}
+                   alt={user.name || 'User'}
+                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                 />
+               ) : (
+                 (user?.name || 'U').charAt(0).toUpperCase()
+               )}
+             </div>
+             <Box>
+               <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>{user?.name || 'User'}</Typography>
+               <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>{user?.email}</Typography>
+               {isAdmin && <Chip label="Admin" size="small" color="error" variant="filled" sx={{ mt: 0.5, height: '20px', fontSize: '0.65rem' }} icon={<Shield size={12} />} />}
+             </Box>
            </Box>
            <Divider />
            <MenuItem component={Link} to="/dashboard/profile" onClick={handleProfileClose}><ListItemIcon><User size={18} /></ListItemIcon>My Profile</MenuItem>

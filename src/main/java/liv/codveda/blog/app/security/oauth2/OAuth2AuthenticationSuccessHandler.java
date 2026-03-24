@@ -41,26 +41,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
         
-        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        Map<String, Object> attributes = oAuth2User.getAttributes();
-        String email = (String) attributes.get("email");
-        String name = (String) attributes.get("name");
-        String picture = (String) attributes.get("picture");
-        String providerId = oAuth2User.getName();
-        
-        Users user = usersRepository.findByEmail(email)
-                .orElseGet(() -> {
-                    Users newUser = Users.builder()
-                            .email(email)
-                            .name(name)
-                            .avatar(picture)
-                            .provider("google")
-                            .providerId(providerId)
-                            .password(null)
-                            .role(Roles.USER)
-                            .build();
-                    return usersRepository.save(newUser);
-                });
+        OAuth2UserPrincipal principal = (OAuth2UserPrincipal) authentication.getPrincipal();
+        Users user = principal.getUser();
         
         log.info("OAuth2 authentication success for user: {}", user.getEmail());
         

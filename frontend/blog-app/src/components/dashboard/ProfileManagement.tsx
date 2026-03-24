@@ -92,26 +92,37 @@ export const ProfileManagement: React.FC = () => {
                 size="large"
                 actions={
                     <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3">
                             <div
                                 className="flex items-center justify-center rounded-full"
                                 style={{
-                                    width: 40,
-                                    height: 40,
-                                    backgroundColor: theme.palette.primary.main,
+                                    width: 48,
+                                    height: 48,
+                                    backgroundColor: user?.avatar ? 'transparent' : theme.palette.primary.main,
                                     color: theme.palette.primary.contrastText,
                                     fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                                    fontSize: '1rem',
-                                    fontWeight: 600
+                                    fontSize: '1.25rem',
+                                    fontWeight: 600,
+                                    overflow: 'hidden',
+                                    border: `2px solid ${theme.palette.background.paper}`,
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
                                 }}
                             >
-                                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                                {user?.avatar ? (
+                                    <img 
+                                        src={user.avatar} 
+                                        alt={user.name || 'User'} 
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                    />
+                                ) : (
+                                    user?.name?.charAt(0)?.toUpperCase() || 'U'
+                                )}
                             </div>
                             <div>
-                                <div className="aws-text-body" style={{ fontWeight: 600, color: theme.palette.text.primary, margin: 0 }}>
+                                <div className="aws-text-body" style={{ fontWeight: 700, color: theme.palette.text.primary, margin: 0, fontSize: '1.1rem' }}>
                                     {user?.name || 'User'}
                                 </div>
-                                <div className="aws-text-body" style={{ color: theme.palette.text.secondary, margin: 0, fontSize: '0.75rem' }}>
+                                <div className="aws-text-body" style={{ color: theme.palette.text.secondary, margin: 0, fontSize: '0.8rem' }}>
                                     {user?.email}
                                 </div>
                             </div>
@@ -157,14 +168,20 @@ export const ProfileManagement: React.FC = () => {
 
                 <div className="aws-spacing-lg">
                     {activeTab === 'profile' && (
-                        <div>
+                        <div style={{ padding: '8px' }}>
                             <div className="flex items-center justify-between aws-margin-b-lg">
-                                <h3 className="aws-header-md" style={{ margin: 0 }}>Profile Information</h3>
+                                <div>
+                                    <h3 className="aws-header-md" style={{ margin: 0 }}>Profile Information</h3>
+                                    <p style={{ color: theme.palette.text.secondary, margin: '4px 0 0 0', fontSize: '0.875rem' }}>
+                                        Update your public persona and account details.
+                                    </p>
+                                </div>
                                 {!isEditing && (
                                     <Button
                                         onClick={() => setIsEditing(true)}
-                                        variant="outlined"
-                                        className="aws-button aws-button-secondary"
+                                        variant="contained"
+                                        color="primary"
+                                        style={{ borderRadius: '20px', textTransform: 'none', padding: '6px 16px', fontWeight: 600, boxShadow: theme.shadows[2] }}
                                         startIcon={<Edit size={16} />}
                                     >
                                         Edit Profile
@@ -172,95 +189,120 @@ export const ProfileManagement: React.FC = () => {
                                 )}
                             </div>
 
-                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                                <LIVBlogLayout.Grid cols={2} gap="md">
-                                    <div>
-                                        <label className="aws-text-body" style={{ fontWeight: 600, color: theme.palette.text.primary, display: 'block', marginBottom: '8px' }}>
-                                            Full Name
-                                        </label>
-                                        {isEditing ? (
-                                            <TextField
-                                                {...register('name')}
-                                                fullWidth
-                                                size="small"
-                                                error={!!errors.name}
-                                                helperText={errors.name?.message}
-                                                className="aws-font"
-                                            />
-                                        ) : (
-                                            <div className="aws-spacing-sm" style={{ backgroundColor: theme.palette.action.hover, borderRadius: '8px', border: `1px solid ${theme.palette.divider}` }}>
-                                                <span className="aws-text-body" style={{ color: theme.palette.text.primary }}>{user?.name}</span>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div>
-                                        <label className="aws-text-body" style={{ fontWeight: 600, color: theme.palette.text.primary, display: 'block', marginBottom: '8px' }}>
-                                            Email Address
-                                        </label>
-                                        {isEditing ? (
-                                            <TextField
-                                                {...register('email')}
-                                                type="email"
-                                                fullWidth
-                                                size="small"
-                                                error={!!errors.email}
-                                                helperText={errors.email?.message}
-                                                className="aws-font"
-                                            />
-                                        ) : (
-                                            <div className="aws-spacing-sm" style={{ backgroundColor: theme.palette.action.hover, borderRadius: '8px', border: `1px solid ${theme.palette.divider}` }}>
-                                                <span className="aws-text-body" style={{ color: theme.palette.text.primary }}>{user?.email}</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                </LIVBlogLayout.Grid>
-
-                                <div>
-                                    <label className="aws-text-body" style={{ fontWeight: 600, color: theme.palette.text.primary, display: 'block', marginBottom: '8px' }}>
-                                        Description
-                                    </label>
-                                    {isEditing ? (
-                                        <TextField
-                                            {...register('description')}
-                                            multiline
-                                            rows={3}
-                                            fullWidth
-                                            size="small"
-                                            error={!!errors.description}
-                                            helperText={errors.description?.message}
-                                            className="aws-font"
-                                            placeholder="Tell us about yourself..."
-                                        />
-                                    ) : (
-                                        <div className="aws-spacing-sm" style={{ backgroundColor: theme.palette.action.hover, borderRadius: '8px', border: `1px solid ${theme.palette.divider}`, minHeight: '80px' }}>
-                                            <span className="aws-text-body" style={{ color: theme.palette.text.primary }}>{user?.description || 'No description provided'}</span>
+                            <form onSubmit={handleSubmit(onSubmit)}>
+                                <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap' }}>
+                                    {/* Left Sidebar: Large Avatar */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', width: '200px' }}>
+                                        <div
+                                            style={{
+                                                width: 120,
+                                                height: 120,
+                                                backgroundColor: user?.avatar ? 'transparent' : theme.palette.primary.main,
+                                                color: theme.palette.primary.contrastText,
+                                                fontSize: '3rem',
+                                                fontWeight: 600,
+                                                borderRadius: '50%',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                overflow: 'hidden',
+                                                boxShadow: theme.shadows[4]
+                                            }}
+                                        >
+                                            {user?.avatar ? (
+                                                <img src={user.avatar} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            ) : (
+                                                user?.name?.charAt(0)?.toUpperCase() || 'U'
+                                            )}
                                         </div>
-                                    )}
-                                </div>
-
-                                {isEditing && (
-                                    <div className="flex justify-end gap-3 pt-4 border-t" style={{ borderColor: theme.palette.divider }}>
-                                        <Button
-                                            type="button"
-                                            onClick={handleCancelEdit}
-                                            variant="outlined"
-                                            className="aws-button aws-button-secondary"
-                                            startIcon={<X size={16} />}
-                                        >
-                                            Cancel
-                                        </Button>
-                                        <Button
-                                            type="submit"
-                                            disabled={isSubmitting || updateProfileMutation.isPending}
-                                            variant="contained"
-                                            className="aws-button aws-button-primary"
-                                            startIcon={<Save size={16} />}
-                                        >
-                                            {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
-                                        </Button>
                                     </div>
-                                )}
+
+                                    {/* Right Side: Form Fields */}
+                                    <div style={{ flex: 1, minWidth: '300px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                        <LIVBlogLayout.Grid cols={2} gap="md">
+                                            <div>
+                                                <label style={{ fontWeight: 600, color: theme.palette.text.primary, display: 'block', marginBottom: '8px', fontSize: '0.875rem' }}>
+                                                    Full Name
+                                                </label>
+                                                {isEditing ? (
+                                                    <TextField
+                                                        {...register('name')}
+                                                        fullWidth size="small"
+                                                        error={!!errors.name}
+                                                        helperText={errors.name?.message}
+                                                        InputProps={{ style: { borderRadius: '8px' } }}
+                                                    />
+                                                ) : (
+                                                    <div style={{ padding: '10px 14px', backgroundColor: alpha(theme.palette.background.paper, 0.5), borderRadius: '8px', border: `1px solid ${alpha(theme.palette.divider, 0.5)}` }}>
+                                                        <span style={{ color: theme.palette.text.primary, fontSize: '0.9rem', fontWeight: 500 }}>{user?.name}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div>
+                                                <label style={{ fontWeight: 600, color: theme.palette.text.primary, display: 'block', marginBottom: '8px', fontSize: '0.875rem' }}>
+                                                    Email Address
+                                                </label>
+                                                {isEditing ? (
+                                                    <TextField
+                                                        {...register('email')}
+                                                        type="email" fullWidth size="small"
+                                                        error={!!errors.email}
+                                                        helperText={errors.email?.message}
+                                                        InputProps={{ style: { borderRadius: '8px' } }}
+                                                    />
+                                                ) : (
+                                                    <div style={{ padding: '10px 14px', backgroundColor: alpha(theme.palette.background.paper, 0.5), borderRadius: '8px', border: `1px solid ${alpha(theme.palette.divider, 0.5)}` }}>
+                                                        <span style={{ color: theme.palette.text.primary, fontSize: '0.9rem', fontWeight: 500 }}>{user?.email}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </LIVBlogLayout.Grid>
+
+                                        <div>
+                                            <label style={{ fontWeight: 600, color: theme.palette.text.primary, display: 'block', marginBottom: '8px', fontSize: '0.875rem' }}>
+                                                Short Bio
+                                            </label>
+                                            {isEditing ? (
+                                                <TextField
+                                                    {...register('description')}
+                                                    multiline rows={4} fullWidth size="small"
+                                                    error={!!errors.description}
+                                                    helperText={errors.description?.message}
+                                                    placeholder="Tell us about yourself..."
+                                                    InputProps={{ style: { borderRadius: '8px' } }}
+                                                />
+                                            ) : (
+                                                <div style={{ padding: '14px', backgroundColor: alpha(theme.palette.background.paper, 0.5), borderRadius: '8px', border: `1px solid ${alpha(theme.palette.divider, 0.5)}`, minHeight: '100px' }}>
+                                                    <span style={{ color: theme.palette.text.secondary, fontSize: '0.9rem', lineHeight: 1.5 }}>{user?.description || 'No bio provided yet.'}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {isEditing && (
+                                            <div className="flex justify-end gap-3 pt-4 border-t" style={{ borderColor: theme.palette.divider, marginTop: '16px' }}>
+                                                <Button
+                                                    type="button"
+                                                    onClick={handleCancelEdit}
+                                                    variant="outlined"
+                                                    startIcon={<X size={16} />}
+                                                    style={{ borderRadius: '20px', textTransform: 'none', fontWeight: 600 }}
+                                                >
+                                                    Cancel
+                                                </Button>
+                                                <Button
+                                                    type="submit"
+                                                    disabled={isSubmitting || updateProfileMutation.isPending}
+                                                    variant="contained"
+                                                    startIcon={<Save size={16} />}
+                                                    style={{ borderRadius: '20px', textTransform: 'none', fontWeight: 600, boxShadow: theme.shadows[4] }}
+                                                >
+                                                    {updateProfileMutation.isPending ? 'Saving...' : 'Save Profile'}
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                             </form>
                         </div>
                     )}
