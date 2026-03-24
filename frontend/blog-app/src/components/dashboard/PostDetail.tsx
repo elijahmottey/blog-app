@@ -20,7 +20,8 @@ import {
   BookOpen,
   FileText,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  List as ListIcon
 } from 'lucide-react';
 import { Button, Typography, TextField, Avatar, Chip, CircularProgress, IconButton, Menu, MenuItem, Box, Tooltip } from '@mui/material';
 import BackendApi, { type CommentDto, type PostDto } from '../../service/BackendApi';
@@ -772,9 +773,12 @@ export const PostDetail: React.FC = () => {
 
       // Handle headers
       if (line.startsWith('# ')) {
+        const text = line.substring(2);
+        const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
         return (
           <Typography
             key={index}
+            id={id}
             variant="h4"
             component="h1"
             sx={{
@@ -784,14 +788,17 @@ export const PostDetail: React.FC = () => {
               fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
             }}
           >
-            {line.substring(2)}
+            {text}
           </Typography>
         );
       }
       if (line.startsWith('## ')) {
+        const text = line.substring(3);
+        const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
         return (
           <Typography
             key={index}
+            id={id}
             variant="h5"
             component="h2"
             sx={{
@@ -801,14 +808,17 @@ export const PostDetail: React.FC = () => {
               fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
             }}
           >
-            {line.substring(3)}
+            {text}
           </Typography>
         );
       }
       if (line.startsWith('### ')) {
+        const text = line.substring(4);
+        const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
         return (
           <Typography
             key={index}
+            id={id}
             variant="h6"
             component="h3"
             sx={{
@@ -818,7 +828,7 @@ export const PostDetail: React.FC = () => {
               fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
             }}
           >
-            {line.substring(4)}
+            {text}
           </Typography>
         );
       }
@@ -1069,6 +1079,23 @@ export const PostDetail: React.FC = () => {
     return rootComments;
   };
 
+  const extractHeadings = (content: string) => {
+    const lines = content.split('\n');
+    const headings = [];
+    for (const line of lines) {
+      const match = line.match(/^(#{1,3})\s+(.*)/);
+      if (match) {
+        const level = match[1].length;
+        const text = match[2];
+        const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        headings.push({ id, text, level });
+      }
+    }
+    return headings;
+  };
+
+  const postHeadings = extractHeadings(safePostContent);
+
   // @ts-ignore
   return (
     <motion.div
@@ -1076,79 +1103,97 @@ export const PostDetail: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
       style={{
-        padding: isMobile ? '16px' : '32px',
-        maxWidth: '1200px',
+        padding: isMobile ? '8px' : '16px',
+        maxWidth: '100%',
         margin: '0 auto'
       }}
     >
       {/* Header */}
-      <div style={{ marginBottom: isMobile ? '20px' : '32px' }}>
+      <div style={{ marginBottom: isMobile ? '12px' : '20px' }}>
         <div style={{
           display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row',
-          alignItems: isMobile ? 'stretch' : 'center',
-          gap: isMobile ? '12px' : '16px',
-          marginBottom: isMobile ? '16px' : '24px'
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: isMobile ? '12px' : '16px'
         }}>
           <Button
             component={Link}
             to="/dashboard/posts"
-            variant="outlined"
-            startIcon={<ArrowLeft />}
+            variant="text"
+            size="small"
+            startIcon={<ArrowLeft size={16} />}
             style={{
-              borderRadius: '10px',
-              padding: '8px 16px'
+              borderRadius: '6px',
+              padding: '4px 8px',
+              fontSize: '0.75rem',
+              textTransform: 'none',
+              color: theme.palette.text.secondary
             }}
           >
-            Back to Posts
+            Back
           </Button>
-          {canEditOrDelete && (
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px',
-              width: '100%'
-            }}>
-              <Button
-                component={Link}
-                to={`/dashboard/posts/${postId}/edit`}
-                variant="outlined"
-                startIcon={<Edit />}
-                size={isMobile ? "small" : "small"}
-                style={{
-                  borderRadius: '10px',
-                  borderColor: theme.palette.warning.main,
-                  color: theme.palette.warning.main,
-                  fontSize: isMobile ? '0.75rem' : '0.875rem'
-                }}
-              >
-                Edit Post
-              </Button>
-              <Button
-                onClick={handleDelete}
-                disabled={deleteMutation.isPending}
-                variant="outlined"
-                startIcon={<Trash2 />}
-                size={isMobile ? "small" : "small"}
-                style={{
-                  borderRadius: '10px',
-                  borderColor: theme.palette.error.main,
-                  color: theme.palette.error.main,
-                  fontSize: isMobile ? '0.75rem' : '0.875rem'
-                }}
-              >
-                Delete Post
-              </Button>
-            </div>
-          )}
+          <div style={{ marginLeft: 'auto' }}>
+            <IconButton
+              aria-label="more"
+              id="long-button"
+              aria-controls={open ? 'long-menu' : undefined}
+              aria-expanded={open ? 'true' : undefined}
+              aria-haspopup="true"
+              onClick={handleClick}
+            >
+              <MoreVertical />
+            </IconButton>
+            <Menu
+              id="long-menu"
+              MenuListProps={{
+                'aria-labelledby': 'long-button',
+              }}
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+            >
+              {canEditOrDelete && (
+                <MenuItem component={Link} to={`/dashboard/posts/${postId}/edit`} onClick={() => handleClose()}>
+                  <Edit size={16} style={{ marginRight: '8px', color: theme.palette.warning.main }} />
+                  <span style={{ color: theme.palette.warning.main }}>Edit Post</span>
+                </MenuItem>
+              )}
+              {canEditOrDelete && (
+                <MenuItem onClick={() => { handleDelete(); handleClose(); }} disabled={deleteMutation.isPending}>
+                  <Trash2 size={16} style={{ marginRight: '8px', color: theme.palette.error.main }} />
+                  <span style={{ color: theme.palette.error.main }}>Delete Post</span>
+                </MenuItem>
+              )}
+              {canEditOrDelete && <div style={{ height: '1px', backgroundColor: theme.palette.divider, margin: '4px 0' }} />}
+              <MenuItem onClick={() => { handleReadPost(); handleClose(); }}>
+                <Volume2 size={16} style={{ marginRight: '8px' }} />
+                {isReading ? 'Stop Reading' : 'Read Aloud'}
+              </MenuItem>
+              <MenuItem onClick={() => { downloadPost(postData, isAuthenticated); handleClose(); }}>
+                <Download size={16} style={{ marginRight: '8px' }} />
+                Download TXT
+              </MenuItem>
+              <MenuItem onClick={() => { downloadPostPdf(postData, isAuthenticated); handleClose(); }}>
+                <Download size={16} style={{ marginRight: '8px' }} />
+                Download PDF
+              </MenuItem>
+              {user && !canEditOrDelete && (
+                <MenuItem onClick={() => { handleReport(); handleClose(); }} disabled={reportMutation.isPending}>
+                  <Flag size={16} style={{ marginRight: '8px' }} />
+                  Report
+                </MenuItem>
+              )}
+            </Menu>
+          </div>
         </div>
 
-        <div style={{ marginBottom: '16px' }}>
+        <div style={{ marginBottom: '8px' }}>
           <h1 style={{
             fontSize: isMobile ? '1.875rem' : '2.5rem',
             fontWeight: 700,
             color: theme.palette.text.primary,
-            margin: '0 0 12px 0',
+            margin: '0 0 8px 0',
             lineHeight: 1.2
           }}>
             {postData.title || 'Untitled Post'}
@@ -1350,7 +1395,7 @@ export const PostDetail: React.FC = () => {
       </div>
 
       {/* View Mode Toggle */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
         <Button
           onClick={() => {
             setIsBookMode(!isBookMode);
@@ -1372,11 +1417,14 @@ export const PostDetail: React.FC = () => {
 
       {/* Post Content */}
       <LIVBlogCard
-        variant="elevated"
-        padding={isMobile ? "medium" : "large"}
+        variant="default"
+        padding={isMobile ? "small" : "medium"}
         style={{
-          marginBottom: isMobile ? '20px' : '32px',
-          backgroundColor: isHighlighted ? alpha(theme.palette.success.main, 0.15) : undefined,
+          marginBottom: isMobile ? '8px' : '16px',
+          backgroundColor: isHighlighted ? alpha(theme.palette.success.main, 0.15) : 'transparent',
+          boxShadow: 'none',
+          border: 'none',
+          outline: 'none',
           transition: 'background-color 1s ease',
           minHeight: isBookMode ? '400px' : 'auto',
           display: 'flex',
@@ -1385,23 +1433,103 @@ export const PostDetail: React.FC = () => {
       >
         {/* Post Body */}
         <div style={{ marginBottom: '32px', flex: 1 }} onMouseUp={handleTextSelection}>
-          <div style={{
+          <Box sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            gap: 4,
             fontSize: '1.125rem',
             lineHeight: 1.7,
             color: theme.palette.text.primary
           }}>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={isBookMode ? `page-${currentPage}` : 'scroll'}
-                initial={{ opacity: 0, x: isBookMode ? 10 : 0 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: isBookMode ? -10 : 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                {isBookMode ? renderContent(pages[currentPage]) : renderContent(safePostContent)}
-              </motion.div>
-            </AnimatePresence>
-          </div>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={isBookMode ? `page-${currentPage}` : 'scroll'}
+                  initial={{ opacity: 0, x: isBookMode ? 10 : 0 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: isBookMode ? -10 : 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {isBookMode ? renderContent(pages[currentPage]) : renderContent(safePostContent)}
+                </motion.div>
+              </AnimatePresence>
+            </Box>
+
+            {postHeadings.length > 0 && (
+              <Box sx={{
+                display: { xs: 'none', md: 'block' },
+                width: '280px',
+                flexShrink: 0
+              }}>
+                <Box sx={{
+                  position: { md: 'sticky' },
+                  top: { md: '24px' },
+                  p: { xs: 2, md: 3 },
+                  bgcolor: alpha(theme.palette.primary.main, 0.03),
+                  borderRadius: 2,
+                  border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                  maxHeight: { md: 'calc(100vh - 100px)' },
+                  overflowY: 'auto'
+                }}>
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1, fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+                    <ListIcon size={20} /> Table of Contents
+                  </Typography>
+                  <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
+                    {postHeadings.map((h, i) => (
+                      <Box component="li" key={i} sx={{ ml: (h.level - 1) * 2, mb: 1 }}>
+                        <a
+                          href={`#${h.id}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            const scrollToTarget = () => {
+                              const el = document.getElementById(h.id);
+                              if (el) {
+                                el.style.scrollMarginTop = '100px';
+                                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                              }
+                            };
+
+                            if (isBookMode) {
+                              const escapedText = h.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                              const regex = new RegExp(`^#{${h.level}}\\s+.*${escapedText}.*$`, 'm');
+                              let pageIdx = pages.findIndex((page: string) => regex.test(page));
+
+                              if (pageIdx === -1) {
+                                pageIdx = pages.findIndex((page: string) => page.includes(h.text));
+                              }
+
+                              if (pageIdx !== -1) {
+                                setCurrentPage(pageIdx);
+                                setTimeout(scrollToTarget, 150);
+                              } else {
+                                setIsBookMode(false);
+                                setTimeout(scrollToTarget, 150);
+                              }
+                            } else {
+                              scrollToTarget();
+                            }
+                          }}
+                          style={{
+                            textDecoration: 'none',
+                            color: theme.palette.text.secondary,
+                            transition: 'color 0.2s',
+                            display: 'inline-block',
+                            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                            fontSize: '0.9rem',
+                            lineHeight: 1.4
+                          }}
+                          onMouseOver={(e) => e.currentTarget.style.color = theme.palette.primary.main}
+                          onMouseOut={(e) => e.currentTarget.style.color = theme.palette.text.secondary}
+                        >
+                          {h.text}
+                        </a>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              </Box>
+            )}
+          </Box>
         </div>
 
         {isBookMode && pages.length > 1 && (
@@ -1512,46 +1640,7 @@ export const PostDetail: React.FC = () => {
             </Button>
           </div>
 
-          <div>
-            <IconButton
-              aria-label="more"
-              id="long-button"
-              aria-controls={open ? 'long-menu' : undefined}
-              aria-expanded={open ? 'true' : undefined}
-              aria-haspopup="true"
-              onClick={handleClick}
-            >
-              <MoreVertical />
-            </IconButton>
-            <Menu
-              id="long-menu"
-              MenuListProps={{
-                'aria-labelledby': 'long-button',
-              }}
-              anchorEl={anchorEl}
-              open={open}
-              onClose={handleClose}
-            >
-              <MenuItem onClick={() => { handleReadPost(); handleClose(); }}>
-                <Volume2 size={16} style={{ marginRight: '8px' }} />
-                {isReading ? 'Stop Reading' : 'Read Aloud'}
-              </MenuItem>
-              <MenuItem onClick={() => { downloadPost(postData, isAuthenticated); handleClose(); }}>
-                <Download size={16} style={{ marginRight: '8px' }} />
-                Download TXT
-              </MenuItem>
-              <MenuItem onClick={() => { downloadPostPdf(postData, isAuthenticated); handleClose(); }}>
-                <Download size={16} style={{ marginRight: '8px' }} />
-                Download PDF
-              </MenuItem>
-              {user && !canEditOrDelete && (
-                <MenuItem onClick={() => { handleReport(); handleClose(); }} disabled={reportMutation.isPending}>
-                  <Flag size={16} style={{ marginRight: '8px' }} />
-                  Report
-                </MenuItem>
-              )}
-            </Menu>
-          </div>
+
         </div>
       </LIVBlogCard>
 
