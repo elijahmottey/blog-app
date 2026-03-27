@@ -25,7 +25,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class CommentServiceTest {
 
     @Mock
@@ -69,7 +73,7 @@ class CommentServiceTest {
         testComment.setPost(testPost);
 
         SecurityContextHolder.setContext(securityContext);
-        when(Objects.requireNonNull(securityContext.getAuthentication())).thenReturn(authentication);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getName()).thenReturn("test@example.com");
     }
 

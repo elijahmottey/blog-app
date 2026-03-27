@@ -7,10 +7,10 @@ import liv.codveda.blog.app.domain.enums.ReactionType;
 import liv.codveda.blog.app.exception.UnauthorizedException;
 
 import liv.codveda.blog.app.repository.ReactionRepository;
-import liv.codveda.blog.app.repository.UsersRepository;
 import liv.codveda.blog.app.service.interfaces.BlogService;
 import liv.codveda.blog.app.service.interfaces.NotificationService;
 import liv.codveda.blog.app.service.interfaces.ReactionService;
+import liv.codveda.blog.app.service.interfaces.UserService;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
@@ -26,17 +26,17 @@ public class ReactionServiceImpl implements ReactionService {
 
     private final ReactionRepository reactionRepository;
     private final BlogService postService; // Use PostService instead of PostRepository
-    private final UsersRepository usersRepository;
+    private final UserService userService;
     private final NotificationService notificationService;
 
     public ReactionServiceImpl(ReactionRepository reactionRepository,
             BlogService postService, // Inject PostService
-            UsersRepository usersRepository,
+            UserService userService,
             NotificationService notificationService,
             @Lazy ReactionService reactionService) {
         this.reactionRepository = reactionRepository;
         this.postService = postService; // Use PostService
-        this.usersRepository = usersRepository;
+        this.userService = userService;
         this.notificationService = notificationService;
     }
 
@@ -48,8 +48,7 @@ public class ReactionServiceImpl implements ReactionService {
         if (auth.getPrincipal() instanceof Users) {
             return (Users) auth.getPrincipal();
         }
-        return usersRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new UnauthorizedException("Authenticated user not found"));
+        return userService.getMyInfo(auth.getName());
     }
 
     private Post getPostOrThrow(Long postId) {

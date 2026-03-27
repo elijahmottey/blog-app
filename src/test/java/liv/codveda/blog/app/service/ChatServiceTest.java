@@ -4,6 +4,7 @@ import liv.codveda.blog.app.domain.dto.request.ChatMessageRequest;
 import liv.codveda.blog.app.domain.dto.response.ChatMessageResponse;
 import liv.codveda.blog.app.domain.entities.ChatMessage;
 import liv.codveda.blog.app.domain.entities.Users;
+import liv.codveda.blog.app.domain.entities.Post;
 import liv.codveda.blog.app.repository.ChatMessageRepository;
 import liv.codveda.blog.app.repository.UsersRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +34,9 @@ class ChatServiceTest {
 
     @Mock
     private UsersRepository userRepository;
+
+    @Mock
+    private liv.codveda.blog.app.repository.PostRepository postRepository;
 
     @Mock
     private SimpMessagingTemplate messagingTemplate;
@@ -65,6 +69,21 @@ class ChatServiceTest {
         // Arrange
         ChatMessageRequest request = new ChatMessageRequest(2L, "Hello", 10L);
         
+        // Post with author = recipient (ID=2) to satisfy author-only rule when postId is present
+        Post post = new Post();
+        // use reflection-free setters
+        try {
+            var idField = Post.class.getDeclaredField("id");
+            idField.setAccessible(true);
+            idField.set(post, 10L);
+        } catch (Exception ignored) {}
+        // set author
+        try {
+            var userField = Post.class.getDeclaredField("users");
+            userField.setAccessible(true);
+            userField.set(post, recipient);
+        } catch (Exception ignored) {}
+        when(postRepository.findById(10L)).thenReturn(Optional.of(post));
         when(userRepository.findById(1L)).thenReturn(Optional.of(sender));
         when(userRepository.findById(2L)).thenReturn(Optional.of(recipient));
         when(chatMessageRepository.save(any(ChatMessage.class))).thenReturn(message);
@@ -80,8 +99,8 @@ class ChatServiceTest {
         assertEquals(2L, response.getRecipientId());
         
         verify(chatMessageRepository, times(1)).save(any(ChatMessage.class));
-        verify(messagingTemplate, times(1)).convertAndSend(eq("/topic/messages/2"), any(ChatMessageResponse.class));
-        verify(messagingTemplate, times(1)).convertAndSend(eq("/topic/messages/1"), any(ChatMessageResponse.class));
+        verify(messagingTemplate, times(1)).convertAndSendToUser(eq("recipient@test.com"), eq("/queue/messages"), any(ChatMessageResponse.class));
+        verify(messagingTemplate, times(1)).convertAndSendToUser(eq("sender@test.com"), eq("/queue/messages"), any(ChatMessageResponse.class));
     }
 
     @Test
@@ -106,6 +125,7 @@ class ChatServiceTest {
     void markMessagesAsRead_Success() {
         // Arrange
         when(chatMessageRepository.findUnreadMessages(1L, 2L)).thenReturn(List.of(message));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sender));
 
         // Act
         chatService.markMessagesAsRead(2L, 1L);
@@ -113,7 +133,7 @@ class ChatServiceTest {
         // Assert
         assertTrue(message.isRead());
         verify(chatMessageRepository, times(1)).saveAll(anyList());
-        verify(messagingTemplate, times(1)).convertAndSend(eq("/topic/messages/1"), any(Object.class));
+        verify(messagingTemplate, times(1)).convertAndSendToUser(eq("sender@test.com"), eq("/queue/messages"), any(Object.class));
     }
 
     @Test

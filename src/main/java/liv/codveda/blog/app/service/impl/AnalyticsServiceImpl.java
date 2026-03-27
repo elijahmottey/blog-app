@@ -6,6 +6,7 @@ import liv.codveda.blog.app.domain.entities.Users;
 import liv.codveda.blog.app.domain.enums.ReactionType;
 import liv.codveda.blog.app.repository.*;
 import liv.codveda.blog.app.service.interfaces.AnalyticsService;
+import liv.codveda.blog.app.service.interfaces.UserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;

@@ -6,7 +6,7 @@ interface OAuth2LoginButtonsProps {
 }
 
 const OAuth2LoginButtons: React.FC<OAuth2LoginButtonsProps> = ({ className = '' }) => {
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL1 || 'http://localhost:8088';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8088';
 
   const handleGoogleLogin = () => {
     window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;

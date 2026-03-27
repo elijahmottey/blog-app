@@ -4,8 +4,8 @@ import liv.codveda.blog.app.domain.entities.Notification;
 import liv.codveda.blog.app.domain.entities.Users;
 import liv.codveda.blog.app.exception.NotFoundException;
 import liv.codveda.blog.app.repository.NotificationRepository;
-import liv.codveda.blog.app.repository.UsersRepository;
 import liv.codveda.blog.app.service.interfaces.NotificationService;
+import liv.codveda.blog.app.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,15 +20,15 @@ import java.util.Objects;
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final UsersRepository usersRepository;
+    private final UserService userService;
     private final SimpMessagingTemplate messagingTemplate;
 
     @Autowired
     public NotificationServiceImpl(NotificationRepository notificationRepository,
-            UsersRepository usersRepository,
+            UserService userService,
             SimpMessagingTemplate messagingTemplate) {
         this.notificationRepository = notificationRepository;
-        this.usersRepository = usersRepository;
+        this.userService = userService;
         this.messagingTemplate = messagingTemplate;
     }
 
@@ -91,7 +91,6 @@ public class NotificationServiceImpl implements NotificationService {
         if (auth.getPrincipal() instanceof Users) {
             return (Users) auth.getPrincipal();
         }
-        return usersRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new NotFoundException("User not found"));
+        return userService.getMyInfo(auth.getName());
     }
 }

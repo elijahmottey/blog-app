@@ -74,7 +74,7 @@ spring:
       - commentReactions
       - myCommentReaction
     caffeine:
-      spec: maximumSize=500,expireAfterWrite=10m   # Cache size + expiration time
+      spec: maximumSize=500,expireAfterWrite=10m,recordStats   # Cache size + expiration time + stats
 
   jpa:
     hibernate:
@@ -120,3 +120,12 @@ logging:
     org.springframework.ai.openai.api: DEBUG
     org.springframework.security: INFO
     org.springframework.cache: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,caches
+  endpoint:
+    health:
+      show-details: when_authorized

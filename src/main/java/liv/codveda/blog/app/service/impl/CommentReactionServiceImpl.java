@@ -9,6 +9,7 @@ import liv.codveda.blog.app.repository.CommentReactionRepository;
 import liv.codveda.blog.app.repository.CommentRepository;
 import liv.codveda.blog.app.repository.UsersRepository;
 import liv.codveda.blog.app.service.interfaces.CommentReactionService;
+import liv.codveda.blog.app.service.interfaces.UserService;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
@@ -21,13 +22,15 @@ public class CommentReactionServiceImpl implements CommentReactionService {
     private final CommentReactionRepository commentReactionRepository;
     private final CommentRepository commentRepository;
     private final UsersRepository usersRepository;
+    private final UserService userService;
 
     public CommentReactionServiceImpl(CommentReactionRepository commentReactionRepository,
-            CommentRepository commentRepository,
-            UsersRepository usersRepository) {
+                                      CommentRepository commentRepository, UsersRepository usersRepository,
+                                      UserService userService) {
         this.commentReactionRepository = commentReactionRepository;
         this.commentRepository = commentRepository;
         this.usersRepository = usersRepository;
+        this.userService = userService;
     }
 
     public Users getAuthenticatedUser() {

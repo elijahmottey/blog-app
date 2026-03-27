@@ -90,7 +90,7 @@ class WebSocketService {
   private subscribeToTopics() {
     if (!this.client || !this.client.connected || !this.userId) return;
 
-    // Subscribe to Notifications
+    // Subscribe to Notifications (keep topic by userId if backend still uses it)
     this.client.subscribe(`/topic/notifications/${this.userId}`, (message) => {
       try {
         const notification = JSON.parse(message.body);
@@ -101,8 +101,8 @@ class WebSocketService {
       }
     });
 
-    // Subscribe to Chat Messages
-    this.client.subscribe(`/topic/messages/${this.userId}`, (message) => {
+    // Subscribe to private user-specific chat queue
+    this.client.subscribe(`/user/queue/messages`, (message) => {
       try {
         const chatMsg = JSON.parse(message.body);
         const callback = this.chatCallbacks.get(this.userId!);

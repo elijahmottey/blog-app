@@ -26,12 +26,19 @@ public class ChatService {
 
         private final ChatMessageRepository chatMessageRepository;
         private final UsersRepository userRepository;
+        private final liv.codveda.blog.app.repository.PostRepository postRepository;
         private final SimpMessagingTemplate messagingTemplate;
 
         @Transactional
         public ChatMessageResponse processMessage(Long senderId, ChatMessageRequest request) {
                 if (senderId == null) {
                     throw new IllegalArgumentException("Sender ID cannot be null");
+                }
+                if (request == null || request.getRecipientId() == null) {
+                    throw new IllegalArgumentException("Recipient ID is required");
+                }
+                if (request.getContent() == null || request.getContent().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Message content is required");
                 }
                 
                 log.info("Processing chat message from {} to {}", senderId, request.getRecipientId());
@@ -43,10 +50,25 @@ public class ChatService {
                                 .orElseThrow(() -> new RuntimeException(
                                                 "Recipient not found: " + request.getRecipientId()));
 
+                // If this chat is tied to a post, enforce that one participant is the post author
+                if (request.getPostId() != null) {
+                        liv.codveda.blog.app.domain.entities.Post post = postRepository.findById(request.getPostId())
+                                        .orElseThrow(() -> new RuntimeException("Post not found: " + request.getPostId()));
+                        Long authorId = post.getUsers() != null ? post.getUsers().getId() : null;
+                        if (authorId == null) {
+                                throw new RuntimeException("Post has no author set");
+                        }
+                        boolean senderIsAuthor = sender.getId().equals(authorId);
+                        boolean recipientIsAuthor = recipient.getId().equals(authorId);
+                        if (!senderIsAuthor && !recipientIsAuthor) {
+                                throw new IllegalArgumentException("Chat is only allowed between the post author and one other user for postId=" + request.getPostId());
+                        }
+                }
+
                 ChatMessage chatMessage = ChatMessage.builder()
                                 .sender(sender)
                                 .recipient(recipient)
-                                .content(request.getContent())
+                                .content(request.getContent().trim())
                                 .postId(request.getPostId())
                                 .isRead(false)
                                 .build();
@@ -55,20 +77,18 @@ public class ChatService {
 
                 ChatMessageResponse response = mapToResponse(savedMessage);
 
-                // Send via WebSocket to specific user queue (recipient)
-                String recipientDestination = "/topic/messages/" + recipient.getId();
-                log.info("Sending message to recipient destination: {}", recipientDestination);
+                // Send via WebSocket to user-specific queue (secured per-user destination)
                 try {
-                    messagingTemplate.convertAndSend(recipientDestination, response);
+                    messagingTemplate.convertAndSendToUser(recipient.getEmail(), "/queue/messages", response);
+                    log.info("Sent message to user queue of recipient: {}", recipient.getEmail());
                 } catch (Exception e) {
                     log.error("Failed to send WebSocket message to recipient: {}", e.getMessage());
                 }
 
                 // Send back to sender as confirmation (so they see it on other devices instantly)
-                String senderDestination = "/topic/messages/" + sender.getId();
-                log.info("Sending message back to sender destination: {}", senderDestination);
                 try {
-                    messagingTemplate.convertAndSend(senderDestination, response);
+                    messagingTemplate.convertAndSendToUser(sender.getEmail(), "/queue/messages", response);
+                    log.info("Sent message to user queue of sender: {}", sender.getEmail());
                 } catch (Exception e) {
                     log.error("Failed to send WebSocket message to sender: {}", e.getMessage());
                 }
@@ -93,15 +113,21 @@ public class ChatService {
                 chatMessageRepository.saveAll(unreadMessages);
 
                 // Notify the sender that their messages have been read
-                String destination = "/topic/messages/" + senderId;
-                log.info("Sending read receipt notification to destination: {}", destination);
+                // Send read receipt to sender's private queue
+                Users sender = userRepository.findById(senderId)
+                        .orElse(null);
+                if (sender == null) {
+                    log.warn("Could not find sender with id {} to send read receipt", senderId);
+                    return;
+                }
 
                 java.util.Map<String, Object> receipt = new java.util.HashMap<>();
                 receipt.put("type", "READ_RECEIPT");
                 receipt.put("readerId", readerId);
 
                 try {
-                    messagingTemplate.convertAndSend(destination, (Object) receipt);
+                    messagingTemplate.convertAndSendToUser(sender.getEmail(), "/queue/messages", receipt);
+                    log.info("Sent read receipt to user queue of sender: {}", sender.getEmail());
                 } catch (Exception e) {
                     log.error("Failed to send WebSocket read receipt: {}", e.getMessage());
                 }
