@@ -1,10 +1,8 @@
 package liv.codveda.blog.app.security.jwt;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,7 +20,7 @@ import java.util.stream.Collectors;
 @Component
 public class JWTUtils {
     // 15 minutes access token expiration as requested
-    private static final long ACCESS_TOKEN_EXPIRATION = 90000000L;
+    private static final long ACCESS_TOKEN_EXPIRATION = 9000000L;
     private static final long REFRESH_TOKEN_EXPIRATION = 604800000L; // 1 week
     
     private final SecretKey secretKey;
@@ -69,47 +67,34 @@ public class JWTUtils {
     }
 
     public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+        return extractClaim(token, secretKey, Claims::getSubject);
     }
 
     public List<String> extractAuthorities(String token) {
-        Claims claims = extractAllClaims(token);
+        Claims claims = extractAllClaims(token, secretKey);
         return (List<String>) claims.get("authorities");
     }
 
     public String extractTokenType(String token) {
-        Claims claims = extractAllClaims(token);
+        Claims claims = extractAllClaims(token, secretKey);
         return (String) claims.get("tokenType");
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
+    public <T> T extractClaim(String token, SecretKey key, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token, key);
         return claimsResolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token) {
-        try {
-            return Jwts.parser()
-                    .verifyWith(secretKey)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
-        } catch (ExpiredJwtException e) {
-            log.debug("Token expired: {}", e.getMessage());
-            throw e;
-        } catch (SignatureException e) {
-            // Try with refresh token secret if access token secret fails
-            try {
-                return Jwts.parser()
-                        .verifyWith(refreshSecretKey)
-                        .build()
-                        .parseSignedClaims(token)
-                        .getPayload();
-            } catch (Exception ex) {
-                log.error("Invalid token signature: {}", ex.getMessage());
-                throw ex;
-            }
-        }
+    /**
+     * Parse and verify a JWT token with the specified signing key.
+     * No fallback to other keys — this prevents key confusion attacks.
+     */
+    private Claims extractAllClaims(String token, SecretKey key) {
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     public boolean isValidAccessToken(String token, UserDetails userDetails) {
@@ -153,6 +138,11 @@ public class JWTUtils {
     }
 
     public Instant extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration).toInstant();
+        // Try access key first, then refresh key
+        try {
+            return extractClaim(token, secretKey, Claims::getExpiration).toInstant();
+        } catch (Exception e) {
+            return extractClaim(token, refreshSecretKey, Claims::getExpiration).toInstant();
+        }
     }
 }

@@ -1,180 +1,109 @@
 package liv.codveda.blog.app.controller;
 
-import liv.codveda.blog.app.domain.dto.request.ChatMessageRequest;
-import liv.codveda.blog.app.domain.dto.response.ChatMessageResponse;
-import liv.codveda.blog.app.domain.entities.ChatMessage;
-import liv.codveda.blog.app.domain.entities.Users;
-import liv.codveda.blog.app.repository.ChatMessageRepository;
-import liv.codveda.blog.app.repository.UsersRepository;
-import org.junit.jupiter.api.BeforeEach;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import liv.codveda.blog.app.domain.dto.request.Login;
+import liv.codveda.blog.app.domain.dto.request.Register;
+import liv.codveda.blog.app.security.util.CookieUtils;
+import liv.codveda.blog.app.service.interfaces.AuthenticationService;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(MockitoExtension.class)
-class ChatServiceTest {
+@SpringBootTest
+@AutoConfigureMockMvc
+@TestPropertySource(properties = {
+    "jwt.secret=testSecretKeyThatIsLongEnoughForHS256AlgorithmTesting",
+    "jwt.refresh-secret=testRefreshSecretKeyThatIsLongEnoughForHS256Testing",
+    "app.admin.email=admin@test.com",
+    "app.admin.name=Admin User",
+    "app.admin.password=Password123!"
+})
+class AuthenticationControllerTest {
 
-    @Mock
-    private  ChatMessageRepository chatMessageRepository;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @Mock
-    private UsersRepository userRepository;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    @Mock
-    private SimpMessagingTemplate messagingTemplate;
+    @MockitoBean
+    private AuthenticationService authenticationService;
 
-    @InjectMocks
-    private ChatService chatService;
+    @MockitoBean
+    private CookieUtils cookieUtils;
 
-    private Users sender;
-    private Users recipient;
-    private ChatMessage message;
+    @Test
+    void testRegisterUser_Success() throws Exception {
+        Register register = new Register();
+        register.setName("Test User");
+        register.setEmail("test@example.com");
+        register.setPassword("Password123!");
 
-    @BeforeEach
-    void setUp() {
-        sender = Users.builder().id(1L).name("Sender").email("sender@test.com").build();
-        recipient = Users.builder().id(2L).name("Recipient").email("recipient@test.com").build();
+        when(authenticationService.register(any(), any())).thenReturn(ResponseEntity.ok().build());
 
-        message = ChatMessage.builder()
-                .id(100L)
-                .sender(sender)
-                .recipient(recipient)
-                .content("Hello")
-                .postId(10L)
-                .isRead(false)
-                .timestamp(LocalDateTime.now())
-                .build();
+        mockMvc.perform(post("/api/v1/auth/signup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(register)))
+                .andExpect(status().isOk());
+
+        verify(authenticationService, times(1)).register(any(), any());
     }
 
     @Test
-    void processMessage_Success() {
-        // Arrange
-        ChatMessageRequest request = new ChatMessageRequest(2L, "Hello", 10L);
+    void testLogin_Success() throws Exception {
+        Login login = new Login("test@example.com", "Password123!");
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(sender));
-        when(userRepository.findById(2L)).thenReturn(Optional.of(recipient));
-        when(chatMessageRepository.save(any(ChatMessage.class))).thenReturn(message);
+        when(authenticationService.authenticate(any(), any())).thenReturn(ResponseEntity.ok().build());
 
-        // Act
-        ChatMessageResponse response = chatService.processMessage(1L, request);
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(login)))
+                .andExpect(status().isOk());
 
-        // Assert
-        assertNotNull(response);
-        assertEquals(100L, response.getId());
-        assertEquals("Hello", response.getContent());
-        assertEquals(1L, response.getSenderId());
-        assertEquals(2L, response.getRecipientId());
-
-        verify(chatMessageRepository, times(1)).save(any(ChatMessage.class));
-        verify(messagingTemplate, times(1)).convertAndSend(eq("/topic/messages/2"), any(ChatMessageResponse.class));
-        verify(messagingTemplate, times(1)).convertAndSend(eq("/topic/messages/1"), any(ChatMessageResponse.class));
+        verify(authenticationService, times(1)).authenticate(any(), any());
     }
 
     @Test
-    void processMessage_SenderNull_ThrowsException() {
-        ChatMessageRequest request = new ChatMessageRequest(2L, "Hello", null);
+    void testLogout_Success() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/logout"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Logout successful"));
 
-        assertThrows(IllegalArgumentException.class, () -> chatService.processMessage(null, request));
-        verifyNoInteractions(chatMessageRepository);
+        verify(cookieUtils, times(1)).deleteCookie(any(), eq("accessToken"));
+        verify(cookieUtils, times(1)).deleteCookie(any(), eq("refreshToken"));
     }
 
     @Test
-    void processMessage_RecipientNotFound_ThrowsException() {
-        ChatMessageRequest request = new ChatMessageRequest(99L, "Hello", null);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(sender));
-        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+    void testRegister_InvalidEmail() throws Exception {
+        Register register = new Register();
+        register.setName("Test User");
+        register.setEmail("invalid-email");
+        register.setPassword("Password123!");
 
-        assertThrows(RuntimeException.class, () -> chatService.processMessage(1L, request));
-        verifyNoInteractions(chatMessageRepository);
+        mockMvc.perform(post("/api/v1/auth/signup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(register)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void markMessagesAsRead_Success() {
-        // Arrange
-        when(userRepository.findById(2L)).thenReturn(Optional.of(recipient)); // reader
-        when(userRepository.findById(1L)).thenReturn(Optional.of(sender)); // sender
-        when(chatMessageRepository.findUnreadMessages(1L, 2L)).thenReturn(List.of(message));
+    void testLogin_MissingCredentials() throws Exception {
+        Login login = new Login("", "");
 
-        // Act
-        chatService.markMessagesAsRead(2L, 1L);
-
-        // Assert
-        assertTrue(message.isRead());
-        verify(chatMessageRepository, times(1)).saveAll(anyList());
-        verify(messagingTemplate, times(1)).convertAndSend(eq("/topic/messages/1"), any(Object.class));
-    }
-
-    @Test
-    void markMessagesAsRead_NoUnreadMessages() {
-        // Arrange
-        when(userRepository.findById(2L)).thenReturn(Optional.of(recipient));
-        when(userRepository.findById(1L)).thenReturn(Optional.of(sender));
-        when(chatMessageRepository.findUnreadMessages(1L, 2L)).thenReturn(List.of());
-
-        // Act
-        chatService.markMessagesAsRead(2L, 1L);
-
-        // Assert
-        verify(chatMessageRepository, never()).saveAll(anyList());
-        verify(messagingTemplate, never()).convertAndSend(anyString(), any(Object.class));
-    }
-
-    @Test
-    void getChatHistory_Success() {
-        // Arrange
-        when(chatMessageRepository.findChatHistory(1L, 2L)).thenReturn(List.of(message));
-
-        // Act
-        List<ChatMessageResponse> history = chatService.getChatHistory(1L, 2L);
-
-        // Assert
-        assertNotNull(history);
-        assertEquals(1, history.size());
-        assertEquals("Hello", history.getFirst().getContent());
-        assertEquals(1L, history.getFirst().getSenderId());
-    }
-
-    @Test
-    void getConversations_Success() {
-        // Arrange
-        when(chatMessageRepository.findPartnerIdsWhereUserIsSender(1L)).thenReturn(List.of(2L));
-        when(chatMessageRepository.findPartnerIdsWhereUserIsRecipient(1L)).thenReturn(List.of(3L));
-
-        Users partner3 = Users.builder().id(3L).name("User3").build();
-        when(userRepository.findAllById(anySet())).thenReturn(Arrays.asList(recipient, partner3));
-
-        when(chatMessageRepository.findUnreadMessages(2L, 1L)).thenReturn(List.of(message));
-        when(chatMessageRepository.findUnreadMessages(3L, 1L)).thenReturn(List.of());
-
-        // Act
-        List<Map<String, Object>> conversations = chatService.getConversations(1L);
-
-        // Assert
-        assertNotNull(conversations);
-        assertEquals(2, conversations.size());
-
-        // Find the conversation with recipient (ID=2)
-        Map<String, Object> conv2 = conversations.stream().filter(c -> c.get("id").equals(2L)).findFirst().orElseThrow();
-        assertEquals("Recipient", conv2.get("name"));
-        assertEquals(1, conv2.get("unreadCount"));
-
-        // Find the conversation with partner3 (ID=3)
-        Map<String, Object> conv3 = conversations.stream().filter(c -> c.get("id").equals(3L)).findFirst().orElseThrow();
-        assertEquals("User3", conv3.get("name"));
-        assertEquals(0, conv3.get("unreadCount"));
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(login)))
+                .andExpect(status().isBadRequest());
     }
 }

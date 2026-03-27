@@ -56,6 +56,19 @@ export const UserAnalytics: React.FC = () => {
     avgViewsPerPost: analyticsResponse?.totalPostViews && analyticsResponse?.totalPosts ? Math.round(analyticsResponse.totalPostViews / analyticsResponse.totalPosts) : 0,
   }), [analyticsResponse, posts, comments, draftsCount]);
 
+  // Generate chart data for recent posts performance
+  const postPerformanceData = React.useMemo(() => {
+    return [...posts]
+      .filter(p => p.createdAt)
+      .sort((a, b) => new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime())
+      .slice(-7)
+      .map((p) => ({
+        name: p.title ? (p.title.length > 15 ? p.title.substring(0, 15) + '...' : p.title) : 'Untitled',
+        views: p.views || 0,
+        likes: p.likes || 0
+      }));
+  }, [posts]);
+
   if (isLoading) {
     return (
       <LIVBlogLayout.Container>
@@ -124,13 +137,39 @@ export const UserAnalytics: React.FC = () => {
       </LIVBlogLayout.Grid>
 
       {/* Charts Row */}
-      <LIVBlogLayout.Grid cols={1} gap="lg">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', marginBottom: '32px' }}>
         <LIVBlogCard
-          title="Activity Summary"
-          variant="default"
+          title="Recent Posts Performance"
+          subtitle="Views over your last 7 posts"
+          variant="elevated"
           padding="large"
         >
-          <div className="aws-flex aws-flex-col aws-gap-3">
+          <ResponsiveContainer width="100%" height={280}>
+            <AreaChart data={postPerformanceData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={theme.palette.success.main} stopOpacity={0.4}/>
+                  <stop offset="95%" stopColor={theme.palette.success.main} stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={alpha(theme.palette.divider, 0.5)} />
+              <XAxis dataKey="name" stroke={theme.palette.text.secondary} fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis stroke={theme.palette.text.secondary} fontSize={12} tickLine={false} axisLine={false} />
+              <Tooltip 
+                contentStyle={{ borderRadius: 12, border: `1px solid ${theme.palette.divider}`, boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }}
+              />
+              <Area type="monotone" dataKey="views" stroke={theme.palette.success.main} fillOpacity={1} fill="url(#colorViews)" strokeWidth={3} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </LIVBlogCard>
+
+        <LIVBlogCard
+          title="Activity Summary"
+          subtitle="Your engagement highlight"
+          variant="elevated"
+          padding="large"
+        >
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
             <div className="aws-flex aws-justify-between">
               <span 
                 style={{ 
@@ -187,7 +226,7 @@ export const UserAnalytics: React.FC = () => {
             </div>
           </div>
         </LIVBlogCard>
-      </LIVBlogLayout.Grid>
+      </div>
 
       {/* Recent Posts */}
       <LIVBlogCard
@@ -199,15 +238,24 @@ export const UserAnalytics: React.FC = () => {
           {posts.slice(0, 5).map((post, index) => (
             <div 
               key={post.id || index} 
-              className="aws-flex aws-justify-between aws-items-center aws-py-3"
+              className="user-analytics-post-row"
               style={{
-                borderBottom: index < 4 ? `1px solid ${theme.palette.divider}` : 'none',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '16px',
+                borderRadius: '12px',
+                marginBottom: '8px',
+                backgroundColor: theme.palette.background.paper,
+                transition: 'all 0.2s ease',
+                border: `1px solid ${alpha(theme.palette.divider, 0.4)}`,
               }}
             >
               <div style={{ flex: 1 }}>
                 <div 
-                  className="aws-text-sm aws-font-semibold"
+                  className="aws-text-sm"
                   style={{ 
+                    fontWeight: 600,
                     color: theme.palette.text.primary,
                     fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
                   }}
@@ -282,6 +330,13 @@ export const UserAnalytics: React.FC = () => {
           )}
         </div>
       </LIVBlogCard>
+      <style>{`
+        .user-analytics-post-row:hover {
+          transform: translateX(4px);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+          border-color: ${theme.palette.primary.main} !important;
+        }
+      `}</style>
     </LIVBlogLayout.Container>
   );
 };

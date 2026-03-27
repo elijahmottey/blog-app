@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -13,6 +14,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestPropertySource(properties = {
+    "jwt.secret=testSecretKeyThatIsLongEnoughForHS256AlgorithmTesting",
+    "jwt.refresh-secret=testRefreshSecretKeyThatIsLongEnoughForHS256Testing",
+    "app.admin.email=admin@test.com",
+    "app.admin.name=Admin User",
+    "app.admin.password=Password123!"
+})
 class SecurityConfigTest {
 
     @Autowired

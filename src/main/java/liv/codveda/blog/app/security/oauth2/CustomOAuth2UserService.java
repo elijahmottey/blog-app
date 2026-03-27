@@ -12,6 +12,15 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +37,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         log.info("OAuth2 login attempt with provider: {}", registrationId);
         log.info("OAuth2 user attributes: {}", oAuth2User.getAttributes());
         
-        String email = getEmail(oAuth2User, registrationId);
+        String email = getEmail(oAuth2User, registrationId, userRequest);
         String name = getName(oAuth2User, registrationId);
         String avatar = getAvatar(oAuth2User, registrationId);
         
@@ -40,14 +49,44 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return new OAuth2UserPrincipal(user, oAuth2User.getAttributes());
     }
 
-    private String getEmail(OAuth2User oAuth2User, String registrationId) {
+    private String getEmail(OAuth2User oAuth2User, String registrationId, OAuth2UserRequest userRequest) {
         String email = null;
         if ("github".equals(registrationId)) {
             email = oAuth2User.getAttribute("email");
             if (email == null || email.trim().isEmpty()) {
-                String login = oAuth2User.getAttribute("login");
-                email = login + "@github.local";
-                log.warn("GitHub email is null/empty, using fallback: {}", email);
+                log.info("GitHub email is null from main profile. Fetching from /user/emails API...");
+                try {
+                    RestTemplate restTemplate = new RestTemplate();
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setBearerAuth(userRequest.getAccessToken().getTokenValue());
+                    HttpEntity<String> entity = new HttpEntity<>(headers);
+                    
+                    ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                            "https://api.github.com/user/emails",
+                            HttpMethod.GET,
+                            entity,
+                            new ParameterizedTypeReference<List<Map<String, Object>>>() {}
+                    );
+                    
+                    if (response.getBody() != null) {
+                        for (Map<String, Object> emailObj : response.getBody()) {
+                            Boolean primary = (Boolean) emailObj.get("primary");
+                            if (primary != null && primary) {
+                                email = (String) emailObj.get("email");
+                                log.info("Successfully fetched primary private email from GitHub API");
+                                break;
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("Failed to fetch GitHub emails: {}", e.getMessage());
+                }
+
+                if (email == null || email.trim().isEmpty()) {
+                    String login = oAuth2User.getAttribute("login");
+                    email = login + "@github.local";
+                    log.warn("GitHub email still null/empty, using fallback: {}", email);
+                }
             }
         } else {
             email = oAuth2User.getAttribute("email");

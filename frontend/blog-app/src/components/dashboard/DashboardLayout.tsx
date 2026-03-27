@@ -8,6 +8,7 @@ import { DashboardRightRail } from './DashboardRightRail';
 import { LIVBlogLayout } from '../ui';
 import useDocumentTitle from '../../hooks/useDocumentTitle';
 import { AIChat } from './AIChat';
+import { WelcomeTour } from './WelcomeTour';
 
 export const DashboardLayout: React.FC = () => {
   useDocumentTitle('LIVBlog - Dashboard');
@@ -93,6 +94,8 @@ export const DashboardLayout: React.FC = () => {
       <div style={{ flex: isWide ? '0 0 72px' : '0 0 0', display: isWide ? 'block' : 'none', height: '100%' }}>
         <DashboardRightRail isDesktop={isWide} onToggleAiChat={toggleAiChat} isAiChatOpen={isAiChatOpen} />
       </div>
+
+      <WelcomeTour />
     </div>
   );
 };

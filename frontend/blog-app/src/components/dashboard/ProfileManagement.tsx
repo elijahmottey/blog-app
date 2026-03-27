@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useTheme } from '@mui/material/styles';
 import {LIVBlogCard, LIVBlogHeader, LIVBlogLayout} from '../ui';
-import { Button, TextField, Chip } from '@mui/material';
+import { Button, TextField, Chip, alpha } from '@mui/material';
 import useDocumentTitle from "../../hooks/useDocumentTitle.ts";
 
 const profileSchema = yup.object({

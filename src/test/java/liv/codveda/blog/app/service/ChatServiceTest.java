@@ -105,8 +105,6 @@ class ChatServiceTest {
     @Test
     void markMessagesAsRead_Success() {
         // Arrange
-        when(userRepository.findById(2L)).thenReturn(Optional.of(recipient)); // reader
-        when(userRepository.findById(1L)).thenReturn(Optional.of(sender)); // sender
         when(chatMessageRepository.findUnreadMessages(1L, 2L)).thenReturn(List.of(message));
 
         // Act
@@ -121,8 +119,6 @@ class ChatServiceTest {
     @Test
     void markMessagesAsRead_NoUnreadMessages() {
         // Arrange
-        when(userRepository.findById(2L)).thenReturn(Optional.of(recipient));
-        when(userRepository.findById(1L)).thenReturn(Optional.of(sender));
         when(chatMessageRepository.findUnreadMessages(1L, 2L)).thenReturn(List.of());
 
         // Act

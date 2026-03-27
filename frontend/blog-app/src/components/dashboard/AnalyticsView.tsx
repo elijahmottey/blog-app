@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTheme, alpha } from '@mui/material/styles';
+import { useMediaQuery } from '@mui/material';
 import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, LineChart, Line
@@ -13,6 +14,7 @@ import useDocumentTitle from "../../hooks/useDocumentTitle.ts";
 
 export const AnalyticsView: React.FC = () => {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   useDocumentTitle('LIVBlog | Analytics');
 
   const { data: adminAnalyticsData } = useQuery({
@@ -177,9 +179,9 @@ export const AnalyticsView: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: window.innerWidth < 768 ? '16px' : '32px', maxWidth: '1400px', margin: '0 auto' }}>
+    <div style={{ padding: isMobile ? '16px' : '32px', maxWidth: '1400px', margin: '0 auto' }}>
       {/* Header */}
-      <div style={{ marginBottom: window.innerWidth < 768 ? '24px' : '32px' }}>
+      <div style={{ marginBottom: isMobile ? '24px' : '32px' }}>
         <LIVBlogHeader
           title="Platform Analytics"
           subtitle="Comprehensive insights into your blog platform performance and user engagement"
@@ -190,9 +192,9 @@ export const AnalyticsView: React.FC = () => {
       {/* Key Metrics Grid */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(auto-fit, minmax(280px, 1fr))',
-        gap: window.innerWidth < 768 ? '16px' : '20px',
-        marginBottom: window.innerWidth < 768 ? '24px' : '32px'
+        gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(280px, 1fr))',
+        gap: isMobile ? '16px' : '20px',
+        marginBottom: isMobile ? '24px' : '32px'
       }}>
         {[
           {
@@ -321,9 +323,9 @@ export const AnalyticsView: React.FC = () => {
       {/* Charts Row 1 */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(auto-fit, minmax(300px, 1fr))',
-        gap: window.innerWidth < 768 ? '20px' : '24px',
-        marginBottom: window.innerWidth < 768 ? '24px' : '32px'
+        gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(300px, 1fr))',
+        gap: isMobile ? '20px' : '24px',
+        marginBottom: isMobile ? '24px' : '32px'
       }}>
         {/* User Growth Chart */}
         <LIVBlogCard
@@ -601,11 +603,13 @@ export const AnalyticsView: React.FC = () => {
           ].map((metric, index) => (
             <div
               key={index}
+              className="health-card"
               style={{
                 padding: '24px',
                 borderRadius: '12px',
                 backgroundColor: alpha(metric.color, 0.08),
                 border: `1px solid ${alpha(metric.color, 0.2)}`,
+                transition: 'all 0.2s ease'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
@@ -636,6 +640,12 @@ export const AnalyticsView: React.FC = () => {
           ))}
         </div>
       </LIVBlogCard>
+      <style>{`
+        .health-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        }
+      `}</style>
     </div>
   );
 };

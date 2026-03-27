@@ -23,7 +23,8 @@ import {
   Dialog,
   DialogContent,
   TextField,
-  Avatar
+  Avatar,
+  useMediaQuery
 } from '@mui/material';
 
 import { useAuth } from '../../context/AuthContext';
@@ -38,6 +39,7 @@ export const UserDashboard: React.FC = () => {
   const { user, userProfile } = useAuth();
   const queryClient = useQueryClient();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [showProfilePopup, setShowProfilePopup] = useState(false);
   const [profileDescription, setProfileDescription] = useState('');
   useDocumentTitle('LIVBlog | Dashboard');
@@ -131,7 +133,7 @@ export const UserDashboard: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: window.innerWidth < 768 ? '16px' : '32px', maxWidth: '1400px', margin: '0 auto' }}>
+    <div style={{ padding: isMobile ? '16px' : '32px', maxWidth: '1400px', margin: '0 auto' }}>
       {/* Profile Completion Popup */}
       <Dialog 
         open={showProfilePopup}
@@ -204,12 +206,13 @@ export const UserDashboard: React.FC = () => {
       <LIVBlogCard 
         variant="glass" 
         padding="xl"
+        className="welcome-banner"
         style={{ 
-          background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
           color: 'white',
           marginBottom: '32px',
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          borderRadius: '24px'
         }}
       >
         <div style={{ position: 'relative', zIndex: 1 }}>
@@ -246,14 +249,25 @@ export const UserDashboard: React.FC = () => {
             </div>
           )}
         </div>
-        <div style={{
+        <div className="shape-1" style={{
           position: 'absolute',
-          top: '-50%',
-          right: '-20%',
+          top: '-20%',
+          right: '-5%',
           width: '300px',
           height: '300px',
-          background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
-          borderRadius: '50%'
+          background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%)',
+          borderRadius: '50%',
+          filter: 'blur(10px)'
+        }} />
+        <div className="shape-2" style={{
+          position: 'absolute',
+          bottom: '-30%',
+          left: '10%',
+          width: '250px',
+          height: '250px',
+          background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%)',
+          borderRadius: '50%',
+          filter: 'blur(20px)'
         }} />
       </LIVBlogCard>
 
@@ -374,9 +388,9 @@ export const UserDashboard: React.FC = () => {
       >
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(auto-fit, minmax(250px, 1fr))', 
-          gap: window.innerWidth < 768 ? '16px' : '20px',
-          marginBottom: window.innerWidth < 768 ? '24px' : '32px'
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(250px, 1fr))', 
+          gap: isMobile ? '16px' : '20px',
+          marginBottom: isMobile ? '24px' : '32px'
         }}>
           {[
             {
@@ -752,6 +766,31 @@ export const UserDashboard: React.FC = () => {
           </div>
         </LIVBlogCard>
       )}
+      <style>{`
+        @keyframes gradientFlow {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        @keyframes float {
+          0% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(5deg); }
+          100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .welcome-banner {
+          background: linear-gradient(-45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark}, ${theme.palette.secondary.main}, ${theme.palette.primary.main});
+          background-size: 400% 400%;
+          animation: gradientFlow 15s ease infinite;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .shape-1 {
+          animation: float 8s ease-in-out infinite;
+        }
+        .shape-2 {
+          animation: float 12s ease-in-out infinite backwards;
+        }
+      `}</style>
     </div>
   );
 };

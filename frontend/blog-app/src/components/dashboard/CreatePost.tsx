@@ -836,7 +836,7 @@ export const CreatePost: React.FC = () => {
         <LIVBlogCard title="Category" padding="medium">
           <FormControl fullWidth>
             <Select
-              value={selectedCategory}
+              value={categories.includes(selectedCategory) ? selectedCategory : (categories[0] || '')}
               onChange={(e) => setSelectedCategory(e.target.value as string)}
               className="aws-font"
             >

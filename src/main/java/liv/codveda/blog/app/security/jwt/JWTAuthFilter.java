@@ -34,12 +34,13 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
-                                    @NonNull HttpServletResponse response,
-                                    @NonNull FilterChain filterChain)
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Skip filter for refresh token endpoint to avoid interfering with the refresh flow
-        if (request.getRequestURI().equals("/auth/refresh-token")) {
+        // Skip filter for refresh token endpoint to avoid interfering with the refresh
+        // flow
+        if (request.getRequestURI().equals("/api/v1/auth/refresh-token")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -73,8 +74,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
                         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                                 userDetails,
                                 null,
-                                userDetails.getAuthorities()
-                        );
+                                userDetails.getAuthorities());
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     }
@@ -83,7 +83,8 @@ public class JWTAuthFilter extends OncePerRequestFilter {
                 // Token expired. We don't set authentication context.
                 // Spring Security will treat this request as unauthenticated.
                 // If the endpoint is protected, it will return 401.
-                // The frontend Axios interceptor will catch the 401 and attempt to refresh the token.
+                // The frontend Axios interceptor will catch the 401 and attempt to refresh the
+                // token.
                 log.debug("JWT Token expired: {}", e.getMessage());
             } catch (Exception e) {
                 log.error("Cannot set user authentication: {}", e.getMessage());

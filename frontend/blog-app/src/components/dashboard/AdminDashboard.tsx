@@ -109,56 +109,68 @@ export const AdminDashboard: React.FC = () => {
               variant="elevated"
               padding="large"
             >
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <div style={{ overflowX: 'auto', paddingBottom: '16px' }}>
+                <table style={{ minWidth: '800px', width: '100%', borderCollapse: 'separate', borderSpacing: '0 12px' }}>
                   <thead>
-                    <tr style={{ borderBottom: `2px solid ${theme.palette.divider}` }}>
+                    <tr>
                       <th style={{ 
-                        padding: '12px 16px', 
+                        padding: '12px 24px', 
                         textAlign: 'left', 
-                        fontSize: '0.875rem', 
-                        fontWeight: 600, 
-                        color: theme.palette.text.primary,
+                        fontSize: '0.75rem', 
+                        fontWeight: 700, 
+                        color: theme.palette.text.secondary,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
                         fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
                       }}>User</th>
                       <th style={{ 
                         padding: '12px 16px', 
                         textAlign: 'left', 
-                        fontSize: '0.875rem', 
-                        fontWeight: 600, 
-                        color: theme.palette.text.primary,
+                        fontSize: '0.75rem', 
+                        fontWeight: 700, 
+                        color: theme.palette.text.secondary,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
                         fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
                       }}>Role</th>
                       <th style={{ 
                         padding: '12px 16px', 
                         textAlign: 'left', 
-                        fontSize: '0.875rem', 
-                        fontWeight: 600, 
-                        color: theme.palette.text.primary,
+                        fontSize: '0.75rem', 
+                        fontWeight: 700, 
+                        color: theme.palette.text.secondary,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
                         fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
                       }}>Joined</th>
                       <th style={{ 
                         padding: '12px 16px', 
                         textAlign: 'left', 
-                        fontSize: '0.875rem', 
-                        fontWeight: 600, 
-                        color: theme.palette.text.primary,
+                        fontSize: '0.75rem', 
+                        fontWeight: 700, 
+                        color: theme.palette.text.secondary,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
                         fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
                       }}>Posts</th>
                       <th style={{ 
                         padding: '12px 16px', 
                         textAlign: 'left', 
-                        fontSize: '0.875rem', 
-                        fontWeight: 600, 
-                        color: theme.palette.text.primary,
+                        fontSize: '0.75rem', 
+                        fontWeight: 700, 
+                        color: theme.palette.text.secondary,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
                         fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
                       }}>Comments</th>
                       <th style={{ 
-                        padding: '12px 16px', 
+                        padding: '12px 24px', 
                         textAlign: 'center', 
-                        fontSize: '0.875rem', 
-                        fontWeight: 600, 
-                        color: theme.palette.text.primary,
+                        fontSize: '0.75rem', 
+                        fontWeight: 700, 
+                        color: theme.palette.text.secondary,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
                         fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
                       }}>Actions</th>
                     </tr>
@@ -173,8 +185,22 @@ export const AdminDashboard: React.FC = () => {
                       ) || [];
                       
                       return (
-                        <tr key={user.id} style={{ borderBottom: `1px solid ${theme.palette.divider}` }}>
-                          <td style={{ padding: '16px' }}>
+                        <tr 
+                          key={user.id} 
+                          className="admin-table-row"
+                          style={{ 
+                            backgroundColor: theme.palette.background.paper,
+                            boxShadow: `0 2px 8px ${alpha(theme.palette.common.black, 0.04)}`,
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          <td style={{ 
+                            padding: '16px 24px', 
+                            borderTopLeftRadius: '12px', 
+                            borderBottomLeftRadius: '12px',
+                            border: `1px solid ${theme.palette.divider}`,
+                            borderRight: 'none'
+                          }}>
                             <div>
                               <div style={{ 
                                 fontSize: '0.875rem', 
@@ -189,7 +215,11 @@ export const AdminDashboard: React.FC = () => {
                               }}>{user.email}</div>
                             </div>
                           </td>
-                          <td style={{ padding: '16px' }}>
+                          <td style={{ 
+                            padding: '16px',
+                            borderTop: `1px solid ${theme.palette.divider}`,
+                            borderBottom: `1px solid ${theme.palette.divider}`
+                          }}>
                             <div style={{
                               display: 'inline-flex',
                               alignItems: 'center',
@@ -214,7 +244,9 @@ export const AdminDashboard: React.FC = () => {
                             padding: '16px', 
                             fontSize: '0.875rem', 
                             color: theme.palette.text.secondary,
-                            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                            borderTop: `1px solid ${theme.palette.divider}`,
+                            borderBottom: `1px solid ${theme.palette.divider}`
                           }}>
                             {user.createdAt ? format(new Date(user.createdAt), 'MMM dd, yyyy') : 'Unknown'}
                           </td>
@@ -223,7 +255,9 @@ export const AdminDashboard: React.FC = () => {
                             fontSize: '0.875rem', 
                             color: theme.palette.text.primary, 
                             fontWeight: 600,
-                            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                            borderTop: `1px solid ${theme.palette.divider}`,
+                            borderBottom: `1px solid ${theme.palette.divider}`
                           }}>
                             {userPosts.length}
                           </td>
@@ -232,11 +266,19 @@ export const AdminDashboard: React.FC = () => {
                             fontSize: '0.875rem', 
                             color: theme.palette.text.primary, 
                             fontWeight: 600,
-                            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                            fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                            borderTop: `1px solid ${theme.palette.divider}`,
+                            borderBottom: `1px solid ${theme.palette.divider}`
                           }}>
                             {userComments.length}
                           </td>
-                          <td style={{ padding: '16px' }}>
+                          <td style={{ 
+                            padding: '16px 24px',
+                            borderTopRightRadius: '12px', 
+                            borderBottomRightRadius: '12px',
+                            border: `1px solid ${theme.palette.divider}`,
+                            borderLeft: 'none'
+                          }}>
                             <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
                               <Button
                                 onClick={() => navigate(`/dashboard/admin/user/${user.id}/view`)}
@@ -273,6 +315,14 @@ export const AdminDashboard: React.FC = () => {
                 </table>
               </div>
             </LIVBlogCard>
+            <style>{`
+              .admin-table-row:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+                z-index: 10;
+                position: relative;
+              }
+            `}</style>
           </LIVBlogLayout.Container>
         );
       case 'analytics':

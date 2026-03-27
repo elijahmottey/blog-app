@@ -19,8 +19,8 @@ spring:
       enabled: false
 
 jwt:
-  secret: testSecretKeyThatIsLongEnoughForHS256AlgorithmTesting
-  refresh-secret: testRefreshSecretKeyThatIsLongEnoughForHS256Testing
+  secret: aG90ZWwtbWFuYWdlbWVudC1zeXN0ZW0tand0LXNlY3JldC1rZXktZm9yLWFjY2Vzcy10b2tlbnMtMjAyNA
+  refresh-secret: aG90ZWwtbWFuYWdlbWVudC1zeXN0ZW0tand0LXNlY3JldC1rZXksnnsjswsfffzfaLWFjY2Vzcy10b2tlbnMtMjAyNA
 
 cookie:
   domain: localhost

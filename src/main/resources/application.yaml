@@ -94,21 +94,21 @@ server:
   port: 8088
 
 jwt:
-  secret: ${JWT}
-  refresh-secret: ${REFRESH_TOKEN}
+  secret: ${JWT:defaultDevSecretKeyThatIsLongEnoughForHS256Algorithm}
+  refresh-secret: ${REFRESH_TOKEN:defaultDevRefreshSecretKeyLongEnoughForHS256}
 
 frontend:
-  url: ${FRONTEND}
+  url: ${FRONTEND:http://localhost:5173}
 
 cookie:
   domain: localhost
-  secure: ${COOKIES_SECURE1}
+  secure: ${COOKIES_SECURE1:false}
 
 app:
   admin:
-    name: ${ADMIN_NAME}
-    email: ${ADMIN_EMAIL}
-    password: ${ADMIN_PASSWORD}
+    name: ${ADMIN_NAME:Admin}
+    email: ${ADMIN_EMAIL:admin@localhost.com}
+    password: ${ADMIN_PASSWORD:Admin123!}
 
 
 
