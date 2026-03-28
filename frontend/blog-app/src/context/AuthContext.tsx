@@ -9,11 +9,11 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   isUser: boolean;
-  login: (credentials: {email: string, password: string}) => Promise<any>;
+  login: (credentials: {email: string, password: string}) => Promise<UserDto>;
   register: (data: { email: string; password: string; name: string }) => Promise<void>;
   logout: () => void;
   loading: boolean;
-  refreshUser: () => Promise<void>;
+  refreshUser: () => Promise<UserDto | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,43 +31,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const refreshUser = async () => {
-    if (BackendApi.isAuthenticated()) {
+  const refreshUser = async (): Promise<UserDto | null> => {
       try {
         const profileResp = await BackendApi.getUserProfile();
         const profile = profileResp.data;
         setUserProfile(profile);
+
+        let roles = BackendApi.getRoles();
+        if (roles.length === 0 && profile.role) {
+            localStorage.setItem("roles1", JSON.stringify(profile.role));
+            roles = BackendApi.getRoles();
+        }
+
         const userWithRoles: UserDto = {
           id: profile.id,
           name: profile.name,
           email: profile.email,
           description: profile.description,
-          roles: BackendApi.getRoles(),
+          roles: roles,
           createdAt: profile.createdAt,
           updatedAt: profile.updatedAt,
         };
         setUser(userWithRoles);
+        return userWithRoles;
       } catch (error) {
         console.error('Failed to fetch user profile during refresh:', error);
         BackendApi.clearTokens();
         setUser(null);
         setUserProfile(null);
+        return null;
       }
-    }
   };
 
   useEffect(() => {
     const initializeAuth = async () => {
-      if (BackendApi.isAuthenticated()) {
         try {
           await refreshUser();
         } catch (error) {
           console.error('Failed to fetch user profile during initialization:', error);
-          BackendApi.clearTokens();
-          setUser(null);
-          setUserProfile(null);
         }
-      }
       setLoading(false);
     };
 
@@ -76,8 +78,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (credentials: { email: string, password: string }) => {
     await BackendApi.loginUser(credentials);
-    await refreshUser();
-    return user;
+    const refreshedUser = await refreshUser();
+    if (!refreshedUser) {
+        throw new Error("Login failed: Could not retrieve user profile.");
+    }
+    return refreshedUser;
   };
 
   const register = async (data: { email: string; password: string; name: string }) => {
@@ -86,18 +91,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
-    // Clear client-side state immediately
     setUser(null);
     setUserProfile(null);
-    BackendApi.clearTokens(); // Clear local storage tokens
+    BackendApi.clearTokens();
 
     try {
-      // Attempt to invalidate token on the server, but don't block client-side logout if it fails
       await BackendApi.logoutUser();
       toast.success('Logged out successfully.');
     } catch (error) {
-      console.error('Server-side logout error (may be due to expired token or network issue):', error);
-      toast.info('Logged out locally. Server session may have already expired or could not be invalidated.');
+      console.error('Server-side logout error:', error);
+      toast.info('Logged out locally. Server session may have already expired.');
     }
   };
 
@@ -107,9 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             user,
             userProfile,
             isAuthenticated: !!user,
-            isAdmin: (() => {
-              return user?.roles?.includes(Roles.ADMIN) ?? false;
-            })(),
+            isAdmin: user?.roles?.includes(Roles.ADMIN) ?? false,
             isUser: user?.roles?.includes(Roles.USER) ?? false,
             login,
             register,

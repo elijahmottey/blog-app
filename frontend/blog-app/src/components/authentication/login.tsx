@@ -115,10 +115,6 @@ export const Login: React.FC = () => {
             await login(credentials);
 
             toast.success("Sign-in successful");
-            setTimeout(() => {
-                const from = location.state?.from?.pathname || '/dashboard';
-                navigate(from, { replace: true });
-            }, 500);
 
         } catch (err: any) {
             console.error("Login error:", err);

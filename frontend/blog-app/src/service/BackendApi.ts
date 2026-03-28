@@ -155,12 +155,15 @@ export default class BackendApi {
     }
 
     // ---- TOKEN VALIDATION ----
+    // Notice: Backend HTTPOnly cookies cannot be read via document.cookie.
+    // Instead, we assume the token is valid if the backend API responds,
+    // or if we have a role in localStorage (for UI sync).
     static isAccessTokenValid(): boolean {
-        return true; // Backend validates cookie
+        return !!localStorage.getItem("roles1");
     }
 
     static isRefreshTokenValid(): boolean {
-        return true; // Backend validates cookie
+        return !!localStorage.getItem("roles1");
     }
 
     static getTimeUntilAccessTokenExpiration(): number {
@@ -318,7 +321,7 @@ export default class BackendApi {
     }
 
     static isAuthenticated() {
-        return this.getRoles().length > 0;
+        return this.isAccessTokenValid();
     }
 
     // ---- USER ----

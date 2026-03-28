@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import liv.codveda.blog.app.domain.entities.Users;
 import liv.codveda.blog.app.domain.entities.RefreshToken;
-import liv.codveda.blog.app.domain.enums.Roles;
+import liv.codveda.blog.app.exception.NotFoundException;
 import liv.codveda.blog.app.repository.RefreshTokenRepository;
 import liv.codveda.blog.app.repository.UsersRepository;
 import liv.codveda.blog.app.security.jwt.JWTUtils;
@@ -19,8 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.time.Instant;
-import java.util.Map;
+
 import java.util.Optional;
 
 @Component
@@ -41,8 +40,18 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
         
-        OAuth2UserPrincipal principal = (OAuth2UserPrincipal) authentication.getPrincipal();
-        Users user = principal.getUser();
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        String email = oAuth2User.getAttribute("email");
+
+        if (email == null) {
+            log.error("Email not found from OAuth2 provider. Cannot proceed with JWT generation.");
+            getRedirectStrategy().sendRedirect(request, response, "/login?error=email_not_found");
+            return;
+        }
+
+        // Ensure we have the fully loaded user from the database within this transaction
+        Users user = usersRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User not found after OAuth2 login: " + email));
         
         log.info("OAuth2 authentication success for user: {}", user.getEmail());
         

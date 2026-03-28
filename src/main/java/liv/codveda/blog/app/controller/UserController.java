@@ -69,7 +69,10 @@ public class UserController {
     public ResponseEntity<ApiResponse<UsersDto>> getUserProfile() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
+
+        // Always use the transactional service method to fetch a fully initialized User entity
         Users userProfile = userService.getMyInfo(email);
+
         return ResponseEntity.ok(new ApiResponse<>(userMapper.userToUserDto(userProfile),
                 "user profile retrieved successfully"));
     }
@@ -99,9 +102,4 @@ public class UserController {
         Users updatedUser = userService.updateUserById(userId,userMapper.userDtoToUser(userDto));
         return ResponseEntity.ok(new ApiResponse<>(userMapper.userToUserDto(updatedUser), "user with ID" + userId + " updated successfully"));
     }
-
-
-
-
-
 }

@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -92,11 +93,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Cacheable(value = "userByEmail", key = "#email")
+    @Transactional(readOnly = true)
     public Users getMyInfo(String email) {
-        return this.usersRepository.findByEmail(email)
+        Users user = this.usersRepository.findByEmail(email)
                 .orElseThrow(() ->
                         new NotFoundException("user not found with email: " + email));
+        // Initialize lazy collections
+        user.getPosts().size();
+        user.getComments().size();
+        return user;
     }
 
     // Helper method for internal usage (not exposed in interface) or expose it if needed

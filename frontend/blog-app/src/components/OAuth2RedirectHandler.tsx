@@ -1,25 +1,26 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import BackendApi from '../service/BackendApi';
+import { useAuth } from '../context/AuthContext';
+import { toast } from 'sonner';
 
 const OAuth2RedirectHandler = () => {
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const handleRedirect = async () => {
       try {
-        // Fetch user profile to get role
-        const response = await BackendApi.getUserProfile();
-        const userRole = response.data.role;
+        // The backend has set the cookies. Now, update the frontend's auth state.
+        await refreshUser();
         
-        // Store role in localStorage
-        localStorage.setItem('roles1', JSON.stringify(userRole));
+        toast.success('Successfully logged in!');
         
-        // Always redirect to /dashboard for all users
+        // Redirect to the dashboard or the intended page
         navigate('/dashboard/posts', { replace: true });
       } catch (error) {
         console.error('OAuth2 redirect error:', error);
+        toast.error('Login failed. Please try again.');
         navigate('/auth/login?error=oauth2_failed', { replace: true });
       } finally {
         setLoading(false);
@@ -27,7 +28,7 @@ const OAuth2RedirectHandler = () => {
     };
 
     handleRedirect();
-  }, [navigate]);
+  }, [navigate, refreshUser]);
 
   if (!loading) return null;
 

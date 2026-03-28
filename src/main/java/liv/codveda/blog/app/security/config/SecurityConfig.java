@@ -2,6 +2,7 @@ package liv.codveda.blog.app.security.config;
 
 import liv.codveda.blog.app.security.jwt.JWTAuthFilter;
 import liv.codveda.blog.app.security.oauth2.CustomOAuth2UserService;
+import liv.codveda.blog.app.security.oauth2.CustomOidcUserService;
 import liv.codveda.blog.app.security.oauth2.OAuth2AuthenticationSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,13 +28,16 @@ public class SecurityConfig {
 
         private final JWTAuthFilter jwtAuthFilter;
         private final CustomOAuth2UserService customOAuth2UserService;
+        private final CustomOidcUserService customOidcUserService;
         private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 
         public SecurityConfig(@Lazy JWTAuthFilter jwtAuthFilter,
                               CustomOAuth2UserService customOAuth2UserService,
+                              CustomOidcUserService customOidcUserService,
                               OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler) {
                 this.jwtAuthFilter = jwtAuthFilter;
                 this.customOAuth2UserService = customOAuth2UserService;
+                this.customOidcUserService = customOidcUserService;
                 this.oAuth2AuthenticationSuccessHandler = oAuth2AuthenticationSuccessHandler;
         }
 
@@ -47,7 +51,7 @@ public class SecurityConfig {
                                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                                 .csrfTokenRequestHandler(requestHandler)
                                 .ignoringRequestMatchers("/api/v1/auth/**", "/oauth2/**",
-                                        "/login/oauth2/**", "/api/v1/post", "/ws/**", "/api/v1/chat/**"))
+                                        "/login/oauth2/**", "/api/v1/post", "/ws/**", "/api/v1/chat/**", "/api/v1/oauth2/**"))
                         .cors(Customizer.withDefaults())
                         .authorizeHttpRequests(auth -> auth
                                 .requestMatchers(
@@ -67,7 +71,8 @@ public class SecurityConfig {
                                         "/login/oauth2/**",
                                         "/error",
                                         "/h2-console/**",
-                                        "/favicon.ico")
+                                        "/favicon.ico",
+                                        "/api/v1/oauth2/**")
                                 .permitAll()
                                 .anyRequest().authenticated())
                         .sessionManagement(session -> session
@@ -75,11 +80,15 @@ public class SecurityConfig {
                         .headers(headers -> headers
                                 .frameOptions(frameOptions -> frameOptions.disable())
                                 .contentSecurityPolicy(csp -> csp.policyDirectives(
-                                        "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:")))
+                                        "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; media-src 'self' data:")))
                         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                         .oauth2Login(oauth2 -> oauth2
+                                .authorizationEndpoint(authorization ->
+                                        authorization.baseUri("/api/v1/oauth2/authorization")
+                                )
                                 .userInfoEndpoint(userInfo -> userInfo
-                                        .userService(customOAuth2UserService))
+                                        .userService(customOAuth2UserService)
+                                        .oidcUserService(customOidcUserService))
                                 .successHandler(oAuth2AuthenticationSuccessHandler));
 
                 return http.build();

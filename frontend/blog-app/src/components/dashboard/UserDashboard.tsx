@@ -243,9 +243,6 @@ export const UserDashboard: React.FC = () => {
               maxWidth: '600px',
               backdropFilter: 'blur(4px)'
             }}>
-              <Typography variant="body2" style={{ color: 'rgba(255,255,255,0.95)', fontStyle: 'italic' }}>
-                "{user.description}"
-              </Typography>
             </div>
           )}
         </div>
