@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, CheckCircle, XCircle } from "lucide-react";
@@ -22,10 +22,10 @@ import {
     Chip,
     Divider,
 } from '@mui/material';
-import { LIVBlogCard, LIVBlogHeader, LIVBlogLayout } from '../ui';
+import { LIVBlogCard, LIVBlogHeader } from '../ui';
 import { styled } from '@mui/material/styles';
 
-const AWSBackground = () => (
+const LoginBackground = () => (
     <Box
         sx={{
             position: 'fixed',
@@ -34,7 +34,10 @@ const AWSBackground = () => (
             width: '100%',
             height: '100%',
             zIndex: -1,
-            background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+            backgroundImage: `url(/elibg.jpg)`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
             '&::before': {
                 content: '""',
                 position: 'absolute',
@@ -42,23 +45,7 @@ const AWSBackground = () => (
                 left: 0,
                 width: '100%',
                 height: '100%',
-                backgroundImage: `
-                    radial-gradient(circle at 20% 80%, rgba(255, 153, 0, 0.08) 0%, transparent 50%),
-                    radial-gradient(circle at 80% 20%, rgba(255, 153, 0, 0.06) 0%, transparent 50%),
-                    radial-gradient(circle at 40% 40%, rgba(255, 153, 0, 0.04) 0%, transparent 50%)
-                `,
-            },
-            '&::after': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                backgroundImage: `
-                    linear-gradient(90deg, transparent 0%, rgba(255, 153, 0, 0.03) 50%, transparent 100%),
-                    linear-gradient(0deg, transparent 0%, rgba(255, 153, 0, 0.03) 50%, transparent 100%)
-                `,
+                backgroundColor: 'rgba(0, 0, 0, 0.4)', // Subtle dark overlay to ensure text readability
             }
         }}
     />
@@ -213,11 +200,16 @@ export const Signup = () => {
         }
     };
 
-      return (
+    return (
         <>
-            <AWSBackground />
+            <LoginBackground />
             <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-                <Box sx={{ flex: 1, display: 'flex', justifyContent: 'space-around' }}>
+                <Box sx={{ 
+                    flex: 1, 
+                    display: 'flex', 
+                    flexDirection: { xs: 'column', md: 'row' },
+                    justifyContent: 'space-around' 
+                }}>
                 {/* Left Half - Logo */}
                 <Box
                     sx={{
@@ -225,7 +217,10 @@ export const Signup = () => {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        backdropFilter: 'blur(5px)', // Added slight blur to the logo area for a glass effect
+                        minHeight: { xs: '200px', md: 'auto' },
+                        order: { xs: 2, md: 1 }
                     }}
                 >
                     <motion.div
@@ -247,7 +242,8 @@ export const Signup = () => {
                                 src="/LIV Blog logo design.png"
                                 alt="LIV Blog"
                                 style={{
-                                    maxWidth: '300px',
+                                    maxWidth: '250px',
+                                    width: '100%',
                                     height: 'auto',
                                     display: 'block'
                                 }}
@@ -263,14 +259,15 @@ export const Signup = () => {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        padding: 4
+                        padding: { xs: 2, md: 4 },
+                        order: { xs: 1, md: 2 }
                     }}
                 >
                     <motion.div
                         initial={{ x: 50, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ duration: 0.6, delay: 0.2 }}
-                        style={{ width: '100%', maxWidth: 400 }}
+                        style={{ width: '100%' }}
                     >
                         <LIVBlogCard
                             variant="elevated"
@@ -278,6 +275,10 @@ export const Signup = () => {
                             className="hover-card"
                             style={{
                                 width: '100%',
+                                maxWidth: '400px',
+                                backgroundColor: theme.palette.mode === 'dark' ? 'rgba(30, 30, 30, 0.85)' : 'rgba(255, 255, 255, 0.95)', // Semi-transparent paper color based on theme
+                                backdropFilter: 'blur(10px)', // Glassmorphism effect
+                                border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}`
                             }}
                         >
                             <LIVBlogHeader
@@ -318,6 +319,7 @@ export const Signup = () => {
                                         variant="outlined"
                                         size="small"
                                         disabled={loading}
+                                        sx={{ bgcolor: 'background.paper', borderRadius: 1 }}
                                     />
                                 </Box>
 
@@ -335,6 +337,7 @@ export const Signup = () => {
                                         variant="outlined"
                                         size="small"
                                         disabled={loading}
+                                        sx={{ bgcolor: 'background.paper', borderRadius: 1 }}
                                     />
                                 </Box>
 
@@ -352,6 +355,7 @@ export const Signup = () => {
                                         variant="outlined"
                                         size="small"
                                         disabled={loading}
+                                        sx={{ bgcolor: 'background.paper', borderRadius: 1 }}
                                         InputProps={{
                                             endAdornment: (
                                                 <InputAdornment position="end">
@@ -369,7 +373,7 @@ export const Signup = () => {
 
                                     {/* Password Strength Indicator */}
                                     {registrationData.password && (
-                                        <LIVBlogCard variant="outlined" padding="small" style={{ marginTop: '12px' }}>
+                                        <LIVBlogCard variant="outlined" padding="small" style={{ marginTop: '12px', backgroundColor: 'background.paper' }}>
                                             <Box sx={{ mb: 1 }}>
                                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                                                     <Typography variant="caption" color="text.secondary">
@@ -447,7 +451,9 @@ export const Signup = () => {
                     sx={{
                         textAlign: 'center',
                         padding: 2,
-                        fontSize:9
+                        fontSize:9,
+                        color: 'white', // Made text white to contrast with background
+                        textShadow: '0px 1px 2px rgba(0,0,0,0.8)' // Added shadow for readability
                     }}
                 >
                     <p   >

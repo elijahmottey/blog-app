@@ -29,7 +29,10 @@ const AWSBackground = () => (
             width: '100%',
             height: '100%',
             zIndex: -1,
-            background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+            backgroundImage: `url(/elibg.jpg)`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat', // Added this to ensure it doesn't repeat
             '&::before': {
                 content: '""',
                 position: 'absolute',
@@ -37,23 +40,7 @@ const AWSBackground = () => (
                 left: 0,
                 width: '100%',
                 height: '100%',
-                backgroundImage: `
-                    radial-gradient(circle at 20% 80%, rgba(255, 153, 0, 0.08) 0%, transparent 50%),
-                    radial-gradient(circle at 80% 20%, rgba(255, 153, 0, 0.06) 0%, transparent 50%),
-                    radial-gradient(circle at 40% 40%, rgba(255, 153, 0, 0.04) 0%, transparent 50%)
-                `,
-            },
-            '&::after': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                backgroundImage: `
-                    linear-gradient(90deg, transparent 0%, rgba(255, 153, 0, 0.03) 50%, transparent 100%),
-                    linear-gradient(0deg, transparent 0%, rgba(255, 153, 0, 0.03) 50%, transparent 100%)
-                `,
+                backgroundColor: 'rgba(0, 0, 0, 0.4)', // Subtle dark overlay to ensure text readability
             }
         }}
     />
@@ -151,6 +138,7 @@ export const Login: React.FC = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        backdropFilter: 'blur(5px)', // Added slight blur to the logo area for a glass effect
                         minHeight: { xs: '200px', md: 'auto' },
                         order: { xs: 2, md: 1 }
                     }}
@@ -207,7 +195,10 @@ export const Login: React.FC = () => {
                             className="hover-card"
                             style={{
                                 width: '100%',
-                                maxWidth: '400px'
+                                maxWidth: '400px',
+                                backgroundColor: theme.palette.mode === 'dark' ? 'rgba(30, 30, 30, 0.85)' : 'rgba(255, 255, 255, 0.95)', // Semi-transparent paper color based on theme
+                                backdropFilter: 'blur(10px)', // Glassmorphism effect
+                                border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}`
                             }}
                         >
                             <LIVBlogHeader
@@ -251,6 +242,7 @@ export const Login: React.FC = () => {
                                         variant="outlined"
                                         size="small"
                                         disabled={loading}
+                                        sx={{ bgcolor: 'background.paper', borderRadius: 1 }}
                                     />
                                 </Box>
 
@@ -270,6 +262,7 @@ export const Login: React.FC = () => {
                                         variant="outlined"
                                         size="small"
                                         disabled={loading}
+                                        sx={{ bgcolor: 'background.paper', borderRadius: 1 }}
                                         InputProps={{
                                             endAdornment: (
                                                 <InputAdornment position="end">
@@ -343,7 +336,9 @@ export const Login: React.FC = () => {
                     sx={{
                         textAlign: 'center',
                         padding: 2,
-                        fontSize:9
+                        fontSize:9,
+                        color: 'white', // Made text white to contrast with background
+                        textShadow: '0px 1px 2px rgba(0,0,0,0.8)' // Added shadow for readability
                     }}
                 >
                     <p   >

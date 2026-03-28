@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useTheme } from '@mui/material/styles';
+import { useTheme, alpha } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Outlet } from 'react-router-dom';
 import { DashboardNavbar } from './DashboardNavbar';
@@ -9,6 +9,34 @@ import { LIVBlogLayout } from '../ui';
 import useDocumentTitle from '../../hooks/useDocumentTitle';
 import { AIChat } from './AIChat';
 import { WelcomeTour } from './WelcomeTour';
+import { Box } from '@mui/material';
+
+const DashboardBackground = () => (
+    <Box
+        sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            zIndex: -1,
+            backgroundImage: `url(/elibg.jpg)`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                backgroundColor: (theme) => alpha(theme.palette.background.default, 0.85),
+                backdropFilter: 'blur(8px)',
+            }
+        }}
+    />
+);
 
 export const DashboardLayout: React.FC = () => {
   useDocumentTitle('LIVBlog - Dashboard');
@@ -43,12 +71,12 @@ export const DashboardLayout: React.FC = () => {
       className="aws-font"
       style={{
         height: '100vh',
-        backgroundColor: theme.palette.background.default,
         display: 'flex',
         fontFamily: 'Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         overflow: 'hidden' // Ensure the entire viewport is used and scrolling is handled internally
       }}
     >
+      <DashboardBackground />
       {isPersistent ? (
         isSidebarOpen && (
           <div style={{ flex: '0 0 ' + (isWide ? '200px' : '176px') }}>
