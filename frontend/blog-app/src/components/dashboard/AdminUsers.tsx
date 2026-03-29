@@ -71,6 +71,7 @@ interface ApiUser {
   role: string; // API returns single role as string
   createdAt: string;
   updatedAt: string;
+  avatar?: string;
   posts?: any[]; // API returns posts array
   comments?: any[];
 }
@@ -520,7 +521,7 @@ export const AdminUsers: React.FC = () => {
         <LIVBlogCard
           variant="elevated"
           padding="none"
-          style={{ overflow: 'hidden', borderRadius: theme.shape.borderRadius * 2 }}
+          style={{ overflow: 'hidden', borderRadius: (typeof theme.shape.borderRadius === 'number' ? theme.shape.borderRadius : 4) * 2 }}
         >
           {/* Search Bar Area */}
           <Box sx={{ 

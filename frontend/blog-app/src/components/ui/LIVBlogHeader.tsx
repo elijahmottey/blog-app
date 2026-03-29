@@ -1,5 +1,6 @@
 import React from 'react';
-import { useTheme } from '@mui/material/styles';
+import { useTheme, SxProps, Theme } from '@mui/material/styles';
+import { Box } from '@mui/material';
 
 interface LIVBlogHeaderProps {
   title: string;
@@ -7,6 +8,7 @@ interface LIVBlogHeaderProps {
   actions?: React.ReactNode;
   size?: 'small' | 'medium' | 'large';
   className?: string;
+  sx?: SxProps<Theme>;
 }
 
 export const LIVBlogHeader: React.FC<LIVBlogHeaderProps> = ({
@@ -14,7 +16,8 @@ export const LIVBlogHeader: React.FC<LIVBlogHeaderProps> = ({
   subtitle,
   actions,
   size = 'medium',
-  className = ''
+  className = '',
+  sx
 }) => {
   const theme = useTheme();
 
@@ -44,7 +47,7 @@ export const LIVBlogHeader: React.FC<LIVBlogHeaderProps> = ({
   const styles = getSizeStyles();
 
   return (
-    <div className={`${styles.spacing} ${className}`}>
+    <Box className={`${styles.spacing} ${className}`} sx={sx}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <h1 
@@ -78,7 +81,7 @@ export const LIVBlogHeader: React.FC<LIVBlogHeaderProps> = ({
           </div>
         )}
       </div>
-    </div>
+    </Box>
   );
 };
 
