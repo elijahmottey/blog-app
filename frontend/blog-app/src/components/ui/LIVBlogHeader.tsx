@@ -1,5 +1,6 @@
 import React from 'react';
-import { useTheme, SxProps, Theme } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
+import type { SxProps, Theme } from '@mui/material/styles';
 import { Box } from '@mui/material';
 
 interface LIVBlogHeaderProps {
