@@ -1419,22 +1419,8 @@ export const PostDetail: React.FC = () => {
                 <option value="clear">Clear</option>
               </select>
 
-              {/* Voice preset selector */}
-              <select
-                value={voicePreset}
-                onChange={(e) => setVoicePreset(e.target.value as 'podcastA' | 'podcastB')}
-                style={{
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                  border: `1px solid ${theme.palette.divider}`,
-                  fontSize: '0.75rem',
-                  backgroundColor: theme.palette.background.paper,
-                  marginLeft: 8
-                }}
-              >
-                <option value="podcastA">Podcast Preset A</option>
-                <option value="podcastB">Podcast Preset B</option>
-              </select>
+
+
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>Speed:</span>
