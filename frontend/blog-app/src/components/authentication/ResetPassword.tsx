@@ -104,7 +104,7 @@ const ResetPassword = () => {
                             backgroundColor: alpha(theme.palette.background.paper, 0.85),
                             backdropFilter: 'blur(10px)',
                             border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
-                            borderRadius: theme.shape.borderRadius * 3,
+                            borderRadius: (typeof theme.shape.borderRadius === 'number' ? theme.shape.borderRadius : 4) * 3,
                             boxShadow: theme.shadows[12]
                         }}
                     >
