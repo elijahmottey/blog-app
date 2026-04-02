@@ -205,7 +205,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
                 String refreshToken = maybeRefresh.get();
 
-                // Verify token in DB
                 RefreshToken dbToken = refreshTokenRepository.findByToken(refreshToken)
                                 .orElseThrow(() -> new UnauthorizedException("Invalid or revoked refresh token"));
 
@@ -215,7 +214,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 }
 
                 String username = jwtUtils.extractUsername(refreshToken);
-                var user = userRepository.findByEmail(username)
+                Users user = userRepository.findByEmail(username)
                                 .orElseThrow(() -> new NotFoundException("User for refresh token not found"));
 
                 if (!jwtUtils.isValidRefreshToken(refreshToken, user)) {
@@ -223,12 +222,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 }
 
                 String newAccessToken = jwtUtils.generateAccessToken(user);
-                String newRefreshToken = jwtUtils.generateRefreshToken(user); // rotate refresh token
+                String newRefreshToken = jwtUtils.generateRefreshToken(user);
 
                 Instant accessTokenExpiration = jwtUtils.extractExpiration(newAccessToken);
                 Instant refreshTokenExpiration = jwtUtils.extractExpiration(newRefreshToken);
 
-                // Update existing refresh token
                 dbToken.setToken(newRefreshToken);
                 dbToken.setExpiryDate(refreshTokenExpiration);
                 refreshTokenRepository.save(dbToken);

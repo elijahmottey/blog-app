@@ -1,6 +1,8 @@
 package liv.codveda.blog.app.security.jwt;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -100,8 +102,11 @@ public class JWTUtils {
     public boolean isValidAccessToken(String token, UserDetails userDetails) {
         try {
             return validateToken(token, userDetails, secretKey, "ACCESS");
-        } catch (Exception e) {
-            log.debug("Access token validation failed: {}", e.getMessage());
+        } catch (ExpiredJwtException e) {
+            log.debug("Access token expired: {}", e.getMessage(), e);
+            return false;
+        } catch (JwtException e) {
+            log.debug("Access token validation failed: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -109,8 +114,11 @@ public class JWTUtils {
     public boolean isValidRefreshToken(String token, UserDetails userDetails) {
         try {
             return validateToken(token, userDetails, refreshSecretKey, "REFRESH");
-        } catch (Exception e) {
-            log.debug("Refresh token validation failed: {}", e.getMessage());
+        } catch (ExpiredJwtException e) {
+            log.debug("Refresh token expired: {}", e.getMessage(), e);
+            return false;
+        } catch (JwtException e) {
+            log.debug("Refresh token validation failed: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -130,19 +138,27 @@ public class JWTUtils {
             return username.equals(userDetails.getUsername()) &&
                     !expiration.before(new Date()) &&
                     tokenType.equals(actualTokenType);
-        } catch (Exception e) {
-            log.debug("Token validation failed: {}", e.getMessage());
+        } catch (ExpiredJwtException e) {
+            log.debug("Token expired: {}", e.getMessage(), e);
+            return false;
+        } catch (JwtException e) {
+            log.debug("Token validation failed: {}", e.getMessage(), e);
             return false;
         }
 
     }
 
     public Instant extractExpiration(String token) {
-        // Try access key first, then refresh key
         try {
             return extractClaim(token, secretKey, Claims::getExpiration).toInstant();
-        } catch (Exception e) {
-            return extractClaim(token, refreshSecretKey, Claims::getExpiration).toInstant();
+        } catch (JwtException e) {
+            log.debug("Failed to extract expiration from access token: {}", e.getMessage(), e);
+            try {
+                return extractClaim(token, refreshSecretKey, Claims::getExpiration).toInstant();
+            } catch (JwtException refreshException) {
+                log.debug("Failed to extract expiration from refresh token: {}", refreshException.getMessage(), refreshException);
+                throw refreshException;
+            }
         }
     }
 }

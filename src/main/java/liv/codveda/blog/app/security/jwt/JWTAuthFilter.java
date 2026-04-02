@@ -1,6 +1,7 @@
 package liv.codveda.blog.app.security.jwt;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -38,59 +39,57 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Skip filter for refresh token endpoint to avoid interfering with the refresh
-        // flow
         if (request.getRequestURI().equals("/api/v1/auth/refresh-token")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String jwtToken = null;
-
-        // 1. Try to get token from Authorization header
-        final String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            jwtToken = authHeader.substring(7);
-        }
-
-        // 2. If not in header, try to get from cookies
-        if (jwtToken == null && request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if ("accessToken".equals(cookie.getName())) {
-                    jwtToken = cookie.getValue();
-                    break;
-                }
-            }
-        }
-
+        String jwtToken = extractToken(request);
         if (jwtToken != null) {
-            try {
-                String userEmail = jwtUtils.extractUsername(jwtToken);
-
-                if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    UserDetails userDetails = customUserDetailService.loadUserByUsername(userEmail);
-
-                    if (jwtUtils.isValidAccessToken(jwtToken, userDetails)) {
-                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities());
-                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
-                    }
-                }
-            } catch (ExpiredJwtException e) {
-                // Token expired. We don't set authentication context.
-                // Spring Security will treat this request as unauthenticated.
-                // If the endpoint is protected, it will return 401.
-                // The frontend Axios interceptor will catch the 401 and attempt to refresh the
-                // token.
-                log.debug("JWT Token expired: {}", e.getMessage());
-            } catch (Exception e) {
-                log.error("Cannot set user authentication: {}", e.getMessage());
-            }
+            authenticateUser(jwtToken, request);
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private String extractToken(HttpServletRequest request) {
+        final String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("accessToken".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    private void authenticateUser(String jwtToken, HttpServletRequest request) {
+        try {
+            String userEmail = jwtUtils.extractUsername(jwtToken);
+
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = customUserDetailService.loadUserByUsername(userEmail);
+
+                if (jwtUtils.isValidAccessToken(jwtToken, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities());
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            }
+        } catch (ExpiredJwtException e) {
+            log.debug("JWT Token expired: {}", e.getMessage(), e);
+        } catch (JwtException e) {
+            log.debug("JWT validation failed: {}", e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("Cannot set user authentication: {}", e.getMessage(), e);
+        }
     }
 }
